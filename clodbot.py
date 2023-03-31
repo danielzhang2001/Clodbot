@@ -30,7 +30,7 @@ async def analyze_replay(ctx, *args):
     stats = {}
 
     # Find all Pokemon in the battle
-    pokes = re.findall(r"\|switch\|.*?\|(.*?)(?=\||$)", raw_data)
+    pokes = re.findall(r"\|poke\|\w+\|(.*?)(?=\||$)", raw_data)
 
     print("Found Pokemon:")
     for poke in pokes:
@@ -42,15 +42,27 @@ async def analyze_replay(ctx, *args):
             stats[poke] = {'kills': 0, 'deaths': 0}
 
     # Find kills and deaths in the battle
-    kills = re.findall(r"\|faint\|(.*?):", raw_data)
-    for kill in kills:
-        if kill in stats:
-            stats[kill]['deaths'] += 1
+    faints = re.findall(r"\|faint\|.*?: (.*?)$", raw_data, re.MULTILINE)
 
-    moves = re.findall(r"\|move\|.*?\|(.*?):", raw_data)
-    for move in moves:
-        if move in stats:
-            stats[move]['kills'] += 1
+    print("Fainted Pokemon:")
+    for fainted_pokemon in faints:
+        print(fainted_pokemon)
+
+    for faint in faints:
+        # Find the matching Pokemon in the pokes list
+        matching_pokemon = None
+        for poke in pokes:
+            if faint in poke:
+                matching_pokemon = poke
+                break
+
+        # If a matching Pokemon is found, increment the death counter
+        if matching_pokemon:
+            if matching_pokemon not in stats:
+                stats[matching_pokemon] = {'kills': 0, 'deaths': 0}
+            stats[matching_pokemon]['deaths'] += 1
+        else:
+            stats[faint] = {'kills': 0, 'deaths': 1}
 
     # Format and send the kill/death numbers
     message = ""
