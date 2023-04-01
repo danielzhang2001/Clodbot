@@ -44,9 +44,16 @@ async def analyze_replay(ctx, *args):
     # Find kills and deaths in the battle
     faints = re.findall(r"\|faint\|.*?: (.*?)$", raw_data, re.MULTILINE)
 
-    print("Fainted Pokemon:")
-    for fainted_pokemon in faints:
-        print(fainted_pokemon)
+    # Create a dictionary to store the mapping between nicknames and actual Pokemon names
+    nickname_to_pokemon = {}
+    switch_lines = re.findall(r"\|switch\|.*?:(.*?)\|(.*?)(?=\||$)", raw_data)
+
+    for nickname, pokemon in switch_lines:
+        nickname_to_pokemon[nickname.strip()] = pokemon.strip()
+
+    # Update the faints list with the actual Pokemon names
+    faints = [nickname_to_pokemon.get(
+        faint.strip(), faint.strip()) for faint in faints]
 
     for faint in faints:
         # Find the matching Pokemon in the pokes list
