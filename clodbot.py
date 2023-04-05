@@ -1,5 +1,7 @@
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
+import os
 import requests
 import re
 
@@ -92,4 +94,6 @@ async def analyze_replay(ctx, *args):
     else:
         await ctx.send("No data found in this replay.")
 
-bot.run("MTA5MDQ1MDkyNzk5Mjk3NTQ5MQ.GYbHv0.6hnesJZSN_aNZMfraGI_Ssp2E8HSlputZpIU00")
+load_dotenv()
+bot_token = os.environ['DISCORD_BOT_TOKEN']
+bot.run(bot_token)
