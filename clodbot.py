@@ -71,6 +71,30 @@ async def analyze_replay(ctx, *args):
         else:
             stats[faint] = {'kills': 0, 'deaths': 1}
 
+    fnt_lines = [line for line in raw_data.split('\n') if 'fnt' in line]
+
+    killer_pokemon = []
+
+    for fnt_line in fnt_lines:
+        if fnt_line:
+            fainted_pokemon = re.search(
+                r'\|.*?:(.*?)\|', fnt_line).group(1).strip()
+            index = raw_data.find(fnt_line)
+            above_lines = raw_data[:index].split('\n')[::-1]
+
+            for line in above_lines:
+                if fainted_pokemon in line and "|move|" in line:
+                    killer = re.search(r'\|.*?:(.*?)\|', line).group(1).strip()
+                    killer_pokemon.append(killer)
+                    break
+
+    for killer_nickname in killer_pokemon:
+        killer = nickname_to_pokemon.get(killer_nickname, killer_nickname)
+        if killer in stats:
+            stats[killer]['kills'] += 1
+        else:
+            stats[killer] = {'kills': 1, 'deaths': 0}
+
     # Format and send the kill/death numbers
     message = ""
     for idx, (poke, stat) in enumerate(stats.items(), start=1):
