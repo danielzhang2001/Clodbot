@@ -44,56 +44,44 @@ async def analyze_replay(ctx, *args):
     # Find kills and deaths in the battle
     faints = re.findall(r"\|faint\|.*?: (.*?)$", raw_data, re.MULTILINE)
 
-    # Create a dictionary to store the mapping between nicknames and actual Pokemon names
+    # Create a dictionary to store the mapping between nicknames and actual Pokémon names
     nickname_to_pokemon = {}
     switch_lines = re.findall(r"\|switch\|.*?:(.*?)\|(.*?)(?=\||$)", raw_data)
 
     for nickname, pokemon in switch_lines:
         nickname_to_pokemon[nickname.strip()] = pokemon.strip()
 
-    # Update the faints list with the actual Pokemon names
-    faints = [nickname_to_pokemon.get(
-        faint.strip(), faint.strip()) for faint in faints]
-
-    for faint in faints:
-        # Find the matching Pokemon in the pokes list
-        matching_pokemon = None
-        for poke in pokes:
-            if faint in poke:
-                matching_pokemon = poke
-                break
-
-        # If a matching Pokemon is found, increment the death counter
-        if matching_pokemon:
-            if matching_pokemon not in stats:
-                stats[matching_pokemon] = {'kills': 0, 'deaths': 0}
-            stats[matching_pokemon]['deaths'] += 1
-        else:
-            stats[faint] = {'kills': 0, 'deaths': 1}
-
+    # Find kills and deaths in the battle using lines with 'fnt'
     fnt_lines = [line for line in raw_data.split('\n') if 'fnt' in line]
-
-    killer_pokemon = []
 
     for fnt_line in fnt_lines:
         if fnt_line:
             fainted_pokemon = re.search(
                 r'\|.*?:(.*?)\|', fnt_line).group(1).strip()
+            fainted_pokemon = nickname_to_pokemon.get(
+                fainted_pokemon, fainted_pokemon)
+
+            # Increment the death counter
+            if fainted_pokemon in stats:
+                stats[fainted_pokemon]['deaths'] += 1
+            else:
+                stats[fainted_pokemon] = {'kills': 0, 'deaths': 1}
+
+            # Find the killer Pokémon
             index = raw_data.find(fnt_line)
             above_lines = raw_data[:index].split('\n')[::-1]
 
             for line in above_lines:
-                if fainted_pokemon in line and "|move|" in line:
-                    killer = re.search(r'\|.*?:(.*?)\|', line).group(1).strip()
-                    killer_pokemon.append(killer)
+                if "|move|" in line:
+                    killer_nickname = re.search(
+                        r'\|.*?:(.*?)\|', line).group(1).strip()
+                    killer = nickname_to_pokemon.get(
+                        killer_nickname, killer_nickname)
+                    if killer in stats:
+                        stats[killer]['kills'] += 1
+                    else:
+                        stats[killer] = {'kills': 1, 'deaths': 0}
                     break
-
-    for killer_nickname in killer_pokemon:
-        killer = nickname_to_pokemon.get(killer_nickname, killer_nickname)
-        if killer in stats:
-            stats[killer]['kills'] += 1
-        else:
-            stats[killer] = {'kills': 1, 'deaths': 0}
 
     # Format and send the kill/death numbers
     message = ""
