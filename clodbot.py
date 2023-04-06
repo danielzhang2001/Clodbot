@@ -21,7 +21,7 @@ async def on_ready():
 async def analyze_replay(ctx, *args):
     replay_link = ' '.join(args)
 
-    # Scrape battle data from the link
+    # Scrape battle data from the log file of the replay link
     try:
         raw_data = requests.get(replay_link + '.log').text
     except requests.exceptions.RequestException as e:
@@ -34,33 +34,31 @@ async def analyze_replay(ctx, *args):
     # Find all Pokemon in the battle
     pokes = re.findall(r"\|poke\|\w+\|(.*?)(?=\||$)", raw_data)
 
-    print("Found Pokemon:")
-    for poke in pokes:
-        print(poke)
-
     # Initialize stats dictionary
     for poke in pokes:
         if poke not in stats:
             stats[poke] = {'kills': 0, 'deaths': 0}
 
-    # Find kills and deaths in the battle
-    faints = re.findall(r"\|faint\|.*?: (.*?)$", raw_data, re.MULTILINE)
-
     # Create a dictionary to store the mapping between nicknames and actual Pokémon names
-    nickname_to_pokemon = {}
-    switch_lines = re.findall(r"\|switch\|.*?:(.*?)\|(.*?)(?=\||$)", raw_data)
+    nickname_mapping = {}
 
-    for nickname, pokemon in switch_lines:
-        nickname_to_pokemon[nickname.strip()] = pokemon.strip()
+    # Find all lines when a Pokemon is switched in
+    switches = re.findall(r"\|switch\|.*?:(.*?)\|(.*?)(?=\||$)", raw_data)
 
-    # Find kills and deaths in the battle using lines with 'fnt'
-    fnt_lines = [line for line in raw_data.split('\n') if 'fnt' in line]
+    # Replace all nicknames with the actual Pokemon names
+    for nickname, pokemon in switches:
+        nickname_mapping[nickname.strip()] = pokemon.strip()
 
-    for fnt_line in fnt_lines:
-        if fnt_line:
+    # Find all lines when a Pokemon has fainted
+    faints = [line for line in raw_data.split('\n') if 'fnt' in line]
+
+    # Iterate through each fainted line
+    for faint in faints:
+        if faint:
+            # Grab the fainted Pokemon
             fainted_pokemon = re.search(
-                r'\|.*?:(.*?)\|', fnt_line).group(1).strip()
-            fainted_pokemon = nickname_to_pokemon.get(
+                r'\|.*?:(.*?)\|', faint).group(1).strip()
+            fainted_pokemon = nickname_mapping.get(
                 fainted_pokemon, fainted_pokemon)
 
             # Increment the death counter
@@ -69,15 +67,16 @@ async def analyze_replay(ctx, *args):
             else:
                 stats[fainted_pokemon] = {'kills': 0, 'deaths': 1}
 
-            # Find the killer Pokémon
-            index = raw_data.find(fnt_line)
+            # Find the lines above the faint line
+            index = raw_data.find(faint)
             above_lines = raw_data[:index].split('\n')[::-1]
 
+            # Look at the lines above to find killer Pokemon and update its kills
             for line in above_lines:
                 if "|move|" in line:
                     killer_nickname = re.search(
                         r'\|.*?:(.*?)\|', line).group(1).strip()
-                    killer = nickname_to_pokemon.get(
+                    killer = nickname_mapping.get(
                         killer_nickname, killer_nickname)
                     if killer in stats:
                         stats[killer]['kills'] += 1
@@ -93,6 +92,8 @@ async def analyze_replay(ctx, *args):
         await ctx.send(message)
     else:
         await ctx.send("No data found in this replay.")
+
+# Running Discord bot
 
 load_dotenv()
 bot_token = os.environ['DISCORD_BOT_TOKEN']
