@@ -28,6 +28,9 @@ async def analyze_replay(ctx, *args):
         await ctx.send(f"An error occurred while fetching the replay data: {e}")
         return
 
+    # Find player names
+    player_names = re.findall(r"\|j\|☆(.+)", raw_data)
+
     # Initialize dictionary to store kill/death numbers
     stats = {}
 
@@ -85,13 +88,21 @@ async def analyze_replay(ctx, *args):
                     break
 
     # Format and send the kill/death numbers
+    # Format and send the kill/death numbers
     message = ""
-    for idx, (poke, stat) in enumerate(stats.items(), start=1):
-        message += f"Pokemon {idx}: {poke}\nKills: {stat['kills']}, Deaths: {stat['deaths']}\n\n"
+    for idx, player_name in enumerate(player_names):
+        message += f"{player_name}'s Pokemon:\n\n"
+        for idx, (poke, stat) in enumerate(stats.items(), start=1):
+            if idx > 6:
+                break
+            message += f"Pokemon {idx}: {poke}\nKills: {stat['kills']}, Deaths: {stat['deaths']}\n\n"
+        stats = dict(list(stats.items())[6:])
+
     if message:
         await ctx.send(message)
     else:
         await ctx.send("No data found in this replay.")
+
 
 # Running Discord bot
 
