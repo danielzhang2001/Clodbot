@@ -87,9 +87,12 @@ async def analyze_replay(ctx, *args):
                         stats[killer] = {'kills': 1, 'deaths': 0}
                     break
 
-    # Format and send the kill/death numbers
+    # Find the winner
+    winner = re.search(r"\|win\|(.+)", raw_data).group(1)
+
     # Format and send the kill/death numbers
     message = ""
+    message = f"Winner: {winner}\n\n" + message
     for idx, player_name in enumerate(player_names):
         message += f"{player_name}'s Pokemon:\n\n"
         for idx, (poke, stat) in enumerate(stats.items(), start=1):
