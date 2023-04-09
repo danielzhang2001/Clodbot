@@ -45,6 +45,10 @@ async def analyze_replay(ctx, *args):
     # Create a dictionary to store the mapping between nicknames and actual Pokémon names
     nickname_mapping = {}
 
+    # Initialize fainted counters for each player
+    player1_fainted = 0
+    player2_fainted = 0
+
     # Find all lines when a Pokemon is switched in
     switches = re.findall(r"\|switch\|.*?:(.*?)\|(.*?)(?=\||$)", raw_data)
 
@@ -70,6 +74,12 @@ async def analyze_replay(ctx, *args):
             else:
                 stats[fainted_pokemon] = {'kills': 0, 'deaths': 1}
 
+            # Count fainted Pokémon for each player
+            if fainted_pokemon in pokes[:6]:
+                player1_fainted += 1
+            else:
+                player2_fainted += 1
+
             # Find the lines above the faint line
             index = raw_data.find(faint)
             above_lines = raw_data[:index].split('\n')[::-1]
@@ -90,9 +100,15 @@ async def analyze_replay(ctx, *args):
     # Find the winner
     winner = re.search(r"\|win\|(.+)", raw_data).group(1)
 
+    # Calculate the difference
+    if winner == player_names[0]:
+        difference = f"({player2_fainted}-{player1_fainted})"
+    else:
+        difference = f"({player1_fainted}-{player2_fainted})"
+
     # Format and send the kill/death numbers
     message = ""
-    message = f"Winner: {winner}\n\n" + message
+    message = f"Winner: {winner} {difference}\n\n" + message
     for idx, player_name in enumerate(player_names):
         message += f"{player_name}'s Pokemon:\n\n"
         for idx, (poke, stat) in enumerate(stats.items(), start=1):
@@ -108,7 +124,6 @@ async def analyze_replay(ctx, *args):
 
 
 # Running Discord bot
-
 load_dotenv()
 bot_token = os.environ['DISCORD_BOT_TOKEN']
 bot.run(bot_token)
