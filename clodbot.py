@@ -86,16 +86,17 @@ async def analyze_replay(ctx, *args):
 
             # Look at the lines above to find killer Pokemon and update its kills
             for line in above_lines:
-                if "|move|" in line:
-                    killer_nickname = re.search(
-                        r'\|.*?:(.*?)\|', line).group(1).strip()
-                    killer = nickname_mapping.get(
-                        killer_nickname, killer_nickname)
-                    if killer in stats:
-                        stats[killer]['kills'] += 1
-                    else:
-                        stats[killer] = {'kills': 1, 'deaths': 0}
-                    break
+                if "|switch|" in line:
+                    if (fainted_pokemon in pokes[:6] and "p2a" in line) or (fainted_pokemon in pokes[6:] and "p1a" in line):
+                        killer_nickname = re.search(
+                            r'\|.*?:(.*?)\|', line).group(1).strip()
+                        killer = nickname_mapping.get(
+                            killer_nickname, killer_nickname)
+                        if killer in stats:
+                            stats[killer]['kills'] += 1
+                        else:
+                            stats[killer] = {'kills': 1, 'deaths': 0}
+                        break
 
     # Find the winner
     winner = re.search(r"\|win\|(.+)", raw_data).group(1)
