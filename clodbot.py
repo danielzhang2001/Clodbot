@@ -38,9 +38,12 @@ async def analyze_replay(ctx, *args):
     pokes = re.findall(r"\|poke\|\w+\|(.*?)(?=\||$)", raw_data)
 
     # Initialize stats dictionary
-    for poke in pokes:
-        if poke not in stats:
-            stats[poke] = {'kills': 0, 'deaths': 0}
+    for player, poke_list in enumerate([pokes[:6], pokes[6:]], start=1):
+        for poke in poke_list:
+            player_poke = f"p{player}: {poke}"
+            if player_poke not in stats:
+                stats[player_poke] = {'player': f"p{player}",
+                                      'poke': poke, 'kills': 0, 'deaths': 0}
 
     # Create a dictionary to store the mapping between nicknames and actual Pokémon names
     nickname_mapping = {}
@@ -64,18 +67,18 @@ async def analyze_replay(ctx, *args):
         if faint:
             # Grab the fainted Pokemon
             fainted_pokemon = re.search(
-                r'\|.*?:(.*?)\|', faint).group(1).strip()
-            fainted_pokemon = nickname_mapping.get(
-                fainted_pokemon, fainted_pokemon)
+                r'\|(p\d)a:(.*?)\|', faint).groups()
+            fainted_key = f"{fainted_pokemon[0]}: {nickname_mapping.get(fainted_pokemon[1].strip(), fainted_pokemon[1].strip())}"
 
             # Increment the death counter
-            if fainted_pokemon in stats:
-                stats[fainted_pokemon]['deaths'] += 1
+            if fainted_key in stats:
+                stats[fainted_key]['deaths'] += 1
             else:
-                stats[fainted_pokemon] = {'kills': 0, 'deaths': 1}
+                stats[fainted_key] = {'player': fainted_pokemon[0],
+                                      'poke': fainted_pokemon[1], 'kills': 0, 'deaths': 1}
 
             # Count fainted Pokémon for each player
-            if fainted_pokemon in pokes[:6]:
+            if fainted_pokemon[0] == 'p1':
                 player1_fainted += 1
             else:
                 player2_fainted += 1
@@ -87,15 +90,15 @@ async def analyze_replay(ctx, *args):
             # Look at the lines above to find killer Pokemon and update its kills
             for line in above_lines:
                 if "|switch|" in line:
-                    if (fainted_pokemon in pokes[:6] and "p2a" in line) or (fainted_pokemon in pokes[6:] and "p1a" in line):
-                        killer_nickname = re.search(
-                            r'\|.*?:(.*?)\|', line).group(1).strip()
-                        killer = nickname_mapping.get(
-                            killer_nickname, killer_nickname)
-                        if killer in stats:
-                            stats[killer]['kills'] += 1
+                    if (fainted_key.startswith("p1") and "p2a" in line) or (fainted_key.startswith("p2") and "p1a" in line):
+                        killer_pokemon = re.search(
+                            r'\|(p\d)a:(.*?)\|', line).groups()
+                        killer_key = f"{killer_pokemon[0]}: {nickname_mapping.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}"
+                        if killer_key in stats:
+                            stats[killer_key]['kills'] += 1
                         else:
-                            stats[killer] = {'kills': 1, 'deaths': 0}
+                            stats[killer_key] = {
+                                'player': killer_pokemon[0], 'poke': killer_pokemon[1], 'kills': 1, 'deaths': 0}
                         break
 
     # Find the winner
@@ -110,13 +113,14 @@ async def analyze_replay(ctx, *args):
     # Format and send the kill/death numbers
     message = ""
     message = f"Winner: {winner} {difference}\n\n" + message
+
     for idx, player_name in enumerate(player_names):
         message += f"{player_name}'s Pokemon:\n\n"
-        for idx, (poke, stat) in enumerate(stats.items(), start=1):
-            if idx > 6:
-                break
-            message += f"Pokemon {idx}: {poke}\nKills: {stat['kills']}, Deaths: {stat['deaths']}\n\n"
-        stats = dict(list(stats.items())[6:])
+        player_pokes = {k: v for k,
+                        v in stats.items() if v['player'] == f"p{idx + 1}"}
+
+        for idx, (key, stat) in enumerate(player_pokes.items(), start=1):
+            message += f"Pokemon {idx}: {stat['poke']}\nKills: {stat['kills']}, Deaths: {stat['deaths']}\n\n"
 
     if message:
         await ctx.send(message)
