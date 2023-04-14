@@ -11,7 +11,7 @@ class Analyzer:
         except requests.exceptions.RequestException as e:
             return f"An error occurred while fetching the replay data: {e}"
             # Find player names
-        player_names = re.findall(r"\|j\|☆(.+)", raw_data)
+        player_names = list(set(re.findall(r"\|j\|☆(.+)", raw_data)))
 
         # Initialize dictionary to store kill/death numbers
         stats = {}
@@ -22,10 +22,6 @@ class Analyzer:
         # Create two dictionaries for each player to store the mapping between nicknames and actual Pokémon names
         nickname_mapping_player1 = {}
         nickname_mapping_player2 = {}
-
-        print("All pokes:")
-        for poke in pokes:
-            print(poke)
 
         # Find all lines when a Pokemon is switched in
         switches = re.findall(
@@ -41,26 +37,14 @@ class Analyzer:
                 continue
 
             # Update nickname mapping
-            species_name = re.sub(r',.*$', '', pokemon.strip())
-            nickname_mapping[nickname.strip()] = species_name
+            actual_name = re.sub(r',.*$', '', pokemon.strip())
+            nickname_mapping[nickname.strip()] = actual_name
 
-        # Print out all nickname mappings for both players
-        print("Player 1 nickname mappings:")
-        for nickname, pokemon in nickname_mapping_player1.items():
-            print(f"{nickname}: {pokemon}")
+        mapped_pokes_player1 = [nickname_mapping_player1.get(
+            poke, poke) for poke in pokes[:6]]
+        mapped_pokes_player2 = [nickname_mapping_player2.get(
+            poke, poke) for poke in pokes[6:]]
 
-        print("Player 2 nickname mappings:")
-        for nickname, pokemon in nickname_mapping_player2.items():
-            print(f"{nickname}: {pokemon}")
-        mapped_pokes_player1 = [
-            nickname_mapping_player1.get(poke, poke) for poke in pokes[:6]]
-        mapped_pokes_player2 = [
-            nickname_mapping_player2.get(poke, poke) for poke in pokes[6:]]
-        print("MAP pokes:")
-        for mappoke1 in mapped_pokes_player1:
-            print(mappoke1)
-        for mappoke2 in mapped_pokes_player2:
-            print(mappoke2)
         # Initialize stats dictionary
         for player, poke_list in enumerate([mapped_pokes_player1, mapped_pokes_player2], start=1):
             for poke in poke_list:
@@ -73,9 +57,6 @@ class Analyzer:
         # Initialize fainted counters for each player
         player1_fainted = 0
         player2_fainted = 0
-
-        for item in stats.items():
-            print(item)
 
         # Find all lines when a Pokemon has fainted
         faints = [line for line in raw_data.split('\n') if 'fnt' in line]
@@ -134,8 +115,6 @@ class Analyzer:
         else:
             difference = f"({player1_fainted}-{player2_fainted})"
 
-        for item in stats.items():
-            print(item)
         # Format and send the kill/death numbers
         message = ""
         message = f"Winner: {winner} {difference}\n\n" + message
