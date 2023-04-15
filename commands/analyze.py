@@ -13,6 +13,8 @@ class Analyzer:
             # Find player names
         player_names = list(set(re.findall(r"\|j\|☆(.+)", raw_data)))
 
+        for player in player_names:
+            print(player)
         # Initialize dictionary to store kill/death numbers
         stats = {}
 
@@ -27,8 +29,11 @@ class Analyzer:
         switches = re.findall(
             r"\|switch\|(p\d)a: (.*?)(?:\||, )(.+?)\|", raw_data)
 
-        # Replace all nicknames with the actual Pokemon names for both players
-        for player, nickname, pokemon in switches:
+        replaces = re.findall(
+            r"\|replace\|(p\d)a: (.*?)(?=\||$)(?:\|)(.*[^|\n])", raw_data)
+
+       # Replace all nicknames with the actual Pokemon names for both players
+        for player, nickname, pokemon in switches + replaces:
             if player == 'p1':
                 nickname_mapping = nickname_mapping_player1
             elif player == 'p2':
@@ -45,6 +50,15 @@ class Analyzer:
         mapped_pokes_player2 = [nickname_mapping_player2.get(
             poke, poke) for poke in pokes[6:]]
 
+        # Print out all nickname mappings for both players
+        print("Player 1 nickname mappings:")
+        for nickname, pokemon in nickname_mapping_player1.items():
+            print(f"{nickname}: {pokemon}")
+
+        print("Player 2 nickname mappings:")
+        for nickname, pokemon in nickname_mapping_player2.items():
+            print(f"{nickname}: {pokemon}")
+
         # Initialize stats dictionary
         for player, poke_list in enumerate([mapped_pokes_player1, mapped_pokes_player2], start=1):
             for poke in poke_list:
@@ -54,21 +68,25 @@ class Analyzer:
                     stats[player_poke] = {'player': f"p{player}",
                                           'poke': poke, 'kills': 0, 'deaths': 0}
 
+        for item in stats.items():
+            print(item)
+
         # Initialize fainted counters for each player
         player1_fainted = 0
         player2_fainted = 0
 
         # Find all lines when a Pokemon has fainted
-        faints = [line for line in raw_data.split('\n') if 'fnt' in line]
+        faints = [line for line in raw_data.split('\n') if 'faint' in line]
 
         # Iterate through each fainted line
         for faint in faints:
             if faint:
                 # Grab the fainted Pokemon
-                fainted_pokemon = re.search(
-                    r'\|(p\d)a:(.*?)\|', faint).groups()
-                player = fainted_pokemon[0]
-                fainted_key = f"{player}: {nickname_mapping_player1.get(fainted_pokemon[1].strip(), fainted_pokemon[1].strip())}" if player == 'p1' else f"{player}: {nickname_mapping_player2.get(fainted_pokemon[1].strip(), fainted_pokemon[1].strip())}"
+                match = re.search(
+                    r'\|faint\|(p\d)a: (.*[^|])', faint)
+                player = match.group(1)
+                fainted_pokemon = match.group(2)
+                fainted_key = f"{player}: {nickname_mapping_player1.get(fainted_pokemon.strip(), fainted_pokemon.strip())}" if player == 'p1' else f"{player}: {nickname_mapping_player2.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
                 print(f"Fainted: {fainted_key}")
                 # Increment the death counter
                 if fainted_key in stats:
@@ -78,7 +96,7 @@ class Analyzer:
                                           'poke': fainted_pokemon[1], 'kills': 0, 'deaths': 1}
 
                 # Count fainted Pokémon for each player
-                if fainted_pokemon[0] == 'p1':
+                if player == 'p1':
                     player1_fainted += 1
                 else:
                     player2_fainted += 1
@@ -114,6 +132,9 @@ class Analyzer:
             difference = f"({player2_fainted}-{player1_fainted})"
         else:
             difference = f"({player1_fainted}-{player2_fainted})"
+
+        for item in stats.items():
+            print(item)
 
         # Format and send the kill/death numbers
         message = ""
