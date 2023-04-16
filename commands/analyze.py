@@ -11,10 +11,11 @@ class Analyzer:
         except requests.exceptions.RequestException as e:
             return f"An error occurred while fetching the replay data: {e}"
             # Find player names
-        player_names = list(set(re.findall(r"\|j\|☆(.+)", raw_data)))
+        player_info = re.findall(r"\|player\|(p\d)\|(.+?)\|", raw_data)
+        players = {player[0]: player[1] for player in player_info}
 
-        for player in player_names:
-            print(player)
+        print(players)
+
         # Initialize dictionary to store kill/death numbers
         stats = {}
 
@@ -128,7 +129,7 @@ class Analyzer:
         winner = re.search(r"\|win\|(.+)", raw_data).group(1)
 
         # Calculate the difference
-        if winner == player_names[0]:
+        if winner == players['p2']:
             difference = f"({player2_fainted}-{player1_fainted})"
         else:
             difference = f"({player1_fainted}-{player2_fainted})"
@@ -140,10 +141,10 @@ class Analyzer:
         message = ""
         message = f"Winner: {winner} {difference}\n\n" + message
 
-        for idx, player_name in enumerate(player_names):
+        for player_num, player_name in players.items():
             message += f"{player_name}'s Pokemon:\n\n"
             player_pokes = {k: v for k,
-                            v in stats.items() if v['player'] == f"p{idx + 1}"}
+                            v in stats.items() if v['player'] == player_num}
 
             for idx, (key, stat) in enumerate(player_pokes.items(), start=1):
                 message += f"Pokemon {idx}: {stat['poke']}\nKills: {stat['kills']}, Deaths: {stat['deaths']}\n\n"
