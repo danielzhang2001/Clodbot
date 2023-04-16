@@ -77,15 +77,19 @@ class Analyzer:
         player2_fainted = 0
 
         # Find all lines when a Pokemon has fainted
-        faints = [line for line in raw_data.split('\n') if 'faint' in line]
-
+        faints = [line for line in raw_data.split(
+            '\n') if re.match(r"^\|faint\|", line)]
+        for faint in faints:
+            print(faint)
         # Iterate through each fainted line
         for faint in faints:
             if faint:
                 # Grab the fainted Pokemon
                 match = re.search(
                     r'\|faint\|(p\d)a: (.*[^|])', faint)
+                print(f"MATCH: {match}")
                 player = match.group(1)
+                print(f"PLAYER: {player}")
                 fainted_pokemon = match.group(2)
                 fainted_key = f"{player}: {nickname_mapping_player1.get(fainted_pokemon.strip(), fainted_pokemon.strip())}" if player == 'p1' else f"{player}: {nickname_mapping_player2.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
                 print(f"Fainted: {fainted_key}")
