@@ -79,55 +79,69 @@ class Analyzer:
         # Find all lines when a Pokemon has fainted
         faints = [line for line in raw_data.split(
             '\n') if re.match(r"^\|faint\|", line)]
-        for faint in faints:
-            print(faint)
+
+        revives = re.findall(r"\|-heal\|(p\d): (\w+)\|", raw_data)
+
         # Iterate through each fainted line
         for faint in faints:
             if faint:
                 # Grab the fainted Pokemon
                 match = re.search(
                     r'\|faint\|(p\d)a: (.*[^|])', faint)
-                print(f"MATCH: {match}")
                 player = match.group(1)
-                print(f"PLAYER: {player}")
                 fainted_pokemon = match.group(2)
                 fainted_key = f"{player}: {nickname_mapping_player1.get(fainted_pokemon.strip(), fainted_pokemon.strip())}" if player == 'p1' else f"{player}: {nickname_mapping_player2.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
-                print(f"Fainted: {fainted_key}")
+
                 # Increment the death counter
                 if fainted_key in stats:
                     stats[fainted_key]['deaths'] += 1
                 else:
-                    stats[fainted_key] = {'player': fainted_pokemon[0],
-                                          'poke': fainted_pokemon[1], 'kills': 0, 'deaths': 1}
+                    stats[fainted_key] = {'player': player,
+                                          'poke': fainted_pokemon, 'kills': 0, 'deaths': 1}
+                print(f"REVIVED LINE: {revives}")
 
-                # Count fainted Pokémon for each player
-                if player == 'p1':
-                    player1_fainted += 1
-                else:
-                    player2_fainted += 1
+            # Count fainted Pokémon for each player
+            if player == 'p1':
+                player1_fainted += 1
+            else:
+                player2_fainted += 1
 
-                # Find the lines above the faint line
-                index = raw_data.find(faint)
-                above_lines = raw_data[:index].split('\n')[::-1]
+            # Find the lines above the faint line
+            index = raw_data.find(faint)
+            above_lines = raw_data[:index].split('\n')[::-1]
 
-                # Look at the lines above to find killer Pokemon and update its kills
-                for line in above_lines:
-                    if "|switch|" in line:
-                        if (fainted_key.startswith("p1") and "p2a" in line) or (fainted_key.startswith("p2") and "p1a" in line):
-                            killer_pokemon = re.search(
-                                r'\|(p\d)a:(.*?)\|', line).groups()
-                            if player == 'p1':
-                                player = 'p2'
-                            else:
-                                player = 'p1'
-                            killer_key = f"{player}: {nickname_mapping_player1.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}" if player == 'p1' else f"{player}: {nickname_mapping_player2.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}"
-                            print(f"Killer: {killer_key}")
-                            if killer_key in stats:
-                                stats[killer_key]['kills'] += 1
-                            else:
-                                stats[killer_key] = {
-                                    'player': killer_pokemon[0], 'poke': killer_pokemon[1], 'kills': 1, 'deaths': 0}
-                            break
+            # Look at the lines above to find killer Pokemon and update its kills
+            for line in above_lines:
+                if "|switch|" in line:
+                    if (fainted_key.startswith("p1") and "p2a" in line) or (fainted_key.startswith("p2") and "p1a" in line):
+                        killer_pokemon = re.search(
+                            r'\|(p\d)a:(.*?)\|', line).groups()
+                        if player == 'p1':
+                            player = 'p2'
+                        else:
+                            player = 'p1'
+                        killer_key = f"{player}: {nickname_mapping_player1.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}" if player == 'p1' else f"{player}: {nickname_mapping_player2.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}"
+                        print(f"Killer: {killer_key}")
+                        if killer_key in stats:
+                            stats[killer_key]['kills'] += 1
+                        else:
+                            stats[killer_key] = {
+                                'player': killer_pokemon[0], 'poke': killer_pokemon[1], 'kills': 1, 'deaths': 0}
+                        break
+
+        # Check if the Pokemon has been revived
+        for revive in revives:
+            player, revived_pokemon = revive
+            for key, value in stats.items():
+                if value['poke'] == revived_pokemon and value['player'] == player:
+                    value['deaths'] -= 1
+                    if player == 'p1':
+                        player1_fainted -= 1
+                    else:
+                        player2_fainted -= 1
+                    print(
+                        f"Revived: {value['player']}: {value['poke']}, deaths updated to {value['deaths']}")
+                    break
 
         # Find the winner
         winner = re.search(r"\|win\|(.+)", raw_data).group(1)
