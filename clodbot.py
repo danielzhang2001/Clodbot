@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 import os
-from commands.analyze import Analyzer
+from commands.analyze import Analyze
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -19,7 +19,7 @@ async def on_ready():
 @bot.command(name='analyze')
 async def analyze_replay(ctx, *args):
     replay_link = ' '.join(args)
-    message = await Analyzer.analyze_replay(replay_link)
+    message = await Analyze.analyze_replay(replay_link)
     if message:
         await ctx.send(message)
     else:
