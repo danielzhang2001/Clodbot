@@ -18,8 +18,17 @@ class Analyze:
         # Initialize dictionary to store kill/death numbers
         stats = {}
 
+        # Initialize counter for p1 Pokemon
+        p1_count = 0
+
         # Find all Pokemon in the battle
-        pokes = re.findall(r"\|poke\|\w+\|([^,|\r\n]+)", raw_data)
+        poke_lines = [line for line in raw_data.split(
+            '\n') if '|poke|' in line]
+        pokes = [re.search(r"\|poke\|\w+\|([^,|\r\n]+)", line).group(1)
+                 for line in poke_lines]
+
+        # Iterate through all Pokemon and count p1 Pokemon
+        p1_count = sum(1 for line in poke_lines if '|poke|p1|' in line)
 
         # Create two dictionaries for each player to store the mapping between nicknames and actual Pokémon names
         nickname_mapping_player1 = {}
@@ -46,9 +55,9 @@ class Analyze:
 
         # Update nickname mapping
         mapped_pokes_player1 = [nickname_mapping_player1.get(
-            poke, poke) for poke in pokes[:6]]
+            poke, poke) for poke in pokes[:p1_count]]
         mapped_pokes_player2 = [nickname_mapping_player2.get(
-            poke, poke) for poke in pokes[6:]]
+            poke, poke) for poke in pokes[p1_count:]]
 
         # Initialize stats dictionary
         for player, poke_list in enumerate([mapped_pokes_player1, mapped_pokes_player2], start=1):
