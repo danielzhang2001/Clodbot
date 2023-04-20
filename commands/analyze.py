@@ -39,9 +39,15 @@ class Analyze:
         stats = initialize_stats(
             pokes, p1_count, nickname_mapping_player1, nickname_mapping_player2)
 
+        # Process faints
         stats, player1_fainted, player2_fainted = process_faints(
             raw_data, stats, nickname_mapping_player1, nickname_mapping_player2)
 
+        # Process kills
+        stats = process_kills(
+            raw_data, stats, nickname_mapping_player1, nickname_mapping_player2)
+
+        # Process revives
         stats, player1_fainted, player2_fainted = process_revives(
             raw_data, stats, player1_fainted, player2_fainted)
 
