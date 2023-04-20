@@ -113,18 +113,3 @@ def process_revives(raw_data, stats, player1_fainted, player2_fainted):
                 break
 
     return stats, player1_fainted, player2_fainted
-
-
-def format_results(winner, difference, stats, players):
-    message = ""
-    message = f"Winner: {winner} {difference}\n\n" + message
-
-    for player_num, player_name in players.items():
-        message += f"{player_name}'s Pokemon:\n\n"
-        player_pokes = {k: v for k,
-                        v in stats.items() if v['player'] == player_num}
-
-        for idx, (_, stat) in enumerate(player_pokes.items(), start=1):
-            message += f"Pokemon {idx}: {stat['poke']}\nKills: {stat['kills']}, Deaths: {stat['deaths']}\n\n"
-
-    return message

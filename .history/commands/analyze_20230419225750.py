@@ -42,9 +42,6 @@ class Analyze:
         stats, player1_fainted, player2_fainted = process_faints(
             raw_data, stats, nickname_mapping_player1, nickname_mapping_player2)
 
-        stats, player1_fainted, player2_fainted = process_revives(
-            raw_data, stats, player1_fainted, player2_fainted)
-
         # Find the winner
         winner = re.search(r"\|win\|(.+)", raw_data).group(1)
 
@@ -55,5 +52,15 @@ class Analyze:
             difference = f"({player1_fainted}-{player2_fainted})"
 
         # Format and send the kill/death numbers
-        message = format_results(winner, difference, stats, players)
+        message = ""
+        message = f"Winner: {winner} {difference}\n\n" + message
+
+        for player_num, player_name in players.items():
+            message += f"{player_name}'s Pokemon:\n\n"
+            player_pokes = {k: v for k,
+                            v in stats.items() if v['player'] == player_num}
+
+            for idx, (_, stat) in enumerate(player_pokes.items(), start=1):
+                message += f"Pokemon {idx}: {stat['poke']}\nKills: {stat['kills']}, Deaths: {stat['deaths']}\n\n"
+
         return message

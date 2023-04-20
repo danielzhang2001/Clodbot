@@ -94,37 +94,3 @@ def process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_p
                         break
 
     return stats, player1_fainted, player2_fainted
-
-
-def process_revives(raw_data, stats, player1_fainted, player2_fainted):
-    # Find all lines when a Pokemon is revived
-    revives = re.findall(r"\|-heal\|(p\d): (\w+)\|", raw_data)
-
-    # Check if the Pokemon has been revived and update deaths accordingly
-    for revive in revives:
-        player, revived_pokemon = revive
-        for _, value in stats.items():
-            if value['poke'] == revived_pokemon and value['player'] == player:
-                value['deaths'] -= 1
-                if player == 'p1':
-                    player1_fainted -= 1
-                else:
-                    player2_fainted -= 1
-                break
-
-    return stats, player1_fainted, player2_fainted
-
-
-def format_results(winner, difference, stats, players):
-    message = ""
-    message = f"Winner: {winner} {difference}\n\n" + message
-
-    for player_num, player_name in players.items():
-        message += f"{player_name}'s Pokemon:\n\n"
-        player_pokes = {k: v for k,
-                        v in stats.items() if v['player'] == player_num}
-
-        for idx, (_, stat) in enumerate(player_pokes.items(), start=1):
-            message += f"Pokemon {idx}: {stat['poke']}\nKills: {stat['kills']}, Deaths: {stat['deaths']}\n\n"
-
-    return message
