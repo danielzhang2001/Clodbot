@@ -70,6 +70,23 @@ def process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_p
             else:
                 player2_fainted += 1
 
+    return stats, player1_fainted, player2_fainted
+
+
+def process_kills(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2):
+    # Find all lines when a Pokemon has fainted
+    faints = [line for line in raw_data.split(
+        '\n') if re.match(r"^\|faint\|", line)]
+
+    # Iterate through each fainted line
+    for faint in faints:
+        if faint:
+            # Grab the fainted Pokemon
+            match = re.search(r'\|faint\|(p\d)a: (.*[^|])', faint)
+            player = match.group(1)
+            fainted_pokemon = match.group(2)
+            fainted_key = f"{player}: {nickname_mapping_player1.get(fainted_pokemon.strip(), fainted_pokemon.strip())}" if player == 'p1' else f"{player}: {nickname_mapping_player2.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
+
             # Find the lines above the faint line
             index = raw_data.find(faint)
             above_lines = raw_data[:index].split('\n')[::-1]
@@ -93,7 +110,7 @@ def process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_p
                                 'player': killer_pokemon[0], 'poke': killer_pokemon[1], 'kills': 1, 'deaths': 0}
                         break
 
-    return stats, player1_fainted, player2_fainted
+    return stats
 
 
 def process_revives(raw_data, stats, player1_fainted, player2_fainted):
