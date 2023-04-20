@@ -1,65 +1,71 @@
-@bot.command(name='analyze')
-async def analyze_replay(ctx, *args):
-    replay_link = ' '.join(args)
+import re
 
-    # Scrape battle data from the log file of the replay link
-    try:
-        raw_data = requests.get(replay_link + '.log').text
-    except requests.exceptions.RequestException as e:
-        await ctx.send(f"An error occurred while fetching the replay data: {e}")
-        return
 
-    # Find player names
-    player_names = re.findall(r"\|j\|☆(.+)", raw_data)
+def get_nickname_mappings(raw_data):
+    nickname_mapping_player1 = {}
+    nickname_mapping_player2 = {}
 
-    # Initialize dictionary to store kill/death numbers
+    switches = re.findall(r"\|switch\|(p\d)a: (.*?)(?:\||, )(.+?)\|", raw_data)
+    replaces = re.findall(
+        r"\|replace\|(p\d)a: (.*?)(?=\||$)(?:\|)(.*[^|\n])", raw_data)
+
+    for player, nickname, pokemon in switches + replaces:
+        if player == 'p1':
+            nickname_mapping = nickname_mapping_player1
+        elif player == 'p2':
+            nickname_mapping = nickname_mapping_player2
+        else:
+            continue
+        actual_name = re.sub(r',.*$', '', pokemon.strip())
+        nickname_mapping[nickname.strip()] = actual_name
+
+    return nickname_mapping_player1, nickname_mapping_player2
+
+
+def initialize_stats(pokes, p1_count, nickname_mapping_player1, nickname_mapping_player2):
+    mapped_pokes_player1 = [nickname_mapping_player1.get(
+        poke, poke) for poke in pokes[:p1_count]]
+    mapped_pokes_player2 = [nickname_mapping_player2.get(
+        poke, poke) for poke in pokes[p1_count:]]
+
     stats = {}
-
-    # Find all Pokemon in the battle
-    pokes = re.findall(r"\|poke\|\w+\|(.*?)(?=\||$)", raw_data)
-
-    # Initialize stats dictionary
-    for player, poke_list in enumerate([pokes[:6], pokes[6:]], start=1):
+    for player, poke_list in enumerate([mapped_pokes_player1, mapped_pokes_player2], start=1):
         for poke in poke_list:
             player_poke = f"p{player}: {poke}"
             if player_poke not in stats:
                 stats[player_poke] = {'player': f"p{player}",
                                       'poke': poke, 'kills': 0, 'deaths': 0}
 
-    # Create a dictionary to store the mapping between nicknames and actual Pokémon names
-    nickname_mapping = {}
+    return stats
 
+
+def process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2):
     # Initialize fainted counters for each player
     player1_fainted = 0
     player2_fainted = 0
 
-    # Find all lines when a Pokemon is switched in
-    switches = re.findall(r"\|switch\|.*?:(.*?)\|(.*?)(?=\||$)", raw_data)
-
-    # Replace all nicknames with the actual Pokemon names
-    for nickname, pokemon in switches:
-        nickname_mapping[nickname.strip()] = pokemon.strip()
-
     # Find all lines when a Pokemon has fainted
-    faints = [line for line in raw_data.split('\n') if 'fnt' in line]
+    faints = [line for line in raw_data.split(
+        '\n') if re.match(r"^\|faint\|", line)]
 
     # Iterate through each fainted line
     for faint in faints:
         if faint:
             # Grab the fainted Pokemon
-            fainted_pokemon = re.search(
-                r'\|(p\d)a:(.*?)\|', faint).groups()
-            fainted_key = f"{fainted_pokemon[0]}: {nickname_mapping.get(fainted_pokemon[1].strip(), fainted_pokemon[1].strip())}"
+            match = re.search(r'\|faint\|(p\d)a: (.*[^|])', faint)
+            player = match.group(1)
+            fainted_pokemon = match.group(2)
+            fainted_key = f"{player}: {nickname_mapping_player1.get(fainted_pokemon.strip(), fainted_pokemon.strip())}" if player == 'p1' else f"{player}: {nickname_mapping_player2.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
 
             # Increment the death counter
             if fainted_key in stats:
                 stats[fainted_key]['deaths'] += 1
             else:
-                stats[fainted_key] = {'player': fainted_pokemon[0],
-                                      'poke': fainted_pokemon[1], 'kills': 0, 'deaths': 1}
+                stats[fainted_key] = {
+                    'player': player, 'poke': fainted_pokemon, 'kills': 0, 'deaths': 1}
 
             # Count fainted Pokémon for each player
-            if fainted_pokemon[0] == 'p1':
+            if player == 'p1':
                 player1_fainted += 1
             else:
                 player2_fainted += 1
@@ -74,7 +80,12 @@ async def analyze_replay(ctx, *args):
                     if (fainted_key.startswith("p1") and "p2a" in line) or (fainted_key.startswith("p2") and "p1a" in line):
                         killer_pokemon = re.search(
                             r'\|(p\d)a:(.*?)\|', line).groups()
-                        killer_key = f"{killer_pokemon[0]}: {nickname_mapping.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}"
+                        if player == 'p1':
+                            player = 'p2'
+                        else:
+                            player = 'p1'
+                        killer_key = f"{player}: {nickname_mapping_player1.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}" if player == 'p1' else f"{player}: {nickname_mapping_player2.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}"
+
                         if killer_key in stats:
                             stats[killer_key]['kills'] += 1
                         else:
@@ -82,30 +93,38 @@ async def analyze_replay(ctx, *args):
                                 'player': killer_pokemon[0], 'poke': killer_pokemon[1], 'kills': 1, 'deaths': 0}
                         break
 
-    # Find the winner
-    winner = re.search(r"\|win\|(.+)", raw_data).group(1)
+    return stats, player1_fainted, player2_fainted
 
-    # Calculate the difference
-    if winner == player_names[0]:
-        difference = f"({player2_fainted}-{player1_fainted})"
-    else:
-        difference = f"({player1_fainted}-{player2_fainted})"
 
-    # Format and send the kill/death numbers
+def process_revives(raw_data, stats, player1_fainted, player2_fainted):
+    # Find all lines when a Pokemon is revived
+    revives = re.findall(r"\|-heal\|(p\d): (\w+)\|", raw_data)
+
+    # Check if the Pokemon has been revived and update deaths accordingly
+    for revive in revives:
+        player, revived_pokemon = revive
+        for _, value in stats.items():
+            if value['poke'] == revived_pokemon and value['player'] == player:
+                value['deaths'] -= 1
+                if player == 'p1':
+                    player1_fainted -= 1
+                else:
+                    player2_fainted -= 1
+                break
+
+    return stats, player1_fainted, player2_fainted
+
+
+def format_results(winner, difference, stats, players):
     message = ""
     message = f"Winner: {winner} {difference}\n\n" + message
 
-    for idx, player_name in enumerate(player_names):
+    for player_num, player_name in players.items():
         message += f"{player_name}'s Pokemon:\n\n"
         player_pokes = {k: v for k,
-                        v in stats.items() if v['player'] == f"p{idx + 1}"}
+                        v in stats.items() if v['player'] == player_num}
 
-        for idx, (key, stat) in enumerate(player_pokes.items(), start=1):
+        for idx, (_, stat) in enumerate(player_pokes.items(), start=1):
             message += f"Pokemon {idx}: {stat['poke']}\nKills: {stat['kills']}, Deaths: {stat['deaths']}\n\n"
 
-    if message:
-        await ctx.send(message)
-    else:
-        await ctx.send("No data found in this replay.")
-
-@bot.command(name='smth else')
+    return message
