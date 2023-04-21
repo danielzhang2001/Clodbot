@@ -1,6 +1,6 @@
 ---------------------------------------------------------
 # Clodbot
-Your friendly amphibian Pokemon Showdown Stat Tracker
+# Your friendly amphibian Pokemon Showdown Stat Tracker
 ---------------------------------------------------------
 
 About:
