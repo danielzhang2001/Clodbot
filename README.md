@@ -8,7 +8,7 @@ About:
 A Pokemon Showdown bot to keep track of stats.
 As of right now, it displays the winner of a match, point differential and kill/death ratios for each Pokemon by feeding it a Pokemon Showdown replay.
 
-
+---------------------------------------------------------
 
 Setup:
 
