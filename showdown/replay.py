@@ -13,10 +13,16 @@ def get_player_names(raw_data):
 
 
 def get_pokes(raw_data):
-    """Retrieves Pokemon names."""
+    """Retrieves Pokemon names. If a Pokemon has a nickname, gets their nickname instead."""
+    nickname_mapping = {}
+    switches = re.findall(r"\|switch\|.*?: (.*?)(?:\||, )(.+?)\|", raw_data)
+    for nickname, pokemon in switches:
+        actual_name = re.sub(r',.*$', '', pokemon.strip())
+        nickname_mapping[actual_name] = nickname.strip()
     poke_lines = [line for line in raw_data.split('\n') if '|poke|' in line]
     pokes = [re.search(r"\|poke\|\w+\|([^,|\r\n]+)", line).group(1) for line in poke_lines]
-    return pokes
+    pokes_with_nicknames = [nickname_mapping.get(pokemon, pokemon) for pokemon in pokes]
+    return pokes_with_nicknames
 
 
 def get_p1_count(raw_data):
@@ -123,7 +129,6 @@ def process_kills(raw_data, stats, nickname_mapping_player1, nickname_mapping_pl
                                 'player': killer_pokemon[0], 'poke': killer_pokemon[1], 'kills': 1, 'deaths': 0}
                         break
     return stats
-
 
 def process_revives(raw_data, stats, player1_fainted, player2_fainted):
     """Repopulates the death values for Pokemon that have been revived by Revival Blessing. If revived, take away one death."""
