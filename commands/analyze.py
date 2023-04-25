@@ -3,6 +3,7 @@ The function to analyze a Pokemon Showdown replay link and display stats.
 """
 
 # pylint: disable=import-error
+# pylint: disable=wildcard-import,unused-wildcard-import
 import requests  # type: ignore
 from showdown.replay import *
 
