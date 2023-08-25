@@ -28,7 +28,7 @@ numpy==1.20.2
 pefile==2018.8.8
 pycodestyle==2.7.0
 pycparser==2.20
-PyInstaller==3.4
+PyInstaller==3.6
 pylint==2.8.2
 python-dotenv==0.17.1
 pywin32-ctypes==0.2.0
