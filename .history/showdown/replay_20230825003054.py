@@ -22,8 +22,9 @@ def get_pokes(raw_data):
     poke_lines = [line for line in raw_data.split('\n') if '|poke|' in line]
     pokes = [re.search(r"\|poke\|\w+\|([^,|\r\n]+)", line).group(1) for line in poke_lines]
     pokes_with_nicknames = [nickname_mapping.get(pokemon, pokemon) for pokemon in pokes]
-    pokes_with_nicknames = [re.sub(r'-\*$', '', poke) for poke in pokes_with_nicknames]
     return pokes_with_nicknames
+    for poke in pokes_with_nicknames:
+        print(poke)
 
 
 def get_p1_count(raw_data):

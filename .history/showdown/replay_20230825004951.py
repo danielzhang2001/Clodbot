@@ -23,6 +23,7 @@ def get_pokes(raw_data):
     pokes = [re.search(r"\|poke\|\w+\|([^,|\r\n]+)", line).group(1) for line in poke_lines]
     pokes_with_nicknames = [nickname_mapping.get(pokemon, pokemon) for pokemon in pokes]
     pokes_with_nicknames = [re.sub(r'-\*$', '', poke) for poke in pokes_with_nicknames]
+
     return pokes_with_nicknames
 
 
