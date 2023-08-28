@@ -34,7 +34,7 @@ async def analyze_replay(ctx, *args):
     else:
         await ctx.send("No data found in this replay.")
 
-@bot.command(name='giveset')
+@bot.command(name='give_set')
 async def give_set(ctx):
     """Temporarily sends a placeholder message 'Creating set...'."""
     await ctx.send("Creating set...")

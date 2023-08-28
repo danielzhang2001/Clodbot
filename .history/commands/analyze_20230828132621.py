@@ -23,6 +23,7 @@ class Analyze:
         print("Nickname mappings for player 1:")
         for nickname, pokemon in nickname_mapping_player1.items():
             print(f"{nickname}: {pokemon}")
+    
         print("\nNickname mappings for player 2:")
         for nickname, pokemon in nickname_mapping_player2.items():
             print(f"{nickname}: {pokemon}")

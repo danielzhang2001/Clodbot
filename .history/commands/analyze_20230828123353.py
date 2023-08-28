@@ -18,14 +18,10 @@ class Analyze:
             return f"An error occurred while fetching the replay data: {exception}"
         players = get_player_names(raw_data)
         pokes = get_pokes(raw_data)
+        for poke in pokes:
+            print(poke)
         p1_count = get_p1_count(raw_data)
         nickname_mapping_player1, nickname_mapping_player2 = get_nickname_mappings(raw_data)
-        print("Nickname mappings for player 1:")
-        for nickname, pokemon in nickname_mapping_player1.items():
-            print(f"{nickname}: {pokemon}")
-        print("\nNickname mappings for player 2:")
-        for nickname, pokemon in nickname_mapping_player2.items():
-            print(f"{nickname}: {pokemon}")
         stats = initialize_stats(pokes, p1_count, nickname_mapping_player1, nickname_mapping_player2)
         stats, player1_fainted, player2_fainted = process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2)
         stats = process_kills(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2)
