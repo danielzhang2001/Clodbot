@@ -34,6 +34,11 @@ async def analyze_replay(ctx, *args):
     else:
         await ctx.send("No data found in this replay.")
 
+@bot.command(name='giveset')
+async def give_set(ctx):
+    """Temporarily sends a placeholder message 'Creating set...'."""
+    await ctx.send("Creating set...")
+
 # Running Discord bot
 load_dotenv()
 bot_token = os.environ['DISCORD_BOT_TOKEN']
