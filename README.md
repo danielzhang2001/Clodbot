@@ -25,7 +25,9 @@ Inviting the bot into your server locally:
 Starting up the bot:
 
 1) Clone this repository through an IDE of your choice
-2) Run clodbot.py in your IDE
+2) Go into the .env file and replace the token with the token from the bot you created
+3) Under the Bot settings in the Discord developer app portal, also activate "Message Content Intent"
+4) Run clodbot.py in your IDE
 
 Using the bot:
 
