@@ -46,7 +46,7 @@ async def analyze_replay(ctx, *args):
 async def give_set(ctx, pokemon_name: str, generation: str, format: str):
     """Sends the first set from Smogon for the given Pokemon name."""
     
-    set_data = await GiveSet.fetch_set(pokemon_name, generation, format)
+    set_data = await GiveSet.fetch_smogon_set(pokemon_name, generation, format)
     if set_data:
         await ctx.send(f"```{set_data}```")  # The triple backticks format the message as code in Discord
     else:
