@@ -52,10 +52,10 @@ async def analyze_replay(ctx, *args):
     else:
         await ctx.send("No data found in this replay.")
 
-async def fetch_smogon_set(pokemon_name: str, generation: str) -> str:
+async def fetch_smogon_set(pokemon_name: str, generation: str, format: str) -> str:
     """Fetch the first set from Smogon for the given Pokemon name and generation using Selenium."""
     
-    url = f"https://www.smogon.com/dex/{gen_dict[generation.lower()]}/pokemon/{pokemon_name.lower()}"
+    url = f"https://www.smogon.com/dex/{gen_dict[generation.lower()]}/pokemon/{pokemon_name.lower()}/{format.lower()}/"
     
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -63,9 +63,16 @@ async def fetch_smogon_set(pokemon_name: str, generation: str) -> str:
     
     driver = webdriver.Chrome(options=chrome_options)
     driver.get(url)
-    
+
     # Print the current URL to see if we're on the right page
     print(f"Currently at URL: {driver.current_url}")
+
+    # Checks if format exists
+    # Can only be the format since format is the only one that can be excluded
+    if driver.current_url != url:
+        print(f"format not found") 
+        driver.quit()
+        return None
     
     # Explicitly wait up to 10 seconds until the ExportButton is present
     try:
@@ -98,10 +105,10 @@ async def fetch_smogon_set(pokemon_name: str, generation: str) -> str:
 
 
 @bot.command(name='giveset')
-async def give_set(ctx, pokemon_name: str, generation: str):
+async def give_set(ctx, pokemon_name: str, generation: str, format: str):
     """Sends the first set from Smogon for the given Pokemon name."""
     
-    set_data = await fetch_smogon_set(pokemon_name, generation)
+    set_data = await fetch_smogon_set(pokemon_name, generation, format)
     if set_data:
         await ctx.send(f"```{set_data}```")  # The triple backticks format the message as code in Discord
     else:
