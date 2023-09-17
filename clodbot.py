@@ -16,6 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 
 from commands.analyze import Analyze
+from commands.giveset import GiveSet
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -23,7 +24,6 @@ intents.presences = False
 intents.message_content = True
 
 bot = commands.Bot(command_prefix="Clodbot, ", intents=intents)
-
 
 @bot.event
 async def on_ready():
@@ -41,56 +41,12 @@ async def analyze_replay(ctx, *args):
     else:
         await ctx.send("No data found in this replay.")
 
-async def fetch_smogon_set(pokemon_name: str) -> str:
-    """Fetch the first set from Smogon for the given Pokemon name using Selenium."""
-    
-    url = f"https://www.smogon.com/dex/sv/pokemon/{pokemon_name.lower()}"
-    
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--log-level=3")  # Suppress logging
-    
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get(url)
-    
-    # Print the current URL to see if we're on the right page
-    print(f"Currently at URL: {driver.current_url}")
-    
-    # Explicitly wait up to 10 seconds until the ExportButton is present
-    try:
-        export_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
-        )
-        print(f"Export button found for {pokemon_name}!")
-        export_button.click()
-
-        # Now wait for the textarea to appear
-        try:
-            textarea = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.TAG_NAME, "textarea"))
-            )
-            print(f"Textarea found for {pokemon_name}!")
-            set_data = textarea.text
-            driver.quit()
-            return set_data
-        except Exception as e_textarea:
-            print(f"No Textarea found for {pokemon_name}.")
-            print(f"Textarea Error: {str(e_textarea)}")
-            driver.quit()
-            return None
-
-    except Exception as e:
-        print(f"No Export button found for {pokemon_name}.")
-        print(f"Error: {str(e)}")
-        driver.quit()
-        return None
-
 
 @bot.command(name='giveset')
-async def give_set(ctx, pokemon_name: str):
+async def give_set(ctx, pokemon_name: str, generation: str, format: str):
     """Sends the first set from Smogon for the given Pokemon name."""
     
-    set_data = await fetch_smogon_set(pokemon_name)
+    set_data = await GiveSet.fetch_set(pokemon_name, generation, format)
     if set_data:
         await ctx.send(f"```{set_data}```")  # The triple backticks format the message as code in Discord
     else:
