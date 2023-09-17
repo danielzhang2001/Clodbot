@@ -24,6 +24,17 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="Clodbot, ", intents=intents)
 
+gen_dict = {
+    "gen1": "rb",
+    "gen2": "gs",
+    "gen3": "rs",
+    "gen4": "dp",
+    "gen5": "bw",
+    "gen6": "xy",
+    "gen7": "sm",
+    "gen8": "ss",
+    "gen9": "sv"
+}
 
 @bot.event
 async def on_ready():
@@ -41,10 +52,10 @@ async def analyze_replay(ctx, *args):
     else:
         await ctx.send("No data found in this replay.")
 
-async def fetch_smogon_set(pokemon_name: str) -> str:
-    """Fetch the first set from Smogon for the given Pokemon name using Selenium."""
+async def fetch_smogon_set(pokemon_name: str, generation: str) -> str:
+    """Fetch the first set from Smogon for the given Pokemon name and generation using Selenium."""
     
-    url = f"https://www.smogon.com/dex/sv/pokemon/{pokemon_name.lower()}"
+    url = f"https://www.smogon.com/dex/{gen_dict[generation.lower()]}/pokemon/{pokemon_name.lower()}"
     
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -87,10 +98,10 @@ async def fetch_smogon_set(pokemon_name: str) -> str:
 
 
 @bot.command(name='giveset')
-async def give_set(ctx, pokemon_name: str):
+async def give_set(ctx, pokemon_name: str, generation: str):
     """Sends the first set from Smogon for the given Pokemon name."""
     
-    set_data = await fetch_smogon_set(pokemon_name)
+    set_data = await fetch_smogon_set(pokemon_name, generation)
     if set_data:
         await ctx.send(f"```{set_data}```")  # The triple backticks format the message as code in Discord
     else:
