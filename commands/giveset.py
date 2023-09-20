@@ -7,7 +7,6 @@ from selenium.webdriver.chrome.options import Options
 from smogon.set import *
 
 class GiveSet:
-    
     @staticmethod
     async def fetch_set(pokemon: str, generation: str, format: str, set: str) -> str:
         """Fetch the set from Smogon for the given Pokemon name, generation, format, and set name."""
