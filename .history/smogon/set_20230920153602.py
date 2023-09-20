@@ -42,13 +42,16 @@ def get_export_btn(driver: webdriver.Chrome, set: str) -> bool:
         set_header = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = '{set.upper()}']"))
         )
+        print(f"Set header '{set}' found!")
         export_button = WebDriverWait(set_header, 10).until(
             EC.presence_of_element_located((By.XPATH, "./preceding-sibling::button[contains(@class, 'ExportButton')][1]"))
         )
+        print(f"Export button found for set '{set}'!")
         export_button.click()
         return True
     except Exception as e:
-        print(f"Export Button Error: {str(e)}")
+        print(f"No Export button found for set '{set}'.")
+        print(f"Error: {str(e)}")
         return False
 
 def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
@@ -60,5 +63,6 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
         print(f"Textarea found for {pokemon}!")
         return textarea.text
     except Exception as e_textarea:
+        print(f"No Textarea found for {pokemon}.")
         print(f"Textarea Error: {str(e_textarea)}")
         return None

@@ -19,12 +19,16 @@ class GiveSet:
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
             if generation.lower() not in get_gen_dict():
+                driver.quit()
                 return f"Generation \"{generation}\" not found."
             if not is_valid_pokemon(driver, pokemon):
+                driver.quit()
                 return f"Pokemon \"{pokemon}\" not found or doesn't exist in Generation \"{generation}\"."
             if driver.current_url != url:
+                driver.quit()
                 return f"Format \"{format}\" not found."
             if not get_export_btn(driver, set):
+                driver.quit()
                 return f"Set \"{set}\" not found."
             set_data = get_textarea(driver, pokemon)
             return set_data

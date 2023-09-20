@@ -43,10 +43,10 @@ async def analyze_replay(ctx, *args):
 
 
 @bot.command(name='giveset')
-async def give_set(ctx, pokemon: str, generation: str, format: str, *set: str):
+async def give_set(ctx, pokemon_name: str, generation: str, format: str, *set_name: str):
     """Sends the first set from Smogon for the given Pokemon name."""
-    set = ' '.join(set)
-    set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
+    set_name = ' '.join(set_name)
+    set_data = await GiveSet.fetch_set(pokemon_name, generation, format, set_name)
     error_keywords = ["not found"]
     if any(keyword in set_data for keyword in error_keywords):
         await ctx.send(set_data)
