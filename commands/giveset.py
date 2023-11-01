@@ -8,15 +8,32 @@ from smogon.set import *
 
 class GiveSet:
     @staticmethod
-    async def fetch_set(pokemon: str, generation: str, format: str, set: str) -> str:
-        """Fetch the set from Smogon for the given Pokemon name, generation, format, and set name."""
+    async def fetch_set(pokemon: str, generation: str = None, format: str = None, set: str = None) -> str:
+        """Fetch the set from Smogon for the given Pokemon name, generation, format, and set name. If only Pokemon given, assume most recent generation and first format found."""
         try:
+            
+            # Check if pokemon exists (PLACEHOLDER)
+            if generation is None and format is None and set is None:
+                chrome_options = Options()
+                chrome_options.add_argument("--headless")
+                chrome_options.add_argument("--log-level=3")
+                driver = webdriver.Chrome(options=chrome_options)
+                for gen in get_gen_dict().values():
+                    url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
+                    driver.get(url)
+                    if is_valid_pokemon(driver, pokemon):
+                        return "exists"
+                return "doesn't exist"
+            driver.get(url)
+            
             url = f"https://www.smogon.com/dex/{get_gen(generation)}/pokemon/{pokemon.lower()}/{format.lower()}/"
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            driver.get(url)
+            
+            
+                
             if generation.lower() not in get_gen_dict():
                 return f"Generation \"{generation}\" not found."
             if not is_valid_pokemon(driver, pokemon):
@@ -30,4 +47,5 @@ class GiveSet:
         except Exception as e:
             return f"An error occurred: {str(e)}"
         finally:
-            driver.quit()
+            if 'driver' in locals():
+                driver.quit()

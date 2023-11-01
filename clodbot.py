@@ -43,10 +43,17 @@ async def analyze_replay(ctx, *args):
 
 
 @bot.command(name='giveset')
-async def give_set(ctx, pokemon: str, generation: str, format: str, *set: str):
-    """Sends the first set from Smogon for the given Pokemon name."""
-    set = ' '.join(set)
-    set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
+async def give_set(ctx, pokemon: str, generation: str = None, format: str = None, *set: str):
+    """Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, checks to see whether it exists or not (PLACEHOLDER)."""
+    # Check if only Pokemon is provided
+    if generation is None and format is None and not set:
+        # Only pokemon was provided, use default generation and format
+        set_data = await GiveSet.fetch_set(pokemon)
+    else:
+        # All arguments were provided, join the set and proceed
+        set = ' '.join(set)
+        set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
+    
     error_keywords = ["not found"]
     if any(keyword in set_data for keyword in error_keywords):
         await ctx.send(set_data)
