@@ -47,13 +47,17 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
 def get_set_names(driver: webdriver.Chrome) -> list:
     """Finds all set names on the page."""
     try:
+        # Locate all export buttons
         export_buttons = WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.CLASS_NAME, "ExportButton"))
         )
+
         set_names = []
         for export_button in export_buttons:
+            # The set name is assumed to be the next sibling h1 of the export button
             set_header = export_button.find_element(By.XPATH, "./following-sibling::h1")
             set_names.append(set_header.text)
+
         return set_names
     except Exception as e:
         print(f"Get All Set Names Error: {str(e)}")

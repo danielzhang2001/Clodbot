@@ -20,13 +20,11 @@ class GiveSet:
                 chrome_options.add_argument("--headless")
                 chrome_options.add_argument("--log-level=3")
                 driver = webdriver.Chrome(options=chrome_options)
-                for gen in reversed(get_gen_dict().values()):
+                for gen in reversed(get_gen_dict().values():
                     url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
                     driver.get(url)
                     if is_valid_pokemon(driver, pokemon):
-                        # Find all set names associated with each Export button
-                        sets = get_set_names(driver)
-                        return sets if sets else "No sets found"
+                        return "exists"
                 return "doesn't exist"
             driver.get(url)
 

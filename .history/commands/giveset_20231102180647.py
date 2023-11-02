@@ -25,7 +25,7 @@ class GiveSet:
                     driver.get(url)
                     if is_valid_pokemon(driver, pokemon):
                         # Find all set names associated with each Export button
-                        sets = get_set_names(driver)
+                        sets = get_all_set_names(driver)
                         return sets if sets else "No sets found"
                 return "doesn't exist"
             driver.get(url)
