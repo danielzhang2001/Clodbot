@@ -16,27 +16,29 @@ class GiveSet:
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
 
+            pokemon_name = format_name(pokemon)
+
             if generation is None and format is None and set is None:
-                # The URL will be determined within the for loop
                 driver = webdriver.Chrome(options=chrome_options)
                 for gen in reversed(get_gen_dict().values()):
                     url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
                     driver.get(url)
                     if is_valid_pokemon(driver, pokemon):
                         sets = get_set_names(driver)
-                        return sets if sets else "No sets found"
+                        if sets:
+                            formatted_sets = (
+                                "```" + "\n".join(f"- {s}" for s in sets) + "```"
+                            )
+                            return f"Please specify set type for {pokemon_name}:\n{formatted_sets}"
+                        else:
+                            return "No sets found"
                 return f'Pokemon "{pokemon}" not found in any generation.'
-
             else:
-                # Ensure generation is valid before proceeding
                 if generation.lower() not in get_gen_dict():
                     return f'Generation "{generation}" not found.'
-
-                # Now the URL is properly defined before using the driver
                 url = f"https://www.smogon.com/dex/{get_gen(generation)}/pokemon/{pokemon.lower()}/{format.lower()}/"
                 driver = webdriver.Chrome(options=chrome_options)
                 driver.get(url)
-
                 if not is_valid_pokemon(driver, pokemon):
                     return f'Pokemon "{pokemon}" not found or doesn\'t exist in Generation "{generation}".'
                 if driver.current_url != url:
@@ -44,7 +46,7 @@ class GiveSet:
                 if not get_export_btn(driver, set):
                     return f'Set "{set}" not found.'
                 set_data = get_textarea(driver, pokemon)
-                return set_data
+                return f"```{set_data}```"
         except Exception as e:
             return f"An error occurred: {str(e)}"
         finally:
