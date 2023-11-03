@@ -56,12 +56,7 @@ async def give_set(
         # All arguments were provided, join the set and proceed
         set = " ".join(set)
         set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
-
-    error_keywords = ["not found"]
-    if any(keyword in set_data for keyword in error_keywords):
-        await ctx.send(set_data)
-    else:
-        await ctx.send(f"```{set_data}```")
+    await ctx.send(set_data)
 
 
 # Running Discord bot

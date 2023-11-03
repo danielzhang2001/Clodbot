@@ -44,6 +44,11 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
         return False
 
 
+def format_name(pokemon: str) -> str:
+    """Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase."""
+    return "-".join(word.capitalize() for word in pokemon.split("-"))
+
+
 def get_set_names(driver: webdriver.Chrome) -> list:
     """Finds all set names on the page."""
     try:
