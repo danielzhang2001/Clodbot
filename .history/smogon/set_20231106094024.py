@@ -92,7 +92,7 @@ def get_export_btn(driver: webdriver.Chrome, set: str) -> bool:
 
 
 def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
-    """Finds and returns text area contents for a Pokemon set."""
+    """Finds and returns text area contents."""
     try:
         textarea = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.TAG_NAME, "textarea"))
