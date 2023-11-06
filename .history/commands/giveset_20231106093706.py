@@ -32,7 +32,7 @@ class GiveSet:
                                 f"Please specify set type for {name}:\n{formatted_sets}"
                             )
                         else:
-                            return f"No sets found for {name}."
+                            return "No sets found"
                 return f'Pokemon "{pokemon}" not found in any generation.'
             else:
                 if generation.lower() not in get_gen_dict():

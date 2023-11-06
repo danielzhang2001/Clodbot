@@ -47,12 +47,16 @@ async def analyze_replay(ctx, *args):
 async def give_set(
     ctx, pokemon: str, generation: str = None, format: str = None, *set: str
 ):
-    """Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, allows selection from its most viable sets."""
+    """Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, checks to see whether it exists or not (PLACEHOLDER)."""
+    # Check if only Pokemon is provided
     if generation is None and format is None and not set:
+        # Only pokemon was provided, use default generation and format
         set_data = await GiveSet.fetch_set(pokemon)
     else:
+        # All arguments were provided, join the set and proceed
         set = " ".join(set)
         set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
+
     await ctx.send(set_data)
 
 
