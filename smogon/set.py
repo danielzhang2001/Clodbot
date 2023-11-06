@@ -50,7 +50,7 @@ def format_name(pokemon: str) -> str:
 
 
 def get_set_names(driver: webdriver.Chrome) -> list:
-    """Finds all set names on the page."""
+    """Finds and returns all set names on the page."""
     try:
         export_buttons = WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.CLASS_NAME, "ExportButton"))
@@ -92,7 +92,7 @@ def get_export_btn(driver: webdriver.Chrome, set: str) -> bool:
 
 
 def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
-    """Finds and returns text area contents."""
+    """Finds and returns text area contents for a Pokemon set."""
     try:
         textarea = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.TAG_NAME, "textarea"))
