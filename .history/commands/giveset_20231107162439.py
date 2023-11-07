@@ -25,14 +25,12 @@ class GiveSet:
                     if is_valid_pokemon(driver, pokemon):
                         sets = get_set_names(driver)
                         if sets:
-                            formatted_sets = (
-                                "```\n"
-                                + "\n".join(
-                                    f"{index+1}) {s}" for index, s in enumerate(sets)
-                                )
-                                + "\n```"
+                            formatted_sets = "\n".join(
+                                f"{index+1}) {s}" for index, s in enumerate(sets)
                             )
-                            return f"Please specify set type for **{name}**:\n{formatted_sets}"
+                            return (
+                                f"Please specify set type for {name}:\n{formatted_sets}"
+                            )
                         else:
                             return f"No sets found for {name}."
                 return f'Pokemon "{pokemon}" not found in any generation.'

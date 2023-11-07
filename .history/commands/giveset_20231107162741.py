@@ -32,7 +32,9 @@ class GiveSet:
                                 )
                                 + "\n```"
                             )
-                            return f"Please specify set type for **{name}**:\n{formatted_sets}"
+                            return (
+                                f"Please specify set type for {name}:\n{formatted_sets}"
+                            )
                         else:
                             return f"No sets found for {name}."
                 return f'Pokemon "{pokemon}" not found in any generation.'
