@@ -16,6 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 
 from commands.analyze import Analyze
+from commands.giveset import GiveSet
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -42,79 +43,31 @@ async def on_ready():
     print(f"{bot.user} has connected to Discord!")
 
 
-@bot.command(name='analyze')
+@bot.command(name="analyze")
 async def analyze_replay(ctx, *args):
     """Analyzes replay and sends stats in a message to Discord."""
-    replay_link = ' '.join(args)
+    replay_link = " ".join(args)
     message = await Analyze.analyze_replay(replay_link)
     if message:
         await ctx.send(message)
     else:
         await ctx.send("No data found in this replay.")
 
-async def fetch_smogon_set(pokemon_name: str, generation: str, format: str) -> str:
-    """Fetch the first set from Smogon for the given Pokemon name and generation using Selenium."""
-    
-    url = f"https://www.smogon.com/dex/{gen_dict[generation.lower()]}/pokemon/{pokemon_name.lower()}/{format.lower()}/"
-    
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--log-level=3")  # Suppress logging
-    
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get(url)
 
-    # Print the current URL to see if we're on the right page
-    print(f"Currently at URL: {driver.current_url}")
-
-    # Checks if format exists
-    # Can only be the format since format is the only one that can be excluded
-    if driver.current_url != url:
-        print(f"format not found") 
-        driver.quit()
-        return None
-    
-    # Explicitly wait up to 10 seconds until the ExportButton is present
-    try:
-        export_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
-        )
-        print(f"Export button found for {pokemon_name}!")
-        export_button.click()
-
-        # Now wait for the textarea to appear
-        try:
-            textarea = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.TAG_NAME, "textarea"))
-            )
-            print(f"Textarea found for {pokemon_name}!")
-            set_data = textarea.text
-            driver.quit()
-            return set_data
-        except Exception as e_textarea:
-            print(f"No Textarea found for {pokemon_name}.")
-            print(f"Textarea Error: {str(e_textarea)}")
-            driver.quit()
-            return None
-
-    except Exception as e:
-        print(f"No Export button found for {pokemon_name}.")
-        print(f"Error: {str(e)}")
-        driver.quit()
-        return None
-
-
-@bot.command(name='giveset')
-async def give_set(ctx, pokemon_name: str, generation: str, format: str):
-    """Sends the first set from Smogon for the given Pokemon name."""
-    
-    set_data = await fetch_smogon_set(pokemon_name, generation, format)
-    if set_data:
-        await ctx.send(f"```{set_data}```")  # The triple backticks format the message as code in Discord
+@bot.command(name="giveset")
+async def give_set(
+    ctx, pokemon: str, generation: str = None, format: str = None, *set: str
+):
+    """Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, allows selection from its most viable sets."""
+    if generation is None and format is None and not set:
+        set_data = await GiveSet.fetch_set(pokemon)
     else:
-        await ctx.send(f"No set found for {pokemon_name} on Smogon.")
+        set = " ".join(set)
+        set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
+    await ctx.send(set_data)
+
 
 # Running Discord bot
 load_dotenv()
-bot_token = os.environ['DISCORD_BOT_TOKEN']
+bot_token = os.environ["DISCORD_BOT_TOKEN"]
 bot.run(bot_token)
