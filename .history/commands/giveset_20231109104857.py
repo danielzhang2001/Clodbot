@@ -8,7 +8,7 @@ class GiveSet:
     awaiting_response = {}
 
     @staticmethod
-    async def prompt_for_set_selection(ctx, pokemon, sets):
+    async def prompt_for_set_selection(ctx, sets):
         """Sends a message prompting the user to select a set and waits for their response."""
         formatted_sets = (
             "```\n"
@@ -16,9 +16,8 @@ class GiveSet:
             + "\n```"
         )
         message = await ctx.send(
-            f"Please specify set type for **{'-'.join(part.capitalize() for part in pokemon.split('-'))}**:\n{formatted_sets}"
+            f"Please specify set type for **{ctx.invoked_with.capitalize()}**:\n{formatted_sets}"
         )
-
         # Store the message context to validate the response later
         GiveSet.awaiting_response[ctx.channel.id] = {
             "message_id": message.id,
@@ -69,7 +68,7 @@ class GiveSet:
                         if sets:
                             return sets
                         else:
-                            return None
+                            return f"No sets found for {name}."
                 return f'Pokemon "{pokemon}" not found in any generation.'
             else:
                 if generation.lower() not in get_gen_dict():

@@ -48,33 +48,12 @@ async def give_set(
     ctx, pokemon: str, generation: str = None, format: str = None, *set: str
 ):
     """Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, allows selection from its most viable sets."""
-    set_data = ""
     if generation is None and format is None and not set:
-        sets = await GiveSet.fetch_set(pokemon)
-        if sets:
-            await GiveSet.prompt_for_set_selection(ctx, pokemon, sets)
-        else:
-            await ctx.send(f"No sets found for {pokemon}.")
+        set_data = await GiveSet.fetch_set(pokemon)
     else:
         set = " ".join(set)
         set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
     await ctx.send(set_data)
-
-
-# Add a listener for on_message to handle set selection response
-@bot.listen("on_message")
-async def on_message(message):
-    if message.author == bot.user:
-        return
-
-    ctx = await bot.get_context(message)
-    if ctx.valid:
-        # If the message is a command, the bot will process it through the commands framework.
-        return
-
-    # Here you handle the message as a potential response to the set selection prompt
-    if message.channel.id in GiveSet.awaiting_response:
-        await GiveSet.handle_set_selection(ctx, message)
 
 
 # Running Discord bot
