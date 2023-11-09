@@ -8,45 +8,6 @@ class GiveSet:
     awaiting_response = {}
 
     @staticmethod
-    async def prompt_for_set_selection(ctx, pokemon, sets):
-        """Sends a message prompting the user to select a set and waits for their response."""
-        formatted_sets = (
-            "```\n"
-            + "\n".join([f"{index+1}) {s}" for index, s in enumerate(sets)])
-            + "\n```"
-        )
-        message = await ctx.send(
-            f"Please specify set type for **{'-'.join(part.capitalize() for part in pokemon.split('-'))}**:\n{formatted_sets}"
-        )
-
-        # Store the message context to validate the response later
-        GiveSet.awaiting_response[ctx.channel.id] = {
-            "message_id": message.id,
-            "user_id": ctx.author.id,
-            "sets": sets,
-        }
-
-    @staticmethod
-    async def handle_set_selection(ctx, message):
-        """Handles the user's selection of a set after prompting."""
-        channel_id = ctx.channel.id
-        if channel_id in GiveSet.awaiting_response:
-            context = GiveSet.awaiting_response[channel_id]
-
-            # Check if the message is a response to the bot's prompt
-            if message.author.id == context["user_id"] and message.content.isdigit():
-                set_index = int(message.content) - 1
-                if 0 <= set_index < len(context["sets"]):
-                    await ctx.send(f"Selected set: **{context['sets'][set_index]}**")
-                else:
-                    await ctx.send(
-                        "Invalid selection. Please choose a valid set number."
-                    )
-
-                # Once a selection is made or invalid, remove the context
-                del GiveSet.awaiting_response[channel_id]
-
-    @staticmethod
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None, set: str = None
     ) -> str:
@@ -67,9 +28,16 @@ class GiveSet:
                     if is_valid_pokemon(driver, pokemon):
                         sets = get_set_names(driver)
                         if sets:
-                            return sets
+                            formatted_sets = (
+                                "```\n"
+                                + "\n".join(
+                                    f"{index+1}) {s}" for index, s in enumerate(sets)
+                                )
+                                + "\n```"
+                            )
+                            return f"Please specify set type for **{name}**:\n{formatted_sets}"
                         else:
-                            return None
+                            return f"No sets found for {name}."
                 return f'Pokemon "{pokemon}" not found in any generation.'
             else:
                 if generation.lower() not in get_gen_dict():

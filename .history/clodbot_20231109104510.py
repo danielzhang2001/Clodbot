@@ -48,11 +48,10 @@ async def give_set(
     ctx, pokemon: str, generation: str = None, format: str = None, *set: str
 ):
     """Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, allows selection from its most viable sets."""
-    set_data = ""
     if generation is None and format is None and not set:
         sets = await GiveSet.fetch_set(pokemon)
         if sets:
-            await GiveSet.prompt_for_set_selection(ctx, pokemon, sets)
+            await GiveSet.prompt_for_set_selection(ctx, sets)
         else:
             await ctx.send(f"No sets found for {pokemon}.")
     else:

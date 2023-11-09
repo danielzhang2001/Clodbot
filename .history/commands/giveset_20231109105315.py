@@ -16,9 +16,8 @@ class GiveSet:
             + "\n```"
         )
         message = await ctx.send(
-            f"Please specify set type for **{'-'.join(part.capitalize() for part in pokemon.split('-'))}**:\n{formatted_sets}"
+            f"Please specify set type for **{pokemon.capitalize()}**:\n{formatted_sets}"
         )
-
         # Store the message context to validate the response later
         GiveSet.awaiting_response[ctx.channel.id] = {
             "message_id": message.id,
