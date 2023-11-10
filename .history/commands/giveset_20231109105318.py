@@ -4,19 +4,21 @@ from smogon.set import *
 
 
 class GiveSet:
+    # This will store the context for each channel awaiting a response
     awaiting_response = {}
 
     @staticmethod
-    async def set_prompt(ctx, pokemon, sets):
-        # Sends a message prompting the user to select a set and waits for their response.
+    async def prompt_for_set_selection(ctx, pokemon, sets):
+        """Sends a message prompting the user to select a set and waits for their response."""
         formatted_sets = (
             "```\n"
             + "\n".join([f"{index+1}) {s}" for index, s in enumerate(sets)])
             + "\n```"
         )
         message = await ctx.send(
-            f"Please specify set type for **{'-'.join(part.capitalize() for part in pokemon.split('-'))}**:\n{formatted_sets}"
+            f"Please specify set type for **{pokemon.capitalize()}**:\n{formatted_sets}"
         )
+        # Store the message context to validate the response later
         GiveSet.awaiting_response[ctx.channel.id] = {
             "message_id": message.id,
             "user_id": ctx.author.id,
@@ -24,11 +26,13 @@ class GiveSet:
         }
 
     @staticmethod
-    async def set_selection(ctx, message):
-        # Handles the user's selection of a set after prompting.
+    async def handle_set_selection(ctx, message):
+        """Handles the user's selection of a set after prompting."""
         channel_id = ctx.channel.id
         if channel_id in GiveSet.awaiting_response:
             context = GiveSet.awaiting_response[channel_id]
+
+            # Check if the message is a response to the bot's prompt
             if message.author.id == context["user_id"] and message.content.isdigit():
                 set_index = int(message.content) - 1
                 if 0 <= set_index < len(context["sets"]):
@@ -37,14 +41,17 @@ class GiveSet:
                     await ctx.send(
                         "Invalid selection. Please choose a valid set number."
                     )
+
+                # Once a selection is made or invalid, remove the context
                 del GiveSet.awaiting_response[channel_id]
 
     @staticmethod
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None, set: str = None
     ) -> str:
-        # Fetch the set from Smogon for the given Pokemon name, generation, format, and set name.
-        # If only Pokemon given, assume most recent generation and first format found and give prompt on all possible sets for user to choose.
+        """Fetch the set from Smogon for the given Pokemon name, generation, format, and set name.
+        If only Pokemon given, assume most recent generation and first format found and give prompt on all possible sets for user to choose.
+        """
         driver = None
         try:
             chrome_options = Options()
