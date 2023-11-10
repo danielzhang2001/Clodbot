@@ -43,8 +43,7 @@ class GiveSet:
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None, set: str = None
     ) -> str:
-        # Fetch the set from Smogon for the given Pokemon name, generation, format, and set name.
-        # If only Pokemon given, assume most recent generation and first format found and give prompt on all possible sets for user to choose.
+        # Fetch the set from Smogon for the given Pokemon name, generation, format, and set name. If only Pokemon given, assume most recent generation and first format found and give prompt on all possible sets for user to choose.
         driver = None
         try:
             chrome_options = Options()
