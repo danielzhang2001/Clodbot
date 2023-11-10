@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 def get_gen_dict() -> dict:
-    """Returns generation dictionary."""
+    # Returns generation dictionary.
     return {
         "gen1": "rb",
         "gen2": "gs",
@@ -24,12 +24,12 @@ def get_gen_dict() -> dict:
 
 
 def get_gen(generation: str) -> str:
-    """Retrieves generation dictionary."""
+    # Retrieves generation dictionary.
     return get_gen_dict().get(generation.lower())
 
 
 def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
-    """Check if the Pokemon name exists on the page."""
+    # Check if the Pokemon name exists on the page.
     try:
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
@@ -45,12 +45,12 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
 
 
 def format_name(pokemon: str) -> str:
-    """Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase."""
+    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase.
     return "-".join(word.capitalize() for word in pokemon.split("-"))
 
 
 def get_set_names(driver: webdriver.Chrome) -> list:
-    """Finds and returns all set names on the page."""
+    # Finds and returns all set names on the page.
     try:
         export_buttons = WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.CLASS_NAME, "ExportButton"))
@@ -66,7 +66,7 @@ def get_set_names(driver: webdriver.Chrome) -> list:
 
 
 def get_export_btn(driver: webdriver.Chrome, set: str) -> bool:
-    """Finds and clicks export button for the specific set."""
+    # Finds and clicks export button for the specific set.
     try:
         set_header = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
@@ -92,7 +92,7 @@ def get_export_btn(driver: webdriver.Chrome, set: str) -> bool:
 
 
 def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
-    """Finds and returns text area contents for a Pokemon set."""
+    # Finds and returns text area contents for a Pokemon set.
     try:
         textarea = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.TAG_NAME, "textarea"))
