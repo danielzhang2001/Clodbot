@@ -50,9 +50,9 @@ async def give_set(
     # Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, allows selection from a choice of sets given most recent generation and first format found.
     set_data = ""
     if generation is None and format is None and not set:
-        sets = await GiveSet.fetch_set(pokemon)
+        sets, url = await GiveSet.fetch_set(pokemon)
         if sets:
-            await GiveSet.set_prompt(ctx, pokemon, sets)
+            await GiveSet.set_prompt(ctx, pokemon, sets, url)
         else:
             await ctx.send(f"No sets found for {pokemon}.")
     else:
@@ -70,7 +70,7 @@ async def on_message(message):
     if ctx.valid:
         return
     if message.channel.id in GiveSet.awaiting_response:
-        await GiveSet.handle_set_selection(ctx, message)
+        await GiveSet.set_selection(ctx, message)
 
 
 # Running Discord bot
