@@ -52,7 +52,7 @@ async def give_set(
     if generation is None and format is None and not set:
         sets, url = await GiveSet.fetch_set(pokemon)
         if sets:
-            await GiveSet.set_prompt(ctx, pokemon, sets, url)
+            await GiveSet.set_prompt(ctx, pokemon, sets, driver)
         else:
             await ctx.send(f"No sets found for {pokemon}.")
     else:

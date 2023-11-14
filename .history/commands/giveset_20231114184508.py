@@ -21,26 +21,22 @@ class GiveSet:
             "message_id": message.id,
             "user_id": ctx.author.id,
             "sets": sets,
-            "url": url,
+            "driver": driver,
         }
 
     @staticmethod
     async def set_selection(ctx, message):
         # Handles the user's selection of a set after prompting.
         channel_id = ctx.channel.id
-        driver = None
         if channel_id in GiveSet.awaiting_response:
             context = GiveSet.awaiting_response[channel_id]
-            url = context["url"]
+            driver = context["driver"]
+            # Print the current URL of the WebDriver to the console
+            print(f"Current WebDriver URL: {driver.current_url}")
             if message.author.id == context["user_id"] and message.content.isdigit():
                 set_index = int(message.content) - 1
                 if 0 <= set_index < len(context["sets"]):
                     try:
-                        chrome_options = Options()
-                        chrome_options.add_argument("--headless")
-                        chrome_options.add_argument("--log-level=3")
-                        driver = webdriver.Chrome(options=chrome_options)
-                        driver.get(url)
                         # Fetch the set data
                         set_name = context["sets"][set_index]
                         if get_export_btn(driver, set_name):
@@ -83,7 +79,7 @@ class GiveSet:
                     if is_valid_pokemon(driver, pokemon):
                         sets = get_set_names(driver)
                         if sets:
-                            return sets, url
+                            return sets, driver
                         else:
                             return None, None
                 return f'Pokemon "{pokemon}" not found in any generation.'
