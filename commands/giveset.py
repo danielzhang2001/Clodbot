@@ -7,7 +7,7 @@ class GiveSet:
     awaiting_response = {}
 
     @staticmethod
-    async def set_prompt(ctx, pokemon, sets):
+    async def set_prompt(ctx, pokemon, sets, url):
         # Sends a message prompting the user to select a set and waits for their response.
         formatted_sets = (
             "```\n"
@@ -21,18 +21,42 @@ class GiveSet:
             "message_id": message.id,
             "user_id": ctx.author.id,
             "sets": sets,
+            "url": url,
         }
 
     @staticmethod
     async def set_selection(ctx, message):
         # Handles the user's selection of a set after prompting.
         channel_id = ctx.channel.id
+        driver = None
         if channel_id in GiveSet.awaiting_response:
             context = GiveSet.awaiting_response[channel_id]
+            url = context["url"]
             if message.author.id == context["user_id"] and message.content.isdigit():
                 set_index = int(message.content) - 1
                 if 0 <= set_index < len(context["sets"]):
-                    await ctx.send(f"Selected set: **{context['sets'][set_index]}**")
+                    try:
+                        chrome_options = Options()
+                        chrome_options.add_argument("--headless")
+                        chrome_options.add_argument("--log-level=3")
+                        driver = webdriver.Chrome(options=chrome_options)
+                        driver.get(url)
+                        # Fetch the set data
+                        set_name = context["sets"][set_index]
+                        if get_export_btn(driver, set_name):
+                            print("EXPORT BUTTON FOUND!")
+                            set_data = get_textarea(driver, set_name)
+                            if set_data:
+                                await ctx.send(f"Selected set: ```{set_data}```")
+                            else:
+                                await ctx.send("Error fetching set data.")
+                        else:
+                            await ctx.send("Error finding set. Please try again.")
+                    except Exception as e:
+                        await ctx.send(f"An error occurred: {str(e)}")
+                    finally:
+                        if driver:
+                            driver.quit()
                 else:
                     await ctx.send(
                         "Invalid selection. Please choose a valid set number."
@@ -59,9 +83,9 @@ class GiveSet:
                     if is_valid_pokemon(driver, pokemon):
                         sets = get_set_names(driver)
                         if sets:
-                            return sets
+                            return sets, url
                         else:
-                            return None
+                            return None, None
                 return f'Pokemon "{pokemon}" not found in any generation.'
             else:
                 if generation.lower() not in get_gen_dict():
