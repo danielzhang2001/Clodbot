@@ -29,32 +29,19 @@ def get_gen(generation: str) -> str:
 
 
 def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
-    # Check if the Pokemon name exists on the page (with and without hyphen replaced by space).
+    # Check if the Pokemon name exists on the page.
     try:
-        # Check with the original name (hyphen unaltered)
-        WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    f"//h1[translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='{pokemon.upper()}']",
+                    f"//h1[translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='{pokemon.upper()}']".replace('-', ' ')}']",
                 )
             )
         )
         return True
     except:
-        try:
-            # Check with the name where hyphen is replaced by a space
-            WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        f"//h1[translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='{pokemon.upper().replace('-', ' ')}']",
-                    )
-                )
-            )
-            return True
-        except:
-            return False
+        return False
 
 
 def format_name(pokemon: str) -> str:
