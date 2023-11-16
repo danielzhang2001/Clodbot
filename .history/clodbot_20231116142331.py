@@ -48,6 +48,7 @@ async def give_set(
     ctx, pokemon: str, generation: str = None, format: str = None, *set: str
 ):
     # Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, allows selection from a choice of sets given most recent generation and first format found.
+    set_data = ""
     if generation is None and format is None and not set:
         sets, url = await GiveSet.fetch_set(pokemon)
         if sets:
@@ -57,6 +58,9 @@ async def give_set(
     else:
         set = " ".join(set)
         set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
+    if not set_data:
+        await ctx.send(f"No data found for {pokemon}")
+    else:
         await ctx.send(set_data)
 
 
