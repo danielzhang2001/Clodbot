@@ -44,6 +44,7 @@ class GiveSet:
                         # Fetch the set data
                         set_name = context["sets"][set_index]
                         if get_export_btn(driver, set_name):
+                            print("EXPORT BUTTON FOUND!")
                             set_data = get_textarea(driver, set_name)
                             if set_data:
                                 await ctx.send(f"```{set_data}```")
@@ -74,11 +75,22 @@ class GiveSet:
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            pokemon = format_name(pokemon)
+            name = format_name(pokemon)
             if generation is None and format is None and set is None:
-                return fetch_general_sets(driver, pokemon)
+                return fetch_general_sets(driver, name)
             else:
-                return fetch_specific_set(driver, pokemon, generation, format, set)
+                if generation.lower() not in get_gen_dict():
+                    return f'Generation "{generation}" not found.'
+                url = f"https://www.smogon.com/dex/{get_gen(generation)}/pokemon/{pokemon.lower()}/{format.lower()}/"
+                driver.get(url)
+                if not is_valid_pokemon(driver, pokemon):
+                    return f'Pokemon "{pokemon}" not found or doesn\'t exist in Generation "{generation}".'
+                if driver.current_url != url:
+                    return f'Format "{format}" not found.'
+                if not get_export_btn(driver, set):
+                    return f'Set "{set}" not found.'
+                set_data = get_textarea(driver, pokemon)
+                return f"```{set_data}```"
         except Exception as e:
             return f"An error occurred: {str(e)}"
         finally:

@@ -76,9 +76,10 @@ class GiveSet:
             driver = webdriver.Chrome(options=chrome_options)
             pokemon = format_name(pokemon)
             if generation is None and format is None and set is None:
-                return fetch_general_sets(driver, pokemon)
+                return fetch_general_sets(driver, name)
             else:
-                return fetch_specific_set(driver, pokemon, generation, format, set)
+                set_data = fetch_specific_set(driver, pokemon, generation, format, set)
+                return (set_data, None)
         except Exception as e:
             return f"An error occurred: {str(e)}"
         finally:
