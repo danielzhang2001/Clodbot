@@ -31,7 +31,6 @@ def get_gen(generation: str) -> str:
 def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
     # Check if the Pokemon name exists on the page (with and without hyphen replaced by space).
     try:
-        # Check with the original name (hyphen unaltered)
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located(
                 (
@@ -43,7 +42,6 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
         return True
     except:
         try:
-            # Check with the name where hyphen is replaced by a space
             WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located(
                     (
@@ -110,8 +108,21 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
         textarea = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.TAG_NAME, "textarea"))
         )
-        print(f"Textarea found for {pokemon}!")
         return textarea.text
     except Exception as e_textarea:
         print(f"Textarea Error: {str(e_textarea)}")
         return None
+
+
+def fetch_sets_general(driver: webdriver.Chrome, pokemon: str) -> tuple:
+    # Finds all pokemon set names given the most recent generation if only Pokemon name is provided
+    for gen in reversed(get_gen_dict().values()):
+        url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
+        driver.get(url)
+        if is_valid_pokemon(driver, pokemon):
+            sets = get_set_names(driver)
+            if sets:
+                return sets, url
+            else:
+                return None, None
+    return None, f'Pokemon "{pokemon}" not found in any generation.'
