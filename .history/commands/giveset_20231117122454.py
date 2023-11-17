@@ -47,7 +47,7 @@ class GiveSet:
                             print("EXPORT BUTTON FOUND!")
                             set_data = get_textarea(driver, set_name)
                             if set_data:
-                                await ctx.send(f"```{set_data}```")
+                                await ctx.send(f"Selected set: ```{set_data}```")
                             else:
                                 await ctx.send("Error fetching set data.")
                         else:

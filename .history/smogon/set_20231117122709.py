@@ -108,6 +108,7 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
         textarea = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.TAG_NAME, "textarea"))
         )
+        print(f"Textarea found for {pokemon}!")
         return textarea.text
     except Exception as e_textarea:
         print(f"Textarea Error: {str(e_textarea)}")
