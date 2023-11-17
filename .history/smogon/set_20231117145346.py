@@ -122,9 +122,11 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
 
 def fetch_general_sets(driver: webdriver.Chrome, pokemon: str) -> tuple:
     # Finds all pokemon set names with the url of the page given the most recent generation if only Pokemon name is provided.
+    print("VERY TOP!")
     for gen in reversed(get_gen_dict().values()):
         url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
         driver.get(url)
+        print("AT FETCH GENERAL SETS!")
         if is_valid_pokemon(driver, pokemon):
             sets = get_set_names(driver)
             if sets:

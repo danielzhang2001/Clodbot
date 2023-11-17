@@ -44,6 +44,7 @@ class GiveSet:
                         # Fetch the set data
                         set_name = context["sets"][set_index]
                         if get_export_btn(driver, set_name):
+                            print("EXPORT BUTTON FOUND!")
                             set_data = get_textarea(driver, set_name)
                             if set_data:
                                 await ctx.send(f"```{set_data}```")
@@ -74,11 +75,11 @@ class GiveSet:
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            pokemon = format_name(pokemon)
+            name = format_name(pokemon)
             if generation is None and format is None and set is None:
-                return fetch_general_sets(driver, pokemon)
+                return fetch_general_sets(driver, name)
             else:
-                return fetch_specific_set(driver, pokemon, generation, format, set)
+                return fetch_specific_set(driver, name, generation, format, set)
         except Exception as e:
             return f"An error occurred: {str(e)}"
         finally:

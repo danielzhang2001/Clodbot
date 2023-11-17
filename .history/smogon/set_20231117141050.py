@@ -56,14 +56,8 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
 
 
 def format_name(pokemon: str) -> str:
-    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
-    formatted_parts = []
-    for part in pokemon.split("-"):
-        if len(part) > 1:
-            formatted_parts.append(part.capitalize())
-        else:
-            formatted_parts.append(part.lower())
-    return "-".join(formatted_parts)
+    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase.
+    return "-".join(word.capitalize() for word in pokemon.split("-"))
 
 
 def get_set_names(driver: webdriver.Chrome) -> list:

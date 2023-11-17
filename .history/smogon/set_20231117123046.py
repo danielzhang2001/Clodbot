@@ -56,14 +56,8 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
 
 
 def format_name(pokemon: str) -> str:
-    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
-    formatted_parts = []
-    for part in pokemon.split("-"):
-        if len(part) > 1:
-            formatted_parts.append(part.capitalize())
-        else:
-            formatted_parts.append(part.lower())
-    return "-".join(formatted_parts)
+    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase.
+    return "-".join(word.capitalize() for word in pokemon.split("-"))
 
 
 def get_set_names(driver: webdriver.Chrome) -> list:
@@ -120,8 +114,8 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
         return None
 
 
-def fetch_general_sets(driver: webdriver.Chrome, pokemon: str) -> tuple:
-    # Finds all pokemon set names with the url of the page given the most recent generation if only Pokemon name is provided.
+def fetch_sets_general(driver: webdriver.Chrome, pokemon: str) -> tuple:
+    # Finds all pokemon set names with the url of the page given the most recent generation if only Pokemon name is provided
     for gen in reversed(get_gen_dict().values()):
         url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
         driver.get(url)
@@ -132,21 +126,3 @@ def fetch_general_sets(driver: webdriver.Chrome, pokemon: str) -> tuple:
             else:
                 return None, None
     return None, f'Pokemon "{pokemon}" not found in any generation.'
-
-
-def fetch_specific_set(
-    driver: webdriver.Chrome, pokemon: str, generation: str, format: str, set_name: str
-) -> str:
-    # Finds specific pokemon set with the given criteria, and gives appropriate error message if something is missing.
-    if generation.lower() not in get_gen_dict():
-        return f'Generation "{generation}" not found.'
-    url = f"https://www.smogon.com/dex/{get_gen(generation)}/pokemon/{pokemon.lower()}/{format.lower()}/"
-    driver.get(url)
-    if not is_valid_pokemon(driver, pokemon):
-        return f'Pokemon "{pokemon}" not found or doesn’t exist in Generation "{generation}".'
-    if driver.current_url != url:
-        return f'Format "{format}" not found.'
-    if not get_export_btn(driver, set_name):
-        return f'Set "{set_name}" not found.'
-    set_data = get_textarea(driver, pokemon)
-    return f"```{set_data}```" if set_data else None
