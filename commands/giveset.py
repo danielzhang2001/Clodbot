@@ -65,22 +65,22 @@ class GiveSet:
     @staticmethod
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None, set: str = None
-    ) -> str:
-        # Fetch the set from Smogon for the given Pokemon name, generation, format, and set name.
-        # If only Pokemon given, assume most recent generation and first format found and give prompt on all possible sets for user to choose.
+    ) -> tuple:
+        # Refactored to handle different scenarios internally and return appropriate data.
         driver = None
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            pokemon = format_name(pokemon)
-            if generation is None and format is None and set is None:
-                return fetch_general_sets(driver, pokemon)
+            if generation is None and format is None and set == "":
+                sets, url = fetch_general_sets(driver, pokemon)
+                return None, sets, url
             else:
-                return fetch_specific_set(driver, pokemon, generation, format, set)
+                set_data = fetch_specific_set(driver, pokemon, generation, format, set)
+                return set_data, None, None
         except Exception as e:
-            return f"An error occurred: {str(e)}"
+            return f"An error occurred: {str(e)}", None, None
         finally:
             if driver:
                 driver.quit()
