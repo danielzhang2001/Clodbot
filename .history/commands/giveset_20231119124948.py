@@ -62,10 +62,9 @@ class GiveSet:
                     )
                 del GiveSet.awaiting_response[channel_id]
 
+
     @staticmethod
-    async def fetch_set(
-        pokemon: str, generation: str = None, format: str = None, set: str = None
-    ) -> tuple:
+    async def fetch_set(pokemon: str, generation: str = None, format: str = None, set: str = None) -> tuple:
         # Refactored to handle different scenarios internally and return appropriate data.
         driver = None
         try:
@@ -80,7 +79,7 @@ class GiveSet:
                 set_data = fetch_specific_set(driver, pokemon, generation, format, set)
                 return set_data, None, None
         except Exception as e:
-            return f"An error occurred: {str(e)}", None, None
-        finally:
-            if driver:
-                driver.quit()
+        return f"An error occurred: {str(e)}", None, None
+    finally:
+        if driver:
+            driver.quit()

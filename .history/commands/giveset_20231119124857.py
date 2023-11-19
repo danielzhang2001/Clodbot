@@ -62,25 +62,27 @@ class GiveSet:
                     )
                 del GiveSet.awaiting_response[channel_id]
 
-    @staticmethod
-    async def fetch_set(
-        pokemon: str, generation: str = None, format: str = None, set: str = None
-    ) -> tuple:
-        # Refactored to handle different scenarios internally and return appropriate data.
-        driver = None
-        try:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--log-level=3")
-            driver = webdriver.Chrome(options=chrome_options)
-            if generation is None and format is None and set == "":
-                sets, url = fetch_general_sets(driver, pokemon)
-                return None, sets, url
-            else:
-                set_data = fetch_specific_set(driver, pokemon, generation, format, set)
-                return set_data, None, None
-        except Exception as e:
-            return f"An error occurred: {str(e)}", None, None
-        finally:
-            if driver:
-                driver.quit()
+
+@staticmethod
+async def fetch_set(
+    pokemon: str, generation: str = None, format: str = None, set: str = None
+) -> tuple:
+    # Refactored to handle different scenarios internally and return appropriate data.
+    driver = None
+    try:
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--log-level=3")
+        driver = webdriver.Chrome(options=chrome_options)
+
+        if generation is None and format is None and set == "":
+            sets, url = fetch_general_sets(driver, pokemon)
+            return None, sets, url
+        else:
+            set_data = fetch_specific_set(driver, pokemon, generation, format, set)
+            return set_data, None, None
+    except Exception as e:
+        return f"An error occurred: {str(e)}", None, None
+    finally:
+        if driver:
+            driver.quit()
