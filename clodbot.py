@@ -47,17 +47,16 @@ async def analyze_replay(ctx, *args):
 async def give_set(
     ctx, pokemon: str, generation: str = None, format: str = None, *set: str
 ):
-    # Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, allows selection from a choice of sets given most recent generation and first format found.
-    if generation is None and format is None and not set:
-        sets, url = await GiveSet.fetch_set(pokemon)
-        if sets:
-            await GiveSet.set_prompt(ctx, pokemon, sets, url)
-        else:
-            await ctx.send(f"No sets found for {pokemon}.")
-    else:
-        set = " ".join(set)
-        set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
+    # Sends the Pokemon set from Smogon according to the given parameters.
+    set_data, sets, url = await GiveSet.fetch_set(
+        pokemon, generation, format, " ".join(set)
+    )
+    if sets:
+        await GiveSet.set_prompt(ctx, pokemon, sets, url)
+    elif set_data:
         await ctx.send(set_data)
+    else:
+        await ctx.send(f"No sets found for {pokemon}.")
 
 
 @bot.listen("on_message")
