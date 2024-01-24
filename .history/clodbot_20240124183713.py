@@ -56,7 +56,7 @@ async def give_set(
     elif set_data:
         await ctx.send(set_data)
     else:
-        await ctx.send(f'Pokemon "{pokemon}" not found.')
+        await ctx.send(f"Pokemon {pokemon}.")
 
 
 @bot.listen("on_message")
