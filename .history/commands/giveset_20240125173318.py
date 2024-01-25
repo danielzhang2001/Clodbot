@@ -25,7 +25,7 @@ class GiveSet:
             view.add_item(button)
 
         message = await ctx.send(
-            f"Please select a set type for **{formatted_name}**:\n{formatted_sets}",
+            f"Please select a set type for **{formatted_pokemon_name}**:\n{formatted_sets}",
             view=view,
         )
         GiveSet.awaiting_response[ctx.channel.id] = {
