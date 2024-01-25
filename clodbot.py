@@ -71,6 +71,14 @@ async def on_message(message):
         await GiveSet.set_selection(ctx, message)
 
 
+@bot.event
+async def on_interaction(interaction):
+    if interaction.type == discord.InteractionType.component:
+        custom_id = interaction.component.custom_id
+        if custom_id.startswith("set_"):
+            set_index = int(custom_id.split("_")[1])
+
+
 # Running Discord bot
 load_dotenv()
 bot_token = os.environ["DISCORD_BOT_TOKEN"]
