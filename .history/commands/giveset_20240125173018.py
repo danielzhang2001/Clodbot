@@ -10,10 +10,6 @@ class GiveSet:
     @staticmethod
     async def set_prompt(ctx, pokemon, sets, url):
         # Sends a message prompting the user to select a set and waits for their response.
-        formatted_name = "-".join(
-            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-        )
-
         formatted_sets = (
             "```\n"
             + "\n".join([f"{index+1}) {s}" for index, s in enumerate(sets)])
@@ -22,11 +18,9 @@ class GiveSet:
         view = ui.View()
         for index, set_name in enumerate(sets):
             button = ui.Button(label=set_name, custom_id=f"set_{index}")
-            view.add_item(button)
 
         message = await ctx.send(
-            f"Please select a set type for **{formatted_name}**:\n{formatted_sets}",
-            view=view,
+            f"Please specify set type for **{'-'.join(part.capitalize() if len(part) > 1 else part for part in pokemon.split('-'))}**:\n{formatted_sets}"
         )
         GiveSet.awaiting_response[ctx.channel.id] = {
             "message_id": message.id,
