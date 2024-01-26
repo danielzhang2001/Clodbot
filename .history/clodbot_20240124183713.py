@@ -25,17 +25,6 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="Clodbot, ", intents=intents)
 
-gen_dict = {
-    "gen1": "rb",
-    "gen2": "gs",
-    "gen3": "rs",
-    "gen4": "dp",
-    "gen5": "bw",
-    "gen6": "xy",
-    "gen7": "sm",
-    "gen8": "ss",
-    "gen9": "sv"
-}
 
 @bot.event
 async def on_ready():
@@ -67,34 +56,19 @@ async def give_set(
     elif set_data:
         await ctx.send(set_data)
     else:
-        await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
+        await ctx.send(f"Pokemon {pokemon}.")
 
 
-@bot.event
-async def on_interaction(interaction):
-    # Handles button functionality for sets for when only a Pokemon parameter with giveset is called
-    if interaction.type == discord.InteractionType.component:
-        custom_id = interaction.data["custom_id"]
-        if custom_id.startswith("set_"):
-            set_index = int(custom_id.split("_")[1])
-            channel_id = interaction.channel_id
-            if channel_id in GiveSet.awaiting_response:
-                context = GiveSet.awaiting_response[channel_id]
-                if interaction.user.id == context["user_id"]:
-                    set_name = context["sets"][set_index]
-                    url = context["url"]
-                    channel = bot.get_channel(channel_id)
-                    message = await channel.fetch_message(context["message_id"])
-                    ctx = await bot.get_context(message)
-                    await GiveSet.set_selection(ctx, set_index, set_name, url)
-                else:
-                    await interaction.response.send_message(
-                        "You didn't initiate this command.", ephemeral=True
-                    )
-            else:
-                await interaction.response.send_message(
-                    "No active set selection found.", ephemeral=True
-                )
+@bot.listen("on_message")
+async def on_message(message):
+    # Listener for on_message to handle set selection response
+    if message.author == bot.user:
+        return
+    ctx = await bot.get_context(message)
+    if ctx.valid:
+        return
+    if message.channel.id in GiveSet.awaiting_response:
+        await GiveSet.set_selection(ctx, message)
 
 
 # Running Discord bot

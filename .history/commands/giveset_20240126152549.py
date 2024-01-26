@@ -38,31 +38,10 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
-
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    channel_id = ctx.channel.id
-                    if channel_id in GiveSet.awaiting_response:
-                        context = GiveSet.awaiting_response[channel_id]
-                        if "details_message_id" in context:
-                            try:
-                                # Edit the existing message
-                                details_message = await ctx.channel.fetch_message(
-                                    context["details_message_id"]
-                                )
-                                await details_message.edit(content=f"```{set_data}```")
-                            except discord.NotFound:
-                                # If the original message was not found, send a new one
-                                details_message = await ctx.send(f"```{set_data}```")
-                                context["details_message_id"] = details_message.id
-                        else:
-                            # Send a new message and store its ID
-                            details_message = await ctx.send(f"```{set_data}```")
-                            context["details_message_id"] = details_message.id
-                    else:
-                        # In case the context does not exist for this channel
-                        details_message = await ctx.send(f"```{set_data}```")
+                    await ctx.send(f"```{set_data}```")
                 else:
                     await ctx.send("Error fetching set data.")
             else:

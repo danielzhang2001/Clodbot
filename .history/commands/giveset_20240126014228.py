@@ -9,16 +9,18 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(ctx, pokemon, sets, url):
-        # Sends a message prompting the user to select a set with button selections and waits for their response.
+        # Sends a message prompting the user to select a set and waits for their response.
         formatted_name = "-".join(
             part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
         )
+
         view = ui.View()
         for index, set_name in enumerate(sets):
             button = ui.Button(label=set_name, custom_id=f"set_{index}")
             view.add_item(button)
+
         message = await ctx.send(
-            f"Please select a set type for **{formatted_name}**:",
+            f"Please select a set type for **{formatted_name}**:\n{formatted_sets}",
             view=view,
         )
         GiveSet.awaiting_response[ctx.channel.id] = {
@@ -29,7 +31,45 @@ class GiveSet:
         }
 
     @staticmethod
-    async def set_selection(ctx, set_index, set_name, url):
+    async def set_selection(ctx, message):
+        # Handles the user's selection of a set after prompting.
+        channel_id = ctx.channel.id
+        driver = None
+        if channel_id in GiveSet.awaiting_response:
+            context = GiveSet.awaiting_response[channel_id]
+            url = context["url"]
+            if message.author.id == context["user_id"] and message.content.isdigit():
+                set_index = int(message.content) - 1
+                if 0 <= set_index < len(context["sets"]):
+                    try:
+                        chrome_options = Options()
+                        chrome_options.add_argument("--headless")
+                        chrome_options.add_argument("--log-level=3")
+                        driver = webdriver.Chrome(options=chrome_options)
+                        driver.get(url)
+                        # Fetch the set data
+                        set_name = context["sets"][set_index]
+                        if get_export_btn(driver, set_name):
+                            set_data = get_textarea(driver, set_name)
+                            if set_data:
+                                await ctx.send(f"```{set_data}```")
+                            else:
+                                await ctx.send("Error fetching set data.")
+                        else:
+                            await ctx.send("Error finding set. Please try again.")
+                    except Exception as e:
+                        await ctx.send(f"An error occurred: {str(e)}")
+                    finally:
+                        if driver:
+                            driver.quit()
+                else:
+                    await ctx.send(
+                        "Invalid selection. Please choose a valid set number."
+                    )
+                del GiveSet.awaiting_response[channel_id]
+
+    @staticmethod
+    async def handle_set_selection_by_index(ctx, set_index, set_name, url):
         # Handles the set selection based on the index from the button interaction.
         driver = None
         try:
@@ -39,30 +79,11 @@ class GiveSet:
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
 
+            # Fetch the set data
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    channel_id = ctx.channel.id
-                    if channel_id in GiveSet.awaiting_response:
-                        context = GiveSet.awaiting_response[channel_id]
-                        if "details_message_id" in context:
-                            try:
-                                # Edit the existing message
-                                details_message = await ctx.channel.fetch_message(
-                                    context["details_message_id"]
-                                )
-                                await details_message.edit(content=f"```{set_data}```")
-                            except discord.NotFound:
-                                # If the original message was not found, send a new one
-                                details_message = await ctx.send(f"```{set_data}```")
-                                context["details_message_id"] = details_message.id
-                        else:
-                            # Send a new message and store its ID
-                            details_message = await ctx.send(f"```{set_data}```")
-                            context["details_message_id"] = details_message.id
-                    else:
-                        # In case the context does not exist for this channel
-                        details_message = await ctx.send(f"```{set_data}```")
+                    await ctx.send(f"```{set_data}```")
                 else:
                     await ctx.send("Error fetching set data.")
             else:
@@ -77,7 +98,7 @@ class GiveSet:
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None, set: str = None
     ) -> tuple:
-        # Directs to the fetch set type based on whether only a Pokemon name is provided or more.
+        # Refactored to handle different scenarios internally and return appropriate data.
         driver = None
         try:
             chrome_options = Options()

@@ -131,7 +131,7 @@ def fetch_general_set(driver: webdriver.Chrome, pokemon: str) -> tuple:
                 return sets, url
             else:
                 return None, None
-    return None, None
+    return None, f'Pokemon "{pokemon}" not found in any generation.'
 
 
 def fetch_specific_set(

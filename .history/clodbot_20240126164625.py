@@ -25,17 +25,6 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="Clodbot, ", intents=intents)
 
-gen_dict = {
-    "gen1": "rb",
-    "gen2": "gs",
-    "gen3": "rs",
-    "gen4": "dp",
-    "gen5": "bw",
-    "gen6": "xy",
-    "gen7": "sm",
-    "gen8": "ss",
-    "gen9": "sv"
-}
 
 @bot.event
 async def on_ready():
@@ -80,13 +69,13 @@ async def on_interaction(interaction):
             channel_id = interaction.channel_id
             if channel_id in GiveSet.awaiting_response:
                 context = GiveSet.awaiting_response[channel_id]
-                if interaction.user.id == context["user_id"]:
-                    set_name = context["sets"][set_index]
-                    url = context["url"]
-                    channel = bot.get_channel(channel_id)
-                    message = await channel.fetch_message(context["message_id"])
-                    ctx = await bot.get_context(message)
-                    await GiveSet.set_selection(ctx, set_index, set_name, url)
+                set_name = context["sets"][set_index]
+                url = context["url"]
+                channel = bot.get_channel(channel_id)
+                original_message = await channel.fetch_message(context["message_id"])
+                ctx = await bot.get_context(original_message)
+                await GiveSet.set_selection(ctx, set_index, set_name, url)
+                    del GiveSet.awaiting_response[channel_id]
                 else:
                     await interaction.response.send_message(
                         "You didn't initiate this command.", ephemeral=True
