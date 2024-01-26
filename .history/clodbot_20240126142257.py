@@ -61,21 +61,37 @@ async def give_set(
 
 @bot.event
 async def on_interaction(interaction):
-    # Handles button functionality for sets for when only a Pokemon parameter with giveset is called
+    # Handles
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
         if custom_id.startswith("set_"):
             set_index = int(custom_id.split("_")[1])
+
+            # Retrieve the original context stored in awaiting_response
             channel_id = interaction.channel_id
             if channel_id in GiveSet.awaiting_response:
                 context = GiveSet.awaiting_response[channel_id]
+
+                # Check if the interaction was made by the user who initiated the command
                 if interaction.user.id == context["user_id"]:
                     set_name = context["sets"][set_index]
                     url = context["url"]
+
+                    # Extract the ctx from the original message
                     channel = bot.get_channel(channel_id)
-                    message = await channel.fetch_message(context["message_id"])
-                    ctx = await bot.get_context(message)
-                    await GiveSet.set_selection(ctx, set_index, set_name, url)
+                    original_message = await channel.fetch_message(
+                        context["message_id"]
+                    )
+                    ctx = await bot.get_context(original_message)
+
+                    # Now call a method similar to set_selection in giveset.py
+                    # Assuming you have a method in GiveSet to handle set selection by index
+                    await GiveSet.handle_set_selection_by_index(
+                        ctx, set_index, set_name, url
+                    )
+
+                    # Cleanup: remove the entry from awaiting_response
+                    del GiveSet.awaiting_response[channel_id]
                 else:
                     await interaction.response.send_message(
                         "You didn't initiate this command.", ephemeral=True
