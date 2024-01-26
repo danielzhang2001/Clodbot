@@ -58,30 +58,43 @@ async def analyze_replay(ctx, *args):
 async def give_set(
     ctx, pokemon: str, generation: str = None, format: str = None, *set: str
 ):
-    # Sends the Pokemon set from Smogon according to Pokemon, Generation, Format and Set. If only Pokemon provided, allows selection from a choice of sets given most recent generation and first format found.
-    set_data = ""
-    if generation is None and format is None and not set:
-        sets = await GiveSet.fetch_set(pokemon)
-        if sets:
-            await GiveSet.set_prompt(ctx, pokemon, sets)
-        else:
-            await ctx.send(f"No sets found for {pokemon}.")
+    # Sends the Pokemon set from Smogon according to the given parameters.
+    set_data, sets, url = await GiveSet.fetch_set(
+        pokemon, generation, format, " ".join(set)
+    )
+    if sets:
+        await GiveSet.set_prompt(ctx, pokemon, sets, url)
+    elif set_data:
+        await ctx.send(set_data)
     else:
-        set = " ".join(set)
-        set_data = await GiveSet.fetch_set(pokemon, generation, format, set)
-    await ctx.send(set_data)
+        await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
 
 
-@bot.listen("on_message")
-async def on_message(message):
-    # Listener for on_message to handle set selection response
-    if message.author == bot.user:
-        return
-    ctx = await bot.get_context(message)
-    if ctx.valid:
-        return
-    if message.channel.id in GiveSet.awaiting_response:
-        await GiveSet.handle_set_selection(ctx, message)
+@bot.event
+async def on_interaction(interaction):
+    # Handles button functionality for sets for when only a Pokemon parameter with giveset is called
+    if interaction.type == discord.InteractionType.component:
+        custom_id = interaction.data["custom_id"]
+        if custom_id.startswith("set_"):
+            set_index = int(custom_id.split("_")[1])
+            channel_id = interaction.channel_id
+            if channel_id in GiveSet.awaiting_response:
+                context = GiveSet.awaiting_response[channel_id]
+                if interaction.user.id == context["user_id"]:
+                    set_name = context["sets"][set_index]
+                    url = context["url"]
+                    channel = bot.get_channel(channel_id)
+                    message = await channel.fetch_message(context["message_id"])
+                    ctx = await bot.get_context(message)
+                    await GiveSet.set_selection(ctx, set_index, set_name, url)
+                else:
+                    await interaction.response.send_message(
+                        "You didn't initiate this command.", ephemeral=True
+                    )
+            else:
+                await interaction.response.send_message(
+                    "No active set selection found.", ephemeral=True
+                )
 
 
 # Running Discord bot

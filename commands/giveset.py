@@ -1,83 +1,97 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from smogon.set import *
+from discord import ui, ButtonStyle
 
 
 class GiveSet:
     awaiting_response = {}
 
     @staticmethod
-    async def set_prompt(ctx, pokemon, sets):
-        # Sends a message prompting the user to select a set and waits for their response.
-        formatted_sets = (
-            "```\n"
-            + "\n".join([f"{index+1}) {s}" for index, s in enumerate(sets)])
-            + "\n```"
+    async def set_prompt(ctx, pokemon, sets, url):
+        # Sends a message prompting the user to select a set with button selections and waits for their response.
+        formatted_name = "-".join(
+            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
         )
+        view = ui.View()
+        for index, set_name in enumerate(sets):
+            button = ui.Button(label=set_name, custom_id=f"set_{index}")
+            view.add_item(button)
         message = await ctx.send(
-            f"Please specify set type for **{'-'.join(part.capitalize() for part in pokemon.split('-'))}**:\n{formatted_sets}"
+            f"Please select a set type for **{formatted_name}**:",
+            view=view,
         )
         GiveSet.awaiting_response[ctx.channel.id] = {
             "message_id": message.id,
             "user_id": ctx.author.id,
             "sets": sets,
+            "url": url,
         }
 
     @staticmethod
-    async def set_selection(ctx, message):
-        # Handles the user's selection of a set after prompting.
-        channel_id = ctx.channel.id
-        if channel_id in GiveSet.awaiting_response:
-            context = GiveSet.awaiting_response[channel_id]
-            if message.author.id == context["user_id"] and message.content.isdigit():
-                set_index = int(message.content) - 1
-                if 0 <= set_index < len(context["sets"]):
-                    await ctx.send(f"Selected set: **{context['sets'][set_index]}**")
-                else:
-                    await ctx.send(
-                        "Invalid selection. Please choose a valid set number."
-                    )
-                del GiveSet.awaiting_response[channel_id]
-
-    @staticmethod
-    async def fetch_set(
-        pokemon: str, generation: str = None, format: str = None, set: str = None
-    ) -> str:
-        # Fetch the set from Smogon for the given Pokemon name, generation, format, and set name.
-        # If only Pokemon given, assume most recent generation and first format found and give prompt on all possible sets for user to choose.
+    async def set_selection(ctx, set_index, set_name, url):
+        # Handles the set selection based on the index from the button interaction.
         driver = None
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            name = format_name(pokemon)
-            if generation is None and format is None and set is None:
-                for gen in reversed(get_gen_dict().values()):
-                    url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
-                    driver.get(url)
-                    if is_valid_pokemon(driver, pokemon):
-                        sets = get_set_names(driver)
-                        if sets:
-                            return sets
+            driver.get(url)
+
+            if get_export_btn(driver, set_name):
+                set_data = get_textarea(driver, set_name)
+                if set_data:
+                    channel_id = ctx.channel.id
+                    if channel_id in GiveSet.awaiting_response:
+                        context = GiveSet.awaiting_response[channel_id]
+                        if "details_message_id" in context:
+                            try:
+                                # Edit the existing message
+                                details_message = await ctx.channel.fetch_message(
+                                    context["details_message_id"]
+                                )
+                                await details_message.edit(content=f"```{set_data}```")
+                            except discord.NotFound:
+                                # If the original message was not found, send a new one
+                                details_message = await ctx.send(f"```{set_data}```")
+                                context["details_message_id"] = details_message.id
                         else:
-                            return None
-                return f'Pokemon "{pokemon}" not found in any generation.'
+                            # Send a new message and store its ID
+                            details_message = await ctx.send(f"```{set_data}```")
+                            context["details_message_id"] = details_message.id
+                    else:
+                        # In case the context does not exist for this channel
+                        details_message = await ctx.send(f"```{set_data}```")
+                else:
+                    await ctx.send("Error fetching set data.")
             else:
-                if generation.lower() not in get_gen_dict():
-                    return f'Generation "{generation}" not found.'
-                url = f"https://www.smogon.com/dex/{get_gen(generation)}/pokemon/{pokemon.lower()}/{format.lower()}/"
-                driver.get(url)
-                if not is_valid_pokemon(driver, pokemon):
-                    return f'Pokemon "{pokemon}" not found or doesn\'t exist in Generation "{generation}".'
-                if driver.current_url != url:
-                    return f'Format "{format}" not found.'
-                if not get_export_btn(driver, set):
-                    return f'Set "{set}" not found.'
-                set_data = get_textarea(driver, pokemon)
-                return f"```{set_data}```"
+                await ctx.send("Error finding set. Please try again.")
         except Exception as e:
-            return f"An error occurred: {str(e)}"
+            await ctx.send(f"An error occurred: {str(e)}")
+        finally:
+            if driver:
+                driver.quit()
+
+    @staticmethod
+    async def fetch_set(
+        pokemon: str, generation: str = None, format: str = None, set: str = None
+    ) -> tuple:
+        # Directs to the fetch set type based on whether only a Pokemon name is provided or more.
+        driver = None
+        try:
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--log-level=3")
+            driver = webdriver.Chrome(options=chrome_options)
+            if generation is None and format is None and set == "":
+                sets, url = fetch_general_set(driver, pokemon)
+                return None, sets, url
+            else:
+                set_data = fetch_specific_set(driver, pokemon, generation, format, set)
+                return set_data, None, None
+        except Exception as e:
+            return f"An error occurred: {str(e)}", None, None
         finally:
             if driver:
                 driver.quit()
