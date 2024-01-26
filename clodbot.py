@@ -56,19 +56,7 @@ async def give_set(
     elif set_data:
         await ctx.send(set_data)
     else:
-        await ctx.send(f'Pokemon "{pokemon}" not found.')
-
-
-@bot.listen("on_message")
-async def on_message(message):
-    # Listener for on_message to handle set selection response
-    if message.author == bot.user:
-        return
-    ctx = await bot.get_context(message)
-    if ctx.valid:
-        return
-    if message.channel.id in GiveSet.awaiting_response:
-        await GiveSet.set_selection(ctx, message)
+        await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
 
 
 @bot.event
