@@ -9,14 +9,16 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(ctx, pokemon, sets, url):
-        # Sends a message prompting the user to select a set with button selections and waits for their response.
+        # Sends a message prompting the user to select a set and waits for their response.
         formatted_name = "-".join(
             part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
         )
+
         view = ui.View()
         for index, set_name in enumerate(sets):
             button = ui.Button(label=set_name, custom_id=f"set_{index}")
             view.add_item(button)
+
         message = await ctx.send(
             f"Please select a set type for **{formatted_name}**:",
             view=view,
@@ -38,6 +40,8 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
+
+            # Fetch the set data
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
@@ -56,7 +60,7 @@ class GiveSet:
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None, set: str = None
     ) -> tuple:
-        # Directs to the fetch set type based on whether only a Pokemon name is provided or more.
+        # Refactored to handle different scenarios internally and return appropriate data.
         driver = None
         try:
             chrome_options = Options()
