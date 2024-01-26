@@ -74,6 +74,32 @@ class GiveSet:
                 del GiveSet.awaiting_response[channel_id]
 
     @staticmethod
+    async def handle_set_selection_by_index(ctx, set_index, set_name, url):
+        # Handles the set selection based on the index from the button interaction.
+        driver = None
+        try:
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--log-level=3")
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.get(url)
+
+            # Fetch the set data
+            if get_export_btn(driver, set_name):
+                set_data = get_textarea(driver, set_name)
+                if set_data:
+                    await ctx.send(f"```{set_data}```")
+                else:
+                    await ctx.send("Error fetching set data.")
+            else:
+                await ctx.send("Error finding set. Please try again.")
+        except Exception as e:
+            await ctx.send(f"An error occurred: {str(e)}")
+        finally:
+            if driver:
+                driver.quit()
+
+    @staticmethod
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None, set: str = None
     ) -> tuple:
