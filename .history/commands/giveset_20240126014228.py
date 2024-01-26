@@ -20,7 +20,7 @@ class GiveSet:
             view.add_item(button)
 
         message = await ctx.send(
-            f"Please select a set type for **{formatted_name}**:",
+            f"Please select a set type for **{formatted_name}**:\n{formatted_sets}",
             view=view,
         )
         GiveSet.awaiting_response[ctx.channel.id] = {
@@ -29,6 +29,44 @@ class GiveSet:
             "sets": sets,
             "url": url,
         }
+
+    @staticmethod
+    async def set_selection(ctx, message):
+        # Handles the user's selection of a set after prompting.
+        channel_id = ctx.channel.id
+        driver = None
+        if channel_id in GiveSet.awaiting_response:
+            context = GiveSet.awaiting_response[channel_id]
+            url = context["url"]
+            if message.author.id == context["user_id"] and message.content.isdigit():
+                set_index = int(message.content) - 1
+                if 0 <= set_index < len(context["sets"]):
+                    try:
+                        chrome_options = Options()
+                        chrome_options.add_argument("--headless")
+                        chrome_options.add_argument("--log-level=3")
+                        driver = webdriver.Chrome(options=chrome_options)
+                        driver.get(url)
+                        # Fetch the set data
+                        set_name = context["sets"][set_index]
+                        if get_export_btn(driver, set_name):
+                            set_data = get_textarea(driver, set_name)
+                            if set_data:
+                                await ctx.send(f"```{set_data}```")
+                            else:
+                                await ctx.send("Error fetching set data.")
+                        else:
+                            await ctx.send("Error finding set. Please try again.")
+                    except Exception as e:
+                        await ctx.send(f"An error occurred: {str(e)}")
+                    finally:
+                        if driver:
+                            driver.quit()
+                else:
+                    await ctx.send(
+                        "Invalid selection. Please choose a valid set number."
+                    )
+                del GiveSet.awaiting_response[channel_id]
 
     @staticmethod
     async def handle_set_selection_by_index(ctx, set_index, set_name, url):
