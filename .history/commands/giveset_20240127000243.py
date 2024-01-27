@@ -55,12 +55,15 @@ class GiveSet:
                                 )
                                 await message_details.edit(content=f"```{set_data}```")
                             except discord.NotFound:
+                                # If the original message was not found, send a new one
                                 message_details = await ctx.send(f"```{set_data}```")
                                 context["message_id"] = message_details.id
                         else:
+                            # Send a new message and store its ID
                             message_details = await ctx.send(f"```{set_data}```")
                             context["message_id"] = message_details.id
                     else:
+                        # In case the context does not exist for this channel
                         message_details = await ctx.send(f"```{set_data}```")
                 else:
                     await ctx.send("Error fetching set data.")
