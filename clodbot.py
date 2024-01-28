@@ -44,19 +44,42 @@ async def analyze_replay(ctx, *args):
 
 
 @bot.command(name="giveset")
-async def give_set(
-    ctx, pokemon: str, generation: str = None, format: str = None, *set: str
-):
-    # Sends the Pokemon set from Smogon according to the given parameters.
-    set_data, sets, url = await GiveSet.fetch_set(
-        pokemon, generation, format, " ".join(set)
-    )
-    if sets:
-        await GiveSet.set_prompt(ctx, pokemon, sets, url)
-    elif set_data:
-        await ctx.send(set_data)
+async def give_set(ctx, *args):
+    # Join arguments and check if they contain commas for multiple Pokémon
+    input_str = " ".join(args)
+    if "," in input_str:
+        # Handle multiple Pokémon
+        pokemons = [p.strip() for p in input_str.split(",")]
+        for pokemon in pokemons:
+            set_data, sets, url = await GiveSet.fetch_set(pokemon)
+            if sets:
+                await GiveSet.set_prompt(ctx, pokemon, sets, url)
+            else:
+                await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
     else:
-        await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
+        # Handle single Pokémon or specific set with all criteria
+        # Splitting the original args by spaces
+        components = args[0].split() + list(args[1:])
+        pokemon = components[0]
+        if len(components) > 1:
+            # Specific set with all criteria
+            generation = components[1] if len(components) > 1 else None
+            format = components[2] if len(components) > 2 else None
+            set = " ".join(components[3:]) if len(components) > 3 else None
+            set_data, sets, url = await GiveSet.fetch_set(
+                pokemon, generation, format, set
+            )
+            if set_data:
+                await ctx.send(set_data)
+            else:
+                await ctx.send(f'No set found for "{pokemon}" with the given criteria.')
+        else:
+            # Single Pokémon query
+            set_data, sets, url = await GiveSet.fetch_set(pokemon)
+            if sets:
+                await GiveSet.set_prompt(ctx, pokemon, sets, url)
+            else:
+                await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
 
 
 @bot.event
