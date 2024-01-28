@@ -65,17 +65,20 @@ async def on_interaction(interaction):
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
         if custom_id.startswith("set_"):
-            set_index = int(custom_id.split("_")[1])
-            channel_id = interaction.channel_id
-            if channel_id in GiveSet.awaiting_response:
-                context = GiveSet.awaiting_response[channel_id]
+            parts = custom_id.split("_")
+            unique_id, set_index = parts[1], int(parts[2])
+            if unique_id in GiveSet.awaiting_response:
+                context = GiveSet.awaiting_response[unique_id]
                 if interaction.user.id == context["user_id"]:
                     set_name = context["sets"][set_index]
                     url = context["url"]
-                    channel = bot.get_channel(channel_id)
+                    channel = bot.get_channel(interaction.channel_id)
                     message = await channel.fetch_message(context["message_id"])
                     ctx = await bot.get_context(message)
-                    await GiveSet.set_selection(ctx, set_index, set_name, url)
+                    await GiveSet.set_selection(
+                        ctx, unique_id, set_index, set_name, url
+                    )
+                    await interaction.response.defer()
                 else:
                     await interaction.response.send_message(
                         "You didn't initiate this command.", ephemeral=True
