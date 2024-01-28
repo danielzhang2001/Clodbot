@@ -21,13 +21,13 @@ class GiveSet:
         )
         view = ui.View()
         for index, set_name in enumerate(sets):
-            button = ui.Button(label=set_name, custom_id=f"set_{unique_id}_{index}")
+            button = ui.Button(label=set_name, custom_id=f"set_{index}")
             view.add_item(button)
         message = await ctx.send(
             f"Please select a set type for **{formatted_name}**:",
             view=view,
         )
-        GiveSet.awaiting_response[unique_id] = {
+        GiveSet.awaiting_response[ctx.channel.id] = {
             "message_id": message.id,
             "user_id": ctx.author.id,
             "sets": sets,
@@ -35,7 +35,7 @@ class GiveSet:
         }
 
     @staticmethod
-    async def set_selection(ctx, unique_id, set_index, set_name, url):
+    async def set_selection(ctx, set_index, set_name, url):
         # Handles the set selection based on the index from the button interaction.
         driver = None
         try:
@@ -47,8 +47,9 @@ class GiveSet:
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    if unique_id in GiveSet.awaiting_response:
-                        context = GiveSet.awaiting_response[unique_id]
+                    channel_id = ctx.channel.id
+                    if channel_id in GiveSet.awaiting_response:
+                        context = GiveSet.awaiting_response[channel_id]
                         if "message_id" in context:
                             try:
                                 message_details = await ctx.channel.fetch_message(
