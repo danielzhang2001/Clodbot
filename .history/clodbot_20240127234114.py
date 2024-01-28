@@ -84,7 +84,7 @@ async def on_interaction(interaction):
                         "You didn't initiate this command.", ephemeral=True
                     )
             else:
-                await interaction.followup.send(
+                await interaction.response.send_message(
                     "No active set selection found.", ephemeral=True
                 )
 
