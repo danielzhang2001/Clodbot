@@ -56,11 +56,13 @@ class GiveSet:
                                 )
                                 await message_details.edit(content=f"```{set_data}```")
                             except discord.NotFound:
-                                message_details = await ctx.send(f"```{set_data}```")
-                                context["message_id"] = message_details.id
+                                new_message_details = await ctx.send(
+                                    f"```{set_data}```"
+                                )
+                                context["message_id"] = new_message_details.id
                         else:
-                            message_details = await ctx.send(f"```{set_data}```")
-                            context["message_id"] = message_details.id
+                            new_message_details = await ctx.send(f"```{set_data}```")
+                            context["message_id"] = new_message_details.id
                     else:
                         message_details = await ctx.send(f"```{set_data}```")
                 else:
