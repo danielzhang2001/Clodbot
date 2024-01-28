@@ -70,6 +70,7 @@ async def on_interaction(interaction):
             if unique_id in GiveSet.awaiting_response:
                 context = GiveSet.awaiting_response[unique_id]
                 if interaction.user.id == context["user_id"]:
+                    await interaction.response.defer()
                     set_name = context["sets"][set_index]
                     url = context["url"]
                     channel = bot.get_channel(interaction.channel_id)
@@ -79,11 +80,11 @@ async def on_interaction(interaction):
                         ctx, unique_id, set_index, set_name, url
                     )
                 else:
-                    await interaction.response.send_message(
+                    await interaction.followup.send(
                         "You didn't initiate this command.", ephemeral=True
                     )
             else:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "No active set selection found.", ephemeral=True
                 )
 
