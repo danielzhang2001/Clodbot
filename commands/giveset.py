@@ -84,7 +84,7 @@ class GiveSet:
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            if generation is None and format is None and set == "":
+            if generation is None and format is None and set is None:
                 sets, url = fetch_general_set(driver, pokemon)
                 return None, sets, url
             else:
