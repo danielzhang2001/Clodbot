@@ -78,7 +78,6 @@ async def on_interaction(interaction):
                     await GiveSet.set_selection(
                         ctx, unique_id, set_index, set_name, url
                     )
-                    await interaction.response.defer()
                 else:
                     await interaction.response.send_message(
                         "You didn't initiate this command.", ephemeral=True
