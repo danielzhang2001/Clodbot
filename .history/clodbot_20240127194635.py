@@ -72,13 +72,10 @@ async def on_interaction(interaction):
                 if interaction.user.id == context["user_id"]:
                     set_name = context["sets"][set_index]
                     url = context["url"]
-                    channel = bot.get_channel(interaction.channel_id)
+                    channel = bot.get_channel(channel_id)
                     message = await channel.fetch_message(context["message_id"])
                     ctx = await bot.get_context(message)
-                    await GiveSet.set_selection(
-                        ctx, unique_id, set_index, set_name, url
-                    )
-                    await interaction.response.defer()
+                    await GiveSet.set_selection(ctx, set_index, set_name, url)
                 else:
                     await interaction.response.send_message(
                         "You didn't initiate this command.", ephemeral=True
