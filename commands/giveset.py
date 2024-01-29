@@ -77,7 +77,7 @@ class GiveSet:
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None, set: str = None
     ) -> tuple:
-        # Directs to the fetch set type based on whether only a Pokemon name is provided or more.
+        # Directs to the fetch set type based on whether only a Pokemon name is provided or specifics too (generation, format, set)
         driver = None
         try:
             chrome_options = Options()
