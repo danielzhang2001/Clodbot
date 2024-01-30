@@ -44,25 +44,34 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
+
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
                     if unique_id in GiveSet.awaiting_response:
                         context = GiveSet.awaiting_response[unique_id]
-                        if "message_id" in context:
+
+                        # Check if there's an existing set message to edit
+                        if "set_message_id" in context:
                             try:
-                                message_details = await ctx.channel.fetch_message(
-                                    context["message_id"]
+                                set_message_details = await ctx.channel.fetch_message(
+                                    context["set_message_id"]
                                 )
-                                await message_details.edit(content=f"```{set_data}```")
+                                await set_message_details.edit(
+                                    content=f"```{set_data}```"
+                                )
                             except discord.NotFound:
-                                message_details = await ctx.send(f"```{set_data}```")
-                                context["message_id"] = message_details.id
+                                # If the set data message is gone, send a new one
+                                new_set_message_details = await ctx.send(
+                                    f"```{set_data}```"
+                                )
+                                context["set_message_id"] = new_set_message_details.id
                         else:
-                            message_details = await ctx.send(f"```{set_data}```")
-                            context["message_id"] = message_details.id
-                    else:
-                        message_details = await ctx.send(f"```{set_data}```")
+                            # If no set message exists, send a new one and store its ID
+                            new_set_message_details = await ctx.send(
+                                f"```{set_data}```"
+                            )
+                            context["set_message_id"] = new_set_message_details.id
                 else:
                     await ctx.send("Error fetching set data.")
             else:
