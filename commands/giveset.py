@@ -83,22 +83,39 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def fetch_set(
-        pokemon: str, generation: str = None, format: str = None, set: str = None
-    ) -> tuple:
-        # Directs to the fetch set type based on whether only a Pokemon name is provided or specifics too (generation, format, set)
+    async def fetch_set(pokemon: str, generation: str = None) -> tuple:
+        # Initializes a headless browser to fetch sets from Smogon
         driver = None
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            if generation is None and format is None and set is None:
+
+            if generation:
+                # If generation is specified but no specific set, fetch all sets for the first format found
+                gen_code = get_gen(generation)
+                if gen_code:
+                    url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+                    driver.get(url)
+                    if is_valid_pokemon(driver, pokemon):
+                        sets = get_set_names(driver)
+                        if sets:
+                            return None, sets, url
+                        else:
+                            return None, None, None
+                    else:
+                        return (
+                            f'Pokemon "{pokemon}" not found in Generation "{generation}".',
+                            None,
+                            None,
+                        )
+                else:
+                    return f"Generation '{generation}' not found.", None, None
+            else:
+                # If no generation is provided, use fetch_general_set to find the most recent generation
                 sets, url = fetch_general_set(driver, pokemon)
                 return None, sets, url
-            else:
-                set_data = fetch_specific_set(driver, pokemon, generation, format, set)
-                return set_data, None, None
         except Exception as e:
             return f"An error occurred: {str(e)}", None, None
         finally:
