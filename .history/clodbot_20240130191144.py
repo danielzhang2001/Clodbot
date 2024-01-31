@@ -56,30 +56,25 @@ async def give_set(ctx, *args):
             else:
                 await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
     else:
-        components = input_str.split()
-        if len(components) == 1:
-            # Handle a single Pokémon without specifying the generation
-            pokemon = components[0]
+        components = args[0].split() + list(args[1:])
+        pokemon = components[0]
+        if len(components) > 1:
+            generation = components[1] if len(components) > 1 else None
+            format = components[2] if len(components) > 2 else None
+            set = " ".join(components[3:]) if len(components) > 3 else None
+            set_data, sets, url = await GiveSet.fetch_set(
+                pokemon, generation, format, set
+            )
+            if set_data:
+                await ctx.send(set_data)
+            else:
+                await ctx.send(f'No set found for "{pokemon}" with the given criteria.')
+        else:
             set_data, sets, url = await GiveSet.fetch_set(pokemon)
             if sets:
                 await GiveSet.set_prompt(ctx, pokemon, sets, url)
             else:
                 await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
-        elif len(components) == 2:
-            # Handle a single Pokémon with a specified generation
-            pokemon, generation = components
-            set_data, sets, url = await GiveSet.fetch_set(pokemon, generation)
-            if sets:
-                await GiveSet.set_prompt(ctx, pokemon, sets, url)
-            else:
-                await ctx.send(
-                    f'No sets found for "{pokemon}" in Generation "{generation}".'
-                )
-        else:
-            # Handle incorrect usage
-            await ctx.send(
-                "Usage: `Clodbot, giveset [Pokemon]` or `Clodbot, giveset [Pokemon], [Pokemon2]...` or `Clodbot, giveset [Pokemon] [Generation]`."
-            )
 
 
 @bot.event

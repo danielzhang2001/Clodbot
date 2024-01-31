@@ -99,21 +99,23 @@ class GiveSet:
                     url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
                     driver.get(url)
                     if is_valid_pokemon(driver, pokemon):
-                        sets = get_set_names(driver)
-                        if sets:
+                        # Assuming the first format found is listed on the page
+                        # This part may require dynamic adjustment based on Smogon's page structure
+                        format_elements = driver.find_elements(
+                            By.CSS_SELECTOR, "some-css-selector-for-format"
+                        )
+                        if format_elements:
+                            first_format = format_elements[0].text.lower()
+                            sets, url = fetch_general_set(
+                                driver, pokemon, gen_code, first_format
+                            )
                             return None, sets, url
                         else:
                             return None, None, None
-                    else:
-                        return (
-                            f'Pokemon "{pokemon}" not found in Generation "{generation}".',
-                            None,
-                            None,
-                        )
                 else:
                     return f"Generation '{generation}' not found.", None, None
             else:
-                # If no generation is provided, use fetch_general_set to find the most recent generation
+                # Handle the case for just a Pokémon name, potentially fetching the most recent generation sets
                 sets, url = fetch_general_set(driver, pokemon)
                 return None, sets, url
         except Exception as e:
