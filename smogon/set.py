@@ -120,7 +120,7 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
         return None
 
 
-def fetch_general_set(driver: webdriver.Chrome, pokemon: str) -> tuple:
+def fetch_set_pokemon(driver: webdriver.Chrome, pokemon: str) -> tuple:
     # Finds all pokemon set names with the url of the page given the most recent generation if only Pokemon name is provided.
     for gen in reversed(get_gen_dict().values()):
         url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
@@ -134,19 +134,19 @@ def fetch_general_set(driver: webdriver.Chrome, pokemon: str) -> tuple:
     return None, None
 
 
-def fetch_specific_set(
-    driver: webdriver.Chrome, pokemon: str, generation: str, format: str, set_name: str
-) -> str:
-    # Finds specific pokemon set with the given criteria, and gives appropriate error message if something is missing.
-    if generation.lower() not in get_gen_dict():
-        return f'Generation "{generation}" not found.'
-    url = f"https://www.smogon.com/dex/{get_gen(generation)}/pokemon/{pokemon.lower()}/{format.lower()}/"
-    driver.get(url)
-    if not is_valid_pokemon(driver, pokemon):
-        return f'Pokemon "{pokemon}" not found or doesn’t exist in Generation "{generation}".'
-    if driver.current_url != url:
-        return f'Format "{format}" not found.'
-    if not get_export_btn(driver, set_name):
-        return f'Set "{set_name}" not found.'
-    set_data = get_textarea(driver, pokemon)
-    return f"```{set_data}```" if set_data else None
+def fetch_set_generation(
+    driver: webdriver.Chrome, pokemon: str, generation: str
+) -> tuple:
+    # Finds all set names for a given Pokémon within a specific generation.
+    gen_code = get_gen_dict().get(generation.lower())
+    if gen_code:
+        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+        driver.get(url)
+        if is_valid_pokemon(driver, pokemon):
+            sets = get_set_names(driver)
+            if sets:
+                return None, sets, url
+            else:
+                return None, None, None
+    else:
+        return f"Generation '{generation}' not found.", None, None
