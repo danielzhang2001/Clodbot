@@ -78,7 +78,7 @@ async def give_set(ctx, *args):
         else:
             # Handle incorrect usage
             await ctx.send(
-                "Usage: `Clodbot, giveset [Pokemon]` or `Clodbot, giveset [Pokemon], [Pokemon2]...` or `Clodbot, giveset [Pokemon] [Generation]`."
+                "Usage: `Clodbot, giveset [Pokemon]` or `Clodbot, giveset [Pokemon], [Pokemon2]` or `Clodbot, giveset [Pokemon] [Generation]`."
             )
 
 
