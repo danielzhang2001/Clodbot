@@ -93,20 +93,26 @@ class GiveSet:
             driver = webdriver.Chrome(options=chrome_options)
 
             if generation:
-                # Use fetch_set_generation for fetching all sets within a specific generation
-                gen_code = get_gen(
-                    generation
-                )  # Ensure this is defined to convert generation to Smogon's format
+                # If generation is specified but no specific set, fetch all sets for the first format found
+                gen_code = get_gen(generation)
                 if gen_code:
-                    # Fetch sets for the given Pokémon and generation
-                    set_data, sets, url = fetch_set_generation(
-                        driver, pokemon, generation
-                    )
-                    return set_data, sets, url
+                    url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+                    driver.get(url)
+                    if is_valid_pokemon(driver, pokemon):
+                        sets = get_set_names(driver)
+                        if sets:
+                            return None, sets, url
+                        else:
+                            return None, None, None
+                    else:
+                        return (
+                            f'Pokemon "{pokemon}" not found in Generation "{generation}".',
+                            None,
+                            None,
+                        )
                 else:
-                    return "Generation not found.", None, None
+                    return f"Generation '{generation}' not found.", None, None
             else:
-                # Use fetch_set_pokemon for fetching sets for the most recent generation
                 sets, url = fetch_set_pokemon(driver, pokemon)
                 return None, sets, url
         except Exception as e:
