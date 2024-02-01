@@ -1,5 +1,5 @@
 """
-The function to give Pokemon sets from smogon based on different types of criteria.
+The function to give Pokemon sets from Smogon based on different types of criteria.
 """
 
 from selenium import webdriver
@@ -36,7 +36,7 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(ctx, unique_id, set_index, set_name, url):
-        # Handles the set selection based on the index from the button interaction.
+        # Gives the set data based on the button selected from the Pokemon prompt.
         driver = None
         try:
             chrome_options = Options()
@@ -51,22 +51,18 @@ class GiveSet:
                         context = GiveSet.awaiting_response[unique_id]
                         if "set_message_id" in context:
                             try:
-                                set_message_details = await ctx.channel.fetch_message(
+                                message_details = await ctx.channel.fetch_message(
                                     context["set_message_id"]
                                 )
-                                await set_message_details.edit(
-                                    content=f"```{set_data}```"
-                                )
+                                await message_details.edit(content=f"```{set_data}```")
                             except discord.NotFound:
-                                new_set_message_details = await ctx.send(
+                                new_message_details = await ctx.send(
                                     f"```{set_data}```"
                                 )
-                                context["set_message_id"] = new_set_message_details.id
+                                context["set_message_id"] = new_message_details.id
                         else:
-                            new_set_message_details = await ctx.send(
-                                f"```{set_data}```"
-                            )
-                            context["set_message_id"] = new_set_message_details.id
+                            new_message_details = await ctx.send(f"```{set_data}```")
+                            context["set_message_id"] = new_message_details.id
                 else:
                     await ctx.send("Error fetching set data.")
             else:
@@ -78,14 +74,21 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def fetch_set(pokemon: str, generation: str = None) -> tuple:
-        # Initializes a headless browser to fetch sets from Smogon
+    async def fetch_set(
+        pokemon: str, generation: str = None, format: str = None
+    ) -> tuple:
+        # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
         driver = None
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
+            if format:
+                set_data, sets, url = fetch_set_format(
+                    driver, pokemon, generation, format
+                )
+                return set_data, sets, url
             if generation:
                 gen_code = get_gen(generation)
                 if gen_code:
