@@ -78,7 +78,7 @@ def get_set_names(driver: webdriver.Chrome) -> list:
             set_names.append(set_header.text)
         return set_names
     except Exception as e:
-        print(f"Error in retrieving set names: {str(e)}")
+        print(f"Get All Set Names Error: {str(e)}")
         return None
 
 
@@ -121,7 +121,7 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
 
 
 def fetch_set_pokemon(driver: webdriver.Chrome, pokemon: str) -> tuple:
-    # Finds all Pokemon set names for a given Pokemon assuming most recent Generation and first Format found.
+    # Finds all pokemon set names with the url of the page given the most recent generation if only Pokemon name is provided.
     for gen in reversed(get_gen_dict().values()):
         url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
         driver.get(url)
@@ -137,7 +137,7 @@ def fetch_set_pokemon(driver: webdriver.Chrome, pokemon: str) -> tuple:
 def fetch_set_generation(
     driver: webdriver.Chrome, pokemon: str, generation: str
 ) -> tuple:
-    # Finds all Pokemon set names for a given Pokemon and given Generation assuming first Format found.
+    # Finds all set names for a given Pokémon within a specific generation.
     gen_code = get_gen_dict().get(generation.lower())
     if gen_code:
         url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
@@ -148,29 +148,5 @@ def fetch_set_generation(
                 return None, sets, url
             else:
                 return None, None, None
-    else:
-        return f"Generation '{generation}' not found.", None, None
-
-
-def fetch_set_format(
-    driver: webdriver.Chrome, pokemon: str, generation: str, format: str
-) -> tuple:
-    # Finds all Pokemon set names for a given Pokemon, given Generation and given Format.
-    gen_code = get_gen_dict().get(generation.lower())
-    if gen_code:
-        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/{format.lower()}/"
-        driver.get(url)
-        if is_valid_pokemon(driver, pokemon):
-            sets = get_set_names(driver)
-            if sets:
-                return None, sets, url
-            else:
-                return None, None, None
-        else:
-            return (
-                f'Pokemon "{pokemon}" not found in Generation "{generation}" with Format "{format}".',
-                None,
-                None,
-            )
     else:
         return f"Generation '{generation}' not found.", None, None

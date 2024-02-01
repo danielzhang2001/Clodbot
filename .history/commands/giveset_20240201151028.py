@@ -74,9 +74,7 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def fetch_set(
-        pokemon: str, generation: str = None, format: str = None
-    ) -> tuple:
+    async def fetch_set(pokemon: str, generation: str = None) -> tuple:
         # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
         driver = None
         try:

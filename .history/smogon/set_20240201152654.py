@@ -78,7 +78,7 @@ def get_set_names(driver: webdriver.Chrome) -> list:
             set_names.append(set_header.text)
         return set_names
     except Exception as e:
-        print(f"Error in retrieving set names: {str(e)}")
+        print(f"Get All Set Names Error: {str(e)}")
         return None
 
 
