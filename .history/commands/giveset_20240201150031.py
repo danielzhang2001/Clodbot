@@ -74,21 +74,14 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def fetch_set(
-        pokemon: str, generation: str = None, format: str = None
-    ) -> tuple:
-        # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
+    async def fetch_set(pokemon: str, generation: str = None) -> tuple:
+        # Initializes a headless browser to fetch sets from Smogon
         driver = None
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            if format:
-                set_data, sets, url = fetch_set_format(
-                    driver, pokemon, generation, format
-                )
-                return set_data, sets, url
             if generation:
                 gen_code = get_gen(generation)
                 if gen_code:

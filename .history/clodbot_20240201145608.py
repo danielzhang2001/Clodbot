@@ -73,15 +73,6 @@ async def give_set(ctx, *args):
                 await ctx.send(
                     f'No sets found for "{pokemon}" in Generation "{generation}".'
                 )
-        elif len(components) == 3:
-            pokemon, generation, format = components
-            set_data, sets, url = await GiveSet.fetch_set(pokemon, generation, format)
-            if sets:
-                await GiveSet.set_prompt(ctx, pokemon, sets, url)
-            else:
-                await ctx.send(
-                    f'No sets found for "{pokemon}" in Generation "{generation}" with Format "{format}".'
-                )
         else:
             await ctx.send(
                 "Usage: `Clodbot, giveset [Pokemon]` or `Clodbot, giveset [Pokemon], [Pokemon2]...` or `Clodbot, giveset [Pokemon] [Generation]`."

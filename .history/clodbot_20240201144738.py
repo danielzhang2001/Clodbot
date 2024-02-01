@@ -45,7 +45,7 @@ async def analyze_replay(ctx, *args):
 
 @bot.command(name="giveset")
 async def give_set(ctx, *args):
-    # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
+    # Gives Pokemon set(s) based on Pokemon, Generation, Format and Set provided
     input_str = " ".join(args)
     if "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
@@ -73,16 +73,8 @@ async def give_set(ctx, *args):
                 await ctx.send(
                     f'No sets found for "{pokemon}" in Generation "{generation}".'
                 )
-        elif len(components) == 3:
-            pokemon, generation, format = components
-            set_data, sets, url = await GiveSet.fetch_set(pokemon, generation, format)
-            if sets:
-                await GiveSet.set_prompt(ctx, pokemon, sets, url)
-            else:
-                await ctx.send(
-                    f'No sets found for "{pokemon}" in Generation "{generation}" with Format "{format}".'
-                )
         else:
+            # Handle incorrect usage
             await ctx.send(
                 "Usage: `Clodbot, giveset [Pokemon]` or `Clodbot, giveset [Pokemon], [Pokemon2]...` or `Clodbot, giveset [Pokemon] [Generation]`."
             )
