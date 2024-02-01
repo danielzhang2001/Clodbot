@@ -44,11 +44,14 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
+
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
                     if unique_id in GiveSet.awaiting_response:
                         context = GiveSet.awaiting_response[unique_id]
+
+                        # Check if there's an existing set message to edit
                         if "set_message_id" in context:
                             try:
                                 set_message_details = await ctx.channel.fetch_message(
@@ -58,11 +61,13 @@ class GiveSet:
                                     content=f"```{set_data}```"
                                 )
                             except discord.NotFound:
+                                # If the set data message is gone, send a new one
                                 new_set_message_details = await ctx.send(
                                     f"```{set_data}```"
                                 )
                                 context["set_message_id"] = new_set_message_details.id
                         else:
+                            # If no set message exists, send a new one and store its ID
                             new_set_message_details = await ctx.send(
                                 f"```{set_data}```"
                             )
@@ -89,6 +94,7 @@ class GiveSet:
             if generation:
                 gen_code = get_gen(generation)
                 if gen_code:
+                    # Fetch sets for the given Pokémon and generation
                     set_data, sets, url = fetch_set_generation(
                         driver, pokemon, generation
                     )
@@ -96,6 +102,7 @@ class GiveSet:
                 else:
                     return "Generation not found.", None, None
             else:
+                # Use fetch_set_pokemon for fetching sets for the most recent generation
                 sets, url = fetch_set_pokemon(driver, pokemon)
                 return None, sets, url
         except Exception as e:
