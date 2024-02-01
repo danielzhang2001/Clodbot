@@ -45,7 +45,7 @@ async def analyze_replay(ctx, *args):
 
 @bot.command(name="giveset")
 async def give_set(ctx, *args):
-    # Gives Pokemon set(s) based on Pokemon, Generation, Format and Set provided
+    # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
     input_str = " ".join(args)
     if "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
@@ -58,7 +58,6 @@ async def give_set(ctx, *args):
     else:
         components = input_str.split()
         if len(components) == 1:
-            # Handle a single Pokémon without specifying the generation
             pokemon = components[0]
             set_data, sets, url = await GiveSet.fetch_set(pokemon)
             if sets:
@@ -66,7 +65,6 @@ async def give_set(ctx, *args):
             else:
                 await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
         elif len(components) == 2:
-            # Handle a single Pokémon with a specified generation
             pokemon, generation = components
             set_data, sets, url = await GiveSet.fetch_set(pokemon, generation)
             if sets:
@@ -75,8 +73,16 @@ async def give_set(ctx, *args):
                 await ctx.send(
                     f'No sets found for "{pokemon}" in Generation "{generation}".'
                 )
+        elif len(components) == 3:
+            pokemon, generation, format = components
+            set_data, sets, url = await GiveSet.fetch_set(pokemon, generation, format)
+            if sets:
+                await GiveSet.set_prompt(ctx, pokemon, sets, url)
+            else:
+                await ctx.send(
+                    f'No sets found for "{pokemon}" in Generation "{generation}" with Format "{format}".'
+                )
         else:
-            # Handle incorrect usage
             await ctx.send(
                 "Usage: `Clodbot, giveset [Pokemon]` or `Clodbot, giveset [Pokemon], [Pokemon2]...` or `Clodbot, giveset [Pokemon] [Generation]`."
             )
@@ -84,7 +90,7 @@ async def give_set(ctx, *args):
 
 @bot.event
 async def on_interaction(interaction):
-    # Handles button functionality for sets for when only a Pokemon parameter with giveset is called
+    # Handles button functionality for when Pokemon sets are displayed
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
         if custom_id.startswith("set_"):
