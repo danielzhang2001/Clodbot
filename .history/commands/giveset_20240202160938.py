@@ -86,17 +86,17 @@ class GiveSet:
             driver = webdriver.Chrome(options=chrome_options)
             if format:
                 sets, url = fetch_set_format(driver, pokemon, generation, format)
-                return sets, url
+                return set_data, sets, url
             elif generation:
                 gen_code = get_gen(generation)
                 if gen_code:
                     sets, url = fetch_set_generation(driver, pokemon, generation)
-                    return sets, url
+                    return set_data, sets, url
                 else:
-                    return "Generation not found.", None
+                    return "Generation not found.", None, None
             else:
                 sets, url = fetch_set_pokemon(driver, pokemon)
-                return sets, url
+                return None, sets, url
         except Exception as e:
             return f"An error occurred: {str(e)}", None, None
         finally:
