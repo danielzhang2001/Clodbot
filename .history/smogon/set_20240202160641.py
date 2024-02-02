@@ -161,7 +161,7 @@ def fetch_set_generation(
             else:
                 return None, None
     else:
-        return f"Generation '{generation}' not found.", None
+        return None, None
 
 
 def fetch_set_format(
@@ -175,13 +175,14 @@ def fetch_set_format(
         if is_valid_pokemon(driver, pokemon):
             sets = get_set_names(driver)
             if sets:
-                return sets, url
+                return None, sets, url
             else:
-                return None, None
+                return None, None, None
         else:
             return (
                 f'Pokemon "{pokemon}" not found in Generation "{generation}" with Format "{format}".',
                 None,
+                None,
             )
     else:
-        return f"Generation '{generation}' not found.", None
+        return f"Generation '{generation}' not found.", None, None

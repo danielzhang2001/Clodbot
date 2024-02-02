@@ -184,4 +184,4 @@ def fetch_set_format(
                 None,
             )
     else:
-        return f"Generation '{generation}' not found.", None
+        return f"Generation '{generation}' not found.", None, None

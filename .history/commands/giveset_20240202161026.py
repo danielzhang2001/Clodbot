@@ -86,7 +86,7 @@ class GiveSet:
             driver = webdriver.Chrome(options=chrome_options)
             if format:
                 sets, url = fetch_set_format(driver, pokemon, generation, format)
-                return sets, url
+                return set_data, sets, url
             elif generation:
                 gen_code = get_gen(generation)
                 if gen_code:
