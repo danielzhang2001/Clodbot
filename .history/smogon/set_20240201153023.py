@@ -66,18 +66,6 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def has_export_buttons(driver: webdriver.Chrome) -> bool:
-    # Checks if there are any export buttons on the page.
-    try:
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
-        )
-        return True
-    except Exception as e:
-        print(f"No Export Buttons Found: {str(e)}")
-        return False
-
-
 def get_set_names(driver: webdriver.Chrome) -> list:
     # Finds and returns all set names on the page.
     try:
@@ -137,7 +125,7 @@ def fetch_set_pokemon(driver: webdriver.Chrome, pokemon: str) -> tuple:
     for gen in reversed(get_gen_dict().values()):
         url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
         driver.get(url)
-        if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
+        if is_valid_pokemon(driver, pokemon):
             sets = get_set_names(driver)
             if sets:
                 return sets, url
