@@ -50,7 +50,7 @@ async def give_set(ctx, *args):
     if "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
         for pokemon in pokemons:
-            set_data, sets, url = await GiveSet.fetch_set(pokemon)
+            sets, url = await GiveSet.fetch_set(pokemon)
             if sets:
                 await GiveSet.set_prompt(ctx, pokemon, sets, url)
             else:
@@ -59,14 +59,14 @@ async def give_set(ctx, *args):
         components = input_str.split()
         if len(components) == 1:
             pokemon = components[0]
-            set_data, sets, url = await GiveSet.fetch_set(pokemon)
+            sets, url = await GiveSet.fetch_set(pokemon)
             if sets:
                 await GiveSet.set_prompt(ctx, pokemon, sets, url)
             else:
                 await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
         elif len(components) == 2:
             pokemon, generation = components
-            set_data, sets, url = await GiveSet.fetch_set(pokemon, generation)
+            sets, url = await GiveSet.fetch_set(pokemon, generation)
             if sets:
                 await GiveSet.set_prompt(ctx, pokemon, sets, url)
             else:
@@ -75,7 +75,7 @@ async def give_set(ctx, *args):
                 )
         elif len(components) == 3:
             pokemon, generation, format = components
-            set_data, sets, url = await GiveSet.fetch_set(pokemon, generation, format)
+            sets, url = await GiveSet.fetch_set(pokemon, generation, format)
             if sets:
                 await GiveSet.set_prompt(ctx, pokemon, sets, url)
             else:

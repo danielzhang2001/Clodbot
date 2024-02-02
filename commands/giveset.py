@@ -85,22 +85,18 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             if format:
-                set_data, sets, url = fetch_set_format(
-                    driver, pokemon, generation, format
-                )
-                return set_data, sets, url
-            if generation:
+                sets, url = fetch_set_format(driver, pokemon, generation, format)
+                return sets, url
+            elif generation:
                 gen_code = get_gen(generation)
                 if gen_code:
-                    set_data, sets, url = fetch_set_generation(
-                        driver, pokemon, generation
-                    )
-                    return set_data, sets, url
+                    sets, url = fetch_set_generation(driver, pokemon, generation)
+                    return sets, url
                 else:
-                    return "Generation not found.", None, None
+                    return "Generation not found.", None
             else:
                 sets, url = fetch_set_pokemon(driver, pokemon)
-                return None, sets, url
+                return sets, url
         except Exception as e:
             return f"An error occurred: {str(e)}", None, None
         finally:
