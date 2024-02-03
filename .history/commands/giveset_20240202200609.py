@@ -98,8 +98,7 @@ class GiveSet:
                 sets, url = fetch_set_pokemon(driver, pokemon)
                 return sets, url
         except Exception as e:
-            print(f"An error occurred: {str(e)}")
-            return None, None
+            return f"An error occurred: {str(e)}", None, None
         finally:
             if driver:
                 driver.quit()
