@@ -29,7 +29,7 @@ def get_gen(generation: str) -> str:
 
 
 def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
-    # Check if the Pokemon name exists on the page (with and without hyphen replaced by space).
+    # Check if the Pokemon name exists on the page.
     try:
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located(
@@ -56,23 +56,27 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
 
 
 def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
+    # Check if the Pokemon format exists on the page.
     try:
-        # Wait for the format list container to be present on the page.
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (By.CLASS_NAME, "PokemonPage-StrategySelector")
             )
         )
-        # Retrieve all format elements including 'is-selected' and links.
         format_elements = driver.find_elements(
-            By.CSS_SELECTOR,
-            ".PokemonPage-StrategySelector ul li span, .PokemonPage-StrategySelector ul li a",
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
         )
-        # Check if the specified format exists in the list by comparing text content.
         for element in format_elements:
-            if format.lower() == element.text.strip().lower():
+            href = element.get_attribute("href")
+            url_format = href.split("/")[-2]
+            if format.lower() == url_format.lower():
                 return True
-        return False  # Return False if the format is not found among the elements.
+        selected_format_element = driver.find_element(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
+        )
+        current_url = driver.current_url
+        url_format = current_url.split("/")[-2]
+        return format.lower() == url_format.lower()
     except Exception as e:
         print(f"Error checking format: {str(e)}")
         return False
