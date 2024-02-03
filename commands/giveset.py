@@ -93,12 +93,13 @@ class GiveSet:
                     sets, url = fetch_set_generation(driver, pokemon, generation)
                     return sets, url
                 else:
-                    return "Generation not found.", None
+                    return None, None
             else:
                 sets, url = fetch_set_pokemon(driver, pokemon)
                 return sets, url
         except Exception as e:
-            return f"An error occurred: {str(e)}", None, None
+            print(f"An error occurred: {str(e)}")
+            return None, None
         finally:
             if driver:
                 driver.quit()
