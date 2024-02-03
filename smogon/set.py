@@ -55,6 +55,29 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
             return False
 
 
+def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
+    try:
+        # Wait for the format list container to be present on the page.
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, "PokemonPage-StrategySelector")
+            )
+        )
+        # Retrieve all format elements including 'is-selected' and links.
+        format_elements = driver.find_elements(
+            By.CSS_SELECTOR,
+            ".PokemonPage-StrategySelector ul li span, .PokemonPage-StrategySelector ul li a",
+        )
+        # Check if the specified format exists in the list by comparing text content.
+        for element in format_elements:
+            if format.lower() == element.text.strip().lower():
+                return True
+        return False  # Return False if the format is not found among the elements.
+    except Exception as e:
+        print(f"Error checking format: {str(e)}")
+        return False
+
+
 def format_name(pokemon: str) -> str:
     # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
     formatted_parts = []
@@ -172,12 +195,9 @@ def fetch_set_format(
     if gen_code:
         url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/{format.lower()}/"
         driver.get(url)
-        if is_valid_pokemon(driver, pokemon):
+        if is_valid_pokemon(driver, pokemon) and is_valid_format(driver, format):
             sets = get_set_names(driver)
-            if sets:
-                return sets, url
-            else:
-                return None, None
+            return sets, url
         else:
             return None, None
     else:
