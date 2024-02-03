@@ -197,7 +197,10 @@ def fetch_set_format(
         driver.get(url)
         if is_valid_pokemon(driver, pokemon) and is_valid_format(driver, format):
             sets = get_set_names(driver)
-            return sets, url
+            if sets:
+                return sets, url
+            else:
+                return None, None
         else:
             return None, None
     else:

@@ -63,7 +63,7 @@ async def give_set(ctx, *args):
             if sets:
                 await GiveSet.set_prompt(ctx, pokemon, sets, url)
             else:
-                await ctx.send(f'No sets found for Pokemon "{pokemon}".')
+                await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
         elif len(components) == 2:
             pokemon, generation = components
             sets, url = await GiveSet.fetch_set(pokemon, generation)
@@ -71,7 +71,7 @@ async def give_set(ctx, *args):
                 await GiveSet.set_prompt(ctx, pokemon, sets, url)
             else:
                 await ctx.send(
-                    f'No sets found for Pokemon "{pokemon}" in Generation "{generation}".'
+                    f'No sets found for "{pokemon}" in Generation "{generation}".'
                 )
         elif len(components) == 3:
             pokemon, generation, format = components
@@ -80,7 +80,7 @@ async def give_set(ctx, *args):
                 await GiveSet.set_prompt(ctx, pokemon, sets, url)
             else:
                 await ctx.send(
-                    f'No sets found for Pokemon "{pokemon}" in Generation "{generation}" with Format "{format}".'
+                    f'No sets found for "{pokemon}" in Generation "{generation}" with Format "{format}".'
                 )
         else:
             await ctx.send(
