@@ -99,7 +99,7 @@ class GiveSet:
                 return sets, url
         except Exception as e:
             print(f"An error occurred: {str(e)}")
-            return None, None
+
         finally:
             if driver:
                 driver.quit()

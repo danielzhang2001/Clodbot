@@ -179,6 +179,9 @@ def fetch_set_format(
             else:
                 return None, None
         else:
-            return None, None
+            return (
+                f'Pokemon "{pokemon}" not found in Generation "{generation}" with Format "{format}".',
+                None,
+            )
     else:
-        return None, None
+        return f"Generation '{generation}' not found.", None
