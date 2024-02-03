@@ -29,7 +29,7 @@ def get_gen(generation: str) -> str:
 
 
 def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
-    # Check if the Pokemon name exists on the page.
+    # Check if the Pokemon name exists on the page (spaces replaced by hyphens).
     try:
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located(
@@ -56,26 +56,34 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
 
 
 def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
-    # Check if the Pokemon format exists on the page.
     try:
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (By.CLASS_NAME, "PokemonPage-StrategySelector")
             )
         )
+        # Fetch all format elements (both span for selected and a for others).
         format_elements = driver.find_elements(
             By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
         )
+        # Iterate over each format element and extract the format part of the URL.
         for element in format_elements:
             href = element.get_attribute("href")
-            url_format = href.split("/")[-2]
+            # Extract the format part from the URL.
+            url_format = href.split("/")[
+                -2
+            ]  # Assumes format is the second last segment.
             if format.lower() == url_format.lower():
                 return True
+        # If no match was found in the anchor elements, check the selected format span as well.
         selected_format_element = driver.find_element(
             By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
         )
+        # Assuming the selected format's page URL is reflected in the browser's URL.
         current_url = driver.current_url
-        url_format = current_url.split("/")[-2]
+        url_format = current_url.split("/")[
+            -2
+        ]  # Assumes format is the second last segment.
         return format.lower() == url_format.lower()
     except Exception as e:
         print(f"Error checking format: {str(e)}")
