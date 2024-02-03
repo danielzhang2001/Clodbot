@@ -161,7 +161,7 @@ def fetch_set_generation(
             else:
                 return None, None
     else:
-        return f"Generation '{generation}' not found.", None
+        return None, None
 
 
 def fetch_set_format(
@@ -179,9 +179,6 @@ def fetch_set_format(
             else:
                 return None, None
         else:
-            return (
-                f'Pokemon "{pokemon}" not found in Generation "{generation}" with Format "{format}".',
-                None,
-            )
+            return None, None
     else:
-        return f"Generation '{generation}' not found.", None
+        return None, None
