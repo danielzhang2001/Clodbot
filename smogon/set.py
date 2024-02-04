@@ -162,11 +162,7 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
 def fetch_sets(
     driver: webdriver.Chrome, pokemon: str, generation: str = None, format: str = None
 ) -> tuple:
-    """
-    Fetches all Pokemon set names based on provided criteria.
-    - Validates Pokemon name, generation, and format sequentially.
-    - Fetches sets based on the combination of criteria provided.
-    """
+    # Fetches all Pokemon set names as well as the associated link based on provided criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
     if not generation and not format:
         for gen in reversed(get_gen_dict().values()):
             url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
@@ -178,14 +174,10 @@ def fetch_sets(
                 else:
                     return None, None
         return None, None
-
-    # Determine the URL for the generation or use the latest generation if not specified
     gen_code = get_gen(generation)
     if not gen_code:
         return None, None
-
     url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
-
     if format:
         url += f"{format.lower()}/"
         driver.get(url)
