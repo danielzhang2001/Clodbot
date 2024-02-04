@@ -159,6 +159,55 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
         return None
 
 
+def fetch_set_pokemon(driver: webdriver.Chrome, pokemon: str) -> tuple:
+    # Finds all Pokemon set names for a given Pokemon assuming most recent Generation and first Format found.
+    for gen in reversed(get_gen_dict().values()):
+        url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
+        driver.get(url)
+        if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
+            sets = get_set_names(driver)
+            if sets:
+                return sets, url
+            else:
+                return None, None
+    return None, None
+
+
+def fetch_set_generation(
+    driver: webdriver.Chrome, pokemon: str, generation: str
+) -> tuple:
+    # Finds all Pokemon set names for a given Pokemon and given Generation assuming first Format found.
+    gen_code = get_gen_dict().get(generation.lower())
+    if gen_code:
+        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+        driver.get(url)
+        if is_valid_pokemon(driver, pokemon):
+            sets = get_set_names(driver)
+            if sets:
+                return sets, url
+            else:
+                return None, None
+    else:
+        return None, None
+
+
+def fetch_set_format(
+    driver: webdriver.Chrome, pokemon: str, generation: str, format: str
+) -> tuple:
+    # Finds all Pokemon set names for a given Pokemon, given Generation and given Format.
+    gen_code = get_gen_dict().get(generation.lower())
+    if gen_code:
+        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/{format.lower()}/"
+        driver.get(url)
+        if is_valid_pokemon(driver, pokemon) and is_valid_format(driver, format):
+            sets = get_set_names(driver)
+            return sets, url
+        else:
+            return None, None
+    else:
+        return None, None
+
+
 def fetch_sets(
     driver: webdriver.Chrome, pokemon: str, generation: str = None, format: str = None
 ) -> tuple:

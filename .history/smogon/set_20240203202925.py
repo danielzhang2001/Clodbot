@@ -164,41 +164,33 @@ def fetch_sets(
 ) -> tuple:
     """
     Fetches all Pokemon set names based on provided criteria.
-    - Validates Pokemon name, generation, and format sequentially.
-    - Fetches sets based on the combination of criteria provided.
+    - If only Pokemon is provided, it assumes the most recent generation and the first format found.
+    - If Pokemon and Generation are provided, it assumes the first format found for that generation.
+    - If Pokemon, Generation, and Format are provided, it fetches sets for that specific combination.
     """
-    if not generation and not format:
-        for gen in reversed(get_gen_dict().values()):
-            url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
+    if generation:
+        gen_code = get_gen(generation.lower())
+        if not gen_code:
+            return None, None  # Invalid generation
+        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+        if format:
+            url += f"{format.lower()}/"  # Append format to URL if specified
             driver.get(url)
-            if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
-                sets = get_set_names(driver)
-                if sets:
-                    return sets, url
-                else:
-                    return None, None
-        return None, None
-
-    # Determine the URL for the generation or use the latest generation if not specified
-    gen_code = get_gen(generation)
-    if not gen_code:
-        return None, None
-
-    url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
-
-    if format:
-        url += f"{format.lower()}/"
-        driver.get(url)
-        if is_valid_pokemon(driver, pokemon) and is_valid_format(driver, format):
-            sets = get_set_names(driver)
-            return sets, url
-        else:
-            return None, None
+            if not is_valid_format(driver, format):
+                return None, None  # Invalid format
     else:
-        driver.get(url)
-        if is_valid_pokemon(driver, pokemon):
-            sets = get_set_names(driver)
-            if sets:
-                return sets, url
-            else:
-                return None, None
+        # Iterate through generations in reverse to find the most recent generation with available sets
+        for gen_code in reversed(get_gen_dict().values()):
+            url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+            if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
+                break
+        else:
+            return None, None  # No valid sets found across generations
+
+    # Common procedure to fetch set names
+
+    if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
+        sets = get_set_names(driver)
+        if sets:
+            return sets, url
+    return None, None

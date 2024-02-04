@@ -78,7 +78,10 @@ class GiveSet:
         pokemon: str, generation: str = None, format: str = None
     ) -> tuple:
         """
-        Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
+        Retrieves set information based on the given criteria.
+        - If only a Pokemon name is provided, it fetches sets for the most recent generation.
+        - If a Pokemon name and generation are provided, it fetches sets for that generation.
+        - If a Pokemon name, generation, and format are provided, it fetches sets for that specific combination.
         """
         driver = None
         try:
@@ -87,14 +90,12 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
 
-            # Use the unified fetch_sets function
             sets, url = fetch_sets(driver, pokemon, generation, format)
+
             return sets, url
-
         except Exception as e:
-            print(f"An error occurred: {str(e)}")
+            print(f"An error occurred while fetching sets: {str(e)}")
             return None, None
-
         finally:
             if driver:
                 driver.quit()
