@@ -73,28 +73,27 @@ class GiveSet:
             if driver:
                 driver.quit()
 
-    @staticmethod
-    async def fetch_set(
-        pokemon: str, generation: str = None, format: str = None
-    ) -> tuple:
-        """
-        Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
-        """
-        driver = None
-        try:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--log-level=3")
-            driver = webdriver.Chrome(options=chrome_options)
 
-            # Use the unified fetch_sets function
-            sets, url = fetch_sets(driver, pokemon, generation, format)
-            return sets, url
+@staticmethod
+async def fetch_set(pokemon: str, generation: str = None, format: str = None) -> tuple:
+    """
+    Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
+    """
+    driver = None
+    try:
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--log-level=3")
+        driver = webdriver.Chrome(options=chrome_options)
 
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
-            return None, None
+        # Use the unified fetch_sets function
+        sets, url = fetch_sets(driver, pokemon, generation, format)
+        return sets, url
 
-        finally:
-            if driver:
-                driver.quit()
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return None, None
+
+    finally:
+        if driver:
+            driver.quit()

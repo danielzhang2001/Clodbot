@@ -73,10 +73,9 @@ class GiveSet:
             if driver:
                 driver.quit()
 
+
     @staticmethod
-    async def fetch_set(
-        pokemon: str, generation: str = None, format: str = None
-    ) -> tuple:
+    async def fetch_set(pokemon: str, generation: str = None, format: str = None) -> tuple:
         """
         Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
         """
@@ -95,6 +94,6 @@ class GiveSet:
             print(f"An error occurred: {str(e)}")
             return None, None
 
-        finally:
-            if driver:
-                driver.quit()
+    finally:
+        if driver:
+            driver.quit()
