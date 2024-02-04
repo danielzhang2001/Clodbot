@@ -108,8 +108,10 @@ class GiveSet:
                         sets = get_set_names(driver)
                         return sets, url
                 return None, None
+
             sets = get_set_names(driver)
             return sets, url
+
         except Exception as e:
             print(f"An error occurred: {str(e)}")
             return None, None

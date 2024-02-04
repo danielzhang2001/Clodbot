@@ -92,7 +92,6 @@ class GiveSet:
                 url = (
                     f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
                 )
-                driver.get(url)
                 if format:
                     url += f"{format.lower()}/"
                     driver.get(url)
@@ -108,8 +107,11 @@ class GiveSet:
                         sets = get_set_names(driver)
                         return sets, url
                 return None, None
+
+            driver.get(url)
             sets = get_set_names(driver)
             return sets, url
+
         except Exception as e:
             print(f"An error occurred: {str(e)}")
             return None, None
