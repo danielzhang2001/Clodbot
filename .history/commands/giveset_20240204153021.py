@@ -85,6 +85,18 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
 
+            if format:
+                url = f"{url_base}{format.lower()}/"
+                if not (
+                    is_valid_pokemon(driver, pokemon)
+                    and is_valid_format(driver, format)
+                ):
+                    return None, None
+            else:
+                url = url_base
+                if not is_valid_pokemon(driver, pokemon):
+                    return None, None
+
             if generation:
                 gen_code = get_gen(generation)
                 if not gen_code:
@@ -92,14 +104,8 @@ class GiveSet:
                 url = (
                     f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
                 )
-                driver.get(url)
                 if format:
                     url += f"{format.lower()}/"
-                    driver.get(url)
-                    if not is_valid_format(driver, format):
-                        return None, None
-                if not is_valid_pokemon(driver, pokemon):
-                    return None, None
             else:
                 for gen in reversed(get_gen_dict().values()):
                     url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
@@ -108,8 +114,11 @@ class GiveSet:
                         sets = get_set_names(driver)
                         return sets, url
                 return None, None
+
+            driver.get(url)
             sets = get_set_names(driver)
             return sets, url
+
         except Exception as e:
             print(f"An error occurred: {str(e)}")
             return None, None
