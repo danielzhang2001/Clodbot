@@ -99,15 +99,11 @@ async def on_interaction(interaction):
                     await interaction.response.defer()
                     pokemons_data = context["pokemons_data"]
                     # Find the correct pokemon and set data based on interaction
-                    for poke_data in pokemons_data:
-                        if poke_data[0] == pokemon:
-                            _, sets, url = poke_data
+                    for poke_name, sets, url in pokemons_data:
+                        if poke_name == pokemon:
                             selected_set = sets[set_index]
-                            await GiveSet.set_selection(
-                                interaction, unique_id, set_index, selected_set, url
-                            )
+                            # Process the selected set further as needed
                             break
-
                 else:
                     await interaction.followup.send(
                         "You didn't initiate this command.", ephemeral=True

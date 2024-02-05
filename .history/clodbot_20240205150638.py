@@ -100,13 +100,12 @@ async def on_interaction(interaction):
                     pokemons_data = context["pokemons_data"]
                     # Find the correct pokemon and set data based on interaction
                     for poke_data in pokemons_data:
-                        if poke_data[0] == pokemon:
+                        if poke_data[0] == pokemon_name:
                             _, sets, url = poke_data
                             selected_set = sets[set_index]
                             await GiveSet.set_selection(
                                 interaction, unique_id, set_index, selected_set, url
                             )
-                            break
 
                 else:
                     await interaction.followup.send(

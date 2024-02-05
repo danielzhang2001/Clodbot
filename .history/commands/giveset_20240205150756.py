@@ -43,37 +43,32 @@ class GiveSet:
         }
 
     @staticmethod
-    async def set_selection(interaction, unique_id, set_index, set_name, url):
-        # Adapted to use interaction instead of ctx
-        driver = None
-        try:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--log-level=3")
-            driver = webdriver.Chrome(options=chrome_options)
-            driver.get(url)
-            if get_export_btn(driver, set_name):
-                set_data = get_textarea(driver, set_name)
-                if set_data:
-                    # Fetch the original message using the interaction object
-                    channel = interaction.client.get_channel(interaction.channel_id)
-                    message = await channel.fetch_message(interaction.message.id)
-                    await message.edit(content=f"```{set_data}```")
-                else:
-                    await interaction.followup.send(
-                        "Error fetching set data.", ephemeral=True
-                    )
+async def set_selection(interaction, unique_id, set_index, set_name, url):
+    # Adapted to use interaction instead of ctx
+    driver = None
+    try:
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--log-level=3")
+        driver = webdriver.Chrome(options=chrome_options)
+        driver.get(url)
+        if get_export_btn(driver, set_name):
+            set_data = get_textarea(driver, set_name)
+            if set_data:
+                # Fetch the original message using the interaction object
+                channel = bot.get_channel(interaction.channel_id)
+                message = await channel.fetch_message(interaction.message.id)
+                await message.edit(content=f"```{set_data}```")
             else:
-                await interaction.followup.send(
-                    "Error finding set. Please try again.", ephemeral=True
-                )
-        except Exception as e:
-            await interaction.followup.send(
-                f"An error occurred: {str(e)}", ephemeral=True
-            )
-        finally:
-            if driver:
-                driver.quit()
+                await interaction.followup.send("Error fetching set data.", ephemeral=True)
+        else:
+            await interaction.followup.send("Error finding set. Please try again.", ephemeral=True)
+    except Exception as e:
+        await interaction.followup.send(f"An error occurred: {str(e)}", ephemeral=True)
+    finally:
+        if driver:
+            driver.quit()
+
 
     @staticmethod
     async def fetch_set(
