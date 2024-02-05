@@ -43,8 +43,8 @@ class GiveSet:
         }
 
     @staticmethod
-    async def set_selection(interaction, unique_id, set_index, set_name, url):
-        # Adapted to use interaction instead of ctx
+    async def set_selection(ctx, unique_id, set_index, set_name, url):
+        # Gives the set data based on the button selected from the Pokemon prompt.
         driver = None
         try:
             chrome_options = Options()
@@ -55,22 +55,28 @@ class GiveSet:
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    # Fetch the original message using the interaction object
-                    channel = interaction.client.get_channel(interaction.channel_id)
-                    message = await channel.fetch_message(interaction.message.id)
-                    await message.edit(content=f"```{set_data}```")
+                    if unique_id in GiveSet.awaiting_response:
+                        context = GiveSet.awaiting_response[unique_id]
+                        if "set_message_id" in context:
+                            try:
+                                message_details = await ctx.channel.fetch_message(
+                                    context["set_message_id"]
+                                )
+                                await message_details.edit(content=f"```{set_data}```")
+                            except discord.NotFound:
+                                new_message_details = await ctx.send(
+                                    f"```{set_data}```"
+                                )
+                                context["set_message_id"] = new_message_details.id
+                        else:
+                            new_message_details = await ctx.send(f"```{set_data}```")
+                            context["set_message_id"] = new_message_details.id
                 else:
-                    await interaction.followup.send(
-                        "Error fetching set data.", ephemeral=True
-                    )
+                    await ctx.send("Error fetching set data.")
             else:
-                await interaction.followup.send(
-                    "Error finding set. Please try again.", ephemeral=True
-                )
+                await ctx.send("Error finding set. Please try again.")
         except Exception as e:
-            await interaction.followup.send(
-                f"An error occurred: {str(e)}", ephemeral=True
-            )
+            await ctx.send(f"An error occurred: {str(e)}")
         finally:
             if driver:
                 driver.quit()

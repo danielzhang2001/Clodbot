@@ -48,66 +48,75 @@ async def give_set(ctx, *args):
     # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
     input_str = " ".join(args)
     if "," in input_str:
-        pokemons = [p.strip() for p in input_str.split(",")]
-        all_pokemon_data = []
-        for pokemon in pokemons:
-            sets, url = await GiveSet.fetch_set(pokemon)
-            if sets:
-                all_pokemon_data.append((pokemon, sets, url))
-        if all_pokemon_data:
-            await GiveSet.set_prompt(ctx, all_pokemon_data)
+        pokemon_names = [p.strip() for p in input_str.split(",")]
+        all_sets_and_urls = await asyncio.gather(
+            *(GiveSet.fetch_set(pokemon) for pokemon in pokemon_names)
+        )
+
+        # Filter out any None responses if a Pokémon's sets couldn't be fetched
+        valid_data = [
+            (pokemon, sets, url)
+            for pokemon, (sets, url) in zip(pokemon_names, all_sets_and_urls)
+            if sets
+        ]
+
+        if valid_data:
+            await GiveSet.set_prompt(ctx, valid_data)
         else:
-            await ctx.send("No sets found for the provided Pokémon.")
+            await ctx.send("No sets found for the specified Pokémon.")
     else:
-        # Handling for single Pokemon, with optional generation and format, remains unchanged
         components = input_str.split()
         if len(components) == 1:
             pokemon = components[0]
-        elif len(components) >= 2:
-            pokemon = components[0]
-            generation = components[1] if len(components) > 1 else None
-            format = components[2] if len(components) > 2 else None
-        sets, url = await GiveSet.fetch_set(
-            pokemon,
-            generation if "generation" in locals() else None,
-            format if "format" in locals() else None,
-        )
-        if sets:
-            await GiveSet.set_prompt(
-                ctx, [(pokemon, sets, url)]
-            )  # Modified to fit the new set_prompt structure
+            sets, url = await GiveSet.fetch_set(pokemon)
+            if sets:
+                await GiveSet.set_prompt(ctx, pokemon, sets, url)
+            else:
+                await ctx.send(f"No sets found for Pokemon **{pokemon}**.")
+        elif len(components) == 2:
+            pokemon, generation = components
+            sets, url = await GiveSet.fetch_set(pokemon, generation)
+            if sets:
+                await GiveSet.set_prompt(ctx, pokemon, sets, url)
+            else:
+                await ctx.send(
+                    f"No sets found for Pokemon **{pokemon}** in Generation **{generation}**."
+                )
+        elif len(components) == 3:
+            pokemon, generation, format = components
+            sets, url = await GiveSet.fetch_set(pokemon, generation, format)
+            if sets:
+                await GiveSet.set_prompt(ctx, pokemon, sets, url)
+            else:
+                await ctx.send(
+                    f"No sets found for Pokemon **{pokemon}** in Generation **{generation}** with Format **{format}**."
+                )
         else:
             await ctx.send(
-                f"No sets found for {pokemon}"
-                + (f" in Generation {generation}" if "generation" in locals() else "")
-                + (f" with Format {format}" if "format" in locals() else "")
-                + "."
+                "Usage: `Clodbot, giveset [Pokemon]` or `Clodbot, giveset [Pokemon], [Pokemon2]...` or `Clodbot, giveset [Pokemon] [Generation]`."
             )
 
 
 @bot.event
 async def on_interaction(interaction):
+    # Handles button functionality for when Pokemon sets are displayed
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
         if custom_id.startswith("set_"):
-            _, unique_id, pokemon, set_index = custom_id.split("_", 3)
-            set_index = int(set_index)  # Convert index back to integer
-
+            parts = custom_id.split("_")
+            unique_id, set_index = parts[1], int(parts[2])
             if unique_id in GiveSet.awaiting_response:
                 context = GiveSet.awaiting_response[unique_id]
                 if interaction.user.id == context["user_id"]:
                     await interaction.response.defer()
-                    pokemons_data = context["pokemons_data"]
-                    # Find the correct pokemon and set data based on interaction
-                    for poke_data in pokemons_data:
-                        if poke_data[0] == pokemon:
-                            _, sets, url = poke_data
-                            selected_set = sets[set_index]
-                            await GiveSet.set_selection(
-                                interaction, unique_id, set_index, selected_set, url
-                            )
-                            break
-
+                    set_name = context["sets"][set_index]
+                    url = context["url"]
+                    channel = bot.get_channel(interaction.channel_id)
+                    message = await channel.fetch_message(context["message_id"])
+                    ctx = await bot.get_context(message)
+                    await GiveSet.set_selection(
+                        ctx, unique_id, set_index, set_name, url
+                    )
                 else:
                     await interaction.followup.send(
                         "You didn't initiate this command.", ephemeral=True

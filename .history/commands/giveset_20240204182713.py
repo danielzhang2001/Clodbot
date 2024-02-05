@@ -13,38 +13,38 @@ class GiveSet:
     awaiting_response = {}
 
     @staticmethod
-    async def set_prompt(ctx, pokemons_data):
-        """
-        Sends a combined message prompting the user to select a set for each Pokémon.
-        pokemons_data: List of tuples [(pokemon_name, sets, url), ...]
-        """
+    async def set_prompt(ctx, pokemons, sets_dict):
         unique_id = str(uuid.uuid4())
         view = ui.View()
-        prompt_text = ""
 
-        for pokemon, sets, url in pokemons_data:
+        prompt_message = "Please select a set type for:\n"
+        for pokemon, sets in sets_dict.items():
             formatted_name = "-".join(
                 part.capitalize() if len(part) > 1 else part
                 for part in pokemon.split("-")
             )
-            prompt_text += f"Please select a set type for **{formatted_name}**:\n"
+            prompt_message += f"**{formatted_name}**: "
             for index, set_name in enumerate(sets):
-                # Custom ID format: "set_uniqueID_pokemonName_setIndex"
-                button_id = f"set_{unique_id}_{pokemon}_{index}"
+                button_id = f"set_{unique_id}_{pokemon}_{index}"  # Unique ID for each set button
                 button = ui.Button(label=set_name, custom_id=button_id)
                 view.add_item(button)
-            prompt_text += "\n"
+            prompt_message += "\n"
 
-        message = await ctx.send(prompt_text.strip(), view=view)
+        message = await ctx.send(
+            prompt_message.strip(),
+            view=view,
+        )
+
         GiveSet.awaiting_response[unique_id] = {
             "message_id": message.id,
             "user_id": ctx.author.id,
-            "pokemons_data": pokemons_data,
+            "sets": sets_dict,
+            "pokemon_list": pokemons,  # Keep track of all Pokémon for this prompt
         }
 
     @staticmethod
-    async def set_selection(interaction, unique_id, set_index, set_name, url):
-        # Adapted to use interaction instead of ctx
+    async def set_selection(ctx, unique_id, set_index, set_name, url):
+        # Gives the set data based on the button selected from the Pokemon prompt.
         driver = None
         try:
             chrome_options = Options()
@@ -55,22 +55,28 @@ class GiveSet:
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    # Fetch the original message using the interaction object
-                    channel = interaction.client.get_channel(interaction.channel_id)
-                    message = await channel.fetch_message(interaction.message.id)
-                    await message.edit(content=f"```{set_data}```")
+                    if unique_id in GiveSet.awaiting_response:
+                        context = GiveSet.awaiting_response[unique_id]
+                        if "set_message_id" in context:
+                            try:
+                                message_details = await ctx.channel.fetch_message(
+                                    context["set_message_id"]
+                                )
+                                await message_details.edit(content=f"```{set_data}```")
+                            except discord.NotFound:
+                                new_message_details = await ctx.send(
+                                    f"```{set_data}```"
+                                )
+                                context["set_message_id"] = new_message_details.id
+                        else:
+                            new_message_details = await ctx.send(f"```{set_data}```")
+                            context["set_message_id"] = new_message_details.id
                 else:
-                    await interaction.followup.send(
-                        "Error fetching set data.", ephemeral=True
-                    )
+                    await ctx.send("Error fetching set data.")
             else:
-                await interaction.followup.send(
-                    "Error finding set. Please try again.", ephemeral=True
-                )
+                await ctx.send("Error finding set. Please try again.")
         except Exception as e:
-            await interaction.followup.send(
-                f"An error occurred: {str(e)}", ephemeral=True
-            )
+            await ctx.send(f"An error occurred: {str(e)}")
         finally:
             if driver:
                 driver.quit()

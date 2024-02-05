@@ -56,7 +56,7 @@ class GiveSet:
                 set_data = get_textarea(driver, set_name)
                 if set_data:
                     # Fetch the original message using the interaction object
-                    channel = interaction.client.get_channel(interaction.channel_id)
+                    channel = bot.get_channel(interaction.channel_id)
                     message = await channel.fetch_message(interaction.message.id)
                     await message.edit(content=f"```{set_data}```")
                 else:
