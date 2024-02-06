@@ -97,6 +97,7 @@ async def on_interaction(interaction):
             if context and interaction.user.id == context["user_id"]:
                 await interaction.response.defer()
                 pokemons_data = context["pokemons_data"]
+                messages = context.get("messages", {})
 
                 selected_pokemon_data = next(
                     (data for data in pokemons_data if data[0] == pokemon), None
@@ -110,9 +111,28 @@ async def on_interaction(interaction):
                 _, sets, url = selected_pokemon_data
                 selected_set_name = sets[set_index]
 
-                await GiveSet.set_selection(
-                    interaction, unique_id, set_index, selected_set_name, url, pokemon
-                )
+                # Check if there is already a message for this Pokémon
+                if pokemon in messages:
+                    # Update existing message for this Pokémon
+                    message_id = messages[pokemon]
+                    channel = interaction.client.get_channel(interaction.channel_id)
+                    message = await channel.fetch_message(message_id)
+                    # Call set_selection to update the message with the selected set details
+                    await GiveSet.set_selection(
+                        interaction,
+                        unique_id,
+                        set_index,
+                        selected_set_name,
+                        url,
+                        message=message,
+                    )
+                else:
+                    # Create a new message for a different Pokémon
+                    # The set_selection method should handle creating a new message
+                    await GiveSet.set_selection(
+                        interaction, unique_id, set_index, selected_set_name, url
+                    )
+                    # Update context with new message ID handled inside set_selection
 
 
 # Running Discord bot

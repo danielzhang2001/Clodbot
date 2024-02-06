@@ -44,14 +44,10 @@ class GiveSet:
         }
 
     @staticmethod
-    async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        context = GiveSet.awaiting_response.get(unique_id)
-        if not context:
-            await interaction.followup.send(
-                "Session expired or not found.", ephemeral=True
-            )
-            return
-
+    async def set_selection(
+        interaction, unique_id, set_index, set_name, url, message=None
+    ):
+        # Adapted to use interaction instead of ctx
         driver = None
         try:
             chrome_options = Options()
@@ -62,17 +58,10 @@ class GiveSet:
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    messages = context.get("messages", {})
+                    # Fetch the original message using the interaction object
                     channel = interaction.client.get_channel(interaction.channel_id)
-
-                    if pokemon in messages:
-                        message_id = messages[pokemon]
-                        message = await channel.fetch_message(message_id)
-                        await message.edit(content=f"```{set_data}```")
-                    else:
-                        new_message = await channel.send(f"```{set_data}```")
-                        messages[pokemon] = new_message.id
-                        context["messages"] = messages
+                    message = await channel.fetch_message(interaction.message.id)
+                    await message.edit(content=f"```{set_data}```")
                 else:
                     await interaction.followup.send(
                         "Error fetching set data.", ephemeral=True

@@ -97,6 +97,7 @@ async def on_interaction(interaction):
             if context and interaction.user.id == context["user_id"]:
                 await interaction.response.defer()
                 pokemons_data = context["pokemons_data"]
+                messages = context.get("messages", {})
 
                 selected_pokemon_data = next(
                     (data for data in pokemons_data if data[0] == pokemon), None
@@ -108,11 +109,33 @@ async def on_interaction(interaction):
                     return
 
                 _, sets, url = selected_pokemon_data
-                selected_set_name = sets[set_index]
+                selected_set = sets[set_index]
+                message_content = f"```{selected_set}```"
 
-                await GiveSet.set_selection(
-                    interaction, unique_id, set_index, selected_set_name, url, pokemon
-                )
+                # If there's already a message for this Pokémon, update it.
+                if pokemon in messages:
+                    message_id = messages[pokemon]
+                    channel = interaction.client.get_channel(interaction.channel_id)
+                    try:
+                        message = await channel.fetch_message(message_id)
+                        await message.edit(content=message_content)
+                    except Exception as e:
+                        print(f"Failed to edit message: {e}")
+                        # Handle the case where the message might have been deleted or cannot be fetched
+                        await interaction.followup.send(
+                            "There was an issue updating the Pokémon's set.",
+                            ephemeral=True,
+                        )
+                else:
+                    # Send a new message for this Pokémon
+                    sent_message = await interaction.followup.send(
+                        message_content, ephemeral=False
+                    )
+                    # Store the new message's ID
+                    messages[pokemon] = sent_message.id
+                    context["messages"] = (
+                        messages  # Update the context with the new message ID
+                    )
 
 
 # Running Discord bot
