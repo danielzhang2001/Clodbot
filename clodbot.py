@@ -59,7 +59,6 @@ async def give_set(ctx, *args):
         else:
             await ctx.send("No sets found for the provided Pokémon.")
     else:
-        # Handling for single Pokemon, with optional generation and format, remains unchanged
         components = input_str.split()
         if len(components) == 1:
             pokemon = components[0]
@@ -73,9 +72,7 @@ async def give_set(ctx, *args):
             format if "format" in locals() else None,
         )
         if sets:
-            await GiveSet.set_prompt(
-                ctx, [(pokemon, sets, url)]
-            )  # Modified to fit the new set_prompt structure
+            await GiveSet.set_prompt(ctx, [(pokemon, sets, url)])
         else:
             await ctx.send(
                 f"No sets found for {pokemon}"
@@ -87,17 +84,16 @@ async def give_set(ctx, *args):
 
 @bot.event
 async def on_interaction(interaction):
+    # Handles button functionality such that when one is clicked, the appropriate set is displayed.
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
         if custom_id.startswith("set_"):
             _, unique_id, pokemon, set_index = custom_id.split("_", 3)
-            set_index = int(set_index)  # Convert index back to integer
-
+            set_index = int(set_index)
             context = GiveSet.awaiting_response.get(unique_id)
             if context and interaction.user.id == context["user_id"]:
                 await interaction.response.defer()
                 pokemons_data = context["pokemons_data"]
-
                 selected_pokemon_data = next(
                     (data for data in pokemons_data if data[0] == pokemon), None
                 )
@@ -106,7 +102,6 @@ async def on_interaction(interaction):
                         "Could not find the selected Pokémon's data.", ephemeral=True
                     )
                     return
-
                 _, sets, url = selected_pokemon_data
                 selected_set_name = sets[set_index]
 
