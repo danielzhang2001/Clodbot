@@ -14,14 +14,10 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(ctx, pokemons_data):
-        """
-        Sends a combined message prompting the user to select a set for each Pokémon.
-        pokemons_data: List of tuples [(pokemon_name, sets, url), ...]
-        """
+        # Sends a message prompting the user to select a set for Pokemon.
         unique_id = str(uuid.uuid4())
         view = ui.View()
         prompt_text = ""
-
         for pokemon, sets, url in pokemons_data:
             formatted_name = "-".join(
                 part.capitalize() if len(part) > 1 else part
@@ -29,13 +25,11 @@ class GiveSet:
             )
             prompt_text += f"Please select a set type for **{formatted_name}**:\n"
             for index, set_name in enumerate(sets):
-                # Custom ID format: "set_uniqueID_pokemonName_setIndex"
                 button_label = f"{formatted_name}: {set_name}"
                 button_id = f"set_{unique_id}_{pokemon}_{index}"
                 button = ui.Button(label=button_label, custom_id=button_id)
                 view.add_item(button)
             prompt_text += "\n"
-
         message = await ctx.send(prompt_text.strip(), view=view)
         GiveSet.awaiting_response[unique_id] = {
             "user_id": ctx.author.id,
@@ -45,13 +39,13 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
+        # Generates the set data for the given criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
             await interaction.followup.send(
                 "Session expired or not found.", ephemeral=True
             )
             return
-
         driver = None
         try:
             chrome_options = Options()
