@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from smogon.set import *
 from discord import ui, ButtonStyle
+from discord import Embed
 import uuid
 
 
@@ -20,38 +21,40 @@ class GiveSet:
         """
         unique_id = str(uuid.uuid4())
         view = ui.View()
-        prompt_text = ""
+        embed = Embed(
+            title="Select a Pokémon Set",
+            description="Please select a set for each Pokémon:",
+            color=0x00FF00,
+        )
 
-        for pokemon, sets, url in pokemons_data:
+        for index, (pokemon, sets, url) in enumerate(pokemons_data):
             formatted_name = "-".join(
                 part.capitalize() if len(part) > 1 else part
                 for part in pokemon.split("-")
             )
-            prompt_text += f"Please select a set type for **{formatted_name}**:\n"
-            for index, set_name in enumerate(sets):
+            # Add a field for each Pokémon to the embed
+            embed.add_field(
+                name=f"Set options for {formatted_name}",
+                value="Please choose below:",
+                inline=False,
+            )
+            for set_index, set_name in enumerate(sets):
                 # Custom ID format: "set_uniqueID_pokemonName_setIndex"
-                button_label = f"{formatted_name}: {set_name}"
-                button_id = f"set_{unique_id}_{pokemon}_{index}"
-                button = ui.Button(label=button_label, custom_id=button_id)
+                button_id = f"set_{unique_id}_{pokemon}_{set_index}"
+                button = ui.Button(
+                    label=set_name, custom_id=button_id, style=ButtonStyle.secondary
+                )
                 view.add_item(button)
-            prompt_text += "\n"
 
-        message = await ctx.send(prompt_text.strip(), view=view)
+        await ctx.send(embed=embed, view=view)
         GiveSet.awaiting_response[unique_id] = {
             "user_id": ctx.author.id,
             "pokemons_data": pokemons_data,
-            "messages": {},
         }
 
     @staticmethod
-    async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        context = GiveSet.awaiting_response.get(unique_id)
-        if not context:
-            await interaction.followup.send(
-                "Session expired or not found.", ephemeral=True
-            )
-            return
-
+    async def set_selection(interaction, unique_id, set_index, set_name, url):
+        # Adapted to use interaction instead of ctx
         driver = None
         try:
             chrome_options = Options()
@@ -62,17 +65,10 @@ class GiveSet:
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    messages = context.get("messages", {})
+                    # Fetch the original message using the interaction object
                     channel = interaction.client.get_channel(interaction.channel_id)
-
-                    if pokemon in messages:
-                        message_id = messages[pokemon]
-                        message = await channel.fetch_message(message_id)
-                        await message.edit(content=f"```{set_data}```")
-                    else:
-                        new_message = await channel.send(f"```{set_data}```")
-                        messages[pokemon] = new_message.id
-                        context["messages"] = messages
+                    message = await channel.fetch_message(interaction.message.id)
+                    await message.edit(content=f"```{set_data}```")
                 else:
                     await interaction.followup.send(
                         "Error fetching set data.", ephemeral=True

@@ -98,21 +98,20 @@ async def on_interaction(interaction):
                 await interaction.response.defer()
                 pokemons_data = context["pokemons_data"]
 
-                selected_pokemon_data = next(
-                    (data for data in pokemons_data if data[0] == pokemon), None
-                )
-                if not selected_pokemon_data:
+                # Find the selected set data for the clicked button
+                for poke_data in pokemons_data:
+                    if poke_data[0] == pokemon:
+                        _, sets, url = poke_data
+                        selected_set_name = sets[set_index]
+                        # Now call set_selection with the correct details
+                        await GiveSet.set_selection(
+                            interaction, unique_id, set_index, selected_set_name, url
+                        )
+                        break
+                else:
                     await interaction.followup.send(
                         "Could not find the selected Pokémon's data.", ephemeral=True
                     )
-                    return
-
-                _, sets, url = selected_pokemon_data
-                selected_set_name = sets[set_index]
-
-                await GiveSet.set_selection(
-                    interaction, unique_id, set_index, selected_set_name, url, pokemon
-                )
 
 
 # Running Discord bot

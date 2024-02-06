@@ -32,26 +32,20 @@ class GiveSet:
                 # Custom ID format: "set_uniqueID_pokemonName_setIndex"
                 button_label = f"{formatted_name}: {set_name}"
                 button_id = f"set_{unique_id}_{pokemon}_{index}"
-                button = ui.Button(label=button_label, custom_id=button_id)
+                button = ui.Button(label=set_name, custom_id=button_id)
                 view.add_item(button)
             prompt_text += "\n"
 
         message = await ctx.send(prompt_text.strip(), view=view)
         GiveSet.awaiting_response[unique_id] = {
+            "message_id": message.id,
             "user_id": ctx.author.id,
             "pokemons_data": pokemons_data,
-            "messages": {},
         }
 
     @staticmethod
-    async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        context = GiveSet.awaiting_response.get(unique_id)
-        if not context:
-            await interaction.followup.send(
-                "Session expired or not found.", ephemeral=True
-            )
-            return
-
+    async def set_selection(interaction, unique_id, set_index, set_name, url):
+        # Adapted to use interaction instead of ctx
         driver = None
         try:
             chrome_options = Options()
@@ -62,17 +56,10 @@ class GiveSet:
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    messages = context.get("messages", {})
+                    # Fetch the original message using the interaction object
                     channel = interaction.client.get_channel(interaction.channel_id)
-
-                    if pokemon in messages:
-                        message_id = messages[pokemon]
-                        message = await channel.fetch_message(message_id)
-                        await message.edit(content=f"```{set_data}```")
-                    else:
-                        new_message = await channel.send(f"```{set_data}```")
-                        messages[pokemon] = new_message.id
-                        context["messages"] = messages
+                    message = await channel.fetch_message(interaction.message.id)
+                    await message.edit(content=f"```{set_data}```")
                 else:
                     await interaction.followup.send(
                         "Error fetching set data.", ephemeral=True

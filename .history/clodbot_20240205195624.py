@@ -108,10 +108,11 @@ async def on_interaction(interaction):
                     return
 
                 _, sets, url = selected_pokemon_data
-                selected_set_name = sets[set_index]
+                selected_set = sets[set_index]
 
+                # Call set_selection with the correct parameters
                 await GiveSet.set_selection(
-                    interaction, unique_id, set_index, selected_set_name, url, pokemon
+                    interaction, unique_id, set_index, selected_set, url
                 )
 
 
