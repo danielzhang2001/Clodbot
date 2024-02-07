@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from smogon.set import *
 from discord import ui, ButtonStyle
+from discord.ui import Button, View
 import uuid
 
 
@@ -14,27 +15,33 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(ctx, pokemons_data):
+        # Sends a message prompting the user to select a set for Pokemon.
         unique_id = str(uuid.uuid4())
-        views = []
+        view = ui.View()
         prompt_text = ""
         multiple = len(pokemons_data) > 1
         if multiple:
-            pokemon_names = [data[0] for data in pokemons_data]
-            prompt_text += f"Please select set types for {', '.join(['**' + name + '**' for name in pokemon_names])}:\n\n"
+            pokemon_names = [data[0] for data in pokemons_data]  # Extract pokemon names
+            prompt_text = f"Please select set types for {', '.join(['**' + name + '**' for name in pokemon_names])}:\n"
             for pokemon, sets, url in pokemons_data:
-                view = ui.View()
                 formatted_name = "-".join(
                     part.capitalize() if len(part) > 1 else part
                     for part in pokemon.split("-")
+                )
+                header_label = f"{formatted_name} Sets:"
+                view.add_item(
+                    ui.Button(
+                        label=header_label,
+                        style=discord.ButtonStyle.secondary,
+                        disabled=True,
+                    )
                 )
                 for index, set_name in enumerate(sets):
                     button_label = f"{formatted_name}: {set_name}"
                     button_id = f"set_{unique_id}_{pokemon}_{index}"
                     button = ui.Button(label=button_label, custom_id=button_id)
                     view.add_item(button)
-                views.append(view)
         else:
-            view = ui.View()
             for pokemon, sets, url in pokemons_data:
                 formatted_name = "-".join(
                     part.capitalize() if len(part) > 1 else part
@@ -42,15 +49,12 @@ class GiveSet:
                 )
                 prompt_text += f"Please select a set type for **{formatted_name}**:\n"
                 for index, set_name in enumerate(sets):
-                    button_label = set_name
+                    button_label = set_name  # Use simple labels for single Pokémon
                     button_id = f"set_{unique_id}_{pokemon}_{index}"
                     button = ui.Button(label=button_label, custom_id=button_id)
                     view.add_item(button)
                 prompt_text += "\n"
-            views.append(view)
-        message = await ctx.send(prompt_text.strip(), view=views[0])
-        for additional_view in views[1:]:
-            await ctx.send(view=additional_view)
+        message = await ctx.send(prompt_text.strip(), view=view)
         GiveSet.awaiting_response[unique_id] = {
             "user_id": ctx.author.id,
             "pokemons_data": pokemons_data,

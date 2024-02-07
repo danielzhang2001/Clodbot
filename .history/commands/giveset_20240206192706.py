@@ -15,25 +15,29 @@ class GiveSet:
     @staticmethod
     async def set_prompt(ctx, pokemons_data):
         unique_id = str(uuid.uuid4())
-        views = []
+        views = []  # To hold multiple views, each representing a row of buttons
         prompt_text = ""
         multiple = len(pokemons_data) > 1
+
         if multiple:
-            pokemon_names = [data[0] for data in pokemons_data]
+            pokemon_names = [data[0] for data in pokemons_data]  # Extract pokemon names
             prompt_text += f"Please select set types for {', '.join(['**' + name + '**' for name in pokemon_names])}:\n\n"
+
+            # Create a separate view (row) for each Pokémon's sets
             for pokemon, sets, url in pokemons_data:
-                view = ui.View()
+                view = ui.View()  # Create a new View for each Pokemon
                 formatted_name = "-".join(
                     part.capitalize() if len(part) > 1 else part
                     for part in pokemon.split("-")
                 )
                 for index, set_name in enumerate(sets):
-                    button_label = f"{formatted_name}: {set_name}"
+                    button_label = f"{set_name}"  # Label with the set name
                     button_id = f"set_{unique_id}_{pokemon}_{index}"
                     button = ui.Button(label=button_label, custom_id=button_id)
                     view.add_item(button)
-                views.append(view)
+                views.append(view)  # Add the view to the views list
         else:
+            # Single Pokémon case, add all buttons to a single view
             view = ui.View()
             for pokemon, sets, url in pokemons_data:
                 formatted_name = "-".join(
@@ -42,15 +46,20 @@ class GiveSet:
                 )
                 prompt_text += f"Please select a set type for **{formatted_name}**:\n"
                 for index, set_name in enumerate(sets):
-                    button_label = set_name
+                    button_label = set_name  # Use simple labels for single Pokémon
                     button_id = f"set_{unique_id}_{pokemon}_{index}"
                     button = ui.Button(label=button_label, custom_id=button_id)
                     view.add_item(button)
                 prompt_text += "\n"
-            views.append(view)
+            views.append(view)  # Add the single view to the views list
+
+        # Sending the message with the first view and then follow-up messages for additional views if multiple Pokémon
         message = await ctx.send(prompt_text.strip(), view=views[0])
         for additional_view in views[1:]:
-            await ctx.send(view=additional_view)
+            await ctx.send(
+                view=additional_view
+            )  # Send additional views as separate follow-up messages
+
         GiveSet.awaiting_response[unique_id] = {
             "user_id": ctx.author.id,
             "pokemons_data": pokemons_data,
