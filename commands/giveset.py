@@ -13,16 +13,21 @@ class GiveSet:
     awaiting_response = {}
 
     @staticmethod
-    async def set_prompt(ctx, pokemons_data):
+    async def set_prompt(ctx, pokemon_data):
         # Displays prompt with buttons for selection of Pokemon sets
         unique_id = str(uuid.uuid4())
         views = []
-        prompt_text = ""
-        multiple = len(pokemons_data) > 1
-        if multiple:
-            pokemon_names = [data[0] for data in pokemons_data]
-            prompt_text += f"Please select set types for {', '.join(['**' + name + '**' for name in pokemon_names])}:\n\n"
-            for pokemon, sets, url in pokemons_data:
+        prompt = ""
+        if len(pokemon_data) > 1:
+            formatted_names = [
+                "-".join(
+                    part.capitalize() if len(part) > 1 else part
+                    for part in pokemon[0].split("-")
+                )
+                for pokemon in pokemon_data
+            ]
+            prompt += f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
+            for pokemon, sets, url in pokemon_data:
                 view = ui.View()
                 formatted_name = "-".join(
                     part.capitalize() if len(part) > 1 else part
@@ -43,25 +48,25 @@ class GiveSet:
                 views.append(view)
         else:
             view = ui.View()
-            for pokemon, sets, url in pokemons_data:
+            for pokemon, sets, url in pokemon_data:
                 formatted_name = "-".join(
                     part.capitalize() if len(part) > 1 else part
                     for part in pokemon.split("-")
                 )
-                prompt_text += f"Please select a set type for **{formatted_name}**:\n"
+                prompt += f"Please select a set type for **{formatted_name}**:\n"
                 for index, set_name in enumerate(sets):
                     button_label = set_name
                     button_id = f"set_{unique_id}_{pokemon}_{index}"
                     button = ui.Button(label=button_label, custom_id=button_id)
                     view.add_item(button)
-                prompt_text += "\n"
+                prompt += "\n"
             views.append(view)
-        message = await ctx.send(prompt_text.strip(), view=views[0])
-        for additional_view in views[1:]:
-            await ctx.send(view=additional_view)
+        message = await ctx.send(prompt.strip(), view=views[0])
+        for view in views[1:]:
+            await ctx.send(view=view)
         GiveSet.awaiting_response[unique_id] = {
             "user_id": ctx.author.id,
-            "pokemons_data": pokemons_data,
+            "pokemon_data": pokemon_data,
             "messages": {},
         }
 
@@ -86,7 +91,6 @@ class GiveSet:
                 if set_data:
                     messages = context.get("messages", {})
                     channel = interaction.client.get_channel(interaction.channel_id)
-
                     if pokemon in messages:
                         message_id = messages[pokemon]
                         message = await channel.fetch_message(message_id)
@@ -122,7 +126,6 @@ class GiveSet:
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-
             if generation:
                 gen_code = get_gen(generation)
                 if not gen_code:
