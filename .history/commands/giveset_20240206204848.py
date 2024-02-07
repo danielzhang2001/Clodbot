@@ -14,7 +14,6 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(ctx, pokemons_data):
-        # Displays prompt with buttons for selection of Pokemon sets
         unique_id = str(uuid.uuid4())
         views = []
         prompt_text = ""
@@ -31,7 +30,7 @@ class GiveSet:
                 view.add_item(
                     ui.Button(
                         label=f"{formatted_name}:",
-                        style=ButtonStyle.secondary,
+                        style=ui.ButtonStyle.secondary,
                         disabled=True,
                     )
                 )
