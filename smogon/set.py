@@ -71,7 +71,7 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
             url_format = href.split("/")[-2]
             if format.lower() == url_format.lower():
                 return True
-        selected_format_element = driver.find_element(
+        selected_format = driver.find_element(
             By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
         )
         current_url = driver.current_url
@@ -80,17 +80,6 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
     except Exception as e:
         print(f"Error checking format: {str(e)}")
         return False
-
-
-def format_name(pokemon: str) -> str:
-    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
-    formatted_parts = []
-    for part in pokemon.split("-"):
-        if len(part) > 1:
-            formatted_parts.append(part.capitalize())
-        else:
-            formatted_parts.append(part.lower())
-    return "-".join(formatted_parts)
 
 
 def has_export_buttons(driver: webdriver.Chrome) -> bool:
@@ -103,6 +92,17 @@ def has_export_buttons(driver: webdriver.Chrome) -> bool:
     except Exception as e:
         print(f"No Export Buttons Found: {str(e)}")
         return False
+
+
+def format_name(pokemon: str) -> str:
+    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
+    formatted_parts = []
+    for part in pokemon.split("-"):
+        if len(part) > 1:
+            formatted_parts.append(part.capitalize())
+        else:
+            formatted_parts.append(part.lower())
+    return "-".join(formatted_parts)
 
 
 def get_set_names(driver: webdriver.Chrome) -> list:
