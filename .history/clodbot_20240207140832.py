@@ -93,20 +93,20 @@ async def on_interaction(interaction):
             context = GiveSet.awaiting_response.get(unique_id)
             if context and interaction.user.id == context["user_id"]:
                 await interaction.response.defer()
-                pokemon_data = context["pokemon_data"]
-                selected_pokemon = next(
-                    (data for data in pokemon_data if data[0] == pokemon), None
+                pokemons_data = context["pokemons_data"]
+                selected_pokemon_data = next(
+                    (data for data in pokemons_data if data[0] == pokemon), None
                 )
-                if not selected_pokemon:
+                if not selected_pokemon_data:
                     await interaction.followup.send(
                         "Could not find the selected Pokémon's data.", ephemeral=True
                     )
                     return
-                _, sets, url = selected_pokemon
-                selected_set = sets[set_index]
+                _, sets, url = selected_pokemon_data
+                selected_set_name = sets[set_index]
 
                 await GiveSet.set_selection(
-                    interaction, unique_id, set_index, selected_set, url, pokemon
+                    interaction, unique_id, set_index, selected_set_name, url, pokemon
                 )
 
 

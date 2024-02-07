@@ -26,7 +26,8 @@ class GiveSet:
                 )
                 for pokemon in pokemon_data
             ]
-            prompt += f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
+            pokemon_names = [data[0] for data in pokemon_data]
+            prompt += f"Please select set types for {', '.join(['**' + name + '**' for name in pokemon_names])}:\n\n"
             for pokemon, sets, url in pokemon_data:
                 view = ui.View()
                 formatted_name = "-".join(
@@ -62,8 +63,8 @@ class GiveSet:
                 prompt += "\n"
             views.append(view)
         message = await ctx.send(prompt.strip(), view=views[0])
-        for view in views[1:]:
-            await ctx.send(view=view)
+        for additional_view in views[1:]:
+            await ctx.send(view=additional_view)
         GiveSet.awaiting_response[unique_id] = {
             "user_id": ctx.author.id,
             "pokemon_data": pokemon_data,
@@ -91,6 +92,7 @@ class GiveSet:
                 if set_data:
                     messages = context.get("messages", {})
                     channel = interaction.client.get_channel(interaction.channel_id)
+
                     if pokemon in messages:
                         message_id = messages[pokemon]
                         message = await channel.fetch_message(message_id)
@@ -126,6 +128,7 @@ class GiveSet:
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
+
             if generation:
                 gen_code = get_gen(generation)
                 if not gen_code:
