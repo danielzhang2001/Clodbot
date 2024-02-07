@@ -98,14 +98,14 @@ class GiveSet:
                     context["combined_sets_message"] = combined_sets_message
 
                     channel = interaction.client.get_channel(interaction.channel_id)
-                    final_message_content = f"```{combined_sets_message}```"
+
                     # Update or send new combined message
                     if "combined_message_id" in context:
                         message_id = context["combined_message_id"]
                         message = await channel.fetch_message(message_id)
-                        await message.edit(content=final_message_content)
+                        await message.edit(content=combined_sets_message)
                     else:
-                        message = await channel.send(final_message_content)
+                        message = await channel.send(combined_sets_message)
                         context["combined_message_id"] = message.id
                 else:
                     await interaction.followup.send(

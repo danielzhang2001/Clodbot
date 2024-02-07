@@ -72,16 +72,13 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
+        # Generates the set data for the given criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
             await interaction.followup.send(
                 "Session expired or not found.", ephemeral=True
             )
             return
-
-        # Retrieve or initialize the combined sets message content
-        combined_sets_message = context.get("combined_sets_message", "")
-
         driver = None
         try:
             chrome_options = Options()
@@ -89,24 +86,19 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
-
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    # Format and append the new set data to the combined message
-                    combined_sets_message += f"{set_data}\n\n"
-                    context["combined_sets_message"] = combined_sets_message
-
+                    messages = context.get("messages", {})
                     channel = interaction.client.get_channel(interaction.channel_id)
-                    final_message_content = f"```{combined_sets_message}```"
-                    # Update or send new combined message
-                    if "combined_message_id" in context:
-                        message_id = context["combined_message_id"]
+                    if pokemon in messages:
+                        message_id = messages[pokemon]
                         message = await channel.fetch_message(message_id)
-                        await message.edit(content=final_message_content)
+                        await message.edit(content=f"```{set_data}```")
                     else:
-                        message = await channel.send(final_message_content)
-                        context["combined_message_id"] = message.id
+                        new_message = await channel.send(f"```{set_data}```")
+                        messages[pokemon] = new_message.id
+                        context["messages"] = messages
                 else:
                     await interaction.followup.send(
                         "Error fetching set data.", ephemeral=True
@@ -165,3 +157,18 @@ class GiveSet:
         finally:
             if driver:
                 driver.quit()
+
+    @staticmethod
+    async def display_combined_sets(interaction, context):
+        combined_message = "Selected Sets:\n"
+        for pokemon, set_name in context["selected_sets"].items():
+            combined_message += f"**{pokemon}**: {set_name}\n"
+
+        if "message_id" in context:
+            # Update existing message
+            message = await interaction.channel.fetch_message(context["message_id"])
+            await message.edit(content=combined_message)
+        else:
+            # Send new message
+            message = await interaction.channel.send(combined_message)
+            context["message_id"] = message.id

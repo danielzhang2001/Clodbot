@@ -74,9 +74,7 @@ class GiveSet:
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
-            await interaction.followup.send(
-                "Session expired or not found.", ephemeral=True
-            )
+            await interaction.followup.send("Session expired or not found.", ephemeral=True)
             return
 
         # Retrieve or initialize the combined sets message content
@@ -94,34 +92,29 @@ class GiveSet:
                 set_data = get_textarea(driver, set_name)
                 if set_data:
                     # Format and append the new set data to the combined message
-                    combined_sets_message += f"{set_data}\n\n"
+                    combined_sets_message += f"**{pokemon}**:\n```{set_data}```\n"
                     context["combined_sets_message"] = combined_sets_message
 
                     channel = interaction.client.get_channel(interaction.channel_id)
-                    final_message_content = f"```{combined_sets_message}```"
+
                     # Update or send new combined message
                     if "combined_message_id" in context:
                         message_id = context["combined_message_id"]
                         message = await channel.fetch_message(message_id)
-                        await message.edit(content=final_message_content)
+                        await message.edit(content=combined_sets_message)
                     else:
-                        message = await channel.send(final_message_content)
+                        message = await channel.send(combined_sets_message)
                         context["combined_message_id"] = message.id
                 else:
-                    await interaction.followup.send(
-                        "Error fetching set data.", ephemeral=True
-                    )
+                    await interaction.followup.send("Error fetching set data.", ephemeral=True)
             else:
-                await interaction.followup.send(
-                    "Error finding set. Please try again.", ephemeral=True
-                )
+                await interaction.followup.send("Error finding set. Please try again.", ephemeral=True)
         except Exception as e:
-            await interaction.followup.send(
-                f"An error occurred: {str(e)}", ephemeral=True
-            )
+            await interaction.followup.send(f"An error occurred: {str(e)}", ephemeral=True)
         finally:
             if driver:
                 driver.quit()
+
 
     @staticmethod
     async def fetch_set(
