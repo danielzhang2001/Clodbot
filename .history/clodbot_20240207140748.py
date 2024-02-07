@@ -60,16 +60,17 @@ async def give_set(ctx, *args):
         if pokemon_data:
             await GiveSet.set_prompt(ctx, pokemon_data)
             if not_found:
-                await ctx.send(
-                    "No sets found for: " + ", ".join([f"**{p}**" for p in not_found])
-                )
+                not_found_message = 
+                await ctx.send("No sets found for: " + ", ".join(
+                    [f"**{p}**" for p in not_found]
+                ))
         else:
             await ctx.send("No sets found for the provided Pokémon.")
     else:
-        parts = input_str.split()
-        pokemon = parts[0]
-        generation = parts[1] if len(parts) > 1 else None
-        format = parts[2] if len(parts) > 2 else None
+        components = input_str.split()
+        pokemon = components[0]
+        generation = components[1] if len(components) > 1 else None
+        format = components[2] if len(components) > 2 else None
         sets, url = await GiveSet.fetch_set(pokemon, generation, format)
         if sets:
             await GiveSet.set_prompt(ctx, [(pokemon, sets, url)])
@@ -93,20 +94,20 @@ async def on_interaction(interaction):
             context = GiveSet.awaiting_response.get(unique_id)
             if context and interaction.user.id == context["user_id"]:
                 await interaction.response.defer()
-                pokemon_data = context["pokemon_data"]
-                selected_pokemon = next(
-                    (data for data in pokemon_data if data[0] == pokemon), None
+                pokemons_data = context["pokemons_data"]
+                selected_pokemon_data = next(
+                    (data for data in pokemons_data if data[0] == pokemon), None
                 )
-                if not selected_pokemon:
+                if not selected_pokemon_data:
                     await interaction.followup.send(
                         "Could not find the selected Pokémon's data.", ephemeral=True
                     )
                     return
-                _, sets, url = selected_pokemon
-                selected_set = sets[set_index]
+                _, sets, url = selected_pokemon_data
+                selected_set_name = sets[set_index]
 
                 await GiveSet.set_selection(
-                    interaction, unique_id, set_index, selected_set, url, pokemon
+                    interaction, unique_id, set_index, selected_set_name, url, pokemon
                 )
 
 
