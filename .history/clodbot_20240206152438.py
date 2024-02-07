@@ -50,35 +50,42 @@ async def give_set(ctx, *args):
     if "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
         all_pokemon_data = []
-        pokemon_not_found = []
         for pokemon in pokemons:
             sets, url = await GiveSet.fetch_set(pokemon)
             if sets:
                 all_pokemon_data.append((pokemon, sets, url))
-            else:
-                pokemon_not_found.append(pokemon)
         if all_pokemon_data:
             await GiveSet.set_prompt(ctx, all_pokemon_data)
-            if pokemon_not_found:
-                not_found_message = "No sets found for: " + ", ".join(
-                    [f"**{p}**" for p in pokemon_not_found]
-                )
-                await ctx.send(not_found_message)
         else:
             await ctx.send("No sets found for the provided Pokémon.")
     else:
         components = input_str.split()
-        pokemon = components[0]
-        generation = components[1] if len(components) > 1 else None
-        format = components[2] if len(components) > 2 else None
-        sets, url = await GiveSet.fetch_set(pokemon, generation, format)
+        if len(components) == 1:
+            pokemon = components[0]
+        elif len(components) >= 2:
+            pokemon = components[0]
+            generation = components[1] if len(components) > 1 else None
+            format = components[2] if len(components) > 2 else None
+        sets, url = await GiveSet.fetch_set(
+            pokemon,
+            generation if "generation" in locals() else None,
+            format if "format" in locals() else None,
+        )
         if sets:
             await GiveSet.set_prompt(ctx, [(pokemon, sets, url)])
         else:
             await ctx.send(
                 f"No sets found for **{pokemon}**"
-                + (f" in Generation **{generation}**" if generation else "")
-                + (f" with Format **{format}**" if format else "")
+                + (
+                    f" in Generation **{generation}**"
+                    if "generation" in locals() and generation is not None
+                    else ""
+                )
+                + (
+                    f" with Format **{format}**"
+                    if "format" in locals() and format is not None
+                    else ""
+                )
                 + "."
             )
 
