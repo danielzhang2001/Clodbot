@@ -8,7 +8,6 @@ from smogon.set import *
 from discord import ui, ButtonStyle
 from asyncio import Lock
 import uuid
-import asyncio
 
 
 class GiveSet:
@@ -75,7 +74,6 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        # Handles button functionality to display appropriate set when clicked
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
             await interaction.followup.send(
@@ -84,8 +82,10 @@ class GiveSet:
             return
         lock = context["lock"]
         async with lock:
+            # Initialize the combined sets storage as a dictionary if not present
             if "combined_sets" not in context:
                 context["combined_sets"] = {}
+
             driver = None
             try:
                 chrome_options = Options()
@@ -93,15 +93,21 @@ class GiveSet:
                 chrome_options.add_argument("--log-level=3")
                 driver = webdriver.Chrome(options=chrome_options)
                 driver.get(url)
+
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
                     if set_data:
+                        # Update the specific Pokémon's set in the dictionary
                         context["combined_sets"][pokemon] = f"{set_data}\n\n"
+
+                        # Generate the combined message content
                         combined_sets_message = "".join(
                             context["combined_sets"].values()
                         )
                         final_message_content = f"```{combined_sets_message}```"
+
                         channel = interaction.client.get_channel(interaction.channel_id)
+                        # Update or send new combined message
                         if "combined_message_id" in context:
                             message_id = context["combined_message_id"]
                             message = await channel.fetch_message(message_id)
