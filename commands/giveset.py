@@ -84,8 +84,8 @@ class GiveSet:
             return
         lock = context["lock"]
         async with lock:
-            if "combined_sets" not in context:
-                context["combined_sets"] = {}
+            if "sets" not in context:
+                context["sets"] = {}
             driver = None
             try:
                 chrome_options = Options()
@@ -96,18 +96,16 @@ class GiveSet:
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
                     if set_data:
-                        context["combined_sets"][pokemon] = f"{set_data}\n\n"
-                        combined_sets_message = "".join(
-                            context["combined_sets"].values()
-                        )
-                        final_message_content = f"```{combined_sets_message}```"
+                        context["sets"][pokemon] = f"{set_data}\n\n"
+                        sets_message = "".join(context["sets"].values())
+                        message_content = f"```{sets_message}```"
                         channel = interaction.client.get_channel(interaction.channel_id)
                         if "combined_message_id" in context:
                             message_id = context["combined_message_id"]
                             message = await channel.fetch_message(message_id)
-                            await message.edit(content=final_message_content)
+                            await message.edit(content=message_content)
                         else:
-                            message = await channel.send(final_message_content)
+                            message = await channel.send(message_content)
                             context["combined_message_id"] = message.id
                     else:
                         await interaction.followup.send(
