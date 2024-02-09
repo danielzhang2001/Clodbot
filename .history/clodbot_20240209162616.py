@@ -8,7 +8,6 @@ import discord  # type: ignore
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
 import aiohttp
-import random
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -44,22 +43,11 @@ async def analyze_replay(ctx, *args):
         await ctx.send("No data found in this replay.")
 
 
-# Placeholder to test random functionality for now
-pokemon_list = ["Pikachu", "Charizard", "Bulbasaur", "Squirtle", "Eevee"]
-
-
 @bot.command(name="giveset")
 async def give_set(ctx, *args):
     # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
-    input_str = " ".join(args).strip()
-    if input_str.lower() == "random":
-        random_pokemon = random.choice(pokemon_list)
-        sets, url = await GiveSet.fetch_set(random_pokemon)
-        if sets:
-            await GiveSet.set_prompt(ctx, [(random_pokemon, sets, url)])
-        else:
-            await ctx.send(f"No sets found for **{random_pokemon}**.")
-    elif "," in input_str:
+    input_str = " ".join(args)
+    if "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
         pokemon_data = []
         not_found = []
