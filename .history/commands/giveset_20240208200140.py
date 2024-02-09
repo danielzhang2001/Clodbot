@@ -98,15 +98,14 @@ class GiveSet:
                     if set_data:
                         context["sets"][pokemon] = f"{set_data}\n\n"
                         sets_message = "".join(context["sets"].values())
-                        message_content = f"```{sets_message}```"
                         channel = interaction.client.get_channel(interaction.channel_id)
-                        if "combined_message_id" in context:
-                            message_id = context["combined_message_id"]
+                        if "message_id" in context:
+                            message_id = context["message_id"]
                             message = await channel.fetch_message(message_id)
-                            await message.edit(content=message_content)
+                            await message.edit(content=f"```{sets_message}```")
                         else:
-                            message = await channel.send(message_content)
-                            context["combined_message_id"] = message.id
+                            message = await channel.send(final_message_content)
+                            context["message_id"] = message.id
                     else:
                         await interaction.followup.send(
                             "Error fetching set data.", ephemeral=True
