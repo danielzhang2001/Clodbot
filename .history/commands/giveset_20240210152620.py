@@ -15,33 +15,35 @@ class GiveSet:
     awaiting_response = {}
 
     @staticmethod
-    # Gets all Pokemon names from Bulbapedia and stores it into a list, then returns the list.
     def fetch_all_pokemon_names():
         url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
         driver = None
         try:
             chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("log-level=3")
+            chrome_options.add_argument("--headless")  # Running in headless mode
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
+
+            # Wait for the page to fully load
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located(
                     (
                         By.XPATH,
-                        "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
+                        "//a[contains(@href, '(Pokémon)') and not(contains(@href, 'Category'))]",
                     )
                 )
             )
+
+            # Find all elements that match the Pokémon links format
             pokemon_elements = driver.find_elements(
                 By.XPATH,
-                "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
+                "//a[contains(@href, '(Pokémon)') and not(contains(@href, 'Category'))]",
             )
-            pokemon_names = []
-            for element in pokemon_elements:
-                pokemon_name = element.text
-                if pokemon_name:
-                    pokemon_names.append(pokemon_name)
+            pokemon_names = [elem.text for elem in pokemon_elements if elem.text]
+
+            print(
+                f"Found Pokémon: {', '.join(pokemon_names)}"
+            )  # Print all Pokémon names found
             return pokemon_names
         except Exception as e:
             print(f"An error occurred: {str(e)}")
@@ -52,7 +54,7 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(ctx, pokemon_data):
-        # Displays prompt with buttons for selection of Pokemon sets.
+        # Displays prompt with buttons for selection of Pokemon sets
         unique_id = str(uuid.uuid4())
         views = []
         prompt = ""
@@ -111,7 +113,7 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        # Handles button functionality to display appropriate set when clicked.
+        # Handles button functionality to display appropriate set when clicked
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
             await interaction.followup.send(
@@ -163,7 +165,7 @@ class GiveSet:
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None
     ) -> tuple:
-        # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
+        # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
         driver = None
         try:
             chrome_options = Options()
