@@ -15,36 +15,29 @@ class GiveSet:
     awaiting_response = {}
 
     @staticmethod
-    def fetch_bulbasaur_name():
-        # The URL of the page where Bulbasaur's details can be found
+    def fetch_random_pokemon_list():
         url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
         driver = None
         try:
             chrome_options = Options()
-            chrome_options.add_argument("--headless")  # Running in headless mode
+            chrome_options.add_argument("--headless")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
 
-            # Wait for the page to load and ensure the Bulbasaur link is present
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "//a[@title='Bulbasaur (Pokémon)']")
-                )
+            pokemon_elements = driver.find_elements(
+                By.XPATH,
+                "//a[contains(@href, '(Pokémon)') and not(contains(@href, 'Category'))]",
             )
+            pokemon_names = [
+                elem.get_attribute("title").replace(" (Pokémon)", "")
+                for elem in pokemon_elements
+                if "(Pokémon)" in elem.get_attribute("title")
+            ]
 
-            # Find the Bulbasaur element
-            bulbasaur_element = driver.find_element(
-                By.XPATH, "//a[@title='Bulbasaur (Pokémon)']"
-            )
-            pokemon_name = (
-                bulbasaur_element.text
-            )  # Extract the text, which should be "Bulbasaur"
-
-            print(f"Found Pokémon: {pokemon_name}")  # Output the Pokémon name
-            return pokemon_name
+            return list(set(pokemon_names))  # Remove duplicates, if any.
         except Exception as e:
-            print(f"An error occurred: {str(e)}")
-            return None
+            print(f"An error occurred while fetching the Pokémon list: {str(e)}")
+            return []
         finally:
             if driver:
                 driver.quit()

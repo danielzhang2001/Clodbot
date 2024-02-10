@@ -31,8 +31,7 @@ bot = commands.Bot(command_prefix="Clodbot, ", intents=intents)
 async def on_ready():
     # Print a message when the bot connects to Discord.
     print(f"{bot.user} has connected to Discord!")
-    # JUST FOR TESTING RANDOM POKEMON
-    pokemon_list = GiveSet.fetch_bulbasaur_name()
+    pokemon_list = GiveSet.fetch_random_pokemon_list()
     print(pokemon_list[0])
 
 
