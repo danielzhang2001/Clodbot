@@ -15,6 +15,41 @@ class GiveSet:
     awaiting_response = {}
 
     @staticmethod
+    def fetch_bulbasaur_name():
+        # The URL of the page where Bulbasaur's details can be found
+        url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
+        driver = None
+        try:
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")  # Running in headless mode
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.get(url)
+
+            # Wait for the page to load and ensure the Bulbasaur link is present
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, "//a[@title='Bulbasaur (Pokémon)']")
+                )
+            )
+
+            # Find the Bulbasaur element
+            bulbasaur_element = driver.find_element(
+                By.XPATH, "//a[@title='Bulbasaur (Pokémon)']"
+            )
+            pokemon_name = (
+                bulbasaur_element.text
+            )  # Extract the text, which should be "Bulbasaur"
+
+            print(f"Found Pokémon: {pokemon_name}")  # Output the Pokémon name
+            return pokemon_name
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            return None
+        finally:
+            if driver:
+                driver.quit()
+
+    @staticmethod
     async def set_prompt(ctx, pokemon_data):
         # Displays prompt with buttons for selection of Pokemon sets
         unique_id = str(uuid.uuid4())
