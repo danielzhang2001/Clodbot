@@ -42,6 +42,7 @@ class GiveSet:
                 pokemon_name = element.text
                 if pokemon_name:
                     pokemon_names.append(pokemon_name)
+                    print(f"Found Pokémon: {pokemon_name}")
             return pokemon_names
         except Exception as e:
             print(f"An error occurred: {str(e)}")
@@ -52,7 +53,7 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(ctx, pokemon_data):
-        # Displays prompt with buttons for selection of Pokemon sets.
+        # Displays prompt with buttons for selection of Pokemon sets
         unique_id = str(uuid.uuid4())
         views = []
         prompt = ""
@@ -111,7 +112,7 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        # Handles button functionality to display appropriate set when clicked.
+        # Handles button functionality to display appropriate set when clicked
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
             await interaction.followup.send(
@@ -163,7 +164,7 @@ class GiveSet:
     async def fetch_set(
         pokemon: str, generation: str = None, format: str = None
     ) -> tuple:
-        # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
+        # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format)
         driver = None
         try:
             chrome_options = Options()
