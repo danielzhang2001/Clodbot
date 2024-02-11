@@ -201,3 +201,27 @@ class GiveSet:
         finally:
             if driver:
                 driver.quit()
+
+    @staticmethod
+    async def fetch_and_display_set(ctx, pokemon, set_name, url):
+        driver = None
+        try:
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--log-level=3")
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.get(url)
+            if get_export_btn(driver, set_name):
+                set_data = get_textarea(driver, set_name)
+                if set_data:
+                    message_content = f"```{set_data}```"
+                    await ctx.send(message_content)
+                else:
+                    await ctx.send("Error fetching set data.")
+            else:
+                await ctx.send("Error finding set. Please try again.")
+        except Exception as e:
+            await ctx.send(f"An error occurred: {str(e)}")
+        finally:
+            if driver:
+                driver.quit()
