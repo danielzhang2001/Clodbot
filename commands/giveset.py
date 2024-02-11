@@ -203,7 +203,8 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def fetch_and_display_set(ctx, pokemon, set_name, url):
+    async def display_set(ctx, pokemon, set_name, url):
+        # Directly displays set data from Pokemon, Set Name and URL.
         driver = None
         try:
             chrome_options = Options()
