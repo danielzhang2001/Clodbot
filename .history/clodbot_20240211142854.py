@@ -53,7 +53,7 @@ async def give_set(ctx, *args):
         sets, url = await GiveSet.fetch_set(random_pokemon)
         if sets:
             random_set = random.choice(sets)
-            await GiveSet.fetch_and_display_set(ctx, random_pokemon, random_set, url)
+            await GiveSet.set_prompt(ctx, [(random_pokemon, sets, url)])
         else:
             await ctx.send(f"No sets found for **{random_pokemon}**.")
     elif "," in input_str:

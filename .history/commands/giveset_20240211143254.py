@@ -214,7 +214,7 @@ class GiveSet:
             if get_export_btn(driver, set_name):
                 set_data = get_textarea(driver, set_name)
                 if set_data:
-                    message_content = f"```{set_data}```"
+                    message_content = f"**{pokemon} - {set_name}**\n```{set_data}```"
                     await ctx.send(message_content)
                 else:
                     await ctx.send("Error fetching set data.")
