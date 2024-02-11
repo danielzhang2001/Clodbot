@@ -44,16 +44,12 @@ async def analyze_replay(ctx, *args):
         await ctx.send("No data found in this replay.")
 
 
-# Placeholder to test random functionality for now
-pokemon_list = ["Pikachu", "Charizard", "Bulbasaur", "Squirtle", "Eevee"]
-
-
 @bot.command(name="giveset")
 async def give_set(ctx, *args):
     # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
     input_str = " ".join(args).strip()
     if input_str.lower() == "random":
-        random_pokemon = random.choice(pokemon_list)
+        random_pokemon = random.choice(GiveSet.get_pokemon())
         sets, url = await GiveSet.fetch_set(random_pokemon)
         if sets:
             await GiveSet.set_prompt(ctx, [(random_pokemon, sets, url)])
