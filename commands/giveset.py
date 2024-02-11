@@ -16,7 +16,7 @@ class GiveSet:
 
     @staticmethod
     # Gets all Pokemon names from Bulbapedia and stores it into a list, then returns the list.
-    def fetch_all_pokemon_names():
+    def get_pokemon():
         url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
         driver = None
         try:
