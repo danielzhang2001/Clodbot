@@ -203,26 +203,38 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def display_set(ctx, pokemon, set_name, url):
-        # Directly displays set data from Pokemon, Set Name and URL.
-        driver = None
-        try:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--log-level=3")
-            driver = webdriver.Chrome(options=chrome_options)
-            driver.get(url)
-            if get_export_btn(driver, set_name):
-                set_data = get_textarea(driver, set_name)
-                if set_data:
-                    message_content = f"```{set_data}```"
-                    await ctx.send(message_content)
+    async def display_multiple_sets(ctx, pokemon_data):
+        message_content = ""
+        for pokemon, sets, url in pokemon_data:
+            # Assuming you have a method to fetch the set details similar to how `display_set` works
+            set_name = sets[0]  # Since sets is a list with one item
+            driver = None
+            try:
+                chrome_options = Options()
+                chrome_options.add_argument("--headless")
+                chrome_options.add_argument("--log-level=3")
+                driver = webdriver.Chrome(options=chrome_options)
+                driver.get(url)
+                if get_export_btn(driver, set_name):
+                    set_data = get_textarea(driver, set_name)
+                    if set_data:
+                        message_content += f"{set_data}\n\n"
+                    else:
+                        message_content += (
+                            f"Error fetching set data for **{pokemon}**.\n\n"
+                        )
                 else:
-                    await ctx.send("Error fetching set data.")
-            else:
-                await ctx.send("Error finding set. Please try again.")
-        except Exception as e:
-            await ctx.send(f"An error occurred: {str(e)}")
-        finally:
-            if driver:
-                driver.quit()
+                    message_content += f"Error finding set for **{pokemon}**.\n\n"
+            except Exception as e:
+                message_content += (
+                    f"An error occurred fetching set for **{pokemon}**: {str(e)}\n\n"
+                )
+            finally:
+                if driver:
+                    driver.quit()
+        message_content = "```" + message_content + "```"
+        # Send the compiled message
+        if message_content.strip() != "``````":
+            await ctx.send(message_content)
+        else:
+            await ctx.send("Unable to fetch data for the selected Pokémon sets.")
