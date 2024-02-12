@@ -48,14 +48,22 @@ async def analyze_replay(ctx, *args):
 async def give_set(ctx, *args):
     # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
     input_str = " ".join(args).strip()
-    if input_str.lower() == "random":
-        random_pokemon = random.choice(GiveSet.get_pokemon())
-        sets, url = await GiveSet.fetch_set(random_pokemon)
-        if sets:
-            random_set = random.choice(sets)
-            await GiveSet.display_set(ctx, random_pokemon, random_set, url)
+    if input_str.startswith("random"):
+        args_list = input_str.split()
+        num_pokemon = 1
+        if len(args_list) > 1 and args_list[1].isdigit():
+            num_pokemon = max(1, int(args_list[1]))
+        pokemon_data = []
+        for _ in range(num_pokemon):
+            random_pokemon = random.choice(GiveSet.get_pokemon())
+            sets, url = await GiveSet.fetch_set(random_pokemon)
+            if sets:
+                random_set = random.choice(sets)
+                pokemon_data.append((random_pokemon, [random_set], url))
+        if pokemon_data:
+            await GiveSet.display_multiple_sets(ctx, pokemon_data)
         else:
-            await ctx.send(f"No sets found for **{random_pokemon}**.")
+            await ctx.send(f"No sets found for the requested Pokemon.")
     elif "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
         pokemon_data = []
