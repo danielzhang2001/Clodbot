@@ -232,9 +232,9 @@ class GiveSet:
             finally:
                 if driver:
                     driver.quit()
-        message_content = "```" + message_content + "```"
+        message_content += "```"
         # Send the compiled message
-        if message_content.strip() != "``````":
+        if message_content:
             await ctx.send(message_content)
         else:
             await ctx.send("Unable to fetch data for the selected Pokémon sets.")

@@ -202,7 +202,7 @@ class GiveSet:
             if driver:
                 driver.quit()
 
-    @staticmethod
+   @staticmethod
     async def display_multiple_sets(ctx, pokemon_data):
         message_content = ""
         for pokemon, sets, url in pokemon_data:
@@ -218,23 +218,19 @@ class GiveSet:
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
                     if set_data:
-                        message_content += f"{set_data}\n\n"
+                        message_content += f"**{pokemon}**\n```{set_data}```\n\n"
                     else:
-                        message_content += (
-                            f"Error fetching set data for **{pokemon}**.\n\n"
-                        )
+                        message_content += f"Error fetching set data for **{pokemon}**.\n\n"
                 else:
                     message_content += f"Error finding set for **{pokemon}**.\n\n"
             except Exception as e:
-                message_content += (
-                    f"An error occurred fetching set for **{pokemon}**: {str(e)}\n\n"
-                )
+                message_content += f"An error occurred fetching set for **{pokemon}**: {str(e)}\n\n"
             finally:
                 if driver:
                     driver.quit()
-        message_content = "```" + message_content + "```"
+
         # Send the compiled message
-        if message_content.strip() != "``````":
+        if message_content:
             await ctx.send(message_content)
         else:
             await ctx.send("Unable to fetch data for the selected Pokémon sets.")
