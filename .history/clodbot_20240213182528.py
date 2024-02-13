@@ -70,25 +70,36 @@ async def give_set(ctx, *args):
         num_pokemon = 1
         if len(args_list) > 1 and args_list[1].isdigit():
             num_pokemon = max(1, int(args_list[1]))
+
+        # Fetch random Pokémon names from cache
         pokemon_names = random.sample(GiveSet.fetch_cache(), k=num_pokemon)
+
+        # Fetch sets for all randomly chosen Pokémon in parallel
         pokemon_sets = await GiveSet.fetch_multiple_sets_async(pokemon_names)
+
+        # Prepare data for displaying sets
         pokemon_data = [
             (name, sets or ["No sets found"], url or "URL not found")
             for name, (sets, url) in zip(pokemon_names, pokemon_sets)
             if sets
         ]
+
         if pokemon_data:
             await GiveSet.display_sets(ctx, pokemon_data)
         else:
             await ctx.send(f"No sets found for the requested Pokémon.")
     elif "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
+
+        # Fetch sets for all specified Pokémon in parallel
         pokemon_sets = await GiveSet.fetch_multiple_sets_async(pokemons)
+
         pokemon_data = [
             (name, sets or ["No sets found"], url or "URL not found")
             for name, (sets, url) in zip(pokemons, pokemon_sets)
             if sets
         ]
+
         if pokemon_data:
             await GiveSet.set_prompt(ctx, pokemon_data)
         else:
@@ -98,7 +109,10 @@ async def give_set(ctx, *args):
         pokemon = parts[0]
         generation = parts[1] if len(parts) > 1 else None
         format = parts[2] if len(parts) > 2 else None
+
+        # Fetch set for a single Pokémon synchronously
         sets, url = await GiveSet.fetch_set_async(pokemon, generation, format)
+
         if sets:
             await GiveSet.set_prompt(ctx, [(pokemon, sets, url)])
         else:

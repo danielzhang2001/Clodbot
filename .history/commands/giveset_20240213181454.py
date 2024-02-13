@@ -7,7 +7,6 @@ from selenium.webdriver.chrome.options import Options
 from smogon.set import *
 from discord import ui, ButtonStyle
 from asyncio import Lock
-from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
 import time
@@ -173,7 +172,9 @@ class GiveSet:
                     driver.quit()
 
     @staticmethod
-    def fetch_set(pokemon: str, generation: str = None, format: str = None) -> tuple:
+    async def fetch_set(
+        pokemon: str, generation: str = None, format: str = None
+    ) -> tuple:
         # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
         driver = None
         try:
@@ -215,19 +216,17 @@ class GiveSet:
 
     @staticmethod
     async def fetch_set_async(pokemon: str, generation: str = None, format: str = None):
-        # Helper function for fetching sets asynchronously to save time.
-        loop = asyncio.get_running_loop()  # For Python 3.7+
-        sets, url = await loop.run_in_executor(
-            None, GiveSet.fetch_set, pokemon, generation, format
-        )
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as pool:
+            sets, url = await loop.run_in_executor(
+                pool, GiveSet.fetch_set, pokemon, generation, format
+            )
         return sets, url
 
     @staticmethod
     async def fetch_multiple_sets_async(pokemon_names: list):
-        # Uses fetch_set_async multiple times to speed up process of fetching multiple Pokemon sets.
         tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
-        results = await asyncio.gather(*tasks)
-        return results
+        return await asyncio.gather(*tasks)
 
     @staticmethod
     async def display_sets(ctx, pokemon_data):
