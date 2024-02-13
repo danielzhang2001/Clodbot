@@ -26,11 +26,28 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="Clodbot, ", intents=intents)
 
+gen_dict = {
+    "gen1": "rb",
+    "gen2": "gs",
+    "gen3": "rs",
+    "gen4": "dp",
+    "gen5": "bw",
+    "gen6": "xy",
+    "gen7": "sm",
+    "gen8": "ss",
+    "gen9": "sv",
+}
+
 
 @bot.event
 async def on_ready():
     # Print a message when the bot connects to Discord.
     print(f"{bot.user} has connected to Discord!")
+
+
+# COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.
+# IF SHEET NAME DOES NOT EXIST, CREATE THE SHEET AND STORE INFORMATION IN
+# IF SHEET NAME DOES EXIST, USE THAT SHEET AND UPDATE IT WITH INFORMATION
 
 
 @bot.command(name="analyze")
