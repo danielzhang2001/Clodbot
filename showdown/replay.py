@@ -175,22 +175,35 @@ def get_winner(raw_data):
     return winner
 
 
+def get_loser(raw_data):
+    # Retrieves the losing player(s).
+    winner = get_winner(raw_data)
+    players = get_player_names(raw_data)
+    for id, name in players.items():
+        if name != winner:
+            return name
+
+
 def get_difference(raw_data, players):
     # Retrieves the point difference from winning player to losing player based on the opposing player's faints.
     player1_fainted = len(re.findall(r"\|faint\|p1", raw_data))
     player2_fainted = len(re.findall(r"\|faint\|p2", raw_data))
     winner = get_winner(raw_data)
     if winner == players["p1"]:
-        difference = f"({player2_fainted}-{player1_fainted})"
+        difference = (
+            f"({player2_fainted - player1_fainted}-{player1_fainted - player1_fainted})"
+        )
     else:
-        difference = f"({player1_fainted}-{player2_fainted})"
+        difference = (
+            f"({player1_fainted - player2_fainted}-{player2_fainted - player2_fainted})"
+        )
     return difference
 
 
-def create_message(winner, difference, stats, players):
+def create_message(winner, loser, difference, stats, players):
     # Creates and returns final message.
     message = ""
-    message = f"**Winner: ||{winner} {difference}||**\n\n" + message
+    message = f"**Winner: ||{winner} {difference} {loser}||**\n\n" + message
     for player_num, player_name in players.items():
         message += f"{player_name}'s Pokemon:\n"
         player_pokes = {
