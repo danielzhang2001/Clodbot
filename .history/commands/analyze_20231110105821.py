@@ -35,7 +35,6 @@ class Analyze:
             raw_data, stats, player1_fainted, player2_fainted
         )
         winner = get_winner(raw_data)
-        loser = get_loser(raw_data)
         difference = get_difference(raw_data, players)
-        message = create_message(winner, loser, difference, stats, players)
+        message = create_message(winner, difference, stats, players)
         return message

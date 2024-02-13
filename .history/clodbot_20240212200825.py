@@ -45,11 +45,6 @@ async def on_ready():
     print(f"{bot.user} has connected to Discord!")
 
 
-# COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.
-# IF SHEET NAME DOES NOT EXIST, CREATE THE SHEET AND STORE INFORMATION IN
-# IF SHEET NAME DOES EXIST, USE THAT SHEET AND UPDATE IT WITH INFORMATION
-
-
 @bot.command(name="analyze")
 async def analyze_replay(ctx, *args):
     # Analyzes replay and sends stats in a message to Discord.

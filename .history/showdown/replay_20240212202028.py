@@ -179,9 +179,7 @@ def get_loser(raw_data):
     # Retrieves the losing player(s).
     winner = get_winner(raw_data)
     players = get_player_names(raw_data)
-    for id, name in players.items():
-        if name != winner:
-            return name
+    for player in players
 
 
 def get_difference(raw_data, players):
