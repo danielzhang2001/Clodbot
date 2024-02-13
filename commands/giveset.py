@@ -203,11 +203,11 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def display_multiple_sets(ctx, pokemon_data):
+    async def display_sets(ctx, pokemon_data):
+        # Displays all sets in one textbox given Pokemon and their Sets.
         message_content = ""
         for pokemon, sets, url in pokemon_data:
-            # Assuming you have a method to fetch the set details similar to how `display_set` works
-            set_name = sets[0]  # Since sets is a list with one item
+            set_name = sets[0]
             driver = None
             try:
                 chrome_options = Options()
@@ -233,7 +233,6 @@ class GiveSet:
                 if driver:
                     driver.quit()
         message_content = "```" + message_content + "```"
-        # Send the compiled message
         if message_content.strip() != "``````":
             await ctx.send(message_content)
         else:
