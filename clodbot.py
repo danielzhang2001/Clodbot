@@ -78,7 +78,7 @@ async def give_set(ctx, *args):
                 random_set = random.choice(sets)
                 pokemon_data.append((random_pokemon, [random_set], url))
         if pokemon_data:
-            await GiveSet.display_multiple_sets(ctx, pokemon_data)
+            await GiveSet.display_sets(ctx, pokemon_data)
         else:
             await ctx.send(f"No sets found for the requested Pokemon.")
     elif "," in input_str:
