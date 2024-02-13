@@ -19,7 +19,7 @@ class GiveSet:
     pokemon_cache = {"names": [], "last_updated": 0}
 
     @staticmethod
-    def fetch_cache():
+    def get_pokemon():
         # Stores all Pokemon from Bulbapedia into a cache that updates every 24 hours, returns the cache.
         current_time = time.time()
         if not GiveSet.pokemon_cache["names"] or (

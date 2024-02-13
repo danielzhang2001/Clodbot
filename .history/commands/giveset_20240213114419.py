@@ -19,48 +19,40 @@ class GiveSet:
     pokemon_cache = {"names": [], "last_updated": 0}
 
     @staticmethod
-    def fetch_cache():
-        # Stores all Pokemon from Bulbapedia into a cache that updates every 24 hours, returns the cache.
-        current_time = time.time()
-        if not GiveSet.pokemon_cache["names"] or (
-            current_time - GiveSet.pokemon_cache["last_updated"] > 86400
-        ):
-            print("Updating Pokémon cache...")
-            url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
-            driver = None
-            try:
-                chrome_options = Options()
-                chrome_options.add_argument("--headless")
-                chrome_options.add_argument("log-level=3")
-                driver = webdriver.Chrome(options=chrome_options)
-                driver.get(url)
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located(
-                        (
-                            By.XPATH,
-                            "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
-                        )
+    # Gets all Pokemon names from Bulbapedia and stores it into a list, then returns the list.
+    def get_pokemon():
+        url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
+        driver = None
+        try:
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("log-level=3")
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.get(url)
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
                     )
                 )
-                pokemon_elements = driver.find_elements(
-                    By.XPATH,
-                    "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
-                )
-                pokemon_names = []
-                for element in pokemon_elements:
-                    pokemon_name = element.text.replace(" ", "-")
-                    if pokemon_name:
-                        pokemon_names.append(pokemon_name)
-                GiveSet.pokemon_cache["names"] = pokemon_names
-                GiveSet.pokemon_cache["last_updated"] = current_time
-            except Exception as e:
-                print(f"An error occurred while updating Pokémon cache: {str(e)}")
-            finally:
-                if driver:
-                    driver.quit()
-        else:
-            print("Using cached Pokémon data...")
-        return GiveSet.pokemon_cache["names"]
+            )
+            pokemon_elements = driver.find_elements(
+                By.XPATH,
+                "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
+            )
+            pokemon_names = []
+            for element in pokemon_elements:
+                pokemon_name = element.text
+                if pokemon_name:
+                    pokemon_names.append(pokemon_name)
+            return pokemon_names
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            return []
+        finally:
+            if driver:
+                driver.quit()
 
     @staticmethod
     async def set_prompt(ctx, pokemon_data):

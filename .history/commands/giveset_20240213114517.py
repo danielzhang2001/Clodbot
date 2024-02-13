@@ -19,9 +19,9 @@ class GiveSet:
     pokemon_cache = {"names": [], "last_updated": 0}
 
     @staticmethod
-    def fetch_cache():
-        # Stores all Pokemon from Bulbapedia into a cache that updates every 24 hours, returns the cache.
+    def get_pokemon():
         current_time = time.time()
+        # Check if we need to update the cache (e.g., data is older than 24 hours)
         if not GiveSet.pokemon_cache["names"] or (
             current_time - GiveSet.pokemon_cache["last_updated"] > 86400
         ):
@@ -46,11 +46,9 @@ class GiveSet:
                     By.XPATH,
                     "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
                 )
-                pokemon_names = []
-                for element in pokemon_elements:
-                    pokemon_name = element.text.replace(" ", "-")
-                    if pokemon_name:
-                        pokemon_names.append(pokemon_name)
+                pokemon_names = [
+                    element.text for element in pokemon_elements if element.text
+                ]
                 GiveSet.pokemon_cache["names"] = pokemon_names
                 GiveSet.pokemon_cache["last_updated"] = current_time
             except Exception as e:

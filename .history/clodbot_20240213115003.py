@@ -72,7 +72,7 @@ async def give_set(ctx, *args):
             num_pokemon = max(1, int(args_list[1]))
         pokemon_data = []
         for _ in range(num_pokemon):
-            random_pokemon = random.choice(GiveSet.fetch_cache())
+            random_pokemon = random.choice(GiveSet.get_pokemon())
             sets, url = await GiveSet.fetch_set(random_pokemon)
             if sets:
                 random_set = random.choice(sets)
