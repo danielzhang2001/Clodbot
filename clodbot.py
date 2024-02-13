@@ -35,8 +35,9 @@ gen_dict = {
     "gen6": "xy",
     "gen7": "sm",
     "gen8": "ss",
-    "gen9": "sv"
+    "gen9": "sv",
 }
+
 
 @bot.event
 async def on_ready():
