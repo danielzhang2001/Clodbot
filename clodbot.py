@@ -8,6 +8,7 @@ import discord  # type: ignore
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
 import aiohttp
+import random
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -55,45 +56,84 @@ async def analyze_replay(ctx, *args):
 
 
 @bot.command(name="giveset")
-async def give_set(
-    ctx, pokemon: str, generation: str = None, format: str = None, *set: str
-):
-    # Sends the Pokemon set from Smogon according to the given parameters.
-    set_data, sets, url = await GiveSet.fetch_set(
-        pokemon, generation, format, " ".join(set)
-    )
-    if sets:
-        await GiveSet.set_prompt(ctx, pokemon, sets, url)
-    elif set_data:
-        await ctx.send(set_data)
+async def give_set(ctx, *args):
+    # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
+    input_str = " ".join(args).strip()
+    if input_str.startswith("random"):
+        args_list = input_str.split()
+        num_pokemon = 1
+        if len(args_list) > 1 and args_list[1].isdigit():
+            num_pokemon = max(1, int(args_list[1]))
+        pokemon_data = []
+        for _ in range(num_pokemon):
+            random_pokemon = random.choice(GiveSet.get_pokemon())
+            sets, url = await GiveSet.fetch_set(random_pokemon)
+            if sets:
+                random_set = random.choice(sets)
+                pokemon_data.append((random_pokemon, [random_set], url))
+        if pokemon_data:
+            await GiveSet.display_multiple_sets(ctx, pokemon_data)
+        else:
+            await ctx.send(f"No sets found for the requested Pokemon.")
+    elif "," in input_str:
+        pokemons = [p.strip() for p in input_str.split(",")]
+        pokemon_data = []
+        not_found = []
+        for pokemon in pokemons:
+            sets, url = await GiveSet.fetch_set(pokemon)
+            if sets:
+                pokemon_data.append((pokemon, sets, url))
+            else:
+                not_found.append(pokemon)
+        if pokemon_data:
+            await GiveSet.set_prompt(ctx, pokemon_data)
+            if not_found:
+                await ctx.send(
+                    "No sets found for: " + ", ".join([f"**{p}**" for p in not_found])
+                )
+        else:
+            await ctx.send("No sets found for the provided Pokémon.")
     else:
-        await ctx.send(f'Pokemon "{pokemon}" not found or no sets available.')
+        parts = input_str.split()
+        pokemon = parts[0]
+        generation = parts[1] if len(parts) > 1 else None
+        format = parts[2] if len(parts) > 2 else None
+        sets, url = await GiveSet.fetch_set(pokemon, generation, format)
+        if sets:
+            await GiveSet.set_prompt(ctx, [(pokemon, sets, url)])
+        else:
+            await ctx.send(
+                f"No sets found for **{pokemon}**"
+                + (f" in Generation **{generation}**" if generation else "")
+                + (f" with Format **{format}**" if format else "")
+                + "."
+            )
 
 
 @bot.event
 async def on_interaction(interaction):
-    # Handles button functionality for sets for when only a Pokemon parameter with giveset is called
+    # Handles button functionality such that when one is clicked, the appropriate set is displayed.
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
         if custom_id.startswith("set_"):
-            set_index = int(custom_id.split("_")[1])
-            channel_id = interaction.channel_id
-            if channel_id in GiveSet.awaiting_response:
-                context = GiveSet.awaiting_response[channel_id]
-                if interaction.user.id == context["user_id"]:
-                    set_name = context["sets"][set_index]
-                    url = context["url"]
-                    channel = bot.get_channel(channel_id)
-                    message = await channel.fetch_message(context["message_id"])
-                    ctx = await bot.get_context(message)
-                    await GiveSet.set_selection(ctx, set_index, set_name, url)
-                else:
-                    await interaction.response.send_message(
-                        "You didn't initiate this command.", ephemeral=True
+            _, unique_id, pokemon, set_index = custom_id.split("_", 3)
+            set_index = int(set_index)
+            context = GiveSet.awaiting_response.get(unique_id)
+            if context and interaction.user.id == context["user_id"]:
+                await interaction.response.defer()
+                pokemon_data = context["pokemon_data"]
+                selected_pokemon = next(
+                    (data for data in pokemon_data if data[0] == pokemon), None
+                )
+                if not selected_pokemon:
+                    await interaction.followup.send(
+                        "Could not find the selected Pokémon's data.", ephemeral=True
                     )
-            else:
-                await interaction.response.send_message(
-                    "No active set selection found.", ephemeral=True
+                    return
+                _, sets, url = selected_pokemon
+                selected_set = sets[set_index]
+                await GiveSet.set_selection(
+                    interaction, unique_id, set_index, selected_set, url, pokemon
                 )
 
 

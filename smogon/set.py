@@ -29,7 +29,7 @@ def get_gen(generation: str) -> str:
 
 
 def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
-    # Check if the Pokemon name exists on the page (with and without hyphen replaced by space).
+    # Check if the Pokemon name exists on the page.
     try:
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located(
@@ -55,6 +55,45 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
             return False
 
 
+def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
+    # Check if the Pokemon format exists on the page.
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, "PokemonPage-StrategySelector")
+            )
+        )
+        format_elements = driver.find_elements(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
+        )
+        for element in format_elements:
+            href = element.get_attribute("href")
+            url_format = href.split("/")[-2]
+            if format.lower() == url_format.lower():
+                return True
+        selected_format = driver.find_element(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
+        )
+        current_url = driver.current_url
+        url_format = current_url.split("/")[-2]
+        return format.lower() == url_format.lower()
+    except Exception as e:
+        print(f"Error checking format: {str(e)}")
+        return False
+
+
+def has_export_buttons(driver: webdriver.Chrome) -> bool:
+    # Checks if there are any export buttons on the page.
+    try:
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
+        )
+        return True
+    except Exception as e:
+        print(f"No Export Buttons Found: {str(e)}")
+        return False
+
+
 def format_name(pokemon: str) -> str:
     # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
     formatted_parts = []
@@ -78,7 +117,7 @@ def get_set_names(driver: webdriver.Chrome) -> list:
             set_names.append(set_header.text)
         return set_names
     except Exception as e:
-        print(f"Get All Set Names Error: {str(e)}")
+        print(f"Error in retrieving set names: {str(e)}")
         return None
 
 
@@ -118,35 +157,3 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
     except Exception as e_textarea:
         print(f"Textarea Error: {str(e_textarea)}")
         return None
-
-
-def fetch_general_set(driver: webdriver.Chrome, pokemon: str) -> tuple:
-    # Finds all pokemon set names with the url of the page given the most recent generation if only Pokemon name is provided.
-    for gen in reversed(get_gen_dict().values()):
-        url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
-        driver.get(url)
-        if is_valid_pokemon(driver, pokemon):
-            sets = get_set_names(driver)
-            if sets:
-                return sets, url
-            else:
-                return None, None
-    return None, None
-
-
-def fetch_specific_set(
-    driver: webdriver.Chrome, pokemon: str, generation: str, format: str, set_name: str
-) -> str:
-    # Finds specific pokemon set with the given criteria, and gives appropriate error message if something is missing.
-    if generation.lower() not in get_gen_dict():
-        return f'Generation "{generation}" not found.'
-    url = f"https://www.smogon.com/dex/{get_gen(generation)}/pokemon/{pokemon.lower()}/{format.lower()}/"
-    driver.get(url)
-    if not is_valid_pokemon(driver, pokemon):
-        return f'Pokemon "{pokemon}" not found or doesn’t exist in Generation "{generation}".'
-    if driver.current_url != url:
-        return f'Format "{format}" not found.'
-    if not get_export_btn(driver, set_name):
-        return f'Set "{set_name}" not found.'
-    set_data = get_textarea(driver, pokemon)
-    return f"```{set_data}```" if set_data else None
