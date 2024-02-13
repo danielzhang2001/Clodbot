@@ -204,7 +204,7 @@ class GiveSet:
 
     @staticmethod
     async def display_sets(ctx, pokemon_data):
-        # Displays all sets in one textbox given Pokemon and their Sets.
+        # Displays all sets in one textbox given
         message_content = ""
         for pokemon, sets, url in pokemon_data:
             set_name = sets[0]
