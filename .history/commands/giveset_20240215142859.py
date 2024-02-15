@@ -115,12 +115,15 @@ class GiveSet:
             )
             prompt = f"Please select a set type for **{formatted_name}**:\n"
             await ctx.send(prompt)
-            for index, set_name in enumerate(sets):
-                button_id = f"set_{unique_id}_{pokemon}_{index}"
-                button = ui.Button(label=set_name, custom_id=button_id)
-                view.add_item(button)
-            message = await ctx.send(view=view)
-            views[message.id] = view
+            for pokemon, sets, url in pokemon_data:
+
+                for index, set_name in enumerate(sets):
+                    button_id = f"set_{unique_id}_{pokemon}_{index}"
+                    button = ui.Button(label=set_name, custom_id=button_id)
+                    view.add_item(button)
+                prompt += "\n"
+                message = await ctx.send(view=view)
+                views[message.id] = view
         GiveSet.awaiting_response[unique_id]["views"] = views
         GiveSet.awaiting_response[unique_id]["message_ids"] = [
             msg.id for msg in messages

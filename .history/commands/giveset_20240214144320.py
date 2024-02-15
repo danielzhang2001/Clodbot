@@ -67,16 +67,8 @@ class GiveSet:
     async def set_prompt(ctx, pokemon_data):
         # Displays prompt with buttons for selection of Pokemon sets.
         unique_id = str(uuid.uuid4())
-        views = {}
+        message_views = {}
         prompt = ""
-        messages = []
-        GiveSet.awaiting_response[unique_id] = {
-            "user_id": ctx.author.id,
-            "pokemon_data": pokemon_data,
-            "views": views,
-            "message_ids": [],
-            "lock": asyncio.Lock(),
-        }
         if len(pokemon_data) > 1:
             formatted_names = [
                 "-".join(
@@ -85,8 +77,7 @@ class GiveSet:
                 )
                 for pokemon in pokemon_data
             ]
-            prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
-            await ctx.send(prompt)
+            prompt += f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
             for pokemon, sets, url in pokemon_data:
                 view = ui.View()
                 formatted_name = "-".join(
@@ -101,40 +92,50 @@ class GiveSet:
                     )
                 )
                 for index, set_name in enumerate(sets):
+                    button_label = set_name
                     button_id = f"set_{unique_id}_{pokemon}_{index}"
-                    button = ui.Button(label=set_name, custom_id=button_id)
+                    button = ui.Button(label=button_label, custom_id=button_id)
                     view.add_item(button)
-                message = await ctx.send(view=view)
-                views[message.id] = view
+                views.append(view)
+                message = await ctx.send(prompt.strip(), view=view)
+                messages.append(message)
+                prompt = ""
         else:
-            pokemon, sets, url = pokemon_data[0]
             view = ui.View()
-            formatted_name = "-".join(
-                part.capitalize() if len(part) > 1 else part
-                for part in pokemon.split("-")
-            )
-            prompt = f"Please select a set type for **{formatted_name}**:\n"
-            await ctx.send(prompt)
-            for index, set_name in enumerate(sets):
-                button_id = f"set_{unique_id}_{pokemon}_{index}"
-                button = ui.Button(label=set_name, custom_id=button_id)
-                view.add_item(button)
-            message = await ctx.send(view=view)
-            views[message.id] = view
-        GiveSet.awaiting_response[unique_id]["views"] = views
-        GiveSet.awaiting_response[unique_id]["message_ids"] = [
-            msg.id for msg in messages
-        ]
+            for pokemon, sets, url in pokemon_data:
+                formatted_name = "-".join(
+                    part.capitalize() if len(part) > 1 else part
+                    for part in pokemon.split("-")
+                )
+                prompt += f"Please select a set type for **{formatted_name}**:\n"
+                for index, set_name in enumerate(sets):
+                    button_label = set_name
+                    button_id = f"set_{unique_id}_{pokemon}_{index}"
+                    button = ui.Button(label=button_label, custom_id=button_id)
+                    view.add_item(button)
+                views.append(view)
+                message = await ctx.send(prompt.strip(), view=view)
+                messages.append(message)
+                prompt = ""
+        last_view = views[-1] if views else None
+        GiveSet.awaiting_response[unique_id] = {
+            "user_id": ctx.author.id,
+            "pokemon_data": pokemon_data,
+            "views": last_view,
+            "messages": messages,
+            "lock": asyncio.Lock(),
+        }
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
         # Handles button functionality to display appropriate set when clicked.
         context = GiveSet.awaiting_response.get(unique_id)
-        if not context:
+        if not context or "view" not in context:
             await interaction.followup.send(
-                "Session expired or not found.", ephemeral=True
+                "Session expired or no button layout available.", ephemeral=True
             )
             return
+        view = context["view"]
         lock = context["lock"]
         async with lock:
             if "sets" not in context:
@@ -153,31 +154,20 @@ class GiveSet:
                         sets_message = "".join(context["sets"].values())
                         message_content = f"```{sets_message}```"
                         channel = interaction.client.get_channel(interaction.channel_id)
-                        original_message_id = interaction.message.id
-                        view = context["views"].get(original_message_id)
-                        if not view:
-                            await interaction.followup.send(
-                                "Original message view not found.", ephemeral=True
-                            )
-                            return
+                        if "combined_message_id" in context:
+                            message_id = context["combined_message_id"]
+                            message = await channel.fetch_message(message_id)
+                            await message.edit(content=message_content, view=view)
+                        else:
+                            message = await channel.send(message_content, view=view)
+                            context["combined_message_id"] = message.id
                         for item in view.children:
                             if (
                                 item.custom_id
                                 == f"set_{unique_id}_{pokemon}_{set_index}"
                             ):
-                                item.disabled = True
+                                item.disabled = True  # Disable the clicked button
                                 break
-                        original_message = await channel.fetch_message(
-                            original_message_id
-                        )
-                        await original_message.edit(view=view)
-                        if "combined_message_id" in context:
-                            message_id = context["combined_message_id"]
-                            message = await channel.fetch_message(message_id)
-                            await message.edit(content=message_content)
-                        else:
-                            message = await channel.send(message_content)
-                            context["combined_message_id"] = message.id
                     else:
                         await interaction.followup.send(
                             "Error fetching set data.", ephemeral=True

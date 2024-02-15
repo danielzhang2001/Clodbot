@@ -74,9 +74,10 @@ class GiveSet:
             "user_id": ctx.author.id,
             "pokemon_data": pokemon_data,
             "views": views,
-            "message_ids": [],
+            "message_ids": [],  # Save messages if needed later
             "lock": asyncio.Lock(),
         }
+
         if len(pokemon_data) > 1:
             formatted_names = [
                 "-".join(
@@ -107,20 +108,20 @@ class GiveSet:
                 message = await ctx.send(view=view)
                 views[message.id] = view
         else:
-            pokemon, sets, url = pokemon_data[0]
             view = ui.View()
-            formatted_name = "-".join(
-                part.capitalize() if len(part) > 1 else part
-                for part in pokemon.split("-")
-            )
-            prompt = f"Please select a set type for **{formatted_name}**:\n"
-            await ctx.send(prompt)
-            for index, set_name in enumerate(sets):
-                button_id = f"set_{unique_id}_{pokemon}_{index}"
-                button = ui.Button(label=set_name, custom_id=button_id)
-                view.add_item(button)
-            message = await ctx.send(view=view)
-            views[message.id] = view
+            for pokemon, sets, url in pokemon_data:
+                formatted_name = "-".join(
+                    part.capitalize() if len(part) > 1 else part
+                    for part in pokemon.split("-")
+                )
+                prompt += f"Please select a set type for **{formatted_name}**:\n"
+                for index, set_name in enumerate(sets):
+                    button_id = f"set_{unique_id}_{pokemon}_{index}"
+                    button = ui.Button(label=set_name, custom_id=button_id)
+                    view.add_item(button)
+                prompt += "\n"
+                message = await ctx.send(view=view)
+                views[message.id] = view
         GiveSet.awaiting_response[unique_id]["views"] = views
         GiveSet.awaiting_response[unique_id]["message_ids"] = [
             msg.id for msg in messages
@@ -160,6 +161,8 @@ class GiveSet:
                                 "Original message view not found.", ephemeral=True
                             )
                             return
+
+                        #        Disable the clicked button
                         for item in view.children:
                             if (
                                 item.custom_id

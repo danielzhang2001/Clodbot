@@ -65,62 +65,55 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(ctx, pokemon_data):
-        # Displays prompt with buttons for selection of Pokemon sets.
         unique_id = str(uuid.uuid4())
         views = {}
-        prompt = ""
         messages = []
         GiveSet.awaiting_response[unique_id] = {
             "user_id": ctx.author.id,
             "pokemon_data": pokemon_data,
             "views": views,
-            "message_ids": [],
+            "message_ids": [],  # Save messages if needed later
             "lock": asyncio.Lock(),
         }
+
+        # Construct the initial prompt only once, if needed
         if len(pokemon_data) > 1:
             formatted_names = [
                 "-".join(
                     part.capitalize() if len(part) > 1 else part
-                    for part in pokemon[0].split("-")
-                )
-                for pokemon in pokemon_data
-            ]
-            prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
-            await ctx.send(prompt)
-            for pokemon, sets, url in pokemon_data:
-                view = ui.View()
-                formatted_name = "-".join(
-                    part.capitalize() if len(part) > 1 else part
                     for part in pokemon.split("-")
                 )
-                view.add_item(
-                    ui.Button(
-                        label=f"{formatted_name}:",
-                        style=ButtonStyle.secondary,
-                        disabled=True,
-                    )
-                )
-                for index, set_name in enumerate(sets):
-                    button_id = f"set_{unique_id}_{pokemon}_{index}"
-                    button = ui.Button(label=set_name, custom_id=button_id)
-                    view.add_item(button)
-                message = await ctx.send(view=view)
-                views[message.id] = view
-        else:
-            pokemon, sets, url = pokemon_data[0]
+                for pokemon, _, _ in pokemon_data
+            ]
+            initial_prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n"
+            # Send the initial message separately
+            initial_message = await ctx.send(initial_prompt)
+            messages.append(initial_message)
+
+        # Now loop through pokemon_data to send individual set selections
+        for pokemon, sets, url in pokemon_data:
+            prompt = ""  # Reset prompt for each Pokémon
             view = ui.View()
             formatted_name = "-".join(
                 part.capitalize() if len(part) > 1 else part
                 for part in pokemon.split("-")
             )
-            prompt = f"Please select a set type for **{formatted_name}**:\n"
-            await ctx.send(prompt)
+            prompt += (
+                f"Select a set for **{formatted_name}**:\n"
+                if len(pokemon_data) > 1
+                else f"Please select a set type for **{formatted_name}**:\n"
+            )
             for index, set_name in enumerate(sets):
                 button_id = f"set_{unique_id}_{pokemon}_{index}"
                 button = ui.Button(label=set_name, custom_id=button_id)
                 view.add_item(button)
-            message = await ctx.send(view=view)
+            message = await ctx.send(
+                content=prompt, view=view
+            )  # Send each set of buttons with their specific prompt
+            messages.append(message)
             views[message.id] = view
+
+        # After sending all messages, save message IDs
         GiveSet.awaiting_response[unique_id]["views"] = views
         GiveSet.awaiting_response[unique_id]["message_ids"] = [
             msg.id for msg in messages
@@ -153,13 +146,17 @@ class GiveSet:
                         sets_message = "".join(context["sets"].values())
                         message_content = f"```{sets_message}```"
                         channel = interaction.client.get_channel(interaction.channel_id)
-                        original_message_id = interaction.message.id
+                        original_message_id = context["message_ids"][
+                            0
+                        ]  # Assuming it's the first message sent
                         view = context["views"].get(original_message_id)
                         if not view:
                             await interaction.followup.send(
                                 "Original message view not found.", ephemeral=True
                             )
                             return
+
+                        #        Disable the clicked button
                         for item in view.children:
                             if (
                                 item.custom_id
