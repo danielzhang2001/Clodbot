@@ -78,53 +78,14 @@ class GiveSet:
             "lock": asyncio.Lock(),
         }
         if len(pokemon_data) > 1:
-            formatted_names = [
-                "-".join(
-                    part.capitalize() if len(part) > 1 else part
-                    for part in pokemon[0].split("-")
-                )
-                for pokemon in pokemon_data
-            ]
-            prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
-            await ctx.send(prompt)
-            for pokemon, sets, url in pokemon_data:
-                view = ui.View()
-                formatted_name = "-".join(
-                    part.capitalize() if len(part) > 1 else part
-                    for part in pokemon.split("-")
-                )
-                view.add_item(
-                    ui.Button(
-                        label=f"{formatted_name}:",
-                        style=ButtonStyle.secondary,
-                        disabled=True,
-                    )
-                )
-                for index, set_name in enumerate(sets):
-                    button_id = f"set_{unique_id}_{pokemon}_{index}"
-                    button = ui.Button(label=set_name, custom_id=button_id)
-                    view.add_item(button)
-                message = await ctx.send(view=view)
-                views[message.id] = view
+            views, prompt = create_multiple_pokemon_view(unique_id, pokemon_data)
         else:
-            pokemon, sets, url = pokemon_data[0]
-            view = ui.View()
-            formatted_name = "-".join(
-                part.capitalize() if len(part) > 1 else part
-                for part in pokemon.split("-")
-            )
-            prompt = f"Please select a set type for **{formatted_name}**:\n"
-            await ctx.send(prompt)
-            for index, set_name in enumerate(sets):
-                button_id = f"set_{unique_id}_{pokemon}_{index}"
-                button = ui.Button(label=set_name, custom_id=button_id)
-                view.add_item(button)
+            views, prompt = create_single_pokemon_view(unique_id, pokemon_data[0])
+        await ctx.send(prompt)
+        for formatted_name, view in views.items():
             message = await ctx.send(view=view)
-            views[message.id] = view
-        GiveSet.awaiting_response[unique_id]["views"] = views
-        GiveSet.awaiting_response[unique_id]["message_ids"] = [
-            msg.id for msg in messages
-        ]
+            GiveSet.awaiting_response[unique_id]["views"][message.id] = view
+            GiveSet.awaiting_response[unique_id]["message_ids"].append(message.id)
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
