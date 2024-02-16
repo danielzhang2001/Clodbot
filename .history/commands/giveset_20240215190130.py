@@ -162,7 +162,12 @@ class GiveSet:
                             return
                         is_multi_pokemon = len(context["pokemon_data"]) > 1
                         for index, item in enumerate(view.children):
-                            if is_multi_pokemon and index % len(view.children) == 0:
+                            if (
+                                is_multi_pokemon
+                                and index
+                                % (len(view.children) // len(context["pokemon_data"]))
+                                == 0
+                            ):
                                 item.disabled = True
                             else:
                                 item.disabled = False

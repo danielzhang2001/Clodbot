@@ -161,11 +161,18 @@ class GiveSet:
                             )
                             return
                         is_multi_pokemon = len(context["pokemon_data"]) > 1
+
+                        # Reset all buttons to enabled except the labels in a multi-pokemon setup
                         for index, item in enumerate(view.children):
-                            if is_multi_pokemon and index % len(view.children) == 0:
-                                item.disabled = True
+                            if (
+                                is_multi_pokemon
+                                and index
+                                % (len(view.children) // len(context["pokemon_data"]))
+                                == 0
+                            ):
+                                item.disabled = True  # Keep labels disabled
                             else:
-                                item.disabled = False
+                                item.disabled = False  # Enable all other buttons
                         for item in view.children:
                             if (
                                 item.custom_id

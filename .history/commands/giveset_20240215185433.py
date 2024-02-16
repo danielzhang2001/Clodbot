@@ -160,12 +160,10 @@ class GiveSet:
                                 "Original message view not found.", ephemeral=True
                             )
                             return
-                        is_multi_pokemon = len(context["pokemon_data"]) > 1
-                        for index, item in enumerate(view.children):
-                            if is_multi_pokemon and index % len(view.children) == 0:
-                                item.disabled = True
-                            else:
-                                item.disabled = False
+                        for i, item in view.children:
+                            if i % len(view.children) == 0:
+                                continue
+                            item.disabled = False
                         for item in view.children:
                             if (
                                 item.custom_id

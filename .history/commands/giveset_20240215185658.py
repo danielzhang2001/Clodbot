@@ -160,9 +160,11 @@ class GiveSet:
                                 "Original message view not found.", ephemeral=True
                             )
                             return
-                        is_multi_pokemon = len(context["pokemon_data"]) > 1
                         for index, item in enumerate(view.children):
-                            if is_multi_pokemon and index % len(view.children) == 0:
+                            # Assuming the first button of each row is always the Pokemon label, keep it disabled
+                            if (
+                                index % len(view.children) == 0
+                            ):  # Adjust this condition based on your actual layout
                                 item.disabled = True
                             else:
                                 item.disabled = False
