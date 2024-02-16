@@ -160,7 +160,23 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
         return None
 
 
-def create_multiple_pokemon_view(unique_id, pokemon_data):
+def get_view(unique_id, pokemon_data):
+    # Creates a prompt + buttons for Pokemon sets for a single Pokemon.
+    pokemon, sets, url = pokemon_data
+    view = ui.View()
+    formatted_name = "-".join(
+        part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
+    )
+    prompt = f"Please select a set type for **{formatted_name}**:\n"
+    for index, set_name in enumerate(sets):
+        button_id = f"set_{unique_id}_{pokemon}_{index}"
+        button = ui.Button(label=set_name, custom_id=button_id)
+        view.add_item(button)
+    return {formatted_name: view}, prompt
+
+
+def get_multiview(unique_id, pokemon_data):
+    # Creates a prompt + buttons for Pokemon sets for multiple Pokemon.
     views = {}
     formatted_names = [
         "-".join(
@@ -185,17 +201,3 @@ def create_multiple_pokemon_view(unique_id, pokemon_data):
             view.add_item(button)
         views[formatted_name] = view
     return views, prompt
-
-
-def create_single_pokemon_view(unique_id, pokemon_data):
-    pokemon, sets, url = pokemon_data
-    view = ui.View()
-    formatted_name = "-".join(
-        part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-    )
-    prompt = f"Please select a set type for **{formatted_name}**:\n"
-    for index, set_name in enumerate(sets):
-        button_id = f"set_{unique_id}_{pokemon}_{index}"
-        button = ui.Button(label=set_name, custom_id=button_id)
-        view.add_item(button)
-    return {formatted_name: view}, prompt

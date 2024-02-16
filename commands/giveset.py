@@ -78,9 +78,9 @@ class GiveSet:
             "lock": asyncio.Lock(),
         }
         if len(pokemon_data) > 1:
-            views, prompt = create_multiple_pokemon_view(unique_id, pokemon_data)
+            views, prompt = get_multiview(unique_id, pokemon_data)
         else:
-            views, prompt = create_single_pokemon_view(unique_id, pokemon_data[0])
+            views, prompt = get_view(unique_id, pokemon_data[0])
         await ctx.send(prompt)
         for formatted_name, view in views.items():
             message = await ctx.send(view=view)
