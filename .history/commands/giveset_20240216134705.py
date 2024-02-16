@@ -80,12 +80,11 @@ class GiveSet:
         if len(pokemon_data) > 1:
             views, prompt = create_multiple_pokemon_view(unique_id, pokemon_data)
         else:
-            views, prompt = create_single_pokemon_view(unique_id, pokemon_data[0])
-        await ctx.send(prompt)
-        for formatted_name, view in views.items():
-            message = await ctx.send(view=view)
-            GiveSet.awaiting_response[unique_id]["views"][message.id] = view
-            GiveSet.awaiting_response[unique_id]["message_ids"].append(message.id)
+            views, prompt = create_single_pokemon_view(unique_id, pokemon_data)
+        GiveSet.awaiting_response[unique_id]["views"] = views
+        GiveSet.awaiting_response[unique_id]["message_ids"] = [
+            msg.id for msg in messages
+        ]
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):

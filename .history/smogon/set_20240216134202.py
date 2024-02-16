@@ -183,7 +183,7 @@ def create_multiple_pokemon_view(unique_id, pokemon_data):
             button_id = f"set_{unique_id}_{pokemon}_{index}"
             button = ui.Button(label=set_name, custom_id=button_id)
             view.add_item(button)
-        views[formatted_name] = view
+        views[formatted_name] = view  # Use formatted_name as key for easier access
     return views, prompt
 
 

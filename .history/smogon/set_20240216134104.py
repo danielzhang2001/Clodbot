@@ -162,13 +162,7 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
 
 def create_multiple_pokemon_view(unique_id, pokemon_data):
     views = {}
-    formatted_names = [
-        "-".join(
-            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-        )
-        for pokemon, _, _ in pokemon_data
-    ]
-    prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
+    messages = []
     for pokemon, sets, url in pokemon_data:
         view = ui.View()
         formatted_name = "-".join(
@@ -184,18 +178,17 @@ def create_multiple_pokemon_view(unique_id, pokemon_data):
             button = ui.Button(label=set_name, custom_id=button_id)
             view.add_item(button)
         views[formatted_name] = view
-    return views, prompt
+    return views
 
 
 def create_single_pokemon_view(unique_id, pokemon_data):
-    pokemon, sets, url = pokemon_data
+    pokemon, sets, url = pokemon_data[0]
     view = ui.View()
     formatted_name = "-".join(
         part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
     )
-    prompt = f"Please select a set type for **{formatted_name}**:\n"
     for index, set_name in enumerate(sets):
         button_id = f"set_{unique_id}_{pokemon}_{index}"
         button = ui.Button(label=set_name, custom_id=button_id)
         view.add_item(button)
-    return {formatted_name: view}, prompt
+    return {formatted_name: view}

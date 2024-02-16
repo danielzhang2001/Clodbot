@@ -81,7 +81,11 @@ class GiveSet:
             views, prompt = create_multiple_pokemon_view(unique_id, pokemon_data)
         else:
             views, prompt = create_single_pokemon_view(unique_id, pokemon_data[0])
+
+        # Send the prompt message
         await ctx.send(prompt)
+
+        # Iterate through the views created by the helper functions and send them
         for formatted_name, view in views.items():
             message = await ctx.send(view=view)
             GiveSet.awaiting_response[unique_id]["views"][message.id] = view

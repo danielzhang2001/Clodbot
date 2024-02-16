@@ -67,9 +67,6 @@ class GiveSet:
     async def set_prompt(ctx, pokemon_data):
         # Displays prompt with buttons for selection of Pokemon sets.
         unique_id = str(uuid.uuid4())
-        views = {}
-        prompt = ""
-        messages = []
         GiveSet.awaiting_response[unique_id] = {
             "user_id": ctx.author.id,
             "pokemon_data": pokemon_data,
@@ -80,12 +77,24 @@ class GiveSet:
         if len(pokemon_data) > 1:
             views, prompt = create_multiple_pokemon_view(unique_id, pokemon_data)
         else:
-            views, prompt = create_single_pokemon_view(unique_id, pokemon_data[0])
-        await ctx.send(prompt)
-        for formatted_name, view in views.items():
+            pokemon, sets, url = pokemon_data[0]
+            view = ui.View()
+            formatted_name = "-".join(
+                part.capitalize() if len(part) > 1 else part
+                for part in pokemon.split("-")
+            )
+            prompt = f"Please select a set type for **{formatted_name}**:\n"
+            await ctx.send(prompt)
+            for index, set_name in enumerate(sets):
+                button_id = f"set_{unique_id}_{pokemon}_{index}"
+                button = ui.Button(label=set_name, custom_id=button_id)
+                view.add_item(button)
             message = await ctx.send(view=view)
-            GiveSet.awaiting_response[unique_id]["views"][message.id] = view
-            GiveSet.awaiting_response[unique_id]["message_ids"].append(message.id)
+            views[message.id] = view
+        GiveSet.awaiting_response[unique_id]["views"] = views
+        GiveSet.awaiting_response[unique_id]["message_ids"] = [
+            msg.id for msg in messages
+        ]
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):

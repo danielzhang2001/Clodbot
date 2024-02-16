@@ -68,8 +68,7 @@ class GiveSet:
         # Displays prompt with buttons for selection of Pokemon sets.
         unique_id = str(uuid.uuid4())
         views = {}
-        prompt = ""
-        messages = []
+messages = []
         GiveSet.awaiting_response[unique_id] = {
             "user_id": ctx.author.id,
             "pokemon_data": pokemon_data,
@@ -80,7 +79,7 @@ class GiveSet:
         if len(pokemon_data) > 1:
             views, prompt = create_multiple_pokemon_view(unique_id, pokemon_data)
         else:
-            views, prompt = create_single_pokemon_view(unique_id, pokemon_data[0])
+            views, prompt = create_single_pokemon_view(unique_id, pokemon_data)
         await ctx.send(prompt)
         for formatted_name, view in views.items():
             message = await ctx.send(view=view)

@@ -80,10 +80,10 @@ class GiveSet:
         if len(pokemon_data) > 1:
             views, prompt = create_multiple_pokemon_view(unique_id, pokemon_data)
         else:
-            views, prompt = create_single_pokemon_view(unique_id, pokemon_data[0])
-        await ctx.send(prompt)
+            views, prompt = create_single_pokemon_view(unique_id, pokemon_data)
+        await ctx.send(prompt)  # Send the prompt message separately
         for formatted_name, view in views.items():
-            message = await ctx.send(view=view)
+            message = await ctx.send(view=view)  # Now sending just the view
             GiveSet.awaiting_response[unique_id]["views"][message.id] = view
             GiveSet.awaiting_response[unique_id]["message_ids"].append(message.id)
 
