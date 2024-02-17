@@ -216,7 +216,8 @@ def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
             break
 
 
-def update_message_with_set_data(context, interaction, unique_id, pokemon, set_data):
+def update_message(context, interaction, unique_id, pokemon, set_data):
+    # Returns the necessary items (set message, channel, prompt message, button views) for updates after a button is selected.
     if "sets" not in context:
         context["sets"] = {}
     context["sets"][pokemon] = f"{set_data}\n\n"
