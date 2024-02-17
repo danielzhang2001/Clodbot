@@ -121,8 +121,8 @@ class GiveSet:
                                 "Original message view not found.", ephemeral=True
                             )
                             return
-                        disable_buttons(
-                            view, unique_id, pokemon, set_index, context["pokemon_data"]
+                        disable_buttons_for_selection(
+                            view, unique_id, pokemon, set_index, pokemon_data
                         )
                         original_message = await channel.fetch_message(
                             original_message_id

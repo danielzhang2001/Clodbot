@@ -203,14 +203,18 @@ def get_multiview(unique_id, pokemon_data):
     return views, prompt
 
 
-def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
-    # Disables the button the set is currently on, and also maintains disability of first buttons of each row for multiple Pokemon.
+def disable_buttons_for_selection(
+    view, unique_id, pokemon, set_index, is_multi_pokemon
+):
     for index, item in enumerate(view.children):
-        if len(pokemon_data) > 1 and index % len(view.children) == 0:
-            item.disabled = True
-        else:
-            item.disabled = False
-    for item in view.children:
-        if item.custom_id == f"set_{unique_id}_{pokemon}_{set_index}":
-            item.disabled = True
-            break
+                            if is_multi_pokemon and index % len(view.children) == 0:
+                                item.disabled = True
+                            else:
+                                item.disabled = False
+                        for item in view.children:
+                            if (
+                                item.custom_id
+                                == f"set_{unique_id}_{pokemon}_{set_index}"
+                            ):
+                                item.disabled = True
+                                break
