@@ -126,6 +126,14 @@ class GiveSet:
                         else:
                             message = await channel.send(message_content)
                             context["combined_message_id"] = message.id
+                    else:
+                        await interaction.followup.send(
+                            "Error fetching set data.", ephemeral=True
+                        )
+                else:
+                    await interaction.followup.send(
+                        "Error finding set. Please try again.", ephemeral=True
+                    )
             except Exception as e:
                 await interaction.followup.send(
                     f"An error occurred: {str(e)}", ephemeral=True
