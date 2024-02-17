@@ -214,3 +214,17 @@ def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
         if item.custom_id == f"set_{unique_id}_{pokemon}_{set_index}":
             item.disabled = True
             break
+
+
+def update_message_with_set_data(context, interaction, unique_id, pokemon, set_data):
+    if "sets" not in context:
+        context["sets"] = {}
+    context["sets"][pokemon] = f"{set_data}\n\n"
+    sets_message = "".join(context["sets"].values())
+    message_content = f"```{sets_message}```"
+    channel = interaction.client.get_channel(interaction.channel_id)
+    original_message_id = interaction.message.id
+    view = context["views"].get(original_message_id)
+    if not view:
+        return "Original message view not found."
+    return message_content, channel, original_message_id, view

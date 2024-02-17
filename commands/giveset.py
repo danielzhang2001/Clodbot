@@ -89,7 +89,6 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        # Handles button functionality to display appropriate set when clicked.
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
             await interaction.followup.send(
@@ -98,8 +97,6 @@ class GiveSet:
             return
         lock = context["lock"]
         async with lock:
-            if "sets" not in context:
-                context["sets"] = {}
             driver = None
             try:
                 chrome_options = Options()
@@ -110,17 +107,11 @@ class GiveSet:
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
                     if set_data:
-                        context["sets"][pokemon] = f"{set_data}\n\n"
-                        sets_message = "".join(context["sets"].values())
-                        message_content = f"```{sets_message}```"
-                        channel = interaction.client.get_channel(interaction.channel_id)
-                        original_message_id = interaction.message.id
-                        view = context["views"].get(original_message_id)
-                        if not view:
-                            await interaction.followup.send(
-                                "Original message view not found.", ephemeral=True
+                        message_content, channel, original_message_id, view = (
+                            update_message_with_set_data(
+                                context, interaction, unique_id, pokemon, set_data
                             )
-                            return
+                        )
                         disable_buttons(
                             view, unique_id, pokemon, set_index, context["pokemon_data"]
                         )
@@ -210,7 +201,7 @@ class GiveSet:
 
     @staticmethod
     async def display_sets(ctx, pokemon_data):
-        # Displays all sets in one textbox given Pokemon and their Sets.
+        # Displays all sets in one textbox given multiple Pokemon and their sets.
         message_content = ""
         for pokemon, sets, url in pokemon_data:
             set_name = sets[0]
