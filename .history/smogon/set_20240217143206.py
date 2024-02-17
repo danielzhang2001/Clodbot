@@ -217,8 +217,6 @@ def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
 
 
 def update_message_with_set_data(context, interaction, unique_id, pokemon, set_data):
-    if "sets" not in context:
-        context["sets"] = {}
     context["sets"][pokemon] = f"{set_data}\n\n"
     sets_message = "".join(context["sets"].values())
     message_content = f"```{sets_message}```"

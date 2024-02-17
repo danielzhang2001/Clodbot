@@ -107,10 +107,8 @@ class GiveSet:
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
                     if set_data:
-                        message_content, channel, original_message_id, view = (
-                            update_message_with_set_data(
-                                context, interaction, unique_id, pokemon, set_data
-                            )
+                        result = update_message_with_set_data(
+                            context, interaction, unique_id, pokemon, set_data
                         )
                         disable_buttons(
                             view, unique_id, pokemon, set_index, context["pokemon_data"]

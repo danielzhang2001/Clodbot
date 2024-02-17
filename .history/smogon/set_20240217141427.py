@@ -216,10 +216,12 @@ def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
             break
 
 
-def update_message_with_set_data(context, interaction, unique_id, pokemon, set_data):
-    if "sets" not in context:
-        context["sets"] = {}
-    context["sets"][pokemon] = f"{set_data}\n\n"
+def update_message_with_set_data(context, interaction, unique_id, pokemon):
+    if "sets" not in context or "views" not in context:
+        return "Context missing required data."
+    set_data = context["sets"].get(pokemon, "")
+    if not set_data:
+        return "Set data not found for the given Pokemon."
     sets_message = "".join(context["sets"].values())
     message_content = f"```{sets_message}```"
     channel = interaction.client.get_channel(interaction.channel_id)

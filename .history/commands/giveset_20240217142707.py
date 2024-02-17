@@ -107,25 +107,23 @@ class GiveSet:
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
                     if set_data:
-                        message_content, channel, original_message_id, view = (
-                            update_message_with_set_data(
-                                context, interaction, unique_id, pokemon, set_data
+                        result = update_message_with_set_data(
+                            context, interaction, unique_id, pokemon
+                        )
+                        disable_buttons(view, unique_id, pokemon, set_index, context["pokemon_data"])
+                            original_message = await channel.fetch_message(
+                                original_message_id
                             )
-                        )
-                        disable_buttons(
-                            view, unique_id, pokemon, set_index, context["pokemon_data"]
-                        )
-                        original_message = await channel.fetch_message(
-                            original_message_id
-                        )
-                        await original_message.edit(view=view)
-                        if "combined_message_id" in context:
-                            message_id = context["combined_message_id"]
-                            message = await channel.fetch_message(message_id)
-                            await message.edit(content=message_content)
-                        else:
-                            message = await channel.send(message_content)
-                            context["combined_message_id"] = message.id
+                            await original_message.edit(
+                                content=message_content, view=view
+                            )
+                            if "combined_message_id" in context:
+                                message_id = context["combined_message_id"]
+                                message = await channel.fetch_message(message_id)
+                                await message.edit(content=message_content)
+                            else:
+                                message = await channel.send(message_content)
+                                context["combined_message_id"] = message.id
                     else:
                         await interaction.followup.send(
                             "Error fetching set data.", ephemeral=True
