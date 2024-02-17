@@ -108,7 +108,7 @@ class GiveSet:
                     set_data = get_textarea(driver, set_name)
                     if set_data:
                         message_content, channel, original_message_id, view = (
-                            update_message_with_set_data(
+                            update_message(
                                 context, interaction, unique_id, pokemon, set_data
                             )
                         )
@@ -126,14 +126,6 @@ class GiveSet:
                         else:
                             message = await channel.send(message_content)
                             context["combined_message_id"] = message.id
-                    else:
-                        await interaction.followup.send(
-                            "Error fetching set data.", ephemeral=True
-                        )
-                else:
-                    await interaction.followup.send(
-                        "Error finding set. Please try again.", ephemeral=True
-                    )
             except Exception as e:
                 await interaction.followup.send(
                     f"An error occurred: {str(e)}", ephemeral=True
