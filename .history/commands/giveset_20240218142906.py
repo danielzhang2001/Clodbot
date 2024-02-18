@@ -107,18 +107,28 @@ class GiveSet:
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
                     if set_data:
-                        await update_message(
-                            context,
-                            interaction,
-                            unique_id,
-                            pokemon,
-                            set_index,
-                            set_data,
+                        original_message = await update_message(
+                            context, interaction, unique_id, pokemon, set_data
                         )
-                    else:
-                        await interaction.followup.send(
-                            "Error fetching set data.", ephemeral=True
+                        if original_message:
+                            disable_buttons(
+                                view,
+                                unique_id,
+                                pokemon,
+                                set_index,
+                                context["pokemon_data"],
+                            )
+                        original_message = await channel.fetch_message(
+                            original_message_id
                         )
+                        await original_message.edit(view=view)
+                        if "combined_message_id" in context:
+                            message_id = context["combined_message_id"]
+                            message = await channel.fetch_message(message_id)
+                            await message.edit(content=message_content)
+                        else:
+                            message = await channel.send(message_content)
+                            context["combined_message_id"] = message.id
             except Exception as e:
                 await interaction.followup.send(
                     f"An error occurred: {str(e)}", ephemeral=True

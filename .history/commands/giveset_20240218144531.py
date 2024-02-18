@@ -108,12 +108,7 @@ class GiveSet:
                     set_data = get_textarea(driver, set_name)
                     if set_data:
                         await update_message(
-                            context,
-                            interaction,
-                            unique_id,
-                            pokemon,
-                            set_index,
-                            set_data,
+                            context, interaction, unique_id, pokemon, set_data
                         )
                     else:
                         await interaction.followup.send(

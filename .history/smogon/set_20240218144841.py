@@ -224,19 +224,19 @@ async def update_message(context, interaction, unique_id, pokemon, set_index, se
     sets_message = "".join(context["sets"].values())
     message_content = f"```{sets_message}```"
     channel = interaction.client.get_channel(interaction.channel_id)
-    prompt = interaction.message.id
-    view = context["views"].get(prompt)
+    original_message_id = interaction.message.id
+    view = context["views"].get(original_message_id)
     if not view:
         await interaction.followup.send(
             "Original message view not found.", ephemeral=True
         )
     disable_buttons(view, unique_id, pokemon, set_index, context["pokemon_data"])
-    original_message = await channel.fetch_message(prompt)
+    original_message = await channel.fetch_message(original_message_id)
     await original_message.edit(view=view)
-    if "final_message" in context:
-        message_id = context["final_message"]
+    if "combined_message_id" in context:
+        message_id = context["combined_message_id"]
         message = await channel.fetch_message(message_id)
         await message.edit(content=message_content)
     else:
         message = await channel.send(message_content)
-        context["final_message"] = message.id
+        context["combined_message_id"] = message.id
