@@ -216,16 +216,27 @@ def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
             break
 
 
-def update_message(context, interaction, unique_id, pokemon, set_data):
-    # Returns the necessary items (set message, channel, prompt message, button views) for updates after a button is selected.
+async def update_message(context, interaction, unique_id, pokemon, set_index, set_data):
+    # Updates the set message and original prompt view with both set content and disabling of buttons after a button is selected.
     if "sets" not in context:
         context["sets"] = {}
     context["sets"][pokemon] = f"{set_data}\n\n"
     sets_message = "".join(context["sets"].values())
     message_content = f"```{sets_message}```"
     channel = interaction.client.get_channel(interaction.channel_id)
-    original_message_id = interaction.message.id
-    view = context["views"].get(original_message_id)
+    prompt = interaction.message.id
+    view = context["views"].get(prompt)
     if not view:
-        return "Original message view not found."
-    return message_content, channel, original_message_id, view
+        await interaction.followup.send(
+            "Original message view not found.", ephemeral=True
+        )
+    disable_buttons(view, unique_id, pokemon, set_index, context["pokemon_data"])
+    original_message = await channel.fetch_message(prompt)
+    await original_message.edit(view=view)
+    if "final_message" in context:
+        message_id = context["final_message"]
+        message = await channel.fetch_message(message_id)
+        await message.edit(content=message_content)
+    else:
+        message = await channel.send(message_content)
+        context["final_message"] = message.id
