@@ -128,7 +128,7 @@ class GiveSet:
                     driver.quit()
 
     @staticmethod
-    def fetch_set(pokemon, generation=None, format=None):
+    def fetch_set(pokemon: str, generation: str = None, format: str = None) -> tuple:
         # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
         driver = None
         try:
@@ -137,7 +137,7 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             if generation:
-                url = get_valid_pokemon_url(driver, pokemon, generation, format)
+                url, valid = get_valid_pokemon_url(driver, pokemon, generation, format)
             else:
                 for gen in reversed(get_gen_dict().values()):
                     url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"

@@ -240,19 +240,23 @@ async def update_message(context, interaction, unique_id, pokemon, set_index, se
     else:
         message = await channel.send(message_content)
         context["final_message"] = message.id
-
-
-def get_valid_pokemon_url(driver, pokemon, generation=None, format=None):
-    gen_code = get_gen(generation)
-    if not gen_code:
-        return None
-    url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
-    driver.get(url)
-    if format:
-        url += f"{format.lower()}/"
+        
+def get_valid_pokemon_url(pokemon, generation: str = None, format: str = None) -> tuple:
+    driver = None
+    try:
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--log-level=3")
+        driver = webdriver.Chrome(options=chrome_options)
+        gen_code = get_gen(generation)
+        if not gen_code:
+            return None, None
+        url = (f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/")
         driver.get(url)
-        if not is_valid_format(driver, format):
-            return None
-    if not is_valid_pokemon(driver, pokemon):
-        return None
-    return url
+        if format:
+            url += f"{format.lower()}/"
+            driver.get(url)
+            if not is_valid_format(driver, format):
+                return None, None
+        if not is_valid_pokemon(driver, pokemon):
+            return None, None

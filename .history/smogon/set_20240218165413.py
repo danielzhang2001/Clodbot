@@ -242,7 +242,9 @@ async def update_message(context, interaction, unique_id, pokemon, set_index, se
         context["final_message"] = message.id
 
 
-def get_valid_pokemon_url(driver, pokemon, generation=None, format=None):
+def get_valid_pokemon_url(
+    driver, pokemon, generation: str = None, format: str = None
+) -> tuple:
     gen_code = get_gen(generation)
     if not gen_code:
         return None

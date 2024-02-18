@@ -128,7 +128,7 @@ class GiveSet:
                     driver.quit()
 
     @staticmethod
-    def fetch_set(pokemon, generation=None, format=None):
+    def fetch_set(pokemon: str, generation: str = None, format: str = None) -> tuple:
         # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
         driver = None
         try:

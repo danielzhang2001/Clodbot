@@ -242,17 +242,15 @@ async def update_message(context, interaction, unique_id, pokemon, set_index, se
         context["final_message"] = message.id
 
 
-def get_valid_pokemon_url(driver, pokemon, generation=None, format=None):
+def get_valid_pokemon_url(pokemon, generation: str = None, format: str = None) -> tuple:
     gen_code = get_gen(generation)
     if not gen_code:
-        return None
+        return None, False
     url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
     driver.get(url)
     if format:
         url += f"{format.lower()}/"
         driver.get(url)
-        if not is_valid_format(driver, format):
-            return None
-    if not is_valid_pokemon(driver, pokemon):
-        return None
-    return url
+        if not is_valid_format(driver, format) or not is_valid_pokemon(driver, pokemon):
+            return None, False
+    return url, True
