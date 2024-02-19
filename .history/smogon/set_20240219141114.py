@@ -260,13 +260,12 @@ def get_setinfo(driver, pokemon, generation=None, format=None):
         else:
             if not is_valid_pokemon(driver, pokemon):
                 return None, None
-        set_names = get_setnames(driver)
+            set_names = get_setnames(driver)
         return set_names, url if set_names else (None, None)
     else:
         for gen in reversed(get_gen_dict().values()):
             url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
             driver.get(url)
             if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
-                set_names = get_setnames(driver)
                 return set_names, url if set_names else (None, None)
-    return None, None
+        return None, None

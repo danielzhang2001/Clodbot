@@ -137,7 +137,6 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             set_names, url = get_setinfo(driver, pokemon, generation, format)
-            return set_names, url
         except Exception as e:
             print(f"An error occurred: {str(e)}")
             return None, None
@@ -155,7 +154,7 @@ class GiveSet:
         return sets, url
 
     @staticmethod
-    async def fetch_multiple_sets_async(pokemon_names):
+    async def fetch_multiple_sets_async(pokemon_names: list):
         # Uses fetch_set_async multiple times to speed up process of fetching multiple Pokemon sets.
         tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
         results = await asyncio.gather(*tasks)

@@ -137,7 +137,8 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             set_names, url = get_setinfo(driver, pokemon, generation, format)
-            return set_names, url
+            if set_names is None:
+                return None, None
         except Exception as e:
             print(f"An error occurred: {str(e)}")
             return None, None
