@@ -136,18 +136,8 @@ class GiveSet:
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            if generation:
-                url = get_valid_pokemon_url(driver, pokemon, generation, format)
-            else:
-                for gen in reversed(get_gen_dict().values()):
-                    url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
-                    driver.get(url)
-                    if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
-                        sets = get_set_names(driver)
-                        return sets, url
-                return None, None
-            sets = get_set_names(driver)
-            return sets, url
+            set_names, url = get_setinfo(driver, pokemon, generation, format)
+            return set_names, url
         except Exception as e:
             print(f"An error occurred: {str(e)}")
             return None, None
@@ -156,7 +146,7 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def fetch_set_async(pokemon: str, generation: str = None, format: str = None):
+    async def fetch_set_async(pokemon, generation=None, format=None):
         # Helper function for fetching sets asynchronously to save time.
         loop = asyncio.get_running_loop()  # For Python 3.7+
         sets, url = await loop.run_in_executor(
@@ -165,7 +155,7 @@ class GiveSet:
         return sets, url
 
     @staticmethod
-    async def fetch_multiple_sets_async(pokemon_names: list):
+    async def fetch_multiple_sets_async(pokemon_names):
         # Uses fetch_set_async multiple times to speed up process of fetching multiple Pokemon sets.
         tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
         results = await asyncio.gather(*tasks)
