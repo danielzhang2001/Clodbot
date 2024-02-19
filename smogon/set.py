@@ -29,83 +29,6 @@ def get_gen(generation: str) -> str:
     return get_gen_dict().get(generation.lower())
 
 
-def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
-    # Check if the Pokemon name exists on the page.
-    try:
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    f"//h1[translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='{pokemon.upper()}']",
-                )
-            )
-        )
-        return True
-    except:
-        try:
-            WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        f"//h1[translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='{pokemon.upper().replace('-', ' ')}']",
-                    )
-                )
-            )
-            return True
-        except:
-            return False
-
-
-def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
-    # Check if the Pokemon format exists on the page.
-    try:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located(
-                (By.CLASS_NAME, "PokemonPage-StrategySelector")
-            )
-        )
-        format_elements = driver.find_elements(
-            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
-        )
-        for element in format_elements:
-            href = element.get_attribute("href")
-            url_format = href.split("/")[-2]
-            if format.lower() == url_format.lower():
-                return True
-        selected_format = driver.find_element(
-            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
-        )
-        current_url = driver.current_url
-        url_format = current_url.split("/")[-2]
-        return format.lower() == url_format.lower()
-    except Exception as e:
-        print(f"Error checking format: {str(e)}")
-        return False
-
-
-def has_export_buttons(driver: webdriver.Chrome) -> bool:
-    # Checks if there are any export buttons on the page.
-    try:
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
-        )
-        return True
-    except Exception as e:
-        print(f"No Export Buttons Found: {str(e)}")
-        return False
-
-
-def format_name(pokemon: str) -> str:
-    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
-    formatted_parts = []
-    for part in pokemon.split("-"):
-        if len(part) > 1:
-            formatted_parts.append(part.capitalize())
-        else:
-            formatted_parts.append(part.lower())
-    return "-".join(formatted_parts)
-
-
 def get_setnames(driver: webdriver.Chrome) -> list:
     # Finds and returns all set names on the page.
     try:
@@ -203,6 +126,113 @@ def get_multiview(unique_id, pokemon_data):
     return views, prompt
 
 
+def get_setinfo(driver, pokemon, generation=None, format=None):
+    # Retrieves the set names and the url with the Driver, Pokemon, Generation (Optional) and Format (Optional) provided.
+    if generation:
+        gen_code = get_gen(generation)
+        if not gen_code:
+            return None, None
+        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+        driver.get(url)
+        if format:
+            url += f"{format.lower()}/"
+            driver.get(url)
+            if not is_valid_format(driver, format) or not is_valid_pokemon(
+                driver, pokemon
+            ):
+                return None, None
+        else:
+            if not is_valid_pokemon(driver, pokemon):
+                return None, None
+        set_names = get_setnames(driver)
+        return set_names, url if set_names else (None, None)
+    else:
+        for gen in reversed(get_gen_dict().values()):
+            url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
+            driver.get(url)
+            if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
+                set_names = get_setnames(driver)
+                return set_names, url if set_names else (None, None)
+    return None, None
+
+
+def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
+    # Check if the Pokemon name exists on the page.
+    try:
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    f"//h1[translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='{pokemon.upper()}']",
+                )
+            )
+        )
+        return True
+    except:
+        try:
+            WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        f"//h1[translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='{pokemon.upper().replace('-', ' ')}']",
+                    )
+                )
+            )
+            return True
+        except:
+            return False
+
+
+def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
+    # Check if the Pokemon format exists on the page.
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, "PokemonPage-StrategySelector")
+            )
+        )
+        format_elements = driver.find_elements(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
+        )
+        for element in format_elements:
+            href = element.get_attribute("href")
+            url_format = href.split("/")[-2]
+            if format.lower() == url_format.lower():
+                return True
+        selected_format = driver.find_element(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
+        )
+        current_url = driver.current_url
+        url_format = current_url.split("/")[-2]
+        return format.lower() == url_format.lower()
+    except Exception as e:
+        print(f"Error checking format: {str(e)}")
+        return False
+
+
+def has_export_buttons(driver: webdriver.Chrome) -> bool:
+    # Checks if there are any export buttons on the page.
+    try:
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
+        )
+        return True
+    except Exception as e:
+        print(f"No Export Buttons Found: {str(e)}")
+        return False
+
+
+def format_name(pokemon: str) -> str:
+    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
+    formatted_parts = []
+    for part in pokemon.split("-"):
+        if len(part) > 1:
+            formatted_parts.append(part.capitalize())
+        else:
+            formatted_parts.append(part.lower())
+    return "-".join(formatted_parts)
+
+
 def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
     # Disables the button the set is currently on, and also maintains disability of first buttons of each row for multiple Pokemon.
     for index, item in enumerate(view.children):
@@ -240,33 +270,3 @@ async def update_message(context, interaction, unique_id, pokemon, set_index, se
     else:
         message = await channel.send(message_content)
         context["final_message"] = message.id
-
-
-def get_setinfo(driver, pokemon, generation=None, format=None):
-    # Retrieves the set names and the url with the Driver, Pokemon, Generation (Optional) and Format (Optional) provided.
-    if generation:
-        gen_code = get_gen(generation)
-        if not gen_code:
-            return None, None
-        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
-        driver.get(url)
-        if format:
-            url += f"{format.lower()}/"
-            driver.get(url)
-            if not is_valid_format(driver, format) or not is_valid_pokemon(
-                driver, pokemon
-            ):
-                return None, None
-        else:
-            if not is_valid_pokemon(driver, pokemon):
-                return None, None
-        set_names = get_setnames(driver)
-        return set_names, url if set_names else (None, None)
-    else:
-        for gen in reversed(get_gen_dict().values()):
-            url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
-            driver.get(url)
-            if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
-                set_names = get_setnames(driver)
-                return set_names, url if set_names else (None, None)
-    return None, None
