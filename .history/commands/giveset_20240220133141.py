@@ -91,7 +91,7 @@ class GiveSet:
         return sets, url
 
     @staticmethod
-    async def fetch_multiset_async(pokemon_names):
+    async def fetch_multiple_sets_async(pokemon_names):
         # Uses fetch_set_async multiple times to speed up process of fetching multiple Pokemon sets.
         tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
         results = await asyncio.gather(*tasks)

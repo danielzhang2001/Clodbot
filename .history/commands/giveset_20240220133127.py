@@ -82,22 +82,6 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def fetch_set_async(pokemon, generation=None, format=None):
-        # Helper function for fetching sets asynchronously to save time.
-        loop = asyncio.get_running_loop()  # For Python 3.7+
-        sets, url = await loop.run_in_executor(
-            None, GiveSet.fetch_set, pokemon, generation, format
-        )
-        return sets, url
-
-    @staticmethod
-    async def fetch_multiset_async(pokemon_names):
-        # Uses fetch_set_async multiple times to speed up process of fetching multiple Pokemon sets.
-        tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
-        results = await asyncio.gather(*tasks)
-        return results
-
-    @staticmethod
     async def set_prompt(ctx, pokemon_data):
         # Displays prompt with buttons for selection of Pokemon sets.
         unique_id = str(uuid.uuid4())
@@ -160,6 +144,22 @@ class GiveSet:
             finally:
                 if driver:
                     driver.quit()
+
+    @staticmethod
+    async def fetch_set_async(pokemon, generation=None, format=None):
+        # Helper function for fetching sets asynchronously to save time.
+        loop = asyncio.get_running_loop()  # For Python 3.7+
+        sets, url = await loop.run_in_executor(
+            None, GiveSet.fetch_set, pokemon, generation, format
+        )
+        return sets, url
+
+    @staticmethod
+    async def fetch_multiple_sets_async(pokemon_names):
+        # Uses fetch_set_async multiple times to speed up process of fetching multiple Pokemon sets.
+        tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
+        results = await asyncio.gather(*tasks)
+        return results
 
     @staticmethod
     async def display_sets(ctx, pokemon_data):
