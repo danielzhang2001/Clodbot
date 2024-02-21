@@ -95,9 +95,6 @@ class GiveSet:
     @staticmethod
     def fetch_set(pokemon, generation=None, format=None):
         # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
-        cached_data = GiveSet.check_cache(pokemon, generation, format)
-        if cached_data:
-            return cached_data
         driver = None
         try:
             chrome_options = Options()
@@ -105,7 +102,6 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             set_names, url = get_setinfo(driver, pokemon, generation, format)
-            GiveSet.update_cache(pokemon, (set_names, url), generation, format)
             return set_names, url
         except Exception as e:
             print(f"An error occurred: {str(e)}")
