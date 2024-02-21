@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
 import time
+import datetime
 
 
 class GiveSet:
@@ -18,6 +19,36 @@ class GiveSet:
 
     # For caching Pokemon names
     pokemon_cache = {"names": [], "last_updated": 0}
+    # Initialize a class variable for caching
+    set_cache = {}
+    # Cache expiration duration
+    CACHE_DURATION = datetime.timedelta(hours=24)
+
+    @staticmethod
+    def get_cache_key(pokemon, generation=None, format=None):
+        """Generate a key for accessing the cache."""
+        return (
+            pokemon.lower(),
+            str(generation).lower() if generation else None,
+            str(format).lower() if format else None,
+        )
+
+    @staticmethod
+    def check_cache(pokemon, generation=None, format=None):
+        """Check if data is available in the cache and not expired."""
+        key = GiveSet.get_cache_key(pokemon, generation, format)
+        if key in GiveSet.set_cache:
+            data, expiration = GiveSet.set_cache[key]
+            if datetime.datetime.now() < expiration:
+                return data
+        return None
+
+    @staticmethod
+    def update_cache(pokemon, data, generation=None, format=None):
+        """Update the cache with new data."""
+        key = GiveSet.get_cache_key(pokemon, generation, format)
+        expiration = datetime.datetime.now() + GiveSet.CACHE_DURATION
+        GiveSet.set_cache[key] = (data, expiration)
 
     @staticmethod
     def fetch_cache():
@@ -59,13 +90,14 @@ class GiveSet:
             finally:
                 if driver:
                     driver.quit()
-        else:
-            print("Using cached Pokémon data...")
         return GiveSet.pokemon_cache["names"]
 
     @staticmethod
     def fetch_set(pokemon, generation=None, format=None):
         # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
+        cached_data = GiveSet.check_cache(pokemon, generation, format)
+        if cached_data:
+            return cached_data
         driver = None
         try:
             chrome_options = Options()
@@ -73,6 +105,7 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             set_names, url = get_setinfo(driver, pokemon, generation, format)
+            GiveSet.update_cache(pokemon, (set_names, url), generation, format)
             return set_names, url
         except Exception as e:
             print(f"An error occurred: {str(e)}")
