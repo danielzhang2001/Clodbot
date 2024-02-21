@@ -55,7 +55,9 @@ class GiveSet:
         # Stores all Pokemon from Bulbapedia into a cache that updates every 24 hours, returns the cache.
         current_time = time.time()
         if not GiveSet.pokemon_cache["names"] or (
-            current_time - GiveSet.pokemon_cache["last_updated"] > 2628288
+            current_time - GiveSet.pokemon_cache["last_updated"] > 2,
+            628,
+            288,
         ):
             print("Updating Pokémon cache...")
             url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"

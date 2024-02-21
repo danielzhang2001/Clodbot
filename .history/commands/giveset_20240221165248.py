@@ -19,14 +19,14 @@ class GiveSet:
 
     # For caching Pokemon names
     pokemon_cache = {"names": [], "last_updated": 0}
-    # For caching Pokemon sets
+    # Initialize a class variable for caching
     set_cache = {}
     # Cache expiration duration
-    CACHE_DURATION = datetime.timedelta(hours=730)
+    CACHE_DURATION = datetime.timedelta(hours=24)
 
     @staticmethod
     def get_cache_key(pokemon, generation=None, format=None):
-        # Generates a key for accessing the cache.
+        """Generate a key for accessing the cache."""
         return (
             pokemon.lower(),
             str(generation).lower() if generation else None,
@@ -35,7 +35,7 @@ class GiveSet:
 
     @staticmethod
     def check_cache(pokemon, generation=None, format=None):
-        # Checks if data is available in the cache and not expired.
+        """Check if data is available in the cache and not expired."""
         key = GiveSet.get_cache_key(pokemon, generation, format)
         if key in GiveSet.set_cache:
             data, expiration = GiveSet.set_cache[key]
@@ -45,7 +45,7 @@ class GiveSet:
 
     @staticmethod
     def update_cache(pokemon, data, generation=None, format=None):
-        # Updates the cache with new data.
+        """Update the cache with new data."""
         key = GiveSet.get_cache_key(pokemon, generation, format)
         expiration = datetime.datetime.now() + GiveSet.CACHE_DURATION
         GiveSet.set_cache[key] = (data, expiration)
@@ -55,7 +55,7 @@ class GiveSet:
         # Stores all Pokemon from Bulbapedia into a cache that updates every 24 hours, returns the cache.
         current_time = time.time()
         if not GiveSet.pokemon_cache["names"] or (
-            current_time - GiveSet.pokemon_cache["last_updated"] > 2628288
+            current_time - GiveSet.pokemon_cache["last_updated"] > 86400
         ):
             print("Updating Pokémon cache...")
             url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
