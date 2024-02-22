@@ -83,11 +83,14 @@ async def give_set(ctx, *args):
         if pokemon_data:
             await GiveSet.display_sets(ctx, pokemon_data)
         if invalid_pokemon:
+            no_sets_message = ()
             await ctx.send(
                 "No sets found for the requested Pokémon: "
-                + ", ".join(invalid_pokemon)
+                + ", ".join(no_sets_pokemon)
                 + "."
             )
+        elif not pokemon_data:
+            await ctx.send("No sets found for the requested Pokémon.")
     elif "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
         pokemon_sets = await GiveSet.fetch_multiset_async(pokemons)
