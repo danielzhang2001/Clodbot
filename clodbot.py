@@ -73,24 +73,21 @@ async def give_set(ctx, *args):
         pokemon_names = random.sample(GiveSet.fetch_cache(), k=num_pokemon)
         pokemon_sets = await GiveSet.fetch_multiset_async(pokemon_names)
         pokemon_data = []
-        no_sets_pokemon = []
+        invalid_pokemon = []
         for name, (sets, url) in zip(pokemon_names, pokemon_sets):
             if sets:
                 pokemon_data.append((name, sets, url))
             else:
-                no_sets_pokemon.append(name)
+                invalid_pokemon.append(name)
 
         if pokemon_data:
             await GiveSet.display_sets(ctx, pokemon_data)
-        if no_sets_pokemon:
-            no_sets_message = (
+        if invalid_pokemon:
+            await ctx.send(
                 "No sets found for the requested Pokémon: "
-                + ", ".join(no_sets_pokemon)
+                + ", ".join(invalid_pokemon)
                 + "."
             )
-            await ctx.send(no_sets_message)
-        elif not pokemon_data:
-            await ctx.send("No sets found for the requested Pokémon.")
     elif "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
         pokemon_sets = await GiveSet.fetch_multiset_async(pokemons)
