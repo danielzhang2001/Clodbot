@@ -10,7 +10,7 @@ from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class GiveSet:
@@ -20,7 +20,7 @@ class GiveSet:
     # For caching Pokemon sets
     set_cache = {}
     # Cache expiration duration
-    cache_duration = timedelta(hours=730)
+    cache_duration = datetime.timedelta(hours=730)
 
     @staticmethod
     def get_cache_key(pokemon, generation=None, format=None):
@@ -37,7 +37,7 @@ class GiveSet:
         key = GiveSet.get_cache_key(pokemon, generation, format)
         if key in GiveSet.set_cache:
             data, expiration = GiveSet.set_cache[key]
-            if datetime.now() < expiration:
+            if datetime.datetime.now() < expiration:
                 return data
         return None
 
@@ -45,7 +45,7 @@ class GiveSet:
     def update_cache(pokemon, data, generation=None, format=None):
         # Updates the cache with new data every month.
         key = GiveSet.get_cache_key(pokemon, generation, format)
-        expiration = datetime.now() + GiveSet.cache_duration
+        expiration = datetime.datetime.now() + GiveSet.cache_duration
         GiveSet.set_cache[key] = (data, expiration)
 
     @staticmethod
