@@ -115,7 +115,7 @@ def get_multiview(unique_id, pokemon_data):
         )
         view.add_item(
             ui.Button(
-                label=f"{formatted_name}:", style=ButtonStyle.primary, disabled=True
+                label=f"{formatted_name}:", style=ButtonStyle.danger, disabled=True
             )
         )
         for index, set_name in enumerate(sets):
@@ -236,13 +236,10 @@ def format_name(pokemon: str) -> str:
 def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
     # Disables the button the set is currently on, and also maintains disability of first buttons of each row for multiple Pokemon.
     for index, item in enumerate(view.children):
-        if len(pokemon_data) > 1 and index % len(view.children) == 0:
-            item.style = ButtonStyle.primary
-        else:
-            item.style = ButtonStyle.secondary
+        item.style = ButtonStyle.secondary
     for item in view.children:
         if item.custom_id == f"set_{unique_id}_{pokemon}_{set_index}":
-            item.style = ButtonStyle.success
+            item.style = ButtonStyle.primary
             break
 
 

@@ -239,7 +239,7 @@ def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
         if len(pokemon_data) > 1 and index % len(view.children) == 0:
             item.style = ButtonStyle.primary
         else:
-            item.style = ButtonStyle.secondary
+        item.style = ButtonStyle.secondary
     for item in view.children:
         if item.custom_id == f"set_{unique_id}_{pokemon}_{set_index}":
             item.style = ButtonStyle.success
