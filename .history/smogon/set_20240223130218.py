@@ -236,10 +236,13 @@ def format_name(pokemon: str) -> str:
 def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
     # Disables the button the set is currently on, and also maintains disability of first buttons of each row for multiple Pokemon.
     for index, item in enumerate(view.children):
-        item.style = ButtonStyle.secondary
+        if len(pokemon_data) > 1 and index % len(view.children) == 0:
+            item.style = ButtonStyle.success
+        else:
+            item.style = ButtonStyle.secondary
     for item in view.children:
         if item.custom_id == f"set_{unique_id}_{pokemon}_{set_index}":
-            item.style = ButtonStyle.primary
+            item.style = ButtonStyle.secondary
             break
 
 
