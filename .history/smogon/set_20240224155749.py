@@ -271,7 +271,7 @@ async def update_message(
         ):
             set_info = context["sets"][selected_pokemon][selected_index]
             message_content += f"{set_info}\n\n"
-    message_content = f"```{message_content}```" if message_content else None
+    message_content = f"```{message_content}```" if message_content else "\u200B"
     original_message_id = interaction.message.id
     view = context["views"].get(original_message_id)
     if not view:
@@ -285,11 +285,11 @@ async def update_message(
     if "final_message" in context:
         message_id = context["final_message"]
         message = await channel.fetch_message(message_id)
-        if message_content:
+        if message_content != "\u200B":
             await message.edit(content=message_content)
         else:
             await message.delete()
             del context["final_message"]
-    elif message_content:
+    elif message_content != "\u200B":
         message = await channel.send(message_content)
         context["final_message"] = message.id

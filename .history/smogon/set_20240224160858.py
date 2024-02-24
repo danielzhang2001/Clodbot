@@ -271,7 +271,7 @@ async def update_message(
         ):
             set_info = context["sets"][selected_pokemon][selected_index]
             message_content += f"{set_info}\n\n"
-    message_content = f"```{message_content}```" if message_content else None
+    message_content = f"```{message_content}```" if message_content else "\u200B"
     original_message_id = interaction.message.id
     view = context["views"].get(original_message_id)
     if not view:
