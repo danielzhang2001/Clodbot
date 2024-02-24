@@ -233,8 +233,8 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def update_buttons(view, selected_sets):
-    # Updates button styles based on whether they are selected or not.
+def disable_buttons(view, unique_id, selected_sets):
+    # Adjust button styles based on whether they are selected or not.
     for item in view.children:
         item_id_parts = item.custom_id.split("_")
         if len(item_id_parts) == 4:
@@ -279,7 +279,7 @@ async def update_message(
             "Original message view not found.", ephemeral=True
         )
         return
-    update_buttons(view, selected_sets)
+    disable_buttons(view, unique_id, selected_sets)
     original_message = await channel.fetch_message(original_message_id)
     await original_message.edit(view=view)
     if "final_message" in context:

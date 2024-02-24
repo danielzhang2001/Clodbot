@@ -233,20 +233,17 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def update_buttons(view, selected_sets):
-    # Updates button styles based on whether they are selected or not.
+def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
+    # Disables the button the set is currently on, and also maintains disability of first buttons of each row for multiple Pokemon.
+    for index, item in enumerate(view.children):
+        if len(pokemon_data) > 1 and index % len(view.children) == 0:
+            item.style = ButtonStyle.primary
+        else:
+            item.style = ButtonStyle.secondary
     for item in view.children:
-        item_id_parts = item.custom_id.split("_")
-        if len(item_id_parts) == 4:
-            _, _, button_pokemon, button_set_index_str = item_id_parts
-            button_set_index = int(button_set_index_str)
-            if (
-                button_pokemon in selected_sets
-                and selected_sets[button_pokemon] == button_set_index
-            ):
-                item.style = ButtonStyle.success
-            else:
-                item.style = ButtonStyle.secondary
+        if item.custom_id == f"set_{unique_id}_{pokemon}_{set_index}":
+            item.style = ButtonStyle.success
+            break
 
 
 async def update_message(
@@ -279,8 +276,7 @@ async def update_message(
             "Original message view not found.", ephemeral=True
         )
         return
-    update_buttons(view, selected_sets)
-    original_message = await channel.fetch_message(original_message_id)
+    disable_buttons(view, unique_id, selected_sets)riginal_message_id)
     await original_message.edit(view=view)
     if "final_message" in context:
         message_id = context["final_message"]
