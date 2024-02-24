@@ -188,7 +188,8 @@ class GiveSet:
                             )
                         else:
                             await update_message(
-                                context, interaction, unique_id, pokemon
+                                context,
+                                interaction,
                             )
                     else:
                         await interaction.followup.send(

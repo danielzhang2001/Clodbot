@@ -186,10 +186,6 @@ class GiveSet:
                                 set_index,
                                 set_data,
                             )
-                        else:
-                            await update_message(
-                                context, interaction, unique_id, pokemon
-                            )
                     else:
                         await interaction.followup.send(
                             "Error fetching set data.", ephemeral=True

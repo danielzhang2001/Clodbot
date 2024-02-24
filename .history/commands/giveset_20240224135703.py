@@ -160,13 +160,6 @@ class GiveSet:
             return
         lock = context["lock"]
         async with lock:
-            if "selected_sets" not in context:
-                context["selected_sets"] = {}
-            selected_sets = context["selected_sets"]
-            if pokemon in selected_sets and selected_sets[pokemon] == set_index:
-                del selected_sets[pokemon]
-            else:
-                selected_sets[pokemon] = set_index
             driver = None
             try:
                 chrome_options = Options()
@@ -177,19 +170,14 @@ class GiveSet:
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
                     if set_data:
-                        if pokemon in selected_sets:
-                            await update_message(
-                                context,
-                                interaction,
-                                unique_id,
-                                pokemon,
-                                set_index,
-                                set_data,
-                            )
-                        else:
-                            await update_message(
-                                context, interaction, unique_id, pokemon
-                            )
+                        await update_message(
+                            context,
+                            interaction,
+                            unique_id,
+                            pokemon,
+                            set_index,
+                            set_data,
+                        )
                     else:
                         await interaction.followup.send(
                             "Error fetching set data.", ephemeral=True

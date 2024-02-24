@@ -249,55 +249,26 @@ def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
 async def update_message(
     context, interaction, unique_id, pokemon=None, set_index=None, set_data=None
 ):
-    # Updates the set message of either adding or deleting a set after a set button is clicked.
-    if set_index is not None:
-        set_index = int(set_index)
+    # Updates the set message and original prompt view with both set content and disabling of buttons after a button is selected.
+    if "sets" not in context:
+        context["sets"] = {}
+    context["sets"][pokemon] = f"{set_data}\n\n"
+    sets_message = "".join(context["sets"].values())
+    message_content = f"```{sets_message}```"
     channel = interaction.client.get_channel(interaction.channel_id)
-    selected_sets = context.get("selected_sets", {})
-    if set_data and pokemon is not None and set_index is not None:
-        if "sets" not in context:
-            context["sets"] = {}
-        if pokemon not in context["sets"]:
-            context["sets"][pokemon] = {}
-        context["sets"][pokemon][set_index] = set_data
-    message_content = ""
-    for selected_pokemon, selected_index in selected_sets.items():
-        if (
-            selected_pokemon in context["sets"]
-            and selected_index in context["sets"][selected_pokemon]
-        ):
-            set_info = context["sets"][selected_pokemon][selected_index]
-            message_content += f"{set_info}\n\n"
-    message_content = f"```{message_content}```" if message_content else "\u200B"
-    original_message_id = interaction.message.id
-    view = context["views"].get(original_message_id)
+    prompt = interaction.message.id
+    view = context["views"].get(prompt)
     if not view:
         await interaction.followup.send(
             "Original message view not found.", ephemeral=True
         )
-        return
-    for item in view.children:
-        item_id_parts = item.custom_id.split("_")
-        if len(item_id_parts) == 4:
-            _, _, button_pokemon, button_set_index_str = item_id_parts
-            button_set_index = int(button_set_index_str)
-            if (
-                button_pokemon in selected_sets
-                and selected_sets[button_pokemon] == button_set_index
-            ):
-                item.style = ButtonStyle.success
-            else:
-                item.style = ButtonStyle.secondary
-    original_message = await channel.fetch_message(original_message_id)
+    disable_buttons(view, unique_id, pokemon, set_index, context["pokemon_data"])
+    original_message = await channel.fetch_message(prompt)
     await original_message.edit(view=view)
     if "final_message" in context:
         message_id = context["final_message"]
         message = await channel.fetch_message(message_id)
-        if message_content != "\u200B":
-            await message.edit(content=message_content)
-        else:
-            await message.delete()
-            del context["final_message"]
-    elif message_content != "\u200B":
+        await message.edit(content=message_content)
+    else:
         message = await channel.send(message_content)
         context["final_message"] = message.id

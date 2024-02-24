@@ -249,26 +249,32 @@ def disable_buttons(view, unique_id, pokemon, set_index, pokemon_data):
 async def update_message(
     context, interaction, unique_id, pokemon=None, set_index=None, set_data=None
 ):
-    # Updates the set message of either adding or deleting a set after a set button is clicked.
+    # Ensure set_index is an integer for consistent comparison and access
     if set_index is not None:
         set_index = int(set_index)
+
     channel = interaction.client.get_channel(interaction.channel_id)
     selected_sets = context.get("selected_sets", {})
+
+    # Update or add the set to the context if set_data is provided
     if set_data and pokemon is not None and set_index is not None:
         if "sets" not in context:
             context["sets"] = {}
         if pokemon not in context["sets"]:
             context["sets"][pokemon] = {}
         context["sets"][pokemon][set_index] = set_data
-    message_content = ""
+
+    message_content = "```"
     for selected_pokemon, selected_index in selected_sets.items():
         if (
             selected_pokemon in context["sets"]
             and selected_index in context["sets"][selected_pokemon]
         ):
             set_info = context["sets"][selected_pokemon][selected_index]
-            message_content += f"{set_info}\n\n"
-    message_content = f"```{message_content}```" if message_content else "\u200B"
+            message_content += f"{selected_pokemon}: {set_info}\n"
+    if message_content != "```":
+        message_content += "```"
+
     original_message_id = interaction.message.id
     view = context["views"].get(original_message_id)
     if not view:
@@ -276,6 +282,8 @@ async def update_message(
             "Original message view not found.", ephemeral=True
         )
         return
+
+    # Update button styles based on selection
     for item in view.children:
         item_id_parts = item.custom_id.split("_")
         if len(item_id_parts) == 4:
@@ -285,19 +293,23 @@ async def update_message(
                 button_pokemon in selected_sets
                 and selected_sets[button_pokemon] == button_set_index
             ):
-                item.style = ButtonStyle.success
+                item.style = ButtonStyle.success  # Selected
             else:
-                item.style = ButtonStyle.secondary
+                item.style = ButtonStyle.secondary  # Not selected
+
     original_message = await channel.fetch_message(original_message_id)
-    await original_message.edit(view=view)
-    if "final_message" in context:
+    await original_message.edit(content=message_content, view=view)
+
+    if "final_message" in context and message_content != "No sets selected.":
         message_id = context["final_message"]
         message = await channel.fetch_message(message_id)
-        if message_content != "\u200B":
-            await message.edit(content=message_content)
-        else:
-            await message.delete()
-            del context["final_message"]
-    elif message_content != "\u200B":
+        await message.edit(content=message_content)
+    elif message_content != "No sets selected.":
         message = await channel.send(message_content)
         context["final_message"] = message.id
+    elif "final_message" in context:
+        # Delete the final message if no sets are selected
+        message_id = context["final_message"]
+        message = await channel.fetch_message(message_id)
+        await message.delete()
+        del context["final_message"]

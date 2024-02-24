@@ -177,19 +177,15 @@ class GiveSet:
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
                     if set_data:
-                        if pokemon in selected_sets:
-                            await update_message(
-                                context,
-                                interaction,
-                                unique_id,
-                                pokemon,
-                                set_index,
-                                set_data,
-                            )
-                        else:
-                            await update_message(
-                                context, interaction, unique_id, pokemon
-                            )
+                        if pokemon in selected_sets: 
+                        await update_message(
+                            context,
+                            interaction,
+                            unique_id,
+                            pokemon,
+                            set_index,
+                            set_data,
+                        )
                     else:
                         await interaction.followup.send(
                             "Error fetching set data.", ephemeral=True
