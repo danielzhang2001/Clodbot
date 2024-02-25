@@ -175,7 +175,6 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        # Handles button functionality from set_prompt when clicked
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
             await interaction.followup.send(
@@ -191,8 +190,11 @@ class GiveSet:
                 del selected_sets[pokemon]
             else:
                 selected_sets[pokemon] = set_index
+
+            # Check if the set data is cached
             cache_key = GiveSet.get_cache_key(pokemon, set_name)
             set_display_data = GiveSet.check_set_display_cache(pokemon, set_name)
+
             if not set_display_data:
                 driver = None
                 try:
@@ -203,6 +205,8 @@ class GiveSet:
                     driver.get(url)
                     if get_export_btn(driver, set_name):
                         set_data = get_textarea(driver, set_name)
+                        # Update the cache with the new set data
+                        print("FOUND!")
                         GiveSet.update_set_display_cache(pokemon, set_name, set_data)
                         set_display_data = set_data
                     else:
@@ -218,6 +222,8 @@ class GiveSet:
                 finally:
                     if driver:
                         driver.quit()
+
+            # Update the message with either the cached data or the newly fetched data
             if set_display_data:
                 await update_message(
                     context,
@@ -228,6 +234,7 @@ class GiveSet:
                     set_display_data,
                 )
             else:
+                # Handle the case where set data could not be fetched or found in cache
                 await interaction.followup.send(
                     "Error fetching set data.", ephemeral=True
                 )

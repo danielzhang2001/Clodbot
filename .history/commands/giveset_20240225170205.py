@@ -175,7 +175,7 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        # Handles button functionality from set_prompt when clicked
+        # Handles sending and updating the set message when prompt buttons are clicked.
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
             await interaction.followup.send(
@@ -191,46 +191,41 @@ class GiveSet:
                 del selected_sets[pokemon]
             else:
                 selected_sets[pokemon] = set_index
-            cache_key = GiveSet.get_cache_key(pokemon, set_name)
-            set_display_data = GiveSet.check_set_display_cache(pokemon, set_name)
-            if not set_display_data:
-                driver = None
-                try:
-                    chrome_options = Options()
-                    chrome_options.add_argument("--headless")
-                    chrome_options.add_argument("--log-level=3")
-                    driver = webdriver.Chrome(options=chrome_options)
-                    driver.get(url)
-                    if get_export_btn(driver, set_name):
-                        set_data = get_textarea(driver, set_name)
-                        GiveSet.update_set_display_cache(pokemon, set_name, set_data)
-                        set_display_data = set_data
+
+            driver = None
+            try:
+                chrome_options = Options()
+                chrome_options.add_argument("--headless")
+                chrome_options.add_argument("--log-level=3")
+                driver = webdriver.Chrome(options=chrome_options)
+                driver.get(url)
+                if get_export_btn(driver, set_name):
+                    set_data = get_textarea(driver, set_name)
+                    if set_data:
+                        if pokemon in selected_sets:
+                            await update_message(
+                                context,
+                                interaction,
+                                unique_id,
+                                pokemon,
+                                set_index,
+                                set_data,
+                            )
+                        else:
+                            await update_message(
+                                context, interaction, unique_id, pokemon
+                            )
                     else:
                         await interaction.followup.send(
                             "Error fetching set data.", ephemeral=True
                         )
-                        return
-                except Exception as e:
-                    await interaction.followup.send(
-                        f"An error occurred: {str(e)}", ephemeral=True
-                    )
-                    return
-                finally:
-                    if driver:
-                        driver.quit()
-            if set_display_data:
-                await update_message(
-                    context,
-                    interaction,
-                    unique_id,
-                    pokemon,
-                    set_index,
-                    set_display_data,
-                )
-            else:
+            except Exception as e:
                 await interaction.followup.send(
-                    "Error fetching set data.", ephemeral=True
+                    f"An error occurred: {str(e)}", ephemeral=True
                 )
+            finally:
+                if driver:
+                    driver.quit()
 
     @staticmethod
     async def display_sets(ctx, pokemon_data):

@@ -255,6 +255,7 @@ async def update_message(
     unique_id,
     pokemon=None,
     set_index=None,
+    set_data=None,
     set_display_data=None,
 ):
     # Updates the set message of either adding or deleting a set after a set button is clicked.
@@ -264,11 +265,10 @@ async def update_message(
     channel = interaction.client.get_channel(interaction.channel_id)
     selected_sets = context.get("selected_sets", {})
     if set_display_data and pokemon and set_index is not None:
-        if "sets" not in context:
-            context["sets"] = {}
-        if pokemon not in context["sets"]:
-            context["sets"][pokemon] = {}
+        context["sets"].setdefault(pokemon, {})
+        # Assign set_display_data to the correct set_index for this pokemon
         context["sets"][pokemon][set_index] = set_display_data
+
     message_content = ""
     for selected_pokemon, selected_index in selected_sets.items():
         if (

@@ -255,6 +255,7 @@ async def update_message(
     unique_id,
     pokemon=None,
     set_index=None,
+    set_data=None,
     set_display_data=None,
 ):
     # Updates the set message of either adding or deleting a set after a set button is clicked.
