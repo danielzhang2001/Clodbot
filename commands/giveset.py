@@ -17,38 +17,38 @@ class GiveSet:
     awaiting_response = {}
     # For caching Pokemon names
     pokemon_cache = {"names": [], "expiration": datetime.now()}
-    # For caching Pokemon sets
-    set_cache = {}
+    # For caching Pokemon set names
+    setname_cache = {}
     # For caching Pokemon set info
-    set_display_cache = {}
+    setinfo_cache = {}
     # Cache expiration duration
     cache_duration = timedelta(hours=730)
 
     @staticmethod
-    def get_set_display_cache_key(pokemon, set_name):
-        # Generates a unique cache key for each set display based on Pokemon name and set name
+    def get_setinfo_key(pokemon, set_name):
+        # Generates a key for accessing the cache of set data.
         return f"{pokemon.lower()}_{set_name.lower()}"
 
     @staticmethod
-    def check_set_display_cache(pokemon, set_name):
-        # Checks if set display data is available in the cache and not expired
-        key = GiveSet.get_set_display_cache_key(pokemon, set_name)
-        if key in GiveSet.set_display_cache:
-            data, expiration = GiveSet.set_display_cache[key]
+    def check_setinfo_cache(pokemon, set_name):
+        # Checks if data is available in the set data cache and not expired.
+        key = GiveSet.get_setinfo_key(pokemon, set_name)
+        if key in GiveSet.setinfo_cache:
+            data, expiration = GiveSet.setinfo_cache[key]
             if datetime.now() < expiration:
                 return data
         return None
 
     @staticmethod
-    def update_set_display_cache(pokemon, set_name, set_data):
-        # Updates the cache with new set display data
-        key = GiveSet.get_set_display_cache_key(pokemon, set_name)
+    def update_setinfo_cache(pokemon, set_name, set_data):
+        # Updates the set data cache with new data.
+        key = GiveSet.get_setinfo_key(pokemon, set_name)
         expiration = datetime.now() + GiveSet.cache_duration
-        GiveSet.set_display_cache[key] = (set_data, expiration)
+        GiveSet.setinfo_cache[key] = (set_data, expiration)
 
     @staticmethod
-    def get_cache_key(pokemon, generation=None, format=None):
-        # Generates a key for accessing the cache.
+    def get_setname_key(pokemon, generation=None, format=None):
+        # Generates a key for accessing the cache of set names.
         return (
             pokemon.lower(),
             str(generation).lower() if generation else None,
@@ -56,25 +56,25 @@ class GiveSet:
         )
 
     @staticmethod
-    def check_cache(pokemon, generation=None, format=None):
-        # Checks if data is available in the cache and not expired.
-        key = GiveSet.get_cache_key(pokemon, generation, format)
-        if key in GiveSet.set_cache:
-            data, expiration = GiveSet.set_cache[key]
+    def check_setname_cache(pokemon, generation=None, format=None):
+        # Checks if data is available in the set names cache and not expired.
+        key = GiveSet.get_setname_key(pokemon, generation, format)
+        if key in GiveSet.setname_cache:
+            data, expiration = GiveSet.setname_cache[key]
             if datetime.now() < expiration:
                 return data
         return None
 
     @staticmethod
-    def update_cache(pokemon, data, generation=None, format=None):
-        # Updates the cache with new data every month.
-        key = GiveSet.get_cache_key(pokemon, generation, format)
+    def update_setname_cache(pokemon, data, generation=None, format=None):
+        # Updates the set names cache with new data.
+        key = GiveSet.get_setname_key(pokemon, generation, format)
         expiration = datetime.now() + GiveSet.cache_duration
-        GiveSet.set_cache[key] = (data, expiration)
+        GiveSet.setname_cache[key] = (data, expiration)
 
     @staticmethod
     def fetch_cache():
-        # Stores all Pokemon from Bulbapedia into a cache that updates every month, returns the cache.
+        # Stores all Pokemon from Bulbapedia into a cache, returns the cache.
         current_time = datetime.now()
         if current_time <= GiveSet.pokemon_cache["expiration"]:
             return GiveSet.pokemon_cache["names"]
@@ -114,7 +114,7 @@ class GiveSet:
     @staticmethod
     def fetch_set(pokemon, generation=None, format=None):
         # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
-        cached_data = GiveSet.check_cache(pokemon, generation, format)
+        cached_data = GiveSet.check_setname_cache(pokemon, generation, format)
         if cached_data:
             return cached_data
         driver = None
@@ -124,7 +124,7 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             set_names, url = get_setinfo(driver, pokemon, generation, format)
-            GiveSet.update_cache(pokemon, (set_names, url), generation, format)
+            GiveSet.update_setname_cache(pokemon, (set_names, url), generation, format)
             return set_names, url
         except Exception as e:
             print(f"An error occurred: {str(e)}")
@@ -191,8 +191,8 @@ class GiveSet:
                 del selected_sets[pokemon]
             else:
                 selected_sets[pokemon] = set_index
-            cache_key = GiveSet.get_cache_key(pokemon, set_name)
-            set_display_data = GiveSet.check_set_display_cache(pokemon, set_name)
+            cache_key = GiveSet.get_setname_key(pokemon, set_name)
+            set_display_data = GiveSet.check_setinfo_cache(pokemon, set_name)
             if not set_display_data:
                 driver = None
                 try:
@@ -203,7 +203,7 @@ class GiveSet:
                     driver.get(url)
                     if get_export_btn(driver, set_name):
                         set_data = get_textarea(driver, set_name)
-                        GiveSet.update_set_display_cache(pokemon, set_name, set_data)
+                        GiveSet.update_setinfo_cache(pokemon, set_name, set_data)
                         set_display_data = set_data
                     else:
                         await interaction.followup.send(
