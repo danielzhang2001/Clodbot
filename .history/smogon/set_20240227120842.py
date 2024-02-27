@@ -268,7 +268,7 @@ async def update_message(
             context["sets"] = {}
         if pokemon not in context["sets"]:
             context["sets"][pokemon] = {}
-        context["sets"][pokemon][set_index] = set_display
+        context["sets"][pokemon][set_index] = set_display_data
     message_content = ""
     for selected_pokemon, selected_index in selected_sets.items():
         if (
@@ -278,15 +278,15 @@ async def update_message(
             set_info = context["sets"][selected_pokemon][selected_index]
             message_content += f"{set_info}\n\n"
     message_content = f"```{message_content}```" if message_content else None
-    original_id = interaction.message.id
-    view = context["views"].get(original_id)
+    original_message_id = interaction.message.id
+    view = context["views"].get(original_message_id)
     if not view:
         await interaction.followup.send(
             "Original message view not found.", ephemeral=True
         )
         return
     update_buttons(view, selected_sets)
-    original_message = await channel.fetch_message(original_id)
+    original_message = await channel.fetch_message(original_message_id)
     await original_message.edit(view=view)
     if "final_message" in context:
         message_id = context["final_message"]
