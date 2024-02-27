@@ -255,7 +255,7 @@ async def update_message(
     unique_id,
     pokemon=None,
     set_index=None,
-    set_display_data=None,
+    set_display=None,
 ):
     # Updates the set message of either adding or deleting a set after a set button is clicked.
     context.setdefault("sets", {})
@@ -263,12 +263,12 @@ async def update_message(
         set_index = int(set_index)
     channel = interaction.client.get_channel(interaction.channel_id)
     selected_sets = context.get("selected_sets", {})
-    if set_display_data and pokemon and set_index is not None:
+    if set_display and pokemon and set_index is not None:
         if "sets" not in context:
             context["sets"] = {}
         if pokemon not in context["sets"]:
             context["sets"][pokemon] = {}
-        context["sets"][pokemon][set_index] = set_display_data
+        context["sets"][pokemon][set_index] = set_display
     message_content = ""
     for selected_pokemon, selected_index in selected_sets.items():
         if (
@@ -278,15 +278,15 @@ async def update_message(
             set_info = context["sets"][selected_pokemon][selected_index]
             message_content += f"{set_info}\n\n"
     message_content = f"```{message_content}```" if message_content else None
-    original_message_id = interaction.message.id
-    view = context["views"].get(original_message_id)
+    original_id = interaction.message.id
+    view = context["views"].get(original_id)
     if not view:
         await interaction.followup.send(
             "Original message view not found.", ephemeral=True
         )
         return
     update_buttons(view, selected_sets)
-    original_message = await channel.fetch_message(original_message_id)
+    original_message = await channel.fetch_message(original_id)
     await original_message.edit(view=view)
     if "final_message" in context:
         message_id = context["final_message"]

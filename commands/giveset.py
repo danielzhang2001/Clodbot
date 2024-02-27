@@ -192,8 +192,8 @@ class GiveSet:
             else:
                 selected_sets[pokemon] = set_index
             cache_key = GiveSet.get_setname_key(pokemon, set_name)
-            set_display_data = GiveSet.check_setinfo_cache(pokemon, set_name)
-            if not set_display_data:
+            set_display = GiveSet.check_setinfo_cache(pokemon, set_name)
+            if not set_display:
                 driver = None
                 try:
                     chrome_options = Options()
@@ -204,7 +204,7 @@ class GiveSet:
                     if get_export_btn(driver, set_name):
                         set_data = get_textarea(driver, set_name)
                         GiveSet.update_setinfo_cache(pokemon, set_name, set_data)
-                        set_display_data = set_data
+                        set_display = set_data
                     else:
                         await interaction.followup.send(
                             "Error fetching set data.", ephemeral=True
@@ -218,14 +218,14 @@ class GiveSet:
                 finally:
                     if driver:
                         driver.quit()
-            if set_display_data:
+            if set_display:
                 await update_message(
                     context,
                     interaction,
                     unique_id,
                     pokemon,
                     set_index,
-                    set_display_data,
+                    set_display,
                 )
             else:
                 await interaction.followup.send(
