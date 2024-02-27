@@ -70,33 +70,34 @@ async def give_set(ctx, *args):
         num_pokemon = 1
         if len(args_list) > 1 and args_list[1].isdigit():
             num_pokemon = max(1, int(args_list[1]))
+        pokemon_names = random.sample(GiveSet.fetch_cache(), k=num_pokemon)
+        pokemon_sets = await GiveSet.fetch_multiset_async(pokemon_names)
         pokemon_data = []
-        for _ in range(num_pokemon):
-            random_pokemon = random.choice(GiveSet.get_pokemon())
-            sets, url = await GiveSet.fetch_set(random_pokemon)
+        invalid_pokemon = []
+        for name, (sets, url) in zip(pokemon_names, pokemon_sets):
             if sets:
-                random_set = random.choice(sets)
-                pokemon_data.append((random_pokemon, [random_set], url))
+                pokemon_data.append((name, sets, url))
+            else:
+                invalid_pokemon.append(name)
+
         if pokemon_data:
-            await GiveSet.display_multiple_sets(ctx, pokemon_data)
-        else:
-            await ctx.send(f"No sets found for the requested Pokemon.")
+            await GiveSet.display_sets(ctx, pokemon_data)
+        if invalid_pokemon:
+            await ctx.send(
+                "No sets found for the requested Pokémon: "
+                + ", ".join(invalid_pokemon)
+                + "."
+            )
     elif "," in input_str:
         pokemons = [p.strip() for p in input_str.split(",")]
-        pokemon_data = []
-        not_found = []
-        for pokemon in pokemons:
-            sets, url = await GiveSet.fetch_set(pokemon)
-            if sets:
-                pokemon_data.append((pokemon, sets, url))
-            else:
-                not_found.append(pokemon)
+        pokemon_sets = await GiveSet.fetch_multiset_async(pokemons)
+        pokemon_data = [
+            (name, sets or ["No sets found"], url or "URL not found")
+            for name, (sets, url) in zip(pokemons, pokemon_sets)
+            if sets
+        ]
         if pokemon_data:
             await GiveSet.set_prompt(ctx, pokemon_data)
-            if not_found:
-                await ctx.send(
-                    "No sets found for: " + ", ".join([f"**{p}**" for p in not_found])
-                )
         else:
             await ctx.send("No sets found for the provided Pokémon.")
     else:
@@ -104,7 +105,7 @@ async def give_set(ctx, *args):
         pokemon = parts[0]
         generation = parts[1] if len(parts) > 1 else None
         format = parts[2] if len(parts) > 2 else None
-        sets, url = await GiveSet.fetch_set(pokemon, generation, format)
+        sets, url = await GiveSet.fetch_set_async(pokemon, generation, format)
         if sets:
             await GiveSet.set_prompt(ctx, [(pokemon, sets, url)])
         else:
