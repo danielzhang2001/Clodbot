@@ -249,6 +249,22 @@ def update_buttons(view, selected_sets):
                 item.style = ButtonStyle.secondary
 
 
+async def update_all_button_messages(context, interaction, selected_sets):
+    channel = interaction.client.get_channel(interaction.channel_id)
+    # Iterate over all message IDs that have associated views
+    for message_id in context.get("message_ids", []):
+        view = context["views"].get(message_id)
+        if view:
+            update_buttons(
+                view, selected_sets
+            )  # Update the view with the current selections
+            try:
+                message = await channel.fetch_message(message_id)
+                await message.edit(view=view)  # Apply the updated view to the message
+            except Exception as e:
+                print(f"Failed to update message {message_id}: {e}")
+
+
 async def update_message(
     context,
     interaction,
@@ -276,6 +292,7 @@ async def update_message(
             message_content += f"{set_info}\n\n"
     if message_content.strip():
         message_content = f"```{message_content}```"
+    await update_all_button_messages(context, interaction, selected_sets)
     first_button_message_id = context.get("message_ids", [None])[0]
     if first_button_message_id is None:
         await interaction.followup.send(
@@ -287,7 +304,4 @@ async def update_message(
     if not view:
         await interaction.followup.send("Error: Button view not found.", ephemeral=True)
         return
-
-    update_buttons(view, selected_sets)
-    # Update the first message with buttons to include the selected set messages
     await first_button_message.edit(content=message_content, view=view)
