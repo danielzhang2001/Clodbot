@@ -264,9 +264,12 @@ async def update_message(
     channel = interaction.client.get_channel(interaction.channel_id)
     selected_sets = context.get("selected_sets", {})
     if set_display and pokemon and set_index is not None:
-        context["sets"].setdefault(pokemon, {})
+        if "sets" not in context:
+            context["sets"] = {}
+        if pokemon not in context["sets"]:
+            context["sets"][pokemon] = {}
         context["sets"][pokemon][set_index] = set_display
-    message_content = context.get("prompt_message", "")
+    message_content = ""
     for selected_pokemon, selected_index in selected_sets.items():
         if (
             selected_pokemon in context["sets"]
@@ -274,20 +277,25 @@ async def update_message(
         ):
             set_info = context["sets"][selected_pokemon][selected_index]
             message_content += f"{set_info}\n\n"
-    if message_content.strip():
-        message_content = f"```{message_content}```"
-    first_button_message_id = context.get("message_ids", [None])[0]
-    if first_button_message_id is None:
+    message_content = f"```{message_content}```" if message_content else None
+    original_id = interaction.message.id
+    view = context["views"].get(original_id)
+    if not view:
         await interaction.followup.send(
-            "Error: Button message ID not found.", ephemeral=True
+            "Original message view not found.", ephemeral=True
         )
         return
-    first_button_message = await channel.fetch_message(first_button_message_id)
-    view = context["views"].get(first_button_message_id)
-    if not view:
-        await interaction.followup.send("Error: Button view not found.", ephemeral=True)
-        return
-
     update_buttons(view, selected_sets)
-    # Update the first message with buttons to include the selected set messages
-    await first_button_message.edit(content=message_content, view=view)
+    original_message = await channel.fetch_message(original_id)
+    await original_message.edit(view=view)
+    if "final_message" in context:
+        message_id = context["final_message"]
+        message = await channel.fetch_message(message_id)
+        if message_content:
+            await message.edit(content=message_content)
+        else:
+            await message.delete()
+            del context["final_message"]
+    elif message_content:
+        message = await channel.send(message_content)
+        context["final_message"] = message.id

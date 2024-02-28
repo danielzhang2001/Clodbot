@@ -249,24 +249,28 @@ def update_buttons(view, selected_sets):
                 item.style = ButtonStyle.secondary
 
 
+# Updates the set message of either adding or deleting a set after a set button is clicked.
+
+
 async def update_message(
-    context,
-    interaction,
-    unique_id,
-    pokemon=None,
-    set_index=None,
-    set_display=None,
+    context, interaction, unique_id, pokemon=None, set_index=None, set_display=None
 ):
-    # Updates the set message of either adding or deleting a set after a set button is clicked.
+    # Ensure the "sets" dictionary is initialized in the context
     context.setdefault("sets", {})
+
     if set_index is not None:
         set_index = int(set_index)
+
     channel = interaction.client.get_channel(interaction.channel_id)
     selected_sets = context.get("selected_sets", {})
+
+    # Update or initialize set display data within "sets"
     if set_display and pokemon and set_index is not None:
         context["sets"].setdefault(pokemon, {})
         context["sets"][pokemon][set_index] = set_display
-    message_content = context.get("prompt_message", "")
+
+    # Initialize or update the message content with set information
+    message_content = ""
     for selected_pokemon, selected_index in selected_sets.items():
         if (
             selected_pokemon in context["sets"]
@@ -274,20 +278,27 @@ async def update_message(
         ):
             set_info = context["sets"][selected_pokemon][selected_index]
             message_content += f"{set_info}\n\n"
-    if message_content.strip():
-        message_content = f"```{message_content}```"
-    first_button_message_id = context.get("message_ids", [None])[0]
-    if first_button_message_id is None:
-        await interaction.followup.send(
-            "Error: Button message ID not found.", ephemeral=True
-        )
-        return
-    first_button_message = await channel.fetch_message(first_button_message_id)
-    view = context["views"].get(first_button_message_id)
-    if not view:
-        await interaction.followup.send("Error: Button view not found.", ephemeral=True)
-        return
 
-    update_buttons(view, selected_sets)
-    # Update the first message with buttons to include the selected set messages
-    await first_button_message.edit(content=message_content, view=view)
+    # Ensure message content formatting
+    message_content = f"```{message_content}```" if message_content.strip() else ""
+
+    # Fetch the first message ID from the stored message IDs - assumed to be the message with the first row of buttons
+    first_message_id = (
+        context.get("message_ids", [])[0] if context.get("message_ids", []) else None
+    )
+
+    if first_message_id:
+        first_message = await channel.fetch_message(first_message_id)
+        # Update buttons based on current selection
+        view = context["views"].get(first_message_id)
+
+        if view:
+            update_buttons(view, selected_sets)
+            # Update the first message (with the first row of buttons) to include the set information
+            await first_message.edit(
+                content=message_content + "\n" + first_message.content, view=view
+            )
+    else:
+        await interaction.followup.send(
+            "Original prompt message not found.", ephemeral=True
+        )

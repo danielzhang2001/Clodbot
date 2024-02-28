@@ -248,7 +248,8 @@ def update_buttons(view, selected_sets):
             else:
                 item.style = ButtonStyle.secondary
 
-
+# Updates the set message of either adding or deleting a set after a set button is clicked.
+   
 async def update_message(
     context,
     interaction,
@@ -257,8 +258,7 @@ async def update_message(
     set_index=None,
     set_display=None,
 ):
-    # Updates the set message of either adding or deleting a set after a set button is clicked.
-    context.setdefault("sets", {})
+     context.setdefault("sets", {})
     if set_index is not None:
         set_index = int(set_index)
     channel = interaction.client.get_channel(interaction.channel_id)
@@ -276,18 +276,13 @@ async def update_message(
             message_content += f"{set_info}\n\n"
     if message_content.strip():
         message_content = f"```{message_content}```"
-    first_button_message_id = context.get("message_ids", [None])[0]
-    if first_button_message_id is None:
+    original_id = interaction.message.id
+    view = context["views"].get(original_id)
+    if not view:
         await interaction.followup.send(
-            "Error: Button message ID not found.", ephemeral=True
+            "Original message view not found.", ephemeral=True
         )
         return
-    first_button_message = await channel.fetch_message(first_button_message_id)
-    view = context["views"].get(first_button_message_id)
-    if not view:
-        await interaction.followup.send("Error: Button view not found.", ephemeral=True)
-        return
-
     update_buttons(view, selected_sets)
-    # Update the first message with buttons to include the selected set messages
-    await first_button_message.edit(content=message_content, view=view)
+    original_message = await channel.fetch_message(original_id)
+    await original_message.edit(content=message_content, view=view)
