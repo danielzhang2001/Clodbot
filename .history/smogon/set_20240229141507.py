@@ -291,15 +291,19 @@ async def update_message(
     if message_content.strip():
         message_content = f"```{message_content}```"
     await update_all_button_messages(context, interaction, selected_sets)
-    firstrow_id = context.get("message_ids", [None])[0]
-    if firstrow_id is None:
+    last_button_message_id = context.get("message_ids", [None])[-1]
+    if last_button_message_id is None:
         await interaction.followup.send(
             "Error: Button message ID not found.", ephemeral=True
         )
         return
-    message = await channel.fetch_message(firstrow_id)
-    view = context["views"].get(firstrow_id)
+    last_button_message = await channel.fetch_message(last_button_message_id)
+    view = context["views"].get(last_button_message_id)
     if not view:
         await interaction.followup.send("Error: Button view not found.", ephemeral=True)
         return
-    await message.edit(content=message_content, view=view)
+    current_content = last_button_message.content if last_button_message.content else ""
+    updated_content = (
+        f"{current_content}\n{message_content}" if current_content else message_content
+    )
+    await last_button_message.edit(content=updated_content, view=view)

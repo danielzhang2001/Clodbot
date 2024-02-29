@@ -297,9 +297,9 @@ async def update_message(
             "Error: Button message ID not found.", ephemeral=True
         )
         return
-    message = await channel.fetch_message(firstrow_id)
-    view = context["views"].get(firstrow_id)
+    first_button_message = await channel.fetch_message(firstrow_id)
+    view = context["views"].get(first_button_message_id)
     if not view:
         await interaction.followup.send("Error: Button view not found.", ephemeral=True)
         return
-    await message.edit(content=message_content, view=view)
+    await first_button_message.edit(content=message_content, view=view)

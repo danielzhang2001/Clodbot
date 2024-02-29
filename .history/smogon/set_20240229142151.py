@@ -298,7 +298,7 @@ async def update_message(
         )
         return
     message = await channel.fetch_message(firstrow_id)
-    view = context["views"].get(firstrow_id)
+    view = context["views"].get(first_button_message_id)
     if not view:
         await interaction.followup.send("Error: Button view not found.", ephemeral=True)
         return
