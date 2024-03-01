@@ -234,7 +234,7 @@ def format_name(pokemon: str) -> str:
 
 
 def update_buttons(view, selected_sets):
-    # Updates button styles based on whether they are selected or not.
+    # Updates button styles in one row based on whether they are selected or not.
     for item in view.children:
         item_id_parts = item.custom_id.split("_")
         if len(item_id_parts) == 4:
@@ -249,9 +249,9 @@ def update_buttons(view, selected_sets):
                 item.style = ButtonStyle.secondary
 
 
-async def update_all_button_messages(context, interaction, selected_sets):
+async def update_buttonrows(context, interaction, selected_sets):
     channel = interaction.client.get_channel(interaction.channel_id)
-    # Iterates over all message IDs that have associated views to update button coloring
+    # Iterates over all button rows to change button styles.
     for message_id in context.get("message_ids", []):
         view = context["views"].get(message_id)
         if view:
@@ -290,7 +290,7 @@ async def update_message(
             message_content += f"{set_info}\n\n"
     if message_content.strip():
         message_content = f"```{message_content}```"
-    await update_all_button_messages(context, interaction, selected_sets)
+    await update_buttonrows(context, interaction, selected_sets)
     firstrow_id = context.get("message_ids", [None])[0]
     if firstrow_id is None:
         await interaction.followup.send(
