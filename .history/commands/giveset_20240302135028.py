@@ -136,7 +136,7 @@ class GiveSet:
     @staticmethod
     async def fetch_set_async(pokemon, generation=None, format=None):
         # Helper function for fetching sets asynchronously to save time.
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_running_loop()  # For Python 3.7+
         sets, url = await loop.run_in_executor(
             None, GiveSet.fetch_set, pokemon, generation, format
         )
@@ -144,14 +144,13 @@ class GiveSet:
 
     @staticmethod
     async def fetch_multiset_async(pokemon_names):
-        # Uses fetch_set_async multiple times to speed up process of fetching multiple random Pokemon sets.
+        # Uses fetch_set_async multiple times to speed up process of fetching multiple Pokemon sets.
         tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
         results = await asyncio.gather(*tasks)
         return results
 
     @staticmethod
     async def fetch_multiset_async_with_gen_format(pokemon_requests):
-        # Uses fetch_set_with_gen_format multiple times to speed up process of fetching multiple Pokemon sets with potential Generation and Format.
         loop = asyncio.get_running_loop()
         tasks = [
             loop.run_in_executor(None, GiveSet.fetch_set_with_gen_format, request)
@@ -162,13 +161,14 @@ class GiveSet:
 
     @staticmethod
     def fetch_set_with_gen_format(request):
-        # Uses fetch_set with request to fetch multiple sets with potential different specifications of Generation and Format.
         pokemon, generation, format = (
             request["name"],
             request["generation"],
             request["format"],
         )
-        sets, url = GiveSet.fetch_set(pokemon, generation, format)
+        sets, url = GiveSet.fetch_set(
+            pokemon, generation, format
+        )  # Assumes this method can handle generation/format
         return (pokemon, sets, url)
 
     @staticmethod

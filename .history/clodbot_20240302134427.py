@@ -96,31 +96,19 @@ async def give_set(ctx, *args):
             pokemon_requests.append(
                 {
                     "name": request_parts[0],
-                    "generation": (
-                        request_parts[1]
-                        if len(request_parts) > 1 and request_parts[1].startswith("gen")
-                        else None
-                    ),
+                    "generation": request_parts[1] if len(request_parts) > 1 else None,
                     "format": (
-                        " ".join(request_parts[2:])
-                        if len(request_parts) > 2
-                        else (
-                            " ".join(request_parts[1:])
-                            if len(request_parts) > 1
-                            and not request_parts[1].startswith("gen")
-                            else None
-                        )
+                        " ".join(request_parts[2:]) if len(request_parts) > 2 else None
                     ),
                 }
             )
-        pokemon_sets = await GiveSet.fetch_multiset_async_with_gen_format(
-            pokemon_requests
-        )
-        pokemon_data = []
-        for request, result in zip(pokemon_requests, pokemon_sets):
-            name, sets, url = result
-            if sets:
-                pokemon_data.append((name, sets, url))
+        pokemons = [p.strip() for p in input_str.split(",")]
+        pokemon_sets = await GiveSet.fetch_multiset_async(pokemons)
+        pokemon_data = [
+            (name, sets or ["No sets found"], url or "URL not found")
+            for name, (sets, url) in zip(pokemons, pokemon_sets)
+            if sets
+        ]
         if pokemon_data:
             await GiveSet.set_prompt(ctx, pokemon_data)
         else:

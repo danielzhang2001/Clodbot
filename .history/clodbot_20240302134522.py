@@ -96,20 +96,9 @@ async def give_set(ctx, *args):
             pokemon_requests.append(
                 {
                     "name": request_parts[0],
-                    "generation": (
-                        request_parts[1]
-                        if len(request_parts) > 1 and request_parts[1].startswith("gen")
-                        else None
-                    ),
+                    "generation": request_parts[1] if len(request_parts) > 1 else None,
                     "format": (
-                        " ".join(request_parts[2:])
-                        if len(request_parts) > 2
-                        else (
-                            " ".join(request_parts[1:])
-                            if len(request_parts) > 1
-                            and not request_parts[1].startswith("gen")
-                            else None
-                        )
+                        " ".join(request_parts[2:]) if len(request_parts) > 2 else None
                     ),
                 }
             )
@@ -117,10 +106,7 @@ async def give_set(ctx, *args):
             pokemon_requests
         )
         pokemon_data = []
-        for request, result in zip(pokemon_requests, pokemon_sets):
-            name, sets, url = result
-            if sets:
-                pokemon_data.append((name, sets, url))
+        for request, (sets,url) in zip(pokemon_requests, pokemon_sets):
         if pokemon_data:
             await GiveSet.set_prompt(ctx, pokemon_data)
         else:
