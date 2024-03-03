@@ -132,7 +132,7 @@ async def give_set(ctx, *args):
         format = parts[2] if len(parts) > 2 else None
         sets, url = await GiveSet.fetch_set_async(pokemon, generation, format)
         if sets:
-            await GiveSet.set_prompt(ctx, [(pokemon, sets, url)])
+            await GiveSet.set_prompt(ctx, [(pokemon, sets, url, generation, format)])
         else:
             await ctx.send(
                 f"No sets found for **{pokemon}**"
@@ -162,7 +162,7 @@ async def on_interaction(interaction):
                         "Could not find the selected Pokémon's data.", ephemeral=True
                     )
                     return
-                _, sets, url = selected_pokemon
+                _, sets, url, _, _ = selected_pokemon
                 selected_set = sets[set_index]
                 await GiveSet.set_selection(
                     interaction, unique_id, set_index, selected_set, url, pokemon
