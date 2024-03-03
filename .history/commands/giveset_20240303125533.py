@@ -194,8 +194,7 @@ class GiveSet:
         if len(pokemon_data) > 1:
             views, prompt = get_multiview(unique_id, pokemon_data)
         else:
-            pokemon, sets, url, _, _ = pokemon_data[0]
-            views, prompt = get_view(unique_id, (pokemon, sets, url))
+            views, prompt = get_view(unique_id, pokemon_data[0])
         await ctx.send(prompt)
         for formatted_name, view in views.items():
             message = await ctx.send(view=view)

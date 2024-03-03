@@ -194,8 +194,7 @@ class GiveSet:
         if len(pokemon_data) > 1:
             views, prompt = get_multiview(unique_id, pokemon_data)
         else:
-            pokemon, sets, url, _, _ = pokemon_data[0]
-            views, prompt = get_view(unique_id, (pokemon, sets, url))
+            views, prompt = get_view(unique_id, pokemon_data[0])
         await ctx.send(prompt)
         for formatted_name, view in views.items():
             message = await ctx.send(view=view)
@@ -220,14 +219,8 @@ class GiveSet:
                 del selected_sets[pokemon]
             else:
                 selected_sets[pokemon] = set_index
-            pokemon_data = context["pokemon_data"]
-            for data in pokemon_data:
-                if data[0] == pokemon:
-                    _, _, _, generation, format = data
-                    break
-            set_display = GiveSet.check_setinfo_cache(
-                pokemon, set_name, generation, format
-            )
+            cache_key = GiveSet.get_setname_key(pokemon, set_name)
+            set_display = GiveSet.check_setinfo_cache(pokemon, set_name)
             if not set_display:
                 driver = None
                 try:
@@ -238,9 +231,7 @@ class GiveSet:
                     driver.get(url)
                     if get_export_btn(driver, set_name):
                         set_data = get_textarea(driver, set_name)
-                        GiveSet.update_setinfo_cache(
-                            pokemon, set_name, set_data, generation, format
-                        )
+                        GiveSet.update_setinfo_cache(pokemon, set_name, set_data)
                         set_display = set_data
                     else:
                         await interaction.followup.send(

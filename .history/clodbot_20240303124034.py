@@ -162,7 +162,7 @@ async def on_interaction(interaction):
                         "Could not find the selected Pokémon's data.", ephemeral=True
                     )
                     return
-                _, sets, url, _, _ = selected_pokemon
+                _, sets, url = selected_pokemon
                 selected_set = sets[set_index]
                 await GiveSet.set_selection(
                     interaction, unique_id, set_index, selected_set, url, pokemon
