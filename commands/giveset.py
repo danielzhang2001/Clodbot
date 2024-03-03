@@ -25,14 +25,19 @@ class GiveSet:
     cache_duration = timedelta(hours=730)
 
     @staticmethod
-    def get_setinfo_key(pokemon, set_name):
+    def get_setinfo_key(pokemon, set_name, generation=None, format=None):
         # Generates a key for accessing the cache of set data.
-        return f"{pokemon.lower()}_{set_name.lower()}"
+        parts = [pokemon.lower(), set_name.lower()]
+        if generation:
+            parts.append(f"gen{generation}")
+        if format:
+            parts.append(format.lower())
+        return "_".join(parts)
 
     @staticmethod
-    def check_setinfo_cache(pokemon, set_name):
+    def check_setinfo_cache(pokemon, set_name, generation=None, format=None):
         # Checks if data is available in the set data cache and not expired.
-        key = GiveSet.get_setinfo_key(pokemon, set_name)
+        key = GiveSet.get_setinfo_key(pokemon, set_name, generation, format)
         if key in GiveSet.setinfo_cache:
             data, expiration = GiveSet.setinfo_cache[key]
             if datetime.now() < expiration:
@@ -40,20 +45,21 @@ class GiveSet:
         return None
 
     @staticmethod
-    def update_setinfo_cache(pokemon, set_name, set_data):
+    def update_setinfo_cache(pokemon, set_name, set_data, generation=None, format=None):
         # Updates the set data cache with new data.
-        key = GiveSet.get_setinfo_key(pokemon, set_name)
+        key = GiveSet.get_setinfo_key(pokemon, set_name, generation, format)
         expiration = datetime.now() + GiveSet.cache_duration
         GiveSet.setinfo_cache[key] = (set_data, expiration)
 
     @staticmethod
     def get_setname_key(pokemon, generation=None, format=None):
         # Generates a key for accessing the cache of set names.
-        return (
-            pokemon.lower(),
-            str(generation).lower() if generation else None,
-            str(format).lower() if format else None,
-        )
+        parts = [pokemon.lower()]
+        if generation:
+            parts.append(f"gen{generation}")
+        if format:
+            parts.append(format.lower())
+        return "_".join(parts)
 
     @staticmethod
     def check_setname_cache(pokemon, generation=None, format=None):
@@ -188,7 +194,8 @@ class GiveSet:
         if len(pokemon_data) > 1:
             views, prompt = get_multiview(unique_id, pokemon_data)
         else:
-            views, prompt = get_view(unique_id, pokemon_data[0])
+            pokemon, sets, url, _, _ = pokemon_data[0]
+            views, prompt = get_view(unique_id, (pokemon, sets, url))
         await ctx.send(prompt)
         for formatted_name, view in views.items():
             message = await ctx.send(view=view)
@@ -213,8 +220,14 @@ class GiveSet:
                 del selected_sets[pokemon]
             else:
                 selected_sets[pokemon] = set_index
-            cache_key = GiveSet.get_setname_key(pokemon, set_name)
-            set_display = GiveSet.check_setinfo_cache(pokemon, set_name)
+            pokemon_data = context["pokemon_data"]
+            for data in pokemon_data:
+                if data[0] == pokemon:
+                    _, _, _, generation, format = data
+                    break
+            set_display = GiveSet.check_setinfo_cache(
+                pokemon, set_name, generation, format
+            )
             if not set_display:
                 driver = None
                 try:
@@ -225,7 +238,9 @@ class GiveSet:
                     driver.get(url)
                     if get_export_btn(driver, set_name):
                         set_data = get_textarea(driver, set_name)
-                        GiveSet.update_setinfo_cache(pokemon, set_name, set_data)
+                        GiveSet.update_setinfo_cache(
+                            pokemon, set_name, set_data, generation, format
+                        )
                         set_display = set_data
                     else:
                         await interaction.followup.send(
