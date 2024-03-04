@@ -40,6 +40,33 @@ def get_eligible_gens(driver, pokemon):
     return eligible_gens
 
 
+def get_eligible_formats(driver: webdriver.Chrome) -> list:
+    # Finds all eligible formats a certain driver has on Smogon.
+    eligible_formats = []
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, "PokemonPage-StrategySelector")
+            )
+        )
+        format_links = driver.find_elements(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
+        )
+        for link in format_links:
+            format_name = link.text.strip()
+            if format_name:
+                eligible_formats.append(format_name)
+        selected_format = driver.find_element(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
+        )
+        selected_format_name = selected_format.text.strip()
+        if selected_format_name and selected_format_name not in formats:
+            eligible_formats.append(selected_format_name)
+    except Exception as e:
+        print(f"Error fetching formats: {str(e)}")
+    return formats
+
+
 def get_setnames(driver: webdriver.Chrome) -> list:
     # Finds and returns all set names on the page.
     try:
