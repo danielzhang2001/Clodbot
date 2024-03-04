@@ -117,10 +117,11 @@ async def give_set(ctx, *args):
             pokemon_requests
         )
         pokemon_data = []
-        for request, result in zip(pokemon_requests, pokemon_sets):
-            name, sets, url = result
+        for request, (name, sets, url) in zip(pokemon_requests, pokemon_sets):
+            generation = request["generation"]
+            format = request["format"]
             if sets:
-                pokemon_data.append((name, sets, url))
+                pokemon_data.append((name, sets, url, generation, format))
         if pokemon_data:
             await GiveSet.set_prompt(ctx, pokemon_data)
         else:

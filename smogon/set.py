@@ -29,6 +29,17 @@ def get_gen(generation: str) -> str:
     return get_gen_dict().get(generation.lower())
 
 
+def get_eligible_gens(driver, pokemon):
+    # Finds all eligible generations that a Pokemon has on Smogon.
+    eligible_gens = []
+    for gen_code in get_gen_dict().values():
+        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+        driver.get(url)
+        if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
+            eligible_gens.append(gen_code)
+    return eligible_gens
+
+
 def get_setnames(driver: webdriver.Chrome) -> list:
     # Finds and returns all set names on the page.
     try:
@@ -99,16 +110,16 @@ def get_view(unique_id, pokemon_data):
 
 
 def get_multiview(unique_id, pokemon_data):
-    # Creates a prompt + buttons for Pokemon sets for multiple Pokemon.
+    # Creates a prompt and buttons for Pokemon sets for multiple Pokemon.
     views = {}
     formatted_names = [
         "-".join(
             part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
         )
-        for pokemon, _, _ in pokemon_data
+        for pokemon, _, _, _, _ in pokemon_data
     ]
     prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
-    for pokemon, sets, url in pokemon_data:
+    for pokemon, sets, url, _, _ in pokemon_data:
         view = ui.View()
         formatted_name = "-".join(
             part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
