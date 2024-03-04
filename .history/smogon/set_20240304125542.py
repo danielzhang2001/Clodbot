@@ -110,16 +110,16 @@ def get_view(unique_id, pokemon_data):
 
 
 def get_multiview(unique_id, pokemon_data):
-    # Creates a prompt and buttons for Pokemon sets for multiple Pokemon.
+    # Creates a prompt + buttons for Pokemon sets for multiple Pokemon.
     views = {}
     formatted_names = [
         "-".join(
             part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
         )
-        for pokemon, _, _, _, _ in pokemon_data
+        for pokemon, _, _ in pokemon_data
     ]
     prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
-    for pokemon, sets, url, _, _ in pokemon_data:
+    for pokemon, sets, url in pokemon_data:
         view = ui.View()
         formatted_name = "-".join(
             part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")

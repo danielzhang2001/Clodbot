@@ -119,7 +119,7 @@ def get_multiview(unique_id, pokemon_data):
         for pokemon, _, _, _, _ in pokemon_data
     ]
     prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
-    for pokemon, sets, url, _, _ in pokemon_data:
+    for pokemon, sets, url in pokemon_data:
         view = ui.View()
         formatted_name = "-".join(
             part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")

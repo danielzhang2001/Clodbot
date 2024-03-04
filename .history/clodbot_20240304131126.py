@@ -118,8 +118,8 @@ async def give_set(ctx, *args):
         )
         pokemon_data = []
         for request, (name, sets, url) in zip(pokemon_requests, pokemon_sets):
-            generation = request["generation"]
-            format = request["format"]
+            generation = request['generation']
+            format = request['format']
             if sets:
                 pokemon_data.append((name, sets, url, generation, format))
         if pokemon_data:
