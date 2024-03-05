@@ -10,7 +10,6 @@ from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
-import random
 from datetime import datetime, timedelta
 
 
@@ -307,8 +306,7 @@ class GiveSet:
             await ctx.send("Unable to fetch data for the selected Pokémon sets.")
 
     @staticmethod
-    async def fetch_random_set(ctx, input_str):
-        # Generates and displays a random Pokemon set with a random eligible Generation and Format.
+    async def handle_random_pokemon_request(ctx, input_str):
         args_list = input_str.split()
         num_pokemon = 1
         if len(args_list) > 1 and args_list[1].isdigit():
@@ -324,7 +322,7 @@ class GiveSet:
                 invalid_pokemon.append(name)
 
         if pokemon_data:
-            await GiveSet.display_sets(ctx, pokemon_data)
+            await display_sets(ctx, pokemon_data)
         if invalid_pokemon:
             await ctx.send(
                 "No sets found for the requested Pokémon: "

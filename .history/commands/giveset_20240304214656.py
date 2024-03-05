@@ -324,7 +324,7 @@ class GiveSet:
                 invalid_pokemon.append(name)
 
         if pokemon_data:
-            await GiveSet.display_sets(ctx, pokemon_data)
+            await display_sets(ctx, pokemon_data)
         if invalid_pokemon:
             await ctx.send(
                 "No sets found for the requested Pokémon: "

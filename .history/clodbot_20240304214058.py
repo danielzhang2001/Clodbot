@@ -8,6 +8,7 @@ import discord  # type: ignore
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
 import aiohttp
+import random
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -65,7 +66,7 @@ async def give_set(ctx, *args):
     # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
     input_str = " ".join(args).strip()
     if input_str.startswith("random"):
-        await GiveSet.fetch_random_set(ctx, input_str)
+        await GiveSet.handle_random_pokemon_request(ctx, input_str)
     elif "," in input_str:
         parts = input_str.split(",")
         pokemon_requests = []
