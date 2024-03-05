@@ -150,14 +150,7 @@ class GiveSet:
         return sets, url
 
     @staticmethod
-    async def fetch_multiset_async(pokemon_names):
-        # Uses fetch_set_async multiple times to speed up process of fetching multiple random Pokemon sets.
-        tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
-        results = await asyncio.gather(*tasks)
-        return results
-
-    @staticmethod
-    async def fetch_multiset_async_with_gen_format(pokemon_requests):
+    async def fetch_multiset_async(pokemon_requests):
         # Uses fetch_set_with_gen_format multiple times to speed up process of fetching multiple Pokemon sets with potential Generation and Format.
         loop = asyncio.get_running_loop()
         tasks = [
@@ -313,21 +306,27 @@ class GiveSet:
         num_pokemon = 1
         if len(args_list) > 1 and args_list[1].isdigit():
             num_pokemon = max(1, int(args_list[1]))
-        pokemon_names = random.sample(GiveSet.fetch_cache(), k=num_pokemon)
-        pokemon_sets = await GiveSet.fetch_multiset_async(pokemon_names)
-        pokemon_data = []
-        invalid_pokemon = []
-        for name, (sets, url) in zip(pokemon_names, pokemon_sets):
-            if sets:
-                pokemon_data.append((name, sets, url))
-            else:
-                invalid_pokemon.append(name)
-
-        if pokemon_data:
-            await GiveSet.display_sets(ctx, pokemon_data)
+        pokemon = random.sample(GiveSet.fetch_cache(), k=num_pokemon)
+        pokemon_requests = []
+        for name in pokemon:
+            eligible_gens = get_eligible_gens(name)
+            if eligible_gens:
+                random_gen = random.choice(eligible_gens)
+                pokemon_requests.append(
+                    {"name": name, "generation": random_gen, "format": None}
+                )
+        pokemon_data = await GiveSet.fetch_multiset_async(pokemon_requests)
+        valid_pokemon_data = [
+            (name, sets, url) for name, sets, url in pokemon_data if sets
+        ]
+        invalid_pokemon = [
+            request["name"]
+            for request in pokemon_requests
+            if request["name"] not in [name for name, _, _ in valid_pokemon_data]
+        ]
+        if valid_pokemon_data:
+            await GiveSet.display_sets(ctx, valid_pokemon_data)
         if invalid_pokemon:
             await ctx.send(
-                "No sets found for the requested Pokémon: "
-                + ", ".join(invalid_pokemon)
-                + "."
+                "No sets found for the requested Pokémon: " + ", ".join(invalid_pokemon)
             )
