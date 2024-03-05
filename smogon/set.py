@@ -2,11 +2,14 @@
 General functions in scraping Pokemon Smogon sets.
 """
 
+import asyncio
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from discord import ui, ButtonStyle
+from concurrent.futures import ThreadPoolExecutor
 
 
 def get_gen_dict() -> dict:
@@ -29,14 +32,18 @@ def get_gen(generation: str) -> str:
     return get_gen_dict().get(generation.lower())
 
 
-def get_eligible_gens(driver, pokemon):
+def get_eligible_gens(pokemon):
     # Finds all eligible generations that a Pokemon has on Smogon.
-    eligible_gens = []
-    for gen_code in get_gen_dict().values():
-        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
-        driver.get(url)
-        if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
-            eligible_gens.append(gen_code)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--log-level=3")
+    with webdriver.Chrome(options=chrome_options) as driver:
+        eligible_gens = []
+        for gen_key, gen_code in get_gen_dict().items():
+            url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+            driver.get(url)
+            if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
+                eligible_gens.append(gen_key)
     return eligible_gens
 
 
@@ -287,7 +294,7 @@ def update_buttons(view, selected_sets):
                 item.style = ButtonStyle.secondary
 
 
-async def update_buttonrows(context, interaction, selected_sets):
+async def update_button_rows(context, interaction, selected_sets):
     channel = interaction.client.get_channel(interaction.channel_id)
     # Iterates over all button rows to change button styles.
     for message_id in context.get("message_ids", []):
@@ -328,7 +335,7 @@ async def update_message(
             message_content += f"{set_info}\n\n"
     if message_content.strip():
         message_content = f"```{message_content}```"
-    await update_buttonrows(context, interaction, selected_sets)
+    await update_button_rows(context, interaction, selected_sets)
     firstrow_id = context.get("message_ids", [None])[0]
     if firstrow_id is None:
         await interaction.followup.send(
