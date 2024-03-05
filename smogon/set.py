@@ -47,31 +47,41 @@ def get_eligible_gens(pokemon):
     return eligible_gens
 
 
-def get_eligible_formats(driver: webdriver.Chrome) -> list:
-    # Finds all eligible formats a certain driver has on Smogon.
+def get_eligible_formats(pokemon, generation):
+    # Finds all eligible formats that a Pokemon with a Generation has on Smogon.
     eligible_formats = []
+    gen_code = get_gen_code(generation)
+    if not gen_code:
+        print(f"Invalid generation: {generation}")
+        return eligible_formats
     try:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located(
-                (By.CLASS_NAME, "PokemonPage-StrategySelector")
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--log-level=3")
+        with webdriver.Chrome(options=chrome_options) as driver:
+            url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+            driver.get(url)
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.CLASS_NAME, "PokemonPage-StrategySelector")
+                )
             )
-        )
-        format_links = driver.find_elements(
-            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
-        )
-        for link in format_links:
-            format_name = link.text.strip()
-            if format_name:
-                eligible_formats.append(format_name)
-        selected_format = driver.find_element(
-            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
-        )
-        selected_format_name = selected_format.text.strip()
-        if selected_format_name and selected_format_name not in formats:
-            eligible_formats.append(selected_format_name)
+            format_links = driver.find_elements(
+                By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
+            )
+            for link in format_links:
+                format_name = link.text.strip()
+                if format_name:
+                    eligible_formats.append(format_name)
+            selected_format = driver.find_element(
+                By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
+            )
+            selected_format_name = selected_format.text.strip()
+            if selected_format_name and selected_format_name not in eligible_formats:
+                eligible_formats.append(selected_format_name)
     except Exception as e:
-        print(f"Error fetching formats: {str(e)}")
-    return formats
+        print(f"Error fetching formats for {pokemon} in {generation}: {str(e)}")
+    return eligible_formats
 
 
 def get_set_names(driver: webdriver.Chrome) -> list:
