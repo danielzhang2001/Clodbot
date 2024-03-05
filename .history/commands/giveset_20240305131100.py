@@ -90,6 +90,7 @@ class GiveSet:
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
@@ -128,6 +129,7 @@ class GiveSet:
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             set_names, url = get_setinfo(driver, pokemon, generation, format)
@@ -150,7 +152,14 @@ class GiveSet:
         return sets, url
 
     @staticmethod
-    async def fetch_multiset_async(pokemon_requests):
+    async def fetch_multiset_async(pokemon_names):
+        # Uses fetch_set_async multiple times to speed up process of fetching multiple random Pokemon sets.
+        tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
+        results = await asyncio.gather(*tasks)
+        return results
+
+    @staticmethod
+    async def fetch_multiset_async_with_gen_format(pokemon_requests):
         # Uses fetch_set_with_gen_format multiple times to speed up process of fetching multiple Pokemon sets with potential Generation and Format.
         loop = asyncio.get_running_loop()
         tasks = [
@@ -227,6 +236,7 @@ class GiveSet:
                 try:
                     chrome_options = Options()
                     chrome_options.add_argument("--headless")
+                    chrome_options.add_argument("--disable-gpu")
                     chrome_options.add_argument("--log-level=3")
                     driver = webdriver.Chrome(options=chrome_options)
                     driver.get(url)
@@ -273,6 +283,7 @@ class GiveSet:
             try:
                 chrome_options = Options()
                 chrome_options.add_argument("--headless")
+                chrome_options.add_argument("--disable-gpu")
                 chrome_options.add_argument("--log-level=3")
                 driver = webdriver.Chrome(options=chrome_options)
                 driver.get(url)
@@ -315,7 +326,9 @@ class GiveSet:
                 pokemon_requests.append(
                     {"name": name, "generation": random_gen, "format": None}
                 )
-        pokemon_data = await GiveSet.fetch_multiset_async(pokemon_requests)
+        pokemon_data = await GiveSet.fetch_multiset_async_with_gen_format(
+            pokemon_requests
+        )
         valid_pokemon_data = [
             (name, sets, url) for name, sets, url in pokemon_data if sets
         ]
@@ -328,5 +341,7 @@ class GiveSet:
             await GiveSet.display_sets(ctx, valid_pokemon_data)
         if invalid_pokemon:
             await ctx.send(
-                "No sets found for the requested Pokémon: " + ", ".join(invalid_pokemon)
+                "No sets found for the requested Pokémon: "
+                + ", ".join(invalid_pokemon)
+                + "."
             )

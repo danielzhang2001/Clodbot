@@ -90,6 +90,7 @@ class GiveSet:
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
@@ -128,9 +129,11 @@ class GiveSet:
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             set_names, url = get_setinfo(driver, pokemon, generation, format)
+            print(f"SETS AND URL: {set_names} {url}")
             GiveSet.update_setname_cache(pokemon, (set_names, url), generation, format)
             return set_names, url
         except Exception as e:
@@ -227,6 +230,7 @@ class GiveSet:
                 try:
                     chrome_options = Options()
                     chrome_options.add_argument("--headless")
+                    chrome_options.add_argument("--disable-gpu")
                     chrome_options.add_argument("--log-level=3")
                     driver = webdriver.Chrome(options=chrome_options)
                     driver.get(url)
@@ -273,6 +277,7 @@ class GiveSet:
             try:
                 chrome_options = Options()
                 chrome_options.add_argument("--headless")
+                chrome_options.add_argument("--disable-gpu")
                 chrome_options.add_argument("--log-level=3")
                 driver = webdriver.Chrome(options=chrome_options)
                 driver.get(url)
@@ -320,9 +325,14 @@ class GiveSet:
             (name, sets, url) for name, sets, url in pokemon_data if sets
         ]
         invalid_pokemon = [
-            request["name"]
+            (
+                f"{request['name']} (Gen: {request['generation']})"
+                if request["generation"]
+                else request["name"]
+            )
             for request in pokemon_requests
-            if request["name"] not in [name for name, _, _ in valid_pokemon_data]
+            if (request["name"], request.get("generation"))
+            not in [(name, gen) for name, _, _, gen, _ in valid_pokemon_data]
         ]
         if valid_pokemon_data:
             await GiveSet.display_sets(ctx, valid_pokemon_data)

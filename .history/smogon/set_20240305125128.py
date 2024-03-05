@@ -2,14 +2,11 @@
 General functions in scraping Pokemon Smogon sets.
 """
 
-import asyncio
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from discord import ui, ButtonStyle
-from concurrent.futures import ThreadPoolExecutor
 
 
 def get_gen_dict() -> dict:
@@ -36,14 +33,15 @@ def get_eligible_gens(pokemon):
     # Finds all eligible generations that a Pokemon has on Smogon.
     chrome_options = Options()
     chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--log-level=3")
     with webdriver.Chrome(options=chrome_options) as driver:
         eligible_gens = []
-        for gen_key, gen_code in get_gen_dict().items():
+        for gen_code in get_gen_dict().values():
             url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
             driver.get(url)
             if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
-                eligible_gens.append(gen_key)
+                eligible_gens.append(gen_code)
     return eligible_gens
 
 

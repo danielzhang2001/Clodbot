@@ -324,6 +324,7 @@ class GiveSet:
             for request in pokemon_requests
             if request["name"] not in [name for name, _, _ in valid_pokemon_data]
         ]
+
         if valid_pokemon_data:
             await GiveSet.display_sets(ctx, valid_pokemon_data)
         if invalid_pokemon:
