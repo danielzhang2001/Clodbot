@@ -44,6 +44,7 @@ def get_eligible_gens(pokemon):
             driver.get(url)
             if has_export_buttons(driver):
                 eligible_gens.append(gen_key)
+    print(f"ELIGIBLE GENS: {eligible_gens}")
     return eligible_gens
 
 
@@ -69,14 +70,15 @@ def get_eligible_formats(pokemon, generation):
             for link in format_links:
                 format_name = link.text.strip().replace(" ", "-")
                 if format_name:
-                    eligible_formats.add(format_name)
+                    eligible_formats.append(format_name)
             selected_format = driver.find_element(
                 By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
             )
             selected_format_name = selected_format.text.strip().replace(" ", "-")
-            eligible_formats.add(selected_format_name)
+            eligible_formats.append(selected_format_name)
     except Exception as e:
         print(f"Error fetching formats for {pokemon} in {generation}: {str(e)}")
+    print(f"ELIGIBLE FORMATS: {eligible_formats}")
     return list(eligible_formats)
 
 
@@ -119,15 +121,15 @@ def get_export_btn(driver, set):
     # Finds and clicks export button for the specific set.
     try:
         set_xpath = xpath_handler(set.upper())
-        set_header = WebDriverWait(driver, 5).until(
+        set_header = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = {set_xpath}]",
+                    f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = {xpath_handler}]",
                 )
             )
         )
-        export_button = WebDriverWait(set_header, 5).until(
+        export_button = WebDriverWait(set_header, 10).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
@@ -150,7 +152,7 @@ def get_textarea(driver, pokemon):
         )
         return textarea.text
     except Exception as e_textarea:
-        print(f"Text Area Error: {str(e_textarea)}")
+        print(f"Textarea Error: {str(e_textarea)}")
         return None
 
 

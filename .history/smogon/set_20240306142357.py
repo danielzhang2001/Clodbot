@@ -74,7 +74,7 @@ def get_eligible_formats(pokemon, generation):
                 By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
             )
             selected_format_name = selected_format.text.strip().replace(" ", "-")
-            eligible_formats.add(selected_format_name)
+            eligible_formats.append(selected_format_name)
     except Exception as e:
         print(f"Error fetching formats for {pokemon} in {generation}: {str(e)}")
     return list(eligible_formats)
@@ -119,15 +119,15 @@ def get_export_btn(driver, set):
     # Finds and clicks export button for the specific set.
     try:
         set_xpath = xpath_handler(set.upper())
-        set_header = WebDriverWait(driver, 5).until(
+        set_header = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = {set_xpath}]",
+                    f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = {xpath_handler}]",
                 )
             )
         )
-        export_button = WebDriverWait(set_header, 5).until(
+        export_button = WebDriverWait(set_header, 10).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,

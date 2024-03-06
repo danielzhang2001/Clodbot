@@ -303,11 +303,16 @@ class GiveSet:
         args_list = input_str.split()
         num = 1
         if len(args_list) > 1:
-            if args_list[1].isdigit() and int(args_list[1]) >= 1:
+            if args_list[1].isdigit():
                 num = int(args_list[1])
+                if num < 1:
+                    await ctx.send(
+                        "Please specify a number greater than or equal to 1, or do not provide a number for a single random set."
+                    )
+                    return
             else:
                 await ctx.send(
-                    "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
+                    "The second argument must be a digit representing the number of Pokemon sets to generate."
                 )
                 return
         valid_pokemon = []

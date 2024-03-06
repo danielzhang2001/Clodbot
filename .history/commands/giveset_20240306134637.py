@@ -302,14 +302,8 @@ class GiveSet:
         # Generates and displays a random Pokemon set with a random eligible Generation and Format.
         args_list = input_str.split()
         num = 1
-        if len(args_list) > 1:
-            if args_list[1].isdigit() and int(args_list[1]) >= 1:
-                num = int(args_list[1])
-            else:
-                await ctx.send(
-                    "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
-                )
-                return
+        if len(args_list) > 1 and args_list[1].isdigit():
+            num = max(1, int(args_list[1]))
         valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)
@@ -319,9 +313,11 @@ class GiveSet:
                 eligible_gens = get_eligible_gens(name)
                 if eligible_gens:
                     random_gen = random.choice(eligible_gens)
+                    print(f"GEN CHOSEN: {random_gen}")
                     eligible_formats = get_eligible_formats(name, random_gen)
                     if eligible_formats:
                         random_format = random.choice(eligible_formats)
+                        print(f"FORMAT CHOSEN: {random_gen}")
                         pokemon_requests.append(
                             {
                                 "name": name,
@@ -334,4 +330,5 @@ class GiveSet:
             pokemon_data = await GiveSet.fetch_multiset_async(pokemon_requests)
             for name, sets, url in pokemon_data:
                 valid_pokemon.append((name, sets, url))
+            print(f"VALID POKEMON!!!!!!!!!!! {valid_pokemon}")
         await GiveSet.display_random_sets(ctx, valid_pokemon)

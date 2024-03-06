@@ -119,7 +119,7 @@ def get_export_btn(driver, set):
     # Finds and clicks export button for the specific set.
     try:
         set_xpath = xpath_handler(set.upper())
-        set_header = WebDriverWait(driver, 5).until(
+        set_header = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
@@ -127,7 +127,7 @@ def get_export_btn(driver, set):
                 )
             )
         )
-        export_button = WebDriverWait(set_header, 5).until(
+        export_button = WebDriverWait(set_header, 10).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,

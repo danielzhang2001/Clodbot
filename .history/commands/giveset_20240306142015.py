@@ -120,6 +120,9 @@ class GiveSet:
 
     @staticmethod
     def fetch_set(pokemon, generation=None, format=None):
+        print(
+            f"FETCHING THE SET WITH NAME GENERATION FORMAT OF: {pokemon} {generation} {format}"
+        )
         # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
         cached_data = GiveSet.check_setname_cache(pokemon, generation, format)
         if cached_data:
@@ -302,14 +305,8 @@ class GiveSet:
         # Generates and displays a random Pokemon set with a random eligible Generation and Format.
         args_list = input_str.split()
         num = 1
-        if len(args_list) > 1:
-            if args_list[1].isdigit() and int(args_list[1]) >= 1:
-                num = int(args_list[1])
-            else:
-                await ctx.send(
-                    "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
-                )
-                return
+        if len(args_list) > 1 and args_list[1].isdigit():
+            num = max(1, int(args_list[1]))
         valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)

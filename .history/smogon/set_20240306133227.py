@@ -12,7 +12,7 @@ from discord import ui, ButtonStyle
 from concurrent.futures import ThreadPoolExecutor
 
 
-def get_gen_dict():
+def get_gen_dict() -> dict:
     # Returns generation dictionary.
     return {
         "gen1": "rb",
@@ -27,7 +27,7 @@ def get_gen_dict():
     }
 
 
-def get_gen(generation):
+def get_gen(generation: str) -> str:
     # Retrieves generation dictionary.
     return get_gen_dict().get(generation.lower())
 
@@ -44,12 +44,13 @@ def get_eligible_gens(pokemon):
             driver.get(url)
             if has_export_buttons(driver):
                 eligible_gens.append(gen_key)
+    print(f"ELIGIBLE GENS: {eligible_gens}")
     return eligible_gens
 
 
 def get_eligible_formats(pokemon, generation):
     # Finds all eligible formats that a Pokemon with a Generation has on Smogon.
-    eligible_formats = set()
+    eligible_formats = []
     gen_code = get_gen(generation)
     try:
         chrome_options = Options()
@@ -67,20 +68,22 @@ def get_eligible_formats(pokemon, generation):
                 By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
             )
             for link in format_links:
-                format_name = link.text.strip().replace(" ", "-")
+                format_name = link.text.strip()
                 if format_name:
-                    eligible_formats.add(format_name)
+                    eligible_formats.append(format_name)
             selected_format = driver.find_element(
                 By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
             )
-            selected_format_name = selected_format.text.strip().replace(" ", "-")
-            eligible_formats.add(selected_format_name)
+            selected_format_name = selected_format.text.strip()
+            if selected_format_name and selected_format_name not in eligible_formats:
+                eligible_formats.append(selected_format_name)
     except Exception as e:
         print(f"Error fetching formats for {pokemon} in {generation}: {str(e)}")
-    return list(eligible_formats)
+    print(f"ELIGIBLE FORMATS: {eligible_formats}")
+    return eligible_formats
 
 
-def get_set_names(driver):
+def get_set_names(driver: webdriver.Chrome) -> list:
     # Finds and returns all set names on the page.
     try:
         export_buttons = WebDriverWait(driver, 10).until(
@@ -96,38 +99,18 @@ def get_set_names(driver):
         return None
 
 
-def xpath_handler(text):
-    # Formats XPath through appropriate quote usage.
-    parts = ["concat("]
-    need_quote = False
-    for char in text:
-        if char == "'":
-            if need_quote:
-                parts.append(", ")
-            parts.append('"\'"')
-            need_quote = True
-        else:
-            if need_quote:
-                parts.append(", ")
-            parts.append(f"'{char}'")
-            need_quote = True
-    parts.append(")")
-    return "".join(parts)
-
-
-def get_export_btn(driver, set):
+def get_export_btn(driver: webdriver.Chrome, set: str) -> bool:
     # Finds and clicks export button for the specific set.
     try:
-        set_xpath = xpath_handler(set.upper())
-        set_header = WebDriverWait(driver, 5).until(
+        set_header = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = {set_xpath}]",
+                    f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = '{set.upper()}']",
                 )
             )
         )
-        export_button = WebDriverWait(set_header, 5).until(
+        export_button = WebDriverWait(set_header, 10).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
@@ -142,7 +125,7 @@ def get_export_btn(driver, set):
         return False
 
 
-def get_textarea(driver, pokemon):
+def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
     # Finds and returns text area contents for a Pokemon set.
     try:
         textarea = WebDriverWait(driver, 10).until(
@@ -150,7 +133,7 @@ def get_textarea(driver, pokemon):
         )
         return textarea.text
     except Exception as e_textarea:
-        print(f"Text Area Error: {str(e_textarea)}")
+        print(f"Textarea Error: {str(e_textarea)}")
         return None
 
 
@@ -227,7 +210,7 @@ def get_setinfo(driver, pokemon, generation=None, format=None):
     return None, None
 
 
-def is_valid_pokemon(driver, pokemon):
+def is_valid_pokemon(driver, pokemon)
     # Check if the Pokemon name exists on the page.
     try:
         WebDriverWait(driver, 5).until(
@@ -254,7 +237,7 @@ def is_valid_pokemon(driver, pokemon):
             return False
 
 
-def is_valid_format(driver, format):
+def is_valid_format(driver, format)
     # Check if the Pokemon format exists on the page.
     try:
         WebDriverWait(driver, 10).until(
@@ -281,7 +264,7 @@ def is_valid_format(driver, format):
         return False
 
 
-def has_export_buttons(driver):
+def has_export_buttons(driver: webdriver.Chrome) -> bool:
     # Checks if there are any export buttons on the page.
     try:
         WebDriverWait(driver, 5).until(
@@ -293,7 +276,7 @@ def has_export_buttons(driver):
         return False
 
 
-def format_name(pokemon):
+def format_name(pokemon: str) -> str:
     # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
     formatted_parts = []
     for part in pokemon.split("-"):

@@ -307,7 +307,7 @@ class GiveSet:
                 num = int(args_list[1])
             else:
                 await ctx.send(
-                    "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
+                    "Please follow this format: ```Clodbot, giveset random **[Number >= 1, Nothing = 1]**```"
                 )
                 return
         valid_pokemon = []

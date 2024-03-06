@@ -303,13 +303,13 @@ class GiveSet:
         args_list = input_str.split()
         num = 1
         if len(args_list) > 1:
-            if args_list[1].isdigit() and int(args_list[1]) >= 1:
-                num = int(args_list[1])
-            else:
-                await ctx.send(
-                    "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
-                )
-                return
+        if args_list[1].isdigit() and int(args_list[1]) >= 1:
+            num = int(args_list[1])
+        else:
+            await ctx.send(
+                "Please specify a valid number greater than or equal to 1."
+            )
+            return
         valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)

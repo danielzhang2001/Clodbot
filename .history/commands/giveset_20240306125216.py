@@ -80,7 +80,7 @@ class GiveSet:
         GiveSet.setname_cache[key] = (data, expiration)
 
     @staticmethod
-    def fetch_all_pokemon():
+    def fetch_cache():
         # Stores all Pokemon from Bulbapedia into a cache, returns the cache.
         current_time = datetime.now()
         if current_time <= GiveSet.pokemon_cache["expiration"]:
@@ -268,29 +268,30 @@ class GiveSet:
         # Displays all sets in one textbox given multiple Pokemon and their sets.
         message_content = ""
         for pokemon, sets, url in pokemon_data:
-            set_name = random.choice(sets)
-            driver = None
-            try:
-                chrome_options = Options()
-                chrome_options.add_argument("--headless")
-                chrome_options.add_argument("--log-level=3")
-                driver = webdriver.Chrome(options=chrome_options)
-                driver.get(url)
-                if get_export_btn(driver, set_name):
-                    set_data = get_textarea(driver, set_name)
-                    if set_data:
-                        message_content += f"{set_data}\n\n"
+            if sets:
+                set_name = random.choice(sets)
+                driver = None
+                try:
+                    chrome_options = Options()
+                    chrome_options.add_argument("--headless")
+                    chrome_options.add_argument("--log-level=3")
+                    driver = webdriver.Chrome(options=chrome_options)
+                    driver.get(url)
+                    if get_export_btn(driver, set_name):
+                        set_data = get_textarea(driver, set_name)
+                        if set_data:
+                            message_content += f"{set_data}\n\n"
+                        else:
+                            message_content += (
+                                f"Error fetching set data for **{pokemon}**.\n\n"
+                            )
                     else:
-                        message_content += (
-                            f"Error fetching set data for **{pokemon}**.\n\n"
-                        )
-            except Exception as e:
-                message_content += (
-                    f"An error occurred fetching set for **{pokemon}**: {str(e)}\n\n"
-                )
-            finally:
-                if driver:
-                    driver.quit()
+                        message_content += f"Error finding set for **{pokemon}**.\n\n"
+                except Exception as e:
+                    message_content += f"An error occurred fetching set for **{pokemon}**: {str(e)}\n\n"
+                finally:
+                    if driver:
+                        driver.quit()
         message_content = "```" + message_content + "```"
         if message_content.strip() != "``````":
             await ctx.send(message_content)
@@ -302,18 +303,12 @@ class GiveSet:
         # Generates and displays a random Pokemon set with a random eligible Generation and Format.
         args_list = input_str.split()
         num = 1
-        if len(args_list) > 1:
-            if args_list[1].isdigit() and int(args_list[1]) >= 1:
-                num = int(args_list[1])
-            else:
-                await ctx.send(
-                    "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
-                )
-                return
+        if len(args_list) > 1 and args_list[1].isdigit():
+            num = max(1, int(args_list[1]))
         valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)
-            pokemon = random.sample(GiveSet.fetch_all_pokemon(), k=remaining)
+            pokemon = random.sample(GiveSet.fetch_cache(), k=remaining)
             pokemon_requests = []
             for name in pokemon:
                 eligible_gens = get_eligible_gens(name)

@@ -307,10 +307,10 @@ class GiveSet:
                 num = int(args_list[1])
             else:
                 await ctx.send(
-                    "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
+                    "Please specify a valid number greater than or equal to 1."
                 )
                 return
-        valid_pokemon = []
+            valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)
             pokemon = random.sample(GiveSet.fetch_all_pokemon(), k=remaining)
