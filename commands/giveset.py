@@ -80,7 +80,7 @@ class GiveSet:
         GiveSet.setname_cache[key] = (data, expiration)
 
     @staticmethod
-    def fetch_cache():
+    def fetch_all_pokemon():
         # Stores all Pokemon from Bulbapedia into a cache, returns the cache.
         current_time = datetime.now()
         if current_time <= GiveSet.pokemon_cache["expiration"]:
@@ -264,11 +264,11 @@ class GiveSet:
                 )
 
     @staticmethod
-    async def display_sets(ctx, pokemon_data):
+    async def display_random_sets(ctx, pokemon_data):
         # Displays all sets in one textbox given multiple Pokemon and their sets.
         message_content = ""
         for pokemon, sets, url in pokemon_data:
-            set_name = sets[0]
+            set_name = random.choice(sets)
             driver = None
             try:
                 chrome_options = Options()
@@ -284,8 +284,6 @@ class GiveSet:
                         message_content += (
                             f"Error fetching set data for **{pokemon}**.\n\n"
                         )
-                else:
-                    message_content += f"Error finding set for **{pokemon}**.\n\n"
             except Exception as e:
                 message_content += (
                     f"An error occurred fetching set for **{pokemon}**: {str(e)}\n\n"
@@ -303,30 +301,37 @@ class GiveSet:
     async def fetch_random_set(ctx, input_str):
         # Generates and displays a random Pokemon set with a random eligible Generation and Format.
         args_list = input_str.split()
-        num_pokemon = 1
-        if len(args_list) > 1 and args_list[1].isdigit():
-            num_pokemon = max(1, int(args_list[1]))
-        pokemon = random.sample(GiveSet.fetch_cache(), k=num_pokemon)
-        pokemon_requests = []
-        for name in pokemon:
-            eligible_gens = get_eligible_gens(name)
-            if eligible_gens:
-                random_gen = random.choice(eligible_gens)
-                pokemon_requests.append(
-                    {"name": name, "generation": random_gen, "format": None}
+        num = 1
+        if len(args_list) > 1:
+            if args_list[1].isdigit() and int(args_list[1]) >= 1:
+                num = int(args_list[1])
+            else:
+                await ctx.send(
+                    "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
                 )
-        pokemon_data = await GiveSet.fetch_multiset_async(pokemon_requests)
-        valid_pokemon_data = [
-            (name, sets, url) for name, sets, url in pokemon_data if sets
-        ]
-        invalid_pokemon = [
-            request["name"]
-            for request in pokemon_requests
-            if request["name"] not in [name for name, _, _ in valid_pokemon_data]
-        ]
-        if valid_pokemon_data:
-            await GiveSet.display_sets(ctx, valid_pokemon_data)
-        if invalid_pokemon:
-            await ctx.send(
-                "No sets found for the requested Pokémon: " + ", ".join(invalid_pokemon)
-            )
+                return
+        valid_pokemon = []
+        while len(valid_pokemon) < num:
+            remaining = num - len(valid_pokemon)
+            pokemon = random.sample(GiveSet.fetch_all_pokemon(), k=remaining)
+            pokemon_requests = []
+            for name in pokemon:
+                eligible_gens = get_eligible_gens(name)
+                if eligible_gens:
+                    random_gen = random.choice(eligible_gens)
+                    eligible_formats = get_eligible_formats(name, random_gen)
+                    if eligible_formats:
+                        random_format = random.choice(eligible_formats)
+                        pokemon_requests.append(
+                            {
+                                "name": name,
+                                "generation": random_gen,
+                                "format": random_format,
+                            }
+                        )
+                else:
+                    continue
+            pokemon_data = await GiveSet.fetch_multiset_async(pokemon_requests)
+            for name, sets, url in pokemon_data:
+                valid_pokemon.append((name, sets, url))
+        await GiveSet.display_random_sets(ctx, valid_pokemon)
