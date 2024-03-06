@@ -12,7 +12,7 @@ from discord import ui, ButtonStyle
 from concurrent.futures import ThreadPoolExecutor
 
 
-def get_gen_dict() -> dict:
+def get_gen_dict():
     # Returns generation dictionary.
     return {
         "gen1": "rb",
@@ -27,7 +27,7 @@ def get_gen_dict() -> dict:
     }
 
 
-def get_gen(generation: str) -> str:
+def get_gen(generation):
     # Retrieves generation dictionary.
     return get_gen_dict().get(generation.lower())
 
@@ -42,18 +42,15 @@ def get_eligible_gens(pokemon):
         for gen_key, gen_code in get_gen_dict().items():
             url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
             driver.get(url)
-            if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
+            if has_export_buttons(driver):
                 eligible_gens.append(gen_key)
     return eligible_gens
 
 
 def get_eligible_formats(pokemon, generation):
     # Finds all eligible formats that a Pokemon with a Generation has on Smogon.
-    eligible_formats = []
-    gen_code = get_gen_code(generation)
-    if not gen_code:
-        print(f"Invalid generation: {generation}")
-        return eligible_formats
+    eligible_formats = set()
+    gen_code = get_gen(generation)
     try:
         chrome_options = Options()
         chrome_options.add_argument("--headless")
@@ -70,21 +67,20 @@ def get_eligible_formats(pokemon, generation):
                 By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
             )
             for link in format_links:
-                format_name = link.text.strip()
+                format_name = link.text.strip().replace(" ", "-")
                 if format_name:
-                    eligible_formats.append(format_name)
+                    eligible_formats.add(format_name)
             selected_format = driver.find_element(
                 By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
             )
-            selected_format_name = selected_format.text.strip()
-            if selected_format_name and selected_format_name not in eligible_formats:
-                eligible_formats.append(selected_format_name)
+            selected_format_name = selected_format.text.strip().replace(" ", "-")
+            eligible_formats.add(selected_format_name)
     except Exception as e:
         print(f"Error fetching formats for {pokemon} in {generation}: {str(e)}")
-    return eligible_formats
+    return list(eligible_formats)
 
 
-def get_set_names(driver: webdriver.Chrome) -> list:
+def get_set_names(driver):
     # Finds and returns all set names on the page.
     try:
         export_buttons = WebDriverWait(driver, 10).until(
@@ -100,18 +96,38 @@ def get_set_names(driver: webdriver.Chrome) -> list:
         return None
 
 
-def get_export_btn(driver: webdriver.Chrome, set: str) -> bool:
+def xpath_handler(text):
+    # Formats XPath through appropriate quote usage.
+    parts = ["concat("]
+    need_quote = False
+    for char in text:
+        if char == "'":
+            if need_quote:
+                parts.append(", ")
+            parts.append('"\'"')
+            need_quote = True
+        else:
+            if need_quote:
+                parts.append(", ")
+            parts.append(f"'{char}'")
+            need_quote = True
+    parts.append(")")
+    return "".join(parts)
+
+
+def get_export_btn(driver, set):
     # Finds and clicks export button for the specific set.
     try:
-        set_header = WebDriverWait(driver, 10).until(
+        set_xpath = xpath_handler(set.upper())
+        set_header = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
-                    f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = '{set.upper()}']",
+                    f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = {set_xpath}]",
                 )
             )
         )
-        export_button = WebDriverWait(set_header, 10).until(
+        export_button = WebDriverWait(set_header, 5).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
@@ -126,7 +142,7 @@ def get_export_btn(driver: webdriver.Chrome, set: str) -> bool:
         return False
 
 
-def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
+def get_textarea(driver, pokemon):
     # Finds and returns text area contents for a Pokemon set.
     try:
         textarea = WebDriverWait(driver, 10).until(
@@ -134,7 +150,7 @@ def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
         )
         return textarea.text
     except Exception as e_textarea:
-        print(f"Textarea Error: {str(e_textarea)}")
+        print(f"Text Area Error: {str(e_textarea)}")
         return None
 
 
@@ -211,7 +227,7 @@ def get_setinfo(driver, pokemon, generation=None, format=None):
     return None, None
 
 
-def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
+def is_valid_pokemon(driver, pokemon):
     # Check if the Pokemon name exists on the page.
     try:
         WebDriverWait(driver, 5).until(
@@ -238,7 +254,7 @@ def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
             return False
 
 
-def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
+def is_valid_format(driver, format):
     # Check if the Pokemon format exists on the page.
     try:
         WebDriverWait(driver, 10).until(
@@ -265,7 +281,7 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
         return False
 
 
-def has_export_buttons(driver: webdriver.Chrome) -> bool:
+def has_export_buttons(driver):
     # Checks if there are any export buttons on the page.
     try:
         WebDriverWait(driver, 5).until(
@@ -277,7 +293,7 @@ def has_export_buttons(driver: webdriver.Chrome) -> bool:
         return False
 
 
-def format_name(pokemon: str) -> str:
+def format_name(pokemon):
     # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
     formatted_parts = []
     for part in pokemon.split("-"):

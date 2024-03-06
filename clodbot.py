@@ -91,9 +91,7 @@ async def give_set(ctx, *args):
                     ),
                 }
             )
-        pokemon_sets = await GiveSet.fetch_multiset_async_with_gen_format(
-            pokemon_requests
-        )
+        pokemon_sets = await GiveSet.fetch_multiset_async(pokemon_requests)
         pokemon_data = []
         for request, (name, sets, url) in zip(pokemon_requests, pokemon_sets):
             generation = request["generation"]
