@@ -16,13 +16,9 @@ from datetime import datetime, timedelta
 
 class GiveSet:
     awaiting_response = {}
-    # For caching Pokemon names
     pokemon_cache = {"names": [], "expiration": datetime.now()}
-    # For caching Pokemon set names
     setname_cache = {}
-    # For caching Pokemon set info
     setinfo_cache = {}
-    # Cache expiration duration
     cache_duration = timedelta(hours=730)
 
     @staticmethod
@@ -298,8 +294,8 @@ class GiveSet:
             await ctx.send("Unable to fetch data for the selected Pokémon sets.")
 
     @staticmethod
-    async def fetch_random_set(ctx, input_str):
-        # Generates and displays a random Pokemon set with a random eligible Generation and Format.
+    async def fetch_random_sets(ctx, input_str):
+        # Generates and displays random Pokemon sets with random eligible Generations and Formats.
         args_list = input_str.split()
         num = 1
         if len(args_list) > 1:
@@ -310,28 +306,41 @@ class GiveSet:
                     "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
                 )
                 return
+        pokemon = GiveSet.fetch_all_pokemon()
+        loop = asyncio.get_event_loop()
         valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)
-            pokemon = random.sample(GiveSet.fetch_all_pokemon(), k=remaining)
-            pokemon_requests = []
-            for name in pokemon:
-                eligible_gens = get_eligible_gens(name)
-                if eligible_gens:
-                    random_gen = random.choice(eligible_gens)
-                    eligible_formats = get_eligible_formats(name, random_gen)
-                    if eligible_formats:
-                        random_format = random.choice(eligible_formats)
-                        pokemon_requests.append(
-                            {
-                                "name": name,
-                                "generation": random_gen,
-                                "format": random_format,
-                            }
-                        )
-                else:
-                    continue
-            pokemon_data = await GiveSet.fetch_multiset_async(pokemon_requests)
-            for name, sets, url in pokemon_data:
-                valid_pokemon.append((name, sets, url))
-        await GiveSet.display_random_sets(ctx, valid_pokemon)
+            selected_pokemon = random.sample(pokemon, k=min(remaining, len(pokemon)))
+            tasks = [
+                loop.create_task(GiveSet.fetch_randomset_async(pokemon))
+                for pokemon in selected_pokemon
+            ]
+            results = await asyncio.gather(*tasks)
+            valid_pokemon.extend([p for p in results if p is not None])
+            for p in valid_pokemon:
+                if p[0] in pokemon:
+                    pokemon.remove(p[0])
+        await GiveSet.display_random_sets(ctx, valid_pokemon[:num])
+
+    @staticmethod
+    async def fetch_randomset_async(pokemon):
+        # Helper function for fetching random sets asynchronously to save time.
+        loop = asyncio.get_running_loop()
+        eligible_gens = await loop.run_in_executor(None, get_eligible_gens, pokemon)
+        if not eligible_gens:
+            return None
+        random_gen = random.choice(eligible_gens)
+
+        eligible_formats = await loop.run_in_executor(
+            None, get_eligible_formats, pokemon, random_gen
+        )
+        if not eligible_formats:
+            return None
+        random_format = random.choice(eligible_formats)
+        set_data = await loop.run_in_executor(
+            None,
+            GiveSet.fetch_set_with_gen_format,
+            {"name": pokemon, "generation": random_gen, "format": random_format},
+        )
+        return set_data

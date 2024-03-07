@@ -65,7 +65,7 @@ async def give_set(ctx, *args):
     # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
     input_str = " ".join(args).strip()
     if input_str.startswith("random"):
-        await GiveSet.fetch_random_set(ctx, input_str)
+        await GiveSet.fetch_random_sets(ctx, input_str)
     elif "," in input_str:
         parts = input_str.split(",")
         pokemon_requests = []
