@@ -93,6 +93,7 @@ async def give_set(ctx, *args):
             )
         pokemon_sets = await GiveSet.fetch_multiset_async(pokemon_requests)
         pokemon_data = []
+        results = await asyncio.gather(*pokemon_sets)
         for request, (name, sets, url) in zip(pokemon_requests, pokemon_sets):
             generation = request["generation"]
             format = request["format"]

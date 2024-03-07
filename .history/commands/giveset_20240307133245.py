@@ -311,7 +311,9 @@ class GiveSet:
         valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)
-            selected_pokemon = random.sample(pokemon, k=min(remaining, len(pokemon)))
+            selected_pokemon = random.sample(
+                all_pokemon, k=min(remaining, len(all_pokemon))
+            )
             tasks = [
                 loop.create_task(GiveSet.fetch_randomset_async(pokemon))
                 for pokemon in selected_pokemon

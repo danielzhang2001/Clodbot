@@ -10,11 +10,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from discord import ui, ButtonStyle
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
 
-generation_cache = {"data": {}, "expiration": datetime.now()}
-format_cache = {"data": {}, "expiration": datetime.now()}
-cache_duration = timedelta(hours=730)
+generation_cache = {}
+format_cache = {}
+setinfo_cache = {}
 
 
 def get_gen_dict():
@@ -39,12 +38,8 @@ def get_gen(generation):
 
 def get_eligible_gens(pokemon):
     # Finds all eligible generations that a Pokemon has on Smogon.
-    current_time = datetime.now()
-    if (
-        current_time <= generation_cache["expiration"]
-        and pokemon in generation_cache["data"]
-    ):
-        return generation_cache["data"][pokemon]
+    if pokemon in generation_cache:
+        return generation_cache[pokemon]
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--log-level=3")
@@ -55,17 +50,15 @@ def get_eligible_gens(pokemon):
             driver.get(url)
             if has_export_buttons(driver):
                 eligible_gens.append(gen_key)
-    generation_cache["data"][pokemon] = eligible_gens
-    generation_cache["expiration"] = current_time + cache_duration
+    generation_cache[pokemon] = eligible_gens
     return eligible_gens
 
 
 def get_eligible_formats(pokemon, generation):
     # Finds all eligible formats that a Pokemon with a Generation has on Smogon.
-    current_time = datetime.now()
     cache_key = f"{pokemon}-{generation}"
-    if current_time <= format_cache["expiration"] and cache_key in format_cache["data"]:
-        return format_cache["data"][cache_key]
+    if cache_key in format_cache:
+        return format_cache[cache_key]
     eligible_formats = set()
     gen_code = get_gen(generation)
     chrome_options = Options()
@@ -75,24 +68,24 @@ def get_eligible_formats(pokemon, generation):
         url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
         driver.get(url)
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located(
-                (By.CLASS_NAME, "PokemonPage-StrategySelector")
+                EC.presence_of_element_located(
+                    (By.CLASS_NAME, "PokemonPage-StrategySelector")
+                )
             )
-        )
         format_links = driver.find_elements(
-            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
-        )
-        for link in format_links:
-            format_name = link.text.strip().replace(" ", "-")
-            if format_name:
-                eligible_formats.add(format_name)
-        selected_format = driver.find_element(
-            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
-        )
-        selected_format_name = selected_format.text.strip().replace(" ", "-")
-        eligible_formats.add(selected_format_name)
-    format_cache["data"][cache_key] = list(eligible_formats)
-    format_cache["expiration"] = current_time + cache_duration
+                By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
+            )
+            for link in format_links:
+                format_name = link.text.strip().replace(" ", "-")
+                if format_name:
+                    eligible_formats.add(format_name)
+            selected_format = driver.find_element(
+                By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
+            )
+            selected_format_name = selected_format.text.strip().replace(" ", "-")
+            eligible_formats.add(selected_format_name)
+    except Exception as e:
+        print(f"Error fetching formats for {pokemon} in {generation}: {str(e)}")
     return list(eligible_formats)
 
 

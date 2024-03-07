@@ -311,7 +311,9 @@ class GiveSet:
         valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)
-            selected_pokemon = random.sample(pokemon, k=min(remaining, len(pokemon)))
+            selected_pokemon = random.sample(
+                all_pokemon, k=min(remaining, len(all_pokemon))
+            )
             tasks = [
                 loop.create_task(GiveSet.fetch_randomset_async(pokemon))
                 for pokemon in selected_pokemon
@@ -321,7 +323,7 @@ class GiveSet:
             for p in valid_pokemon:
                 if p[0] in pokemon:
                     pokemon.remove(p[0])
-        await GiveSet.display_random_sets(ctx, valid_pokemon[:num])
+        await GiveSet.display_random_sets(ctx, valid_pokemon)
 
     @staticmethod
     async def fetch_randomset_async(pokemon):

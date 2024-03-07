@@ -8,6 +8,7 @@ import discord  # type: ignore
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
 import aiohttp
+import asyncio
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -93,7 +94,8 @@ async def give_set(ctx, *args):
             )
         pokemon_sets = await GiveSet.fetch_multiset_async(pokemon_requests)
         pokemon_data = []
-        for request, (name, sets, url) in zip(pokemon_requests, pokemon_sets):
+        results = await asyncio.gather(*pokemon_sets)
+        for request, (name, sets, url) in zip(pokemon_requests, results):
             generation = request["generation"]
             format = request["format"]
             if sets:

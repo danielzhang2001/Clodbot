@@ -306,26 +306,34 @@ class GiveSet:
                     "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
                 )
                 return
-        pokemon = GiveSet.fetch_all_pokemon()
-        loop = asyncio.get_event_loop()
         valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)
-            selected_pokemon = random.sample(pokemon, k=min(remaining, len(pokemon)))
-            tasks = [
-                loop.create_task(GiveSet.fetch_randomset_async(pokemon))
-                for pokemon in selected_pokemon
-            ]
-            results = await asyncio.gather(*tasks)
-            valid_pokemon.extend([p for p in results if p is not None])
-            for p in valid_pokemon:
-                if p[0] in pokemon:
-                    pokemon.remove(p[0])
-        await GiveSet.display_random_sets(ctx, valid_pokemon[:num])
+            pokemon = random.sample(GiveSet.fetch_all_pokemon(), k=remaining)
+            pokemon_requests = []
+            for name in pokemon:
+                eligible_gens = get_eligible_gens(name)
+                if eligible_gens:
+                    random_gen = random.choice(eligible_gens)
+                    eligible_formats = get_eligible_formats(name, random_gen)
+                    if eligible_formats:
+                        random_format = random.choice(eligible_formats)
+                        pokemon_requests.append(
+                            {
+                                "name": name,
+                                "generation": random_gen,
+                                "format": random_format,
+                            }
+                        )
+                else:
+                    continue
+            pokemon_data = await GiveSet.fetch_multiset_async(pokemon_requests)
+            for name, sets, url in pokemon_data:
+                valid_pokemon.append((name, sets, url))
+        await GiveSet.display_random_sets(ctx, valid_pokemon)
 
     @staticmethod
-    async def fetch_randomset_async(pokemon):
-        # Helper function for fetching random sets asynchronously to save time.
+    async def async_fetch_set_for_pokemon(pokemon):
         loop = asyncio.get_running_loop()
         eligible_gens = await loop.run_in_executor(None, get_eligible_gens, pokemon)
         if not eligible_gens:
@@ -338,9 +346,7 @@ class GiveSet:
         if not eligible_formats:
             return None
         random_format = random.choice(eligible_formats)
-        set_data = await loop.run_in_executor(
-            None,
-            GiveSet.fetch_set_with_gen_format,
-            {"name": pokemon, "generation": random_gen, "format": random_format},
+        set_data = await GiveSet.fetch_set_with_gen_format(
+            {"name": pokemon, "generation": random_gen, "format": random_format}
         )
         return set_data

@@ -92,7 +92,6 @@ def get_eligible_formats(pokemon, generation):
         selected_format_name = selected_format.text.strip().replace(" ", "-")
         eligible_formats.add(selected_format_name)
     format_cache["data"][cache_key] = list(eligible_formats)
-    format_cache["expiration"] = current_time + cache_duration
     return list(eligible_formats)
 
 

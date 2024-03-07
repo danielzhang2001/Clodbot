@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 
 generation_cache = {"data": {}, "expiration": datetime.now()}
-format_cache = {"data": {}, "expiration": datetime.now()}
+format_cache = {}
 cache_duration = timedelta(hours=730)
 
 
@@ -56,16 +56,15 @@ def get_eligible_gens(pokemon):
             if has_export_buttons(driver):
                 eligible_gens.append(gen_key)
     generation_cache["data"][pokemon] = eligible_gens
-    generation_cache["expiration"] = current_time + cache_duration
+    generation_cache["expiration"] = current_time + timedelta(hours=730)  # Adjust cache duration as needed
     return eligible_gens
 
 
 def get_eligible_formats(pokemon, generation):
     # Finds all eligible formats that a Pokemon with a Generation has on Smogon.
-    current_time = datetime.now()
     cache_key = f"{pokemon}-{generation}"
-    if current_time <= format_cache["expiration"] and cache_key in format_cache["data"]:
-        return format_cache["data"][cache_key]
+    if cache_key in format_cache:
+        return format_cache[cache_key]
     eligible_formats = set()
     gen_code = get_gen(generation)
     chrome_options = Options()
@@ -91,8 +90,7 @@ def get_eligible_formats(pokemon, generation):
         )
         selected_format_name = selected_format.text.strip().replace(" ", "-")
         eligible_formats.add(selected_format_name)
-    format_cache["data"][cache_key] = list(eligible_formats)
-    format_cache["expiration"] = current_time + cache_duration
+    format_cache[cache_key] = list(eligible_formats)
     return list(eligible_formats)
 
 
