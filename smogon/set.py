@@ -11,13 +11,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from discord import ui, ButtonStyle
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from typing import Optional, Dict, List
 
 generation_cache = {"data": {}, "expiration": datetime.now()}
 format_cache = {"data": {}, "expiration": datetime.now()}
 cache_duration = timedelta(hours=730)
 
 
-def get_gen_dict():
+def get_gen_dict() -> Dict[str, str]:
     # Returns generation dictionary.
     return {
         "gen1": "rb",
@@ -32,12 +33,12 @@ def get_gen_dict():
     }
 
 
-def get_gen(generation):
+def get_gen(generation: str) -> Optional[str]:
     # Retrieves generation dictionary.
     return get_gen_dict().get(generation.lower())
 
 
-def get_eligible_gens(pokemon):
+def get_eligible_gens(pokemon: str) -> List[str]:
     # Finds all eligible generations that a Pokemon has on Smogon.
     current_time = datetime.now()
     if (
@@ -57,10 +58,11 @@ def get_eligible_gens(pokemon):
                 eligible_gens.append(gen_key)
     generation_cache["data"][pokemon] = eligible_gens
     generation_cache["expiration"] = current_time + cache_duration
+    print(f"ELIGIBLE GENS FOR {pokemon}: {eligible_gens}")
     return eligible_gens
 
 
-def get_eligible_formats(pokemon, generation):
+def get_eligible_formats(pokemon: str, generation: str) -> List[str]:
     # Finds all eligible formats that a Pokemon with a Generation has on Smogon.
     current_time = datetime.now()
     cache_key = f"{pokemon}-{generation}"
@@ -84,19 +86,21 @@ def get_eligible_formats(pokemon, generation):
         )
         for link in format_links:
             format_name = link.text.strip().replace(" ", "-")
-            if format_name:
+            if format_name and is_valid_format(driver, format_name):
                 eligible_formats.add(format_name)
         selected_format = driver.find_element(
             By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
         )
-        selected_format_name = selected_format.text.strip().replace(" ", "-")
-        eligible_formats.add(selected_format_name)
+        selected_name = selected_format.text.strip().replace(" ", "-")
+        if is_valid_format(driver, selected_name):
+            eligible_formats.add(selected_name)
     format_cache["data"][cache_key] = list(eligible_formats)
     format_cache["expiration"] = current_time + cache_duration
+    print(f"ELIGIBLE FORMATS FOR {pokemon} IN GEN {generation}: {eligible_formats}")
     return list(eligible_formats)
 
 
-def get_set_names(driver):
+def get_set_names(driver: webdriver.Chrome) -> Optional[List[str]]:
     # Finds and returns all set names on the page.
     try:
         export_buttons = WebDriverWait(driver, 10).until(
@@ -112,11 +116,11 @@ def get_set_names(driver):
         return None
 
 
-def xpath_handler(text):
+def xpath_handler(set: str) -> str:
     # Formats XPath through appropriate quote usage.
     parts = ["concat("]
     need_quote = False
-    for char in text:
+    for char in set:
         if char == "'":
             if need_quote:
                 parts.append(", ")
@@ -131,7 +135,7 @@ def xpath_handler(text):
     return "".join(parts)
 
 
-def get_export_btn(driver, set):
+def get_export_btn(driver: WebDriver.Chrome, set: str) -> bool:
     # Finds and clicks export button for the specific set.
     try:
         set_xpath = xpath_handler(set.upper())
@@ -158,19 +162,22 @@ def get_export_btn(driver, set):
         return False
 
 
-def get_textarea(driver, pokemon):
+def get_textarea(driver: WebDriver.Chrome, set: str) -> Optional[str]:
     # Finds and returns text area contents for a Pokemon set.
     try:
-        textarea = WebDriverWait(driver, 10).until(
+        textarea = WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.TAG_NAME, "textarea"))
         )
+        print(f"TEXT AREA: {textarea.text}")
         return textarea.text
     except Exception as e_textarea:
         print(f"Text Area Error: {str(e_textarea)}")
         return None
 
 
-def get_view(unique_id, pokemon_data):
+def get_view(
+    unique_id: str, pokemon_data: Tuple[str, Optional[List[str]], Optional[str]]
+) -> Tuple[Dict[str, ui.View], str]:
     # Creates a prompt + buttons for Pokemon sets for a single Pokemon.
     pokemon, sets, url = pokemon_data
     view = ui.View()
@@ -185,7 +192,12 @@ def get_view(unique_id, pokemon_data):
     return {formatted_name: view}, prompt
 
 
-def get_multiview(unique_id, pokemon_data):
+def get_multiview(
+    unique_id: str,
+    pokemon_data: List[
+        Tuple[str, Optional[List[str]], Optional[str], Optional[str], Optional[str]]
+    ],
+) -> Tuple[Dict[str, ui.View], str]:
     # Creates a prompt and buttons for Pokemon sets for multiple Pokemon.
     views = {}
     formatted_names = [
@@ -213,7 +225,12 @@ def get_multiview(unique_id, pokemon_data):
     return views, prompt
 
 
-def get_setinfo(driver, pokemon, generation=None, format=None):
+def get_setinfo(
+    driver: WebDriver.Chrome,
+    pokemon: str,
+    generation: Optional[str] = None,
+    format: Optional[str] = None,
+) -> Tuple[Optional[List[str]], Optional[str]]:
     # Retrieves the set names and the url with the Driver, Pokemon, Generation (Optional) and Format (Optional) provided.
     if generation:
         gen_code = get_gen(generation)
@@ -243,7 +260,7 @@ def get_setinfo(driver, pokemon, generation=None, format=None):
     return None, None
 
 
-def is_valid_pokemon(driver, pokemon):
+def is_valid_pokemon(driver: WebDriver.Chrome, pokemon: str) -> bool:
     # Check if the Pokemon name exists on the page.
     try:
         WebDriverWait(driver, 5).until(
@@ -270,8 +287,8 @@ def is_valid_pokemon(driver, pokemon):
             return False
 
 
-def is_valid_format(driver, format):
-    # Check if the Pokemon format exists on the page.
+def is_valid_format(driver: WebDriver.Chrome, format: str) -> bool:
+    # Check if the Pokemon format exists on the page and there is an export button associated with it.
     try:
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
@@ -284,20 +301,20 @@ def is_valid_format(driver, format):
         for element in format_elements:
             href = element.get_attribute("href")
             url_format = href.split("/")[-2]
-            if format.lower() == url_format.lower():
+            if format.lower() == url_format.lower() and has_export_buttons(driver):
                 return True
         selected_format = driver.find_element(
             By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
         )
         current_url = driver.current_url
         url_format = current_url.split("/")[-2]
-        return format.lower() == url_format.lower()
+        return format.lower() == url_format.lower() and has_export_buttons(driver)
     except Exception as e:
         print(f"Error checking format: {str(e)}")
         return False
 
 
-def has_export_buttons(driver):
+def has_export_buttons(driver: WebDriver.Chrome) -> bool:
     # Checks if there are any export buttons on the page.
     try:
         WebDriverWait(driver, 5).until(
@@ -309,7 +326,7 @@ def has_export_buttons(driver):
         return False
 
 
-def format_name(pokemon):
+def format_name(pokemon: str) -> str:
     # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
     formatted_parts = []
     for part in pokemon.split("-"):
@@ -320,7 +337,7 @@ def format_name(pokemon):
     return "-".join(formatted_parts)
 
 
-def update_buttons(view, selected_sets):
+def update_buttons(view: ui.View, selected_sets: dict) -> None:
     # Updates button styles in one row based on whether they are selected or not.
     for item in view.children:
         item_id_parts = item.custom_id.split("_")
@@ -336,7 +353,9 @@ def update_buttons(view, selected_sets):
                 item.style = ButtonStyle.secondary
 
 
-async def update_button_rows(context, interaction, selected_sets):
+async def update_button_rows(
+    context: dict, interaction: discord.Interaction, selected_sets: dict
+) -> None:
     channel = interaction.client.get_channel(interaction.channel_id)
     # Iterates over all button rows to change button styles.
     for message_id in context.get("message_ids", []):
@@ -351,13 +370,13 @@ async def update_button_rows(context, interaction, selected_sets):
 
 
 async def update_message(
-    context,
-    interaction,
-    unique_id,
-    pokemon=None,
-    set_index=None,
-    set_display=None,
-):
+    context: dict,
+    interaction: discord.Interaction,
+    unique_id: str,
+    pokemon: Optional[str] = None,
+    set_index: Optional[int] = None,
+    set_display: Optional[str] = None,
+) -> None:
     # Updates the set message of either adding or deleting a set after a set button is clicked.
     context.setdefault("sets", {})
     if set_index is not None:
