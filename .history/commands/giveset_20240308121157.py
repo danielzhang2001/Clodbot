@@ -5,12 +5,12 @@ The function to give Pokemon sets from Smogon based on different types of criter
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from smogon.set import *
+from discord import ui, ButtonStyle
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
 import random
-import discord
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Tuple
 from discord.ext import commands
@@ -179,7 +179,7 @@ class GiveSet:
 
     @staticmethod
     async def fetch_multiset_async(
-        requests: List[Dict[str, Optional[str]]]
+        pokemon_requests: List[Dict[str, Optional[str]]]
     ) -> List[Tuple[Optional[List[str]], Optional[str]]]:
         # Uses fetch_set_with_gen_format multiple times to speed up process of fetching multiple Pokemon sets with potential Generation and Format.
         loop = asyncio.get_running_loop()
@@ -347,7 +347,7 @@ class GiveSet:
             await ctx.send("Unable to fetch data for the selected Pokémon sets.")
 
     @staticmethod
-    async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
+    async def fetch_random_sets(ctx: commands.Context, input_str):
         # Generates and displays random Pokemon sets with random eligible Generations and Formats.
         args_list = input_str.split()
         num = 1
@@ -378,9 +378,7 @@ class GiveSet:
         await GiveSet.display_random_sets(ctx, valid_pokemon[:num])
 
     @staticmethod
-    async def fetch_randomset_async(
-        pokemon: str,
-    ) -> Optional[Tuple[str, List[str], str]]:
+    async def fetch_randomset_async(pokemon):
         # Helper function for fetching random sets asynchronously to save time.
         loop = asyncio.get_running_loop()
         eligible_gens = await loop.run_in_executor(None, get_eligible_gens, pokemon)

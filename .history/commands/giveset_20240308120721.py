@@ -5,15 +5,15 @@ The function to give Pokemon sets from Smogon based on different types of criter
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from smogon.set import *
+from discord import ui, ButtonStyle
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
 import random
-import discord
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Tuple
-from discord.ext import commands
+from discord.ext.commands import Context
 
 
 class GiveSet:
@@ -179,7 +179,7 @@ class GiveSet:
 
     @staticmethod
     async def fetch_multiset_async(
-        requests: List[Dict[str, Optional[str]]]
+        pokemon_requests: List[Dict[str, Optional[str]]]
     ) -> List[Tuple[Optional[List[str]], Optional[str]]]:
         # Uses fetch_set_with_gen_format multiple times to speed up process of fetching multiple Pokemon sets with potential Generation and Format.
         loop = asyncio.get_running_loop()
@@ -235,14 +235,7 @@ class GiveSet:
             GiveSet.awaiting_response[unique_id]["message_ids"].append(message.id)
 
     @staticmethod
-    async def set_selection(
-        interaction: discord.Interaction,
-        unique_id: str,
-        set_index: int,
-        set_name: str,
-        url: str,
-        pokemon: str,
-    ) -> None:
+    async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
         # Handles button functionality from set_prompt when clicked
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
@@ -309,9 +302,7 @@ class GiveSet:
                 )
 
     @staticmethod
-    async def display_random_sets(
-        ctx: commands.Context, pokemon_data: List[Tuple[str, List[str], str]]
-    ) -> None:
+    async def display_random_sets(ctx, pokemon_data):
         # Displays all sets in one textbox given multiple Pokemon and their sets.
         message_content = ""
         for pokemon, sets, url in pokemon_data:
@@ -347,7 +338,7 @@ class GiveSet:
             await ctx.send("Unable to fetch data for the selected Pokémon sets.")
 
     @staticmethod
-    async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
+    async def fetch_random_sets(ctx, input_str):
         # Generates and displays random Pokemon sets with random eligible Generations and Formats.
         args_list = input_str.split()
         num = 1
@@ -378,9 +369,7 @@ class GiveSet:
         await GiveSet.display_random_sets(ctx, valid_pokemon[:num])
 
     @staticmethod
-    async def fetch_randomset_async(
-        pokemon: str,
-    ) -> Optional[Tuple[str, List[str], str]]:
+    async def fetch_randomset_async(pokemon):
         # Helper function for fetching random sets asynchronously to save time.
         loop = asyncio.get_running_loop()
         eligible_gens = await loop.run_in_executor(None, get_eligible_gens, pokemon)

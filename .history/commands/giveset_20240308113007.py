@@ -5,15 +5,13 @@ The function to give Pokemon sets from Smogon based on different types of criter
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from smogon.set import *
+from discord import ui, ButtonStyle
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
 import random
-import discord
 from datetime import datetime, timedelta
-from typing import Optional, List, Dict, Tuple
-from discord.ext import commands
 
 
 class GiveSet:
@@ -56,20 +54,20 @@ class GiveSet:
     @staticmethod
     def update_setinfo_cache(
         pokemon: str,
-        name: str,
-        data: str,
+        set_name: str,
+        set_data: dict,
         generation: Optional[str] = None,
         format: Optional[str] = None,
     ) -> None:
         # Updates the set data cache with new data.
-        key = GiveSet.get_setinfo_key(pokemon, name, generation, format)
+        key = GiveSet.get_setinfo_key(pokemon, set_name, generation, format)
         expiration = datetime.now() + GiveSet.cache_duration
-        GiveSet.setinfo_cache[key] = (data, expiration)
+        GiveSet.setinfo_cache[key] = (set_data, expiration)
 
     @staticmethod
     def get_setname_key(
         pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
-    ) -> str:
+    ) -> :
         # Generates a key for accessing the cache of set names.
         parts = [pokemon.lower()]
         if generation:
@@ -79,9 +77,7 @@ class GiveSet:
         return "_".join(parts)
 
     @staticmethod
-    def check_setname_cache(
-        pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
-    ) -> Optional[Tuple[List[str], str]]:
+    def check_setname_cache(pokemon, generation=None, format=None):
         # Checks if data is available in the set names cache and not expired.
         key = GiveSet.get_setname_key(pokemon, generation, format)
         if key in GiveSet.setname_cache:
@@ -91,19 +87,14 @@ class GiveSet:
         return None
 
     @staticmethod
-    def update_setname_cache(
-        pokemon: str,
-        data: Tuple[List[str], str],
-        generation: Optional[str] = None,
-        format: Optional[str] = None,
-    ) -> None:
+    def update_setname_cache(pokemon, data, generation=None, format=None):
         # Updates the set names cache with new data.
         key = GiveSet.get_setname_key(pokemon, generation, format)
         expiration = datetime.now() + GiveSet.cache_duration
         GiveSet.setname_cache[key] = (data, expiration)
 
     @staticmethod
-    def fetch_all_pokemon() -> List[str]:
+    def fetch_all_pokemon():
         # Stores all Pokemon from Bulbapedia into a cache, returns the cache.
         current_time = datetime.now()
         if current_time <= GiveSet.pokemon_cache["expiration"]:
@@ -142,9 +133,7 @@ class GiveSet:
         return pokemon_names
 
     @staticmethod
-    def fetch_set(
-        pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
-    ) -> Tuple[Optional[List[str]], Optional[str]]:
+    def fetch_set(pokemon, generation=None, format=None):
         # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
         cached_data = GiveSet.check_setname_cache(pokemon, generation, format)
         if cached_data:
@@ -167,9 +156,7 @@ class GiveSet:
                 driver.quit()
 
     @staticmethod
-    async def fetch_set_async(
-        pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
-    ) -> Tuple[Optional[List[str]], Optional[str]]:
+    async def fetch_set_async(pokemon, generation=None, format=None):
         # Helper function for fetching sets asynchronously to save time.
         loop = asyncio.get_running_loop()
         sets, url = await loop.run_in_executor(
@@ -178,22 +165,18 @@ class GiveSet:
         return sets, url
 
     @staticmethod
-    async def fetch_multiset_async(
-        requests: List[Dict[str, Optional[str]]]
-    ) -> List[Tuple[Optional[List[str]], Optional[str]]]:
+    async def fetch_multiset_async(pokemon_requests):
         # Uses fetch_set_with_gen_format multiple times to speed up process of fetching multiple Pokemon sets with potential Generation and Format.
         loop = asyncio.get_running_loop()
         tasks = [
             loop.run_in_executor(None, GiveSet.fetch_set_with_gen_format, request)
-            for request in requests
+            for request in pokemon_requests
         ]
         results = await asyncio.gather(*tasks)
         return results
 
     @staticmethod
-    def fetch_set_with_gen_format(
-        request: Dict[str, Optional[str]]
-    ) -> Tuple[str, Optional[List[str]], Optional[str]]:
+    def fetch_set_with_gen_format(request):
         # Uses fetch_set with request to fetch multiple sets with potential different specifications of Generation and Format.
         pokemon, generation, format = (
             request["name"],
@@ -205,12 +188,7 @@ class GiveSet:
         return (pokemon, sets, url)
 
     @staticmethod
-    async def set_prompt(
-        ctx: commands.Context,
-        pokemon_data: List[
-            Tuple[str, Optional[List[str]], Optional[str], Optional[str], Optional[str]]
-        ],
-    ) -> None:
+    async def set_prompt(ctx, pokemon_data):
         # Displays prompt with buttons for selection of Pokemon sets.
         unique_id = str(uuid.uuid4())
         views = {}
@@ -235,14 +213,7 @@ class GiveSet:
             GiveSet.awaiting_response[unique_id]["message_ids"].append(message.id)
 
     @staticmethod
-    async def set_selection(
-        interaction: discord.Interaction,
-        unique_id: str,
-        set_index: int,
-        set_name: str,
-        url: str,
-        pokemon: str,
-    ) -> None:
+    async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
         # Handles button functionality from set_prompt when clicked
         context = GiveSet.awaiting_response.get(unique_id)
         if not context:
@@ -309,9 +280,7 @@ class GiveSet:
                 )
 
     @staticmethod
-    async def display_random_sets(
-        ctx: commands.Context, pokemon_data: List[Tuple[str, List[str], str]]
-    ) -> None:
+    async def display_random_sets(ctx, pokemon_data):
         # Displays all sets in one textbox given multiple Pokemon and their sets.
         message_content = ""
         for pokemon, sets, url in pokemon_data:
@@ -347,7 +316,7 @@ class GiveSet:
             await ctx.send("Unable to fetch data for the selected Pokémon sets.")
 
     @staticmethod
-    async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
+    async def fetch_random_sets(ctx, input_str):
         # Generates and displays random Pokemon sets with random eligible Generations and Formats.
         args_list = input_str.split()
         num = 1
@@ -378,9 +347,7 @@ class GiveSet:
         await GiveSet.display_random_sets(ctx, valid_pokemon[:num])
 
     @staticmethod
-    async def fetch_randomset_async(
-        pokemon: str,
-    ) -> Optional[Tuple[str, List[str], str]]:
+    async def fetch_randomset_async(pokemon):
         # Helper function for fetching random sets asynchronously to save time.
         loop = asyncio.get_running_loop()
         eligible_gens = await loop.run_in_executor(None, get_eligible_gens, pokemon)

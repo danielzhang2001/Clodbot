@@ -354,7 +354,7 @@ def update_buttons(view: ui.View, selected_sets: dict) -> None:
 
 
 async def update_button_rows(
-    context: dict, interaction: discord.Interaction, selected_sets: dict
+    context: dict, interaction: Any, selected_sets: dict
 ) -> None:
     channel = interaction.client.get_channel(interaction.channel_id)
     # Iterates over all button rows to change button styles.
@@ -370,13 +370,13 @@ async def update_button_rows(
 
 
 async def update_message(
-    context: dict,
-    interaction: discord.Interaction,
-    unique_id: str,
-    pokemon: Optional[str] = None,
-    set_index: Optional[int] = None,
-    set_display: Optional[str] = None,
-) -> None:
+    context,
+    interaction,
+    unique_id,
+    pokemon=None,
+    set_index=None,
+    set_display=None,
+):
     # Updates the set message of either adding or deleting a set after a set button is clicked.
     context.setdefault("sets", {})
     if set_index is not None:

@@ -260,7 +260,7 @@ def get_setinfo(
     return None, None
 
 
-def is_valid_pokemon(driver: WebDriver.Chrome, pokemon: str) -> bool:
+def is_valid_pokemon(driver, pokemon):
     # Check if the Pokemon name exists on the page.
     try:
         WebDriverWait(driver, 5).until(
@@ -287,7 +287,7 @@ def is_valid_pokemon(driver: WebDriver.Chrome, pokemon: str) -> bool:
             return False
 
 
-def is_valid_format(driver: WebDriver.Chrome, format: str) -> bool:
+def is_valid_format(driver, format):
     # Check if the Pokemon format exists on the page and there is an export button associated with it.
     try:
         WebDriverWait(driver, 10).until(
@@ -314,7 +314,7 @@ def is_valid_format(driver: WebDriver.Chrome, format: str) -> bool:
         return False
 
 
-def has_export_buttons(driver: WebDriver.Chrome) -> bool:
+def has_export_buttons(driver):
     # Checks if there are any export buttons on the page.
     try:
         WebDriverWait(driver, 5).until(
@@ -326,7 +326,7 @@ def has_export_buttons(driver: WebDriver.Chrome) -> bool:
         return False
 
 
-def format_name(pokemon: str) -> str:
+def format_name(pokemon):
     # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
     formatted_parts = []
     for part in pokemon.split("-"):
@@ -337,7 +337,7 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def update_buttons(view: ui.View, selected_sets: dict) -> None:
+def update_buttons(view, selected_sets):
     # Updates button styles in one row based on whether they are selected or not.
     for item in view.children:
         item_id_parts = item.custom_id.split("_")
@@ -353,9 +353,7 @@ def update_buttons(view: ui.View, selected_sets: dict) -> None:
                 item.style = ButtonStyle.secondary
 
 
-async def update_button_rows(
-    context: dict, interaction: discord.Interaction, selected_sets: dict
-) -> None:
+async def update_button_rows(context, interaction, selected_sets):
     channel = interaction.client.get_channel(interaction.channel_id)
     # Iterates over all button rows to change button styles.
     for message_id in context.get("message_ids", []):
@@ -370,13 +368,13 @@ async def update_button_rows(
 
 
 async def update_message(
-    context: dict,
-    interaction: discord.Interaction,
-    unique_id: str,
-    pokemon: Optional[str] = None,
-    set_index: Optional[int] = None,
-    set_display: Optional[str] = None,
-) -> None:
+    context,
+    interaction,
+    unique_id,
+    pokemon=None,
+    set_index=None,
+    set_display=None,
+):
     # Updates the set message of either adding or deleting a set after a set button is clicked.
     context.setdefault("sets", {})
     if set_index is not None:

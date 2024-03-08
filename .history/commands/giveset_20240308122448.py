@@ -5,12 +5,12 @@ The function to give Pokemon sets from Smogon based on different types of criter
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from smogon.set import *
+from discord import ui, ButtonStyle, Interaction
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
 import random
-import discord
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Tuple
 from discord.ext import commands
@@ -179,7 +179,7 @@ class GiveSet:
 
     @staticmethod
     async def fetch_multiset_async(
-        requests: List[Dict[str, Optional[str]]]
+        pokemon_requests: List[Dict[str, Optional[str]]]
     ) -> List[Tuple[Optional[List[str]], Optional[str]]]:
         # Uses fetch_set_with_gen_format multiple times to speed up process of fetching multiple Pokemon sets with potential Generation and Format.
         loop = asyncio.get_running_loop()
