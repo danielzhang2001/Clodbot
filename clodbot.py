@@ -73,7 +73,7 @@ async def give_set(ctx, *args):
             request_parts = part.strip().split()
             pokemon_requests.append(
                 {
-                    "name": request_parts[0],
+                    "pokemon": request_parts[0],
                     "generation": (
                         request_parts[1]
                         if len(request_parts) > 1 and request_parts[1].startswith("gen")

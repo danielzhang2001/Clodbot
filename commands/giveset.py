@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
 import random
-import discord
+from discord import Interaction
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Tuple
 from discord.ext import commands
@@ -181,28 +181,24 @@ class GiveSet:
     async def fetch_multiset_async(
         requests: List[Dict[str, Optional[str]]]
     ) -> List[Tuple[Optional[List[str]], Optional[str]]]:
-        # Uses fetch_set_with_gen_format multiple times to speed up process of fetching multiple Pokemon sets with potential Generation and Format.
+        # Uses fetch_set to fetch multiple sets with potential different specifications of Generation and Format asynchronously.
         loop = asyncio.get_running_loop()
         tasks = [
-            loop.run_in_executor(None, GiveSet.fetch_set_with_gen_format, request)
+            loop.run_in_executor(
+                None,
+                GiveSet.fetch_set,
+                request["pokemon"],
+                request.get("generation"),
+                request.get("format"),
+            )
             for request in requests
         ]
         results = await asyncio.gather(*tasks)
-        return results
-
-    @staticmethod
-    def fetch_set_with_gen_format(
-        request: Dict[str, Optional[str]]
-    ) -> Tuple[str, Optional[List[str]], Optional[str]]:
-        # Uses fetch_set with request to fetch multiple sets with potential different specifications of Generation and Format.
-        pokemon, generation, format = (
-            request["name"],
-            request["generation"],
-            request["format"],
-        )
-        print(f"POKEMON GENERATION AND FORMAT HERE: {pokemon} {generation} {format}")
-        sets, url = GiveSet.fetch_set(pokemon, generation, format)
-        return (pokemon, sets, url)
+        final_results = [
+            (requests[i]["pokemon"], result[0], result[1])
+            for i, result in enumerate(results)
+        ]
+        return final_results
 
     @staticmethod
     async def set_prompt(
@@ -236,7 +232,7 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(
-        interaction: discord.Interaction,
+        interaction: Interaction,
         unique_id: str,
         set_index: int,
         set_name: str,
@@ -327,6 +323,7 @@ class GiveSet:
                 driver.get(url)
                 if get_export_btn(driver, set_name):
                     set_data = get_textarea(driver, set_name)
+                    print(f"MY SET DATA: {set_data}")
                     if set_data:
                         message_content += f"{set_data}\n\n"
                     else:
@@ -342,6 +339,7 @@ class GiveSet:
                     driver.quit()
         message_content = "```" + message_content + "```"
         if message_content.strip() != "``````":
+            print(f"MY FINAL MESSAGE CONTENT: {message_content}")
             await ctx.send(message_content)
         else:
             await ctx.send("Unable to fetch data for the selected Pokémon sets.")
@@ -385,18 +383,17 @@ class GiveSet:
         loop = asyncio.get_running_loop()
         eligible_gens = await loop.run_in_executor(None, get_eligible_gens, pokemon)
         if not eligible_gens:
+            print(f"THIS POKEMON {pokemon} HAS NO ELIGIBLE GENS!")
             return None
         random_gen = random.choice(eligible_gens)
-
         eligible_formats = await loop.run_in_executor(
             None, get_eligible_formats, pokemon, random_gen
         )
         if not eligible_formats:
+            print(f"THIS POKEMON {pokemon} HAS NO ELIGIBLE FORMATS!")
             return None
         random_format = random.choice(eligible_formats)
-        set_data = await loop.run_in_executor(
-            None,
-            GiveSet.fetch_set_with_gen_format,
-            {"name": pokemon, "generation": random_gen, "format": random_format},
+        sets, url = await loop.run_in_executor(
+            None, GiveSet.fetch_set, pokemon, random_gen, random_format
         )
-        return set_data
+        return (pokemon, sets, url)
