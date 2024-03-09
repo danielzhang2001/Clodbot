@@ -338,8 +338,8 @@ class GiveSet:
                 if driver:
                     driver.quit()
         message_content = "```" + message_content + "```"
+        print(f"MY MESSAGE CONTENT: {message_content}")
         if message_content.strip() != "``````":
-            print(f"MY FINAL MESSAGE CONTENT: {message_content}")
             await ctx.send(message_content)
         else:
             await ctx.send("Unable to fetch data for the selected Pokémon sets.")
@@ -393,7 +393,11 @@ class GiveSet:
             print(f"THIS POKEMON {pokemon} HAS NO ELIGIBLE FORMATS!")
             return None
         random_format = random.choice(eligible_formats)
-        sets, url = await loop.run_in_executor(
-            None, GiveSet.fetch_set, pokemon, random_gen, random_format
+        set_data = await loop.run_in_executor(
+            None,
+            GiveSet.fetch_set,
+            pokemon,
+            random_gen,
+            random_format,
         )
-        return (pokemon, sets, url)
+        return set_data

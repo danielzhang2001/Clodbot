@@ -87,12 +87,14 @@ def get_eligible_formats(pokemon: str, generation: str) -> List[str]:
         for link in format_links:
             format_name = link.text.strip().replace(" ", "-")
             if format_name and is_valid_format(driver, format_name):
+                print(f"{format_name} IS A VALID FORMAT!")
                 eligible_formats.add(format_name)
         selected_format = driver.find_element(
             By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
         )
         selected_name = selected_format.text.strip().replace(" ", "-")
         if is_valid_format(driver, selected_name):
+            print(f"{selected_name} IS A VALID FORMAT!")
             eligible_formats.add(selected_name)
     format_cache["data"][cache_key] = list(eligible_formats)
     format_cache["expiration"] = current_time + cache_duration
@@ -328,10 +330,10 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
 def has_export_buttons(driver: webdriver.Chrome) -> bool:
     # Checks if there are any export buttons on the page.
     try:
-        button = WebDriverWait(driver, 5).until(
-            EC.visibility_of_element_located((By.CLASS_NAME, "ExportButton"))
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
         )
-        return button.is_displayed()
+        return True
     except Exception as e:
         print(f"No Export Buttons Found: {str(e)}")
         return False

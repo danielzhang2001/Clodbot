@@ -331,7 +331,7 @@ def has_export_buttons(driver: webdriver.Chrome) -> bool:
         button = WebDriverWait(driver, 5).until(
             EC.visibility_of_element_located((By.CLASS_NAME, "ExportButton"))
         )
-        return button.is_displayed()
+        return button.is_displayed()  # Additional check for visibility
     except Exception as e:
         print(f"No Export Buttons Found: {str(e)}")
         return False

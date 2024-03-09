@@ -246,7 +246,7 @@ def get_setinfo(
                 driver, pokemon
             ):
                 print(
-                    f"IS VALID FORMAT FOR {pokemon} in {format}: {is_valid_format(driver, format)}"
+                    f"IS VALID FORMAT FOR {pokemon}: {is_valid_format(driver, format)}"
                 )
                 print(
                     f"IS VALID POKEMON FOR {pokemon}: {is_valid_pokemon(driver, pokemon)}"
@@ -315,9 +315,7 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
                 url_format = href.split("/")[-2]
             elif element.tag_name.lower() == "span":
                 url_format = element.text
-            url_format = url_format.replace(" ", "-")
             if format.lower() == url_format.lower() and has_export_buttons(driver):
-                print(f"{format} HAS EXPORT BUTTONS!")
                 return True
         return False
     except Exception as e:
@@ -328,10 +326,10 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
 def has_export_buttons(driver: webdriver.Chrome) -> bool:
     # Checks if there are any export buttons on the page.
     try:
-        button = WebDriverWait(driver, 5).until(
-            EC.visibility_of_element_located((By.CLASS_NAME, "ExportButton"))
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
         )
-        return button.is_displayed()
+        return True
     except Exception as e:
         print(f"No Export Buttons Found: {str(e)}")
         return False

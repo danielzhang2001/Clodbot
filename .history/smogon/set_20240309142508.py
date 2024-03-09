@@ -245,12 +245,6 @@ def get_setinfo(
             if not is_valid_format(driver, format) or not is_valid_pokemon(
                 driver, pokemon
             ):
-                print(
-                    f"IS VALID FORMAT FOR {pokemon} in {format}: {is_valid_format(driver, format)}"
-                )
-                print(
-                    f"IS VALID POKEMON FOR {pokemon}: {is_valid_pokemon(driver, pokemon)}"
-                )
                 return None, None
         else:
             if not is_valid_pokemon(driver, pokemon):
@@ -305,21 +299,21 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
         format_elements = driver.find_elements(
             By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
         )
-        selected_format = driver.find_elements(
+        selected_format_element = driver.find_elements(
             By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
         )
-        all_formats = format_elements + selected_format
-        for element in all_formats:
-            if element.tag_name.lower() == "a":
-                href = element.get_attribute("href")
-                url_format = href.split("/")[-2]
-            elif element.tag_name.lower() == "span":
-                url_format = element.text
-            url_format = url_format.replace(" ", "-")
+        all_format_elements = format_elements + selected_format_element
+        for element in all_format_elements:
+            href = element.get_attribute("href")
+            url_format = href.split("/")[-2]
             if format.lower() == url_format.lower() and has_export_buttons(driver):
-                print(f"{format} HAS EXPORT BUTTONS!")
                 return True
-        return False
+        selected_format = driver.find_element(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
+        )
+        current_url = driver.current_url
+        url_format = current_url.split("/")[-2]
+        return format.lower() == url_format.lower() and has_export_buttons(driver)
     except Exception as e:
         print(f"Error checking format: {str(e)}")
         return False
@@ -328,10 +322,10 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
 def has_export_buttons(driver: webdriver.Chrome) -> bool:
     # Checks if there are any export buttons on the page.
     try:
-        button = WebDriverWait(driver, 5).until(
-            EC.visibility_of_element_located((By.CLASS_NAME, "ExportButton"))
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
         )
-        return button.is_displayed()
+        return True
     except Exception as e:
         print(f"No Export Buttons Found: {str(e)}")
         return False

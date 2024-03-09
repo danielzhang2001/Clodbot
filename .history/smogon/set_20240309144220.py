@@ -236,6 +236,7 @@ def get_setinfo(
     if generation:
         gen_code = get_gen(generation)
         if not gen_code:
+            print(f"NO GEN CODE FOR {pokemon}")
             return None, None
         url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
         driver.get(url)
@@ -245,15 +246,11 @@ def get_setinfo(
             if not is_valid_format(driver, format) or not is_valid_pokemon(
                 driver, pokemon
             ):
-                print(
-                    f"IS VALID FORMAT FOR {pokemon} in {format}: {is_valid_format(driver, format)}"
-                )
-                print(
-                    f"IS VALID POKEMON FOR {pokemon}: {is_valid_pokemon(driver, pokemon)}"
-                )
+                print(f"NO VALID FORMAT OR IS NOT VALID POKEMON FOR {pokemon}")
                 return None, None
         else:
             if not is_valid_pokemon(driver, pokemon):
+                print(f"IS NOT VALID POKEMON FOR {pokemon}")
                 return None, None
         set_names = get_set_names(driver)
         return set_names, url if set_names else (None, None)
@@ -315,9 +312,7 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
                 url_format = href.split("/")[-2]
             elif element.tag_name.lower() == "span":
                 url_format = element.text
-            url_format = url_format.replace(" ", "-")
             if format.lower() == url_format.lower() and has_export_buttons(driver):
-                print(f"{format} HAS EXPORT BUTTONS!")
                 return True
         return False
     except Exception as e:
@@ -328,10 +323,10 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
 def has_export_buttons(driver: webdriver.Chrome) -> bool:
     # Checks if there are any export buttons on the page.
     try:
-        button = WebDriverWait(driver, 5).until(
-            EC.visibility_of_element_located((By.CLASS_NAME, "ExportButton"))
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
         )
-        return button.is_displayed()
+        return True
     except Exception as e:
         print(f"No Export Buttons Found: {str(e)}")
         return False
