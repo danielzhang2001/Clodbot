@@ -111,7 +111,6 @@ class GiveSet:
         last_modified = response.headers.get("Last-Modified")
         if last_modified == GiveSet.pokemon_cache["last_modified"]:
             return GiveSet.pokemon_cache["names"]
-        GiveSet.pokemon_cache["last_modified"] = last_modified
         pokemon_names = []
         try:
             chrome_options = Options()
@@ -119,7 +118,7 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
-            WebDriverWait(driver, 5).until(
+            WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located(
                     (
                         By.XPATH,
@@ -141,6 +140,7 @@ class GiveSet:
             if driver:
                 driver.quit()
         GiveSet.pokemon_cache["names"] = pokemon_names
+        GiveSet.pokemon_cache["expiration"] = current_time + GiveSet.cache_duration
         return pokemon_names
 
     @staticmethod

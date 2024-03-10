@@ -19,7 +19,7 @@ from discord.ext import commands
 
 class GiveSet:
     awaiting_response = {}
-    pokemon_cache = {"names": [], "last_modified": None}
+    pokemon_cache = {"names": [], "expiration": datetime.now()}
     setname_cache = {}
     setinfo_cache = {}
     cache_duration = timedelta(hours=730)
@@ -106,12 +106,10 @@ class GiveSet:
     @staticmethod
     def fetch_all_pokemon() -> List[str]:
         # Stores all Pokemon from Bulbapedia into a cache, returns the cache.
-        url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
-        response = requests.head(url)
-        last_modified = response.headers.get("Last-Modified")
-        if last_modified == GiveSet.pokemon_cache["last_modified"]:
+        current_time = datetime.now()
+        if current_time <= GiveSet.pokemon_cache["expiration"]:
             return GiveSet.pokemon_cache["names"]
-        GiveSet.pokemon_cache["last_modified"] = last_modified
+        url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
         pokemon_names = []
         try:
             chrome_options = Options()
@@ -119,7 +117,7 @@ class GiveSet:
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
-            WebDriverWait(driver, 5).until(
+            WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located(
                     (
                         By.XPATH,
@@ -141,6 +139,7 @@ class GiveSet:
             if driver:
                 driver.quit()
         GiveSet.pokemon_cache["names"] = pokemon_names
+        GiveSet.pokemon_cache["expiration"] = current_time + GiveSet.cache_duration
         return pokemon_names
 
     @staticmethod

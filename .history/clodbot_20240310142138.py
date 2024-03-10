@@ -14,6 +14,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+import requests
+
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
 
@@ -37,10 +39,27 @@ gen_dict = {
 }
 
 
+def check_etag_and_last_modified(url):
+    response = requests.head(url)  # Using HEAD to fetch headers only
+    etag = response.headers.get("ETag")
+    last_modified = response.headers.get("Last-Modified")
+
+    return etag, last_modified
+
+
+url = (
+    "https://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number"
+)
+etag, last_modified = check_etag_and_last_modified(url)
+print("ETag:", etag)
+print("Last-Modified:", last_modified)
+
+
 @bot.event
 async def on_ready():
     # Print a message when the bot connects to Discord.
     print(f"{bot.user} has connected to Discord!")
+    check_etag_and_last_modified(url)
 
 
 # COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.

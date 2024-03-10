@@ -141,6 +141,7 @@ class GiveSet:
             if driver:
                 driver.quit()
         GiveSet.pokemon_cache["names"] = pokemon_names
+        GiveSet.pokemon_cache["expiration"] = current_time + GiveSet.cache_duration
         return pokemon_names
 
     @staticmethod

@@ -41,6 +41,7 @@ gen_dict = {
 async def on_ready():
     # Print a message when the bot connects to Discord.
     print(f"{bot.user} has connected to Discord!")
+    check_etag_and_last_modified(url)
 
 
 # COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.

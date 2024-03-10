@@ -14,6 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
 
@@ -41,6 +42,7 @@ gen_dict = {
 async def on_ready():
     # Print a message when the bot connects to Discord.
     print(f"{bot.user} has connected to Discord!")
+    check_etag_and_last_modified(url)
 
 
 # COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.
