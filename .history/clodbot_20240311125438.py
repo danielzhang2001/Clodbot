@@ -38,10 +38,28 @@ gen_dict = {
 }
 
 
+def check_etag_last_modified_and_content_length(url):
+    response = requests.head(url)  # Using HEAD to fetch headers only
+    etag = response.headers.get("ETag")
+    last_modified = response.headers.get("Last-Modified")
+    content_length = response.headers.get("Content-Length")
+
+    return etag, last_modified, content_length
+
+
+url = (
+    "https://bulbapedia.bulbagarden.net/wiki/List_of_Pokémon_by_National_Pokédex_number"
+)
+etag, last_modified, content_length = check_etag_last_modified_and_content_length(url)
+
+
 @bot.event
 async def on_ready():
     # Print a message when the bot connects to Discord.
     print(f"{bot.user} has connected to Discord!")
+    print("Last-Modified:", last_modified)
+    print("E-Tag:", etag)
+    print("Content-Length:", content_length)
 
 
 # COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.

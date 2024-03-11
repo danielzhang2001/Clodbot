@@ -87,7 +87,7 @@ def get_eligible_formats(pokemon: str, generation: str) -> List[str]:
         for link in format_links:
             format_name = link.text.strip().replace(" ", "-")
             if format_name and is_valid_format(driver, format_name):
-                print(f"{pokemon} {generation} {format_name} IS VALID FORMAT!")
+                print(f"{pokemon} {generation} {selected_name} IS VALID FORMAT!")
                 eligible_formats.add(format_name)
         selected_format = driver.find_element(
             By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"

@@ -19,6 +19,7 @@ from discord.ext import commands
 
 class GiveSet:
     awaiting_response = {}
+    pokemon_cache = {"names": [], "last_modified": None}
     setname_cache = {}
     setinfo_cache = {}
     cache_duration = timedelta(hours=730)
@@ -104,11 +105,19 @@ class GiveSet:
 
     @staticmethod
     def fetch_all_pokemon() -> List[str]:
-        # Retrieves a list of all Pokemon using PokeAPI.
-        url = "https://pokeapi.co/api/v2/pokemon-species?limit=10000"
+        # Stores all Pokemon from PokeAPI into a cache, returns the cache.
+        if GiveSet.pokemon_cache["names"]:  # Check if cache is already populated.
+            return GiveSet.pokemon_cache["names"]
+
+        url = "https://pokeapi.co/api/v2/pokemon-species?limit=10000"  # A high limit to ensure fetching all species
         response = requests.get(url)
         data = response.json()
+
+        # Extracting Pokémon names from the API response.
         pokemon_names = [species["name"] for species in data["results"]]
+
+        # Updating the cache with fetched Pokémon names.
+        GiveSet.pokemon_cache["names"] = pokemon_names
         return pokemon_names
 
     @staticmethod

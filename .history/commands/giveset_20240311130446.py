@@ -104,7 +104,6 @@ class GiveSet:
 
     @staticmethod
     def fetch_all_pokemon() -> List[str]:
-        # Retrieves a list of all Pokemon using PokeAPI.
         url = "https://pokeapi.co/api/v2/pokemon-species?limit=10000"
         response = requests.get(url)
         data = response.json()

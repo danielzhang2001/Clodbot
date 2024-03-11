@@ -19,6 +19,7 @@ from discord.ext import commands
 
 class GiveSet:
     awaiting_response = {}
+    pokemon_cache = {"names": [], "last_modified": None}
     setname_cache = {}
     setinfo_cache = {}
     cache_duration = timedelta(hours=730)
@@ -104,11 +105,49 @@ class GiveSet:
 
     @staticmethod
     def fetch_all_pokemon() -> List[str]:
-        # Retrieves a list of all Pokemon using PokeAPI.
-        url = "https://pokeapi.co/api/v2/pokemon-species?limit=10000"
-        response = requests.get(url)
-        data = response.json()
-        pokemon_names = [species["name"] for species in data["results"]]
+        # Stores all Pokemon from Bulbapedia into a cache, returns the cache.
+        url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
+        response = requests.head(url)
+        last_modified = response.headers.get("Last-Modified")
+        if last_modified:
+            server_date = datetime.strptime(
+                last_modified, "%a, %d %b %Y %H:%M:%S GMT"
+            ).date()
+        if (
+            "last_modified" in GiveSet.pokemon_cache
+            and server_date == GiveSet.pokemon_cache["last_modified"]
+        ):
+            return GiveSet.pokemon_cache["names"]
+        GiveSet.pokemon_cache["last_modified"] = server_date
+        pokemon_names = []
+        try:
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--log-level=3")
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.get(url)
+            WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
+                    )
+                )
+            )
+            pokemon_elements = driver.find_elements(
+                By.XPATH,
+                "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
+            )
+            for element in pokemon_elements:
+                pokemon_name = element.text.replace(" ", "-")
+                if pokemon_name:
+                    pokemon_names.append(pokemon_name)
+        except Exception as e:
+            print(f"An error occurred while updating Pokémon cache: {str(e)}")
+        finally:
+            if driver:
+                driver.quit()
+        GiveSet.pokemon_cache["names"] = pokemon_names
         return pokemon_names
 
     @staticmethod
@@ -125,9 +164,6 @@ class GiveSet:
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--log-level=3")
             driver = webdriver.Chrome(options=chrome_options)
-            print(
-                f"POKEMON GENERATION AND FORMAT AS FOLLOWS: {pokemon} {generation} {format}"
-            )
             set_names, url = get_setinfo(driver, pokemon, generation, format)
             print(f"SET NAMES AND URL HERE FOR {pokemon} HERE: {set_names} {url}")
             GiveSet.update_setname_cache(pokemon, (set_names, url), generation, format)
