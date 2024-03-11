@@ -16,6 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
+import requests
 
 intents = discord.Intents.default()
 intents.typing = False
