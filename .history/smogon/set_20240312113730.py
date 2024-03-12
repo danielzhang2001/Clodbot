@@ -4,7 +4,6 @@ General functions in scraping Pokemon Smogon sets.
 
 import asyncio
 import requests
-import random
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -40,47 +39,61 @@ def get_gen(generation: str) -> Optional[str]:
     return get_gen_dict().get(generation.lower())
 
 
-def get_random_gen(pokemon: str) -> Optional[str]:
-    # Returns a random eligible gen using the Smogon API given a Pokemon.
-    gen_dict = get_gen_dict()
-    generations = list(gen_dict.values())
+def get_eligible_gen(pokemon: str) -> str:
+    generations = ["rb", "gs", "rs", "dp", "bw", "xy", "sm", "ss", "sv"]
     base_url = "https://smogonapi.herokuapp.com/GetSmogonData/{}/{}"
-    random.shuffle(generations)
-    for gen_code in generations:
-        response = requests.get(base_url.format(gen_code, pokemon.lower()))
+    for gen in generations:
+        response = requests.get(base_url.format(gen, pokemon.lower()))
         if response.status_code == 200:
             data = response.json()
             if data.get("strategies") or data.get("learnset"):
-                gen_key = [key for key, value in gen_dict.items() if value == gen_code][
-                    0
-                ]
-                print(f"{pokemon} {gen_code} {gen_key} IS VALID!")
-                return gen_key
+                return gen
             if "error" in data:
-                print(
-                    f"Error for gen {gen_code} and pokemon {pokemon}: {data['error']}"
-                )
+                print(f"Error for gen {gen} and pokemon {pokemon}: {data['error']}")
                 continue
-    return None
+    return "No valid generation found for this Pokémon."
 
 
-def get_random_format(pokemon: str, generation: str) -> Optional[str]:
-    # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        strategies = data.get("strategies", [])
-        eligible_formats = [
-            strategy["format"] for strategy in strategies if strategy.get("movesets")
-        ]
-        if eligible_formats:
-            return random.choice(eligible_formats)
-        else:
-            return None
-    else:
-        return None
+def get_eligible_format(pokemon: str, generation: str) -> List[str]:
+    # Finds all eligible formats that a Pokemon with a Generation has on Smogon.
+    current_time = datetime.now()
+    cache_key = f"{pokemon}-{generation}"
+    if current_time <= format_cache["expiration"] and cache_key in format_cache["data"]:
+        return format_cache["data"][cache_key]
+    eligible_formats = set()
+    gen_code = get_gen(generation)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--log-level=3")
+    with webdriver.Chrome(options=chrome_options) as driver:
+        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+        driver.get(url)
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, "PokemonPage-StrategySelector")
+            )
+        )
+        format_links = driver.find_elements(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
+        )
+        for link in format_links:
+            format_name = link.text.strip().replace(" ", "-")
+            if format_name and is_valid_format(driver, format_name):
+                print(f"{pokemon} {generation} {format_name} IS VALID FORMAT!")
+                eligible_formats.add(format_name)
+        selected_format = driver.find_element(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
+        )
+        selected_name = selected_format.text.strip().replace(" ", "-")
+        if is_valid_format(driver, selected_name):
+            print(f"{pokemon} {generation} {selected_name} IS VALID FORMAT!")
+            eligible_formats.add(selected_name)
+    format_cache["data"][cache_key] = list(eligible_formats)
+    format_cache["expiration"] = current_time + cache_duration
+    print(
+        f"ELIGIBLE FORMATS FOR {pokemon} IN GEN {generation}: {list(eligible_formats)}"
+    )
+    return list(eligible_formats)
 
 
 def get_set_names(driver: webdriver.Chrome) -> Optional[List[str]]:
@@ -298,6 +311,7 @@ def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
                 url_format = element.text
             url_format = url_format.replace(" ", "-")
             if format.lower() == url_format.lower() and has_export_buttons(driver):
+                print(f"{format} HAS EXPORT BUTTONS!")
                 return True
         return False
     except Exception as e:

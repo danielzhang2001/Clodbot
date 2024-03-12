@@ -40,7 +40,7 @@ def get_gen(generation: str) -> Optional[str]:
     return get_gen_dict().get(generation.lower())
 
 
-def get_random_gen(pokemon: str) -> Optional[str]:
+def get_random_gen(pokemon: str) -> str:
     # Returns a random eligible gen using the Smogon API given a Pokemon.
     gen_dict = get_gen_dict()
     generations = list(gen_dict.values())
@@ -64,23 +64,44 @@ def get_random_gen(pokemon: str) -> Optional[str]:
     return None
 
 
-def get_random_format(pokemon: str, generation: str) -> Optional[str]:
+def get_random_format(pokemon: str, generation: str) -> List[str]:
     # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        strategies = data.get("strategies", [])
-        eligible_formats = [
-            strategy["format"] for strategy in strategies if strategy.get("movesets")
-        ]
-        if eligible_formats:
-            return random.choice(eligible_formats)
-        else:
-            return None
-    else:
-        return None
+    current_time = datetime.now()
+    cache_key = f"{pokemon}-{generation}"
+    if current_time <= format_cache["expiration"] and cache_key in format_cache["data"]:
+        return format_cache["data"][cache_key]
+    eligible_formats = set()
+    gen_code = get_gen(generation)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--log-level=3")
+    with webdriver.Chrome(options=chrome_options) as driver:
+        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
+        driver.get(url)
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, "PokemonPage-StrategySelector")
+            )
+        )
+        format_links = driver.find_elements(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
+        )
+        for link in format_links:
+            format_name = link.text.strip().replace(" ", "-")
+            if format_name and is_valid_format(driver, format_name):
+                eligible_formats.add(format_name)
+        selected_format = driver.find_element(
+            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
+        )
+        selected_name = selected_format.text.strip().replace(" ", "-")
+        if is_valid_format(driver, selected_name):
+            eligible_formats.add(selected_name)
+    format_cache["data"][cache_key] = list(eligible_formats)
+    format_cache["expiration"] = current_time + cache_duration
+    print(
+        f"ELIGIBLE FORMATS FOR {pokemon} IN GEN {generation}: {list(eligible_formats)}"
+    )
+    return list(eligible_formats)
 
 
 def get_set_names(driver: webdriver.Chrome) -> Optional[List[str]]:

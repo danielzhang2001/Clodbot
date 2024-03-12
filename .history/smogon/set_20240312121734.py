@@ -66,21 +66,21 @@ def get_random_gen(pokemon: str) -> Optional[str]:
 
 def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{generation}/{pokemon}"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
-        strategies = data.get("strategies", [])
         eligible_formats = [
-            strategy["format"] for strategy in strategies if strategy.get("movesets")
+            format_entry.get("format")
+            for format_entry in data
+            if format_entry.get("movesets") and format_entry.get("format")
         ]
         if eligible_formats:
             return random.choice(eligible_formats)
         else:
             return None
     else:
-        return None
+        return "Failed to fetch data."
 
 
 def get_set_names(driver: webdriver.Chrome) -> Optional[List[str]]:

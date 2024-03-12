@@ -66,8 +66,7 @@ def get_random_gen(pokemon: str) -> Optional[str]:
 
 def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{generation}/{pokemon}"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
@@ -75,6 +74,7 @@ def get_random_format(pokemon: str, generation: str) -> Optional[str]:
         eligible_formats = [
             strategy["format"] for strategy in strategies if strategy.get("movesets")
         ]
+        print(f"ELIGIBLE FORMATS ARE: {eligible_formats}")
         if eligible_formats:
             return random.choice(eligible_formats)
         else:

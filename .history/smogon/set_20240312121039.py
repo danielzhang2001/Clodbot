@@ -40,7 +40,7 @@ def get_gen(generation: str) -> Optional[str]:
     return get_gen_dict().get(generation.lower())
 
 
-def get_random_gen(pokemon: str) -> Optional[str]:
+def get_random_gen(pokemon: str) -> str:
     # Returns a random eligible gen using the Smogon API given a Pokemon.
     gen_dict = get_gen_dict()
     generations = list(gen_dict.values())
@@ -64,23 +64,29 @@ def get_random_gen(pokemon: str) -> Optional[str]:
     return None
 
 
-def get_random_format(pokemon: str, generation: str) -> Optional[str]:
+def get_random_format(pokemon: str, generation: str) -> str:
     # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+    url = f"http://example.com/GetSmogonData/{generation}/{pokemon}"
+
+    # Send a GET request to the API endpoint
     response = requests.get(url)
+
+    # Check if the request was successful
     if response.status_code == 200:
-        data = response.json()
-        strategies = data.get("strategies", [])
+        data = response.json()  # Parse the JSON response
+
+        # Filter formats with non-empty movesets
         eligible_formats = [
-            strategy["format"] for strategy in strategies if strategy.get("movesets")
+            format_entry["format"] for format_entry in data if format_entry["movesets"]
         ]
+
+        # If there are eligible formats, return a random one
         if eligible_formats:
             return random.choice(eligible_formats)
         else:
-            return None
+            return "No eligible formats found."
     else:
-        return None
+        return "Failed to fetch data."
 
 
 def get_set_names(driver: webdriver.Chrome) -> Optional[List[str]]:

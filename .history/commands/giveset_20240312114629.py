@@ -340,6 +340,7 @@ class GiveSet:
             ]
             results = await asyncio.gather(*tasks)
             valid_pokemon.extend([p for p in results if p is not None])
+            print(f"VALID POKEMON: {valid_pokemon}")
             for p in valid_pokemon:
                 if p[0] in pokemon:
                     pokemon.remove(p[0])
@@ -354,11 +355,12 @@ class GiveSet:
         random_gen = await loop.run_in_executor(None, get_random_gen, pokemon)
         if not random_gen:
             return None
-        random_format = await loop.run_in_executor(
-            None, get_random_format, pokemon, random_gen
+        eligible_formats = await loop.run_in_executor(
+            None, get_eligible_format, pokemon, random_gen
         )
-        if not random_format:
+        if not eligible_formats:
             return None
+        random_format = random.choice(eligible_formats)
         sets, url = await loop.run_in_executor(
             None, GiveSet.fetch_set, pokemon, random_gen, random_format
         )

@@ -333,6 +333,7 @@ class GiveSet:
         valid_pokemon = []
         while len(valid_pokemon) < num:
             remaining = num - len(valid_pokemon)
+            print(f"REMAINING: {remaining}")
             selected_pokemon = random.sample(pokemon, k=min(remaining, len(pokemon)))
             tasks = [
                 loop.create_task(GiveSet.fetch_randomset_async(pokemon))
@@ -340,6 +341,7 @@ class GiveSet:
             ]
             results = await asyncio.gather(*tasks)
             valid_pokemon.extend([p for p in results if p is not None])
+            print(f"VALID POKEMON: {valid_pokemon}")
             for p in valid_pokemon:
                 if p[0] in pokemon:
                     pokemon.remove(p[0])

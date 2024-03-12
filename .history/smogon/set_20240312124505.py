@@ -66,8 +66,8 @@ def get_random_gen(pokemon: str) -> Optional[str]:
 
 def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+    gen_key = get_gen(generation)
+    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen}/{pokemon}"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
