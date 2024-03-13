@@ -83,24 +83,6 @@ def get_random_format(pokemon: str, generation: str) -> Optional[str]:
         return None
 
 
-def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
-    # Returns a random eligible set name using the Smogon API given a Pokemon, Generation and Format.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        for strategy in data.get("strategies", []):
-            if strategy.get("format") == format:
-                if strategy.get("movesets"):
-                    set_names = [moveset["name"] for moveset in strategy["movesets"]]
-                    print(
-                        f"GET RANDOM SET: {pokemon} {generation} {format} {set_names}"
-                    )
-                    return random.choice(set_names)
-    return None
-
-
 def get_set_names(driver: webdriver.Chrome) -> Optional[List[str]]:
     # Finds and returns all set names on the page.
     try:

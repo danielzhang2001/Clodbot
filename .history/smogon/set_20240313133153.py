@@ -94,9 +94,6 @@ def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
             if strategy.get("format") == format:
                 if strategy.get("movesets"):
                     set_names = [moveset["name"] for moveset in strategy["movesets"]]
-                    print(
-                        f"GET RANDOM SET: {pokemon} {generation} {format} {set_names}"
-                    )
                     return random.choice(set_names)
     return None
 
