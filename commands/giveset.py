@@ -359,6 +359,9 @@ class GiveSet:
         )
         if not random_format:
             return None
+        random_set = await loop.run_in_executor(
+            None, get_random_set, pokemon, random_gen, random_format
+        )
         sets, url = await loop.run_in_executor(
             None, GiveSet.fetch_set, pokemon, random_gen, random_format
         )
