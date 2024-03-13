@@ -112,32 +112,46 @@ class GiveSet:
         return pokemon_names
 
     @staticmethod
-    def fetch_set(
-        pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
-    ) -> Tuple[Optional[List[str]], Optional[str]]:
-        # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
-        cached_data = GiveSet.check_setname_cache(pokemon, generation, format)
-        if cached_data:
-            return cached_data
-        driver = None
-        try:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--log-level=3")
-            driver = webdriver.Chrome(options=chrome_options)
-            print(
-                f"POKEMON GENERATION AND FORMAT AS FOLLOWS: {pokemon} {generation} {format}"
+    def fetch_set(pokemon: str, generation: str, format: str, set: str) -> str:
+        # Fetches and displays set data based on Pokemon, Generation, Format and Set names given.
+        gen_code = get_gen(generation)
+        url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_code}/{pokemon}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            for strategy in data.get("strategies", []):
+                if strategy["format"].lower() == format.lower():
+                    for moveset in strategy.get("movesets", []):
+                        if moveset["name"].lower() == set.lower():
+                            return GiveSet.format_set(moveset)
+        return "Set not found."
+
+    @staticmethod
+    def format_set(moveset: dict) -> str:
+        # Returns the formatted set data from the moveset information given.
+        name = moveset["pokemon"]
+        item = moveset.get("items", [])[0] if moveset.get("items") else "None"
+        ability = (
+            moveset.get("abilities", [])[0] if moveset.get("abilities") else "None"
+        )
+        evs_dict = moveset.get("evconfigs", [{}])[0]
+        evs = (
+            " / ".join(
+                f"{value} {key.upper()}" for key, value in evs_dict.items() if value > 0
             )
-            set_names, url = get_setinfo(driver, pokemon, generation, format)
-            print(f"SET NAMES AND URL HERE FOR {pokemon} HERE: {set_names} {url}")
-            GiveSet.update_setname_cache(pokemon, (set_names, url), generation, format)
-            return set_names, url
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
-            return None, None
-        finally:
-            if driver:
-                driver.quit()
+            .replace("HP", "HP")
+            .replace("ATK", "Atk")
+            .replace("DEF", "Def")
+            .replace("SPA", "SpA")
+            .replace("SPD", "SpD")
+            .replace("SPE", "Spe")
+        )
+        nature = moveset.get("natures", [])[0] if moveset.get("natures") else "None"
+        moves = "\n- ".join(
+            random.choice(move)["move"] for move in moveset.get("moveslots", [])
+        )
+        formatted_set = f"{name} @ {item}\nAbility: {ability}\nEVs: {evs}\n{nature} Nature\n- {moves}"
+        return formatted_set
 
     @staticmethod
     async def fetch_set_async(
@@ -330,25 +344,24 @@ class GiveSet:
                 return
         pokemon = GiveSet.fetch_all_pokemon()
         loop = asyncio.get_event_loop()
-        valid_pokemon = []
-        while len(valid_pokemon) < num:
-            remaining = num - len(valid_pokemon)
+        formatted_sets = []
+        while len(formatted_sets) < num:
+            remaining = num - len(formatted_sets)
+            print(f"REMAINING: {remaining}")
             selected_pokemon = random.sample(pokemon, k=min(remaining, len(pokemon)))
             tasks = [
                 loop.create_task(GiveSet.fetch_randomset_async(pokemon))
                 for pokemon in selected_pokemon
             ]
             results = await asyncio.gather(*tasks)
-            valid_pokemon.extend([p for p in results if p is not None])
-            for p in valid_pokemon:
-                if p[0] in pokemon:
+            formatted_sets.extend([i for i in results if i is not None])
+            for p in results:
+                if p and p[0] in pokemon:
                     pokemon.remove(p[0])
-        await GiveSet.display_random_sets(ctx, valid_pokemon[:num])
+        await ctx.send(f"```\n" + "\n\n".join(formatted_sets) + "\n```")
 
     @staticmethod
-    async def fetch_randomset_async(
-        pokemon: str,
-    ) -> Optional[Tuple[str, List[str], str]]:
+    async def fetch_randomset_async(pokemon: str) -> Optional[str]:
         # Helper function for fetching random sets asynchronously to save time.
         loop = asyncio.get_running_loop()
         random_gen = await loop.run_in_executor(None, get_random_gen, pokemon)
@@ -362,7 +375,9 @@ class GiveSet:
         random_set = await loop.run_in_executor(
             None, get_random_set, pokemon, random_gen, random_format
         )
-        sets, url = await loop.run_in_executor(
-            None, GiveSet.fetch_set, pokemon, random_gen, random_format
+        if not random_set:
+            return None
+        formatted_set = await loop.run_in_executor(
+            None, GiveSet.fetch_set, pokemon, random_gen, random_format, random_set
         )
-        return (pokemon, sets, url)
+        return formatted_set

@@ -44,17 +44,16 @@ def get_random_gen(pokemon: str) -> Optional[str]:
     # Returns a random eligible gen using the Smogon API given a Pokemon.
     gen_dict = get_gen_dict()
     generations = list(gen_dict.values())
-    base_url = "https://smogonapi.herokuapp.com/GetSmogonData/{}/{}"
+    url = "https://smogonapi.herokuapp.com/GetSmogonData/{}/{}"
     random.shuffle(generations)
     for gen_code in generations:
-        response = requests.get(base_url.format(gen_code, pokemon.lower()))
+        response = requests.get(url.format(gen_code, pokemon.lower()))
         if response.status_code == 200:
             data = response.json()
-            if data.get("strategies") or data.get("learnset"):
+            if data.get("strategies"):
                 gen_key = [key for key, value in gen_dict.items() if value == gen_code][
                     0
                 ]
-                print(f"{pokemon} {gen_code} {gen_key} IS VALID!")
                 return gen_key
             if "error" in data:
                 print(
@@ -72,11 +71,11 @@ def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     if response.status_code == 200:
         data = response.json()
         strategies = data.get("strategies", [])
-        eligible_formats = [
+        formats = [
             strategy["format"] for strategy in strategies if strategy.get("movesets")
         ]
-        if eligible_formats:
-            return random.choice(eligible_formats)
+        if formats:
+            return random.choice(formats)
         else:
             return None
     else:
@@ -94,9 +93,6 @@ def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
             if strategy.get("format") == format:
                 if strategy.get("movesets"):
                     set_names = [moveset["name"] for moveset in strategy["movesets"]]
-                    print(
-                        f"GET RANDOM SET: {pokemon} {generation} {format} {set_names}"
-                    )
                     return random.choice(set_names)
     return None
 
