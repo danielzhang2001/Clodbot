@@ -347,7 +347,6 @@ class GiveSet:
         formatted_sets = []
         while len(formatted_sets) < num:
             remaining = num - len(formatted_sets)
-            print(f"REMAINING: {remaining}")
             selected_pokemon = random.sample(pokemon, k=min(remaining, len(pokemon)))
             tasks = [
                 loop.create_task(GiveSet.fetch_randomset_async(pokemon))
@@ -358,7 +357,7 @@ class GiveSet:
             for p in results:
                 if p and p[0] in pokemon:
                     pokemon.remove(p[0])
-        await ctx.send(f"```\n" + "\n\n".join(formatted_sets) + "\n```")
+            await ctx.send(f"```\n" + "\n\n".join(formatted_sets) + "\n```")
 
     @staticmethod
     async def fetch_randomset_async(pokemon: str) -> Optional[str]:

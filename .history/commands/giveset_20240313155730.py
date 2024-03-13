@@ -123,32 +123,26 @@ class GiveSet:
                 if strategy["format"].lower() == format.lower():
                     for moveset in strategy.get("movesets", []):
                         if moveset["name"].lower() == set.lower():
-                            return GiveSet.format_set(moveset)
+                            return Giveformat_set(moveset)
         return "Set not found."
 
     @staticmethod
     def format_set(moveset: dict) -> str:
         # Returns the formatted set data from the moveset information given.
-        name = moveset["pokemon"]
+        name = moveset["name"]
         item = moveset.get("items", [])[0] if moveset.get("items") else "None"
         ability = (
             moveset.get("abilities", [])[0] if moveset.get("abilities") else "None"
         )
-        evs_dict = moveset.get("evconfigs", [{}])[0]
-        evs = (
-            " / ".join(
-                f"{value} {key.upper()}" for key, value in evs_dict.items() if value > 0
-            )
-            .replace("HP", "HP")
-            .replace("ATK", "Atk")
-            .replace("DEF", "Def")
-            .replace("SPA", "SpA")
-            .replace("SPD", "SpD")
-            .replace("SPE", "Spe")
+        evs = "/".join(
+            [
+                f"{value} {key.upper()}"
+                for key, value in moveset.get("evconfigs", [{}])[0].items()
+            ]
         )
         nature = moveset.get("natures", [])[0] if moveset.get("natures") else "None"
         moves = "\n- ".join(
-            random.choice(move)["move"] for move in moveset.get("moveslots", [])
+            [move["move"] for move in moveset.get("moveslots", []) for move in move]
         )
         formatted_set = f"{name} @ {item}\nAbility: {ability}\nEVs: {evs}\n{nature} Nature\n- {moves}"
         return formatted_set
@@ -347,7 +341,6 @@ class GiveSet:
         formatted_sets = []
         while len(formatted_sets) < num:
             remaining = num - len(formatted_sets)
-            print(f"REMAINING: {remaining}")
             selected_pokemon = random.sample(pokemon, k=min(remaining, len(pokemon)))
             tasks = [
                 loop.create_task(GiveSet.fetch_randomset_async(pokemon))
@@ -358,7 +351,8 @@ class GiveSet:
             for p in results:
                 if p and p[0] in pokemon:
                     pokemon.remove(p[0])
-        await ctx.send(f"```\n" + "\n\n".join(formatted_sets) + "\n```")
+        for set_data in formatted_sets:
+            await ctx.send(set_data)
 
     @staticmethod
     async def fetch_randomset_async(pokemon: str) -> Optional[str]:

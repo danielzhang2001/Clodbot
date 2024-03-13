@@ -358,7 +358,7 @@ class GiveSet:
             for p in results:
                 if p and p[0] in pokemon:
                     pokemon.remove(p[0])
-        await ctx.send(f"```\n" + "\n\n".join(formatted_sets) + "\n```")
+            await ctx.send(f"```\n" + "\n\n".join(formatted_sets) + "\n```")
 
     @staticmethod
     async def fetch_randomset_async(pokemon: str) -> Optional[str]:

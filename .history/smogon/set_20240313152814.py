@@ -75,7 +75,7 @@ def get_random_format(pokemon: str, generation: str) -> Optional[str]:
             strategy["format"] for strategy in strategies if strategy.get("movesets")
         ]
         if formats:
-            return random.choice(formats)
+            return random.choice(eligible_formats)
         else:
             return None
     else:
