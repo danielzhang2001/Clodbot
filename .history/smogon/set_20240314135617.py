@@ -85,26 +85,24 @@ def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
                 if strategy.get("movesets"):
                     set_names = [moveset["name"] for moveset in strategy["movesets"]]
                     return random.choice(set_names)
-    else:
-        return None
+    return None
 
 
-def get_set_names(
-    pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
-) -> Optional[List[str]]:
+def get_set_names(pokemon: str, generation: str, format: str) -> Optional[List[str]]:
     gen_value = get_gen(generation)
+    format = format.replace(" ", "-").lower()
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
         set_names = []
         for strategy in data.get("strategies", []):
-            if strategy["format"].replace(" ", "-").lower() == format.lower():
+            if strategy["format"].replace(" ", "-").lower() == format:
                 for moveset in strategy.get("movesets", []):
                     set_names.append(moveset["name"])
         return set_names
     else:
-        return None
+        return "Failed to fetch data from the API."
 
 
 def get_view(

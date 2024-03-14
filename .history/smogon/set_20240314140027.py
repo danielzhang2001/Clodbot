@@ -89,9 +89,7 @@ def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
         return None
 
 
-def get_set_names(
-    pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
-) -> Optional[List[str]]:
+def get_set_names(pokemon: str, generation: str, format: str) -> Optional[List[str]]:
     gen_value = get_gen(generation)
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
     response = requests.get(url)

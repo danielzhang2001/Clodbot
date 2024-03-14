@@ -49,31 +49,28 @@ class GiveSet:
     def format_set(moveset: dict) -> str:
         # Returns the formatted set data from the moveset information given.
         name = moveset["pokemon"]
-        item = moveset.get("items", [])
-        item_str = f" @ {item[0]}" if item else ""
-        ability = moveset.get("abilities", [])
-        ability_str = f"\nAbility: {ability[0]}" if ability else ""
-        evs_list = moveset.get("evconfigs", [])
-        if evs_list:
-            evs_dict = evs_list[0]
-            evs = " / ".join(
-                f"{value} {key.capitalize()}"
-                for key, value in evs_dict.items()
-                if value > 0
+        item = moveset.get("items", [])[0] if moveset.get("items") else "None"
+        ability = (
+            moveset.get("abilities", [])[0] if moveset.get("abilities") else "None"
+        )
+        evs_dict = moveset.get("evconfigs", [{}])[0]
+        evs = (
+            " / ".join(
+                f"{value} {key.upper()}" for key, value in evs_dict.items() if value > 0
             )
-            evs_str = f"\nEVs: {evs}" if evs else ""
-        else:
-            evs_str = ""
-        nature = moveset.get("natures", [])
-        nature_str = f"\n{nature[0]} Nature" if nature else ""
-        moves = []
-        for slot in moveset.get("moveslots", []):
-            if slot:
-                move = random.choice(slot)["move"]
-                moves.append(move)
-        moves_str = "\n- " + "\n- ".join(moves)
-        formatted_set = f"{name}{item_str}{ability_str}{evs_str}{nature_str}{moves_str}"
-        return formatted_set.strip()
+            .replace("HP", "HP")
+            .replace("ATK", "Atk")
+            .replace("DEF", "Def")
+            .replace("SPA", "SpA")
+            .replace("SPD", "SpD")
+            .replace("SPE", "Spe")
+        )
+        nature = moveset.get("natures", [])[0] if moveset.get("natures") else "None"
+        moves = "\n- ".join(
+            random.choice(move)["move"] for move in moveset.get("moveslots", [])
+        )
+        formatted_set = f"{name} @ {item}\nAbility: {ability}\nEVs: {evs}\n{nature} Nature\n- {moves}"
+        return formatted_set
 
     @staticmethod
     async def fetch_set_async(

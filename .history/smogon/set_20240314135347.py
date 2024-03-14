@@ -85,25 +85,22 @@ def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
                 if strategy.get("movesets"):
                     set_names = [moveset["name"] for moveset in strategy["movesets"]]
                     return random.choice(set_names)
-    else:
-        return None
+    return None
 
 
-def get_set_names(
-    pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
-) -> Optional[List[str]]:
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
+def get_set_names(driver: webdriver.Chrome) -> Optional[List[str]]:
+    # Finds and returns all set names on the page.
+    try:
+        export_buttons = WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.CLASS_NAME, "ExportButton"))
+        )
         set_names = []
-        for strategy in data.get("strategies", []):
-            if strategy["format"].replace(" ", "-").lower() == format.lower():
-                for moveset in strategy.get("movesets", []):
-                    set_names.append(moveset["name"])
+        for export_button in export_buttons:
+            set_header = export_button.find_element(By.XPATH, "./following-sibling::h1")
+            set_names.append(set_header.text)
         return set_names
-    else:
+    except Exception as e:
+        print(f"Error in retrieving set names: {str(e)}")
         return None
 
 

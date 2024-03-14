@@ -6,6 +6,8 @@ import uuid
 import asyncio
 import random
 import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from smogon.set import *
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
@@ -17,6 +19,88 @@ from discord.ext import commands
 
 class GiveSet:
     awaiting_response = {}
+    setname_cache = {}
+    setinfo_cache = {}
+    cache_duration = timedelta(hours=730)
+
+    @staticmethod
+    def get_setinfo_key(
+        pokemon: str,
+        set_name: str,
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
+    ) -> str:
+        # Generates a key for accessing the cache of set data.
+        parts = [pokemon.lower(), set_name.lower()]
+        if generation:
+            parts.append(f"gen{generation}")
+        if format:
+            parts.append(format.lower())
+        return "_".join(parts)
+
+    @staticmethod
+    def check_setinfo_cache(
+        pokemon: str,
+        set_name: str,
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
+    ) -> Optional[dict]:
+        # Checks if data is available in the set data cache and not expired.
+        key = GiveSet.get_setinfo_key(pokemon, set_name, generation, format)
+        if key in GiveSet.setinfo_cache:
+            data, expiration = GiveSet.setinfo_cache[key]
+            if datetime.now() < expiration:
+                return data
+        return None
+
+    @staticmethod
+    def update_setinfo_cache(
+        pokemon: str,
+        name: str,
+        data: str,
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
+    ) -> None:
+        # Updates the set data cache with new data.
+        key = GiveSet.get_setinfo_key(pokemon, name, generation, format)
+        expiration = datetime.now() + GiveSet.cache_duration
+        GiveSet.setinfo_cache[key] = (data, expiration)
+
+    @staticmethod
+    def get_setname_key(
+        pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
+    ) -> str:
+        # Generates a key for accessing the cache of set names.
+        parts = [pokemon.lower()]
+        if generation:
+            parts.append(f"gen{generation}")
+        if format:
+            parts.append(format.lower())
+        return "_".join(parts)
+
+    @staticmethod
+    def check_setname_cache(
+        pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
+    ) -> Optional[Tuple[List[str], str]]:
+        # Checks if data is available in the set names cache and not expired.
+        key = GiveSet.get_setname_key(pokemon, generation, format)
+        if key in GiveSet.setname_cache:
+            data, expiration = GiveSet.setname_cache[key]
+            if datetime.now() < expiration:
+                return data
+        return None
+
+    @staticmethod
+    def update_setname_cache(
+        pokemon: str,
+        data: Tuple[List[str], str],
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
+    ) -> None:
+        # Updates the set names cache with new data.
+        key = GiveSet.get_setname_key(pokemon, generation, format)
+        expiration = datetime.now() + GiveSet.cache_duration
+        GiveSet.setname_cache[key] = (data, expiration)
 
     @staticmethod
     def fetch_all_pokemon() -> List[str]:
@@ -30,9 +114,6 @@ class GiveSet:
     @staticmethod
     def fetch_set(pokemon: str, generation: str, format: str, set: str) -> str:
         # Fetches and displays set data based on Pokemon, Generation, Format and Set names given.
-        print(
-            f"POKEMON GENERATION FORMAT SET IS AS FOLLOWS: {pokemon} {generation} {format} {set}"
-        )
         gen_code = get_gen(generation)
         url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_code}/{pokemon}"
         response = requests.get(url)
@@ -49,31 +130,28 @@ class GiveSet:
     def format_set(moveset: dict) -> str:
         # Returns the formatted set data from the moveset information given.
         name = moveset["pokemon"]
-        item = moveset.get("items", [])
-        item_str = f" @ {item[0]}" if item else ""
-        ability = moveset.get("abilities", [])
-        ability_str = f"\nAbility: {ability[0]}" if ability else ""
-        evs_list = moveset.get("evconfigs", [])
-        if evs_list:
-            evs_dict = evs_list[0]
-            evs = " / ".join(
-                f"{value} {key.capitalize()}"
-                for key, value in evs_dict.items()
-                if value > 0
+        item = moveset.get("items", [])[0] if moveset.get("items") else "None"
+        ability = (
+            moveset.get("abilities", [])[0] if moveset.get("abilities") else "None"
+        )
+        evs_dict = moveset.get("evconfigs", [{}])[0]
+        evs = (
+            " / ".join(
+                f"{value} {key.upper()}" for key, value in evs_dict.items() if value > 0
             )
-            evs_str = f"\nEVs: {evs}" if evs else ""
-        else:
-            evs_str = ""
-        nature = moveset.get("natures", [])
-        nature_str = f"\n{nature[0]} Nature" if nature else ""
-        moves = []
-        for slot in moveset.get("moveslots", []):
-            if slot:
-                move = random.choice(slot)["move"]
-                moves.append(move)
-        moves_str = "\n- " + "\n- ".join(moves)
-        formatted_set = f"{name}{item_str}{ability_str}{evs_str}{nature_str}{moves_str}"
-        return formatted_set.strip()
+            .replace("HP", "HP")
+            .replace("ATK", "Atk")
+            .replace("DEF", "Def")
+            .replace("SPA", "SpA")
+            .replace("SPD", "SpD")
+            .replace("SPE", "Spe")
+        )
+        nature = moveset.get("natures", [])[0] if moveset.get("natures") else "None"
+        moves = "\n- ".join(
+            random.choice(move)["move"] for move in moveset.get("moveslots", [])
+        )
+        formatted_set = f"{name} @ {item}\nAbility: {ability}\nEVs: {evs}\n{nature} Nature\n- {moves}"
+        return formatted_set
 
     @staticmethod
     async def fetch_set_async(
@@ -212,6 +290,44 @@ class GiveSet:
                 await interaction.followup.send(
                     "Error fetching set data.", ephemeral=True
                 )
+
+    @staticmethod
+    async def display_random_sets(
+        ctx: commands.Context, pokemon_data: List[Tuple[str, List[str], str]]
+    ) -> None:
+        # Displays all sets in one textbox given multiple Pokemon and their sets.
+        message_content = ""
+        for pokemon, sets, url in pokemon_data:
+            if sets is None or not sets:
+                await ctx.send(f"No sets found for {pokemon_data}. Skipping.")
+            set_name = random.choice(sets)
+            driver = None
+            try:
+                chrome_options = Options()
+                chrome_options.add_argument("--headless")
+                chrome_options.add_argument("--log-level=3")
+                driver = webdriver.Chrome(options=chrome_options)
+                driver.get(url)
+                if get_export_btn(driver, set_name):
+                    set_data = get_textarea(driver, set_name)
+                    if set_data:
+                        message_content += f"{set_data}\n\n"
+                    else:
+                        message_content += (
+                            f"Error fetching set data for **{pokemon}**.\n\n"
+                        )
+            except Exception as e:
+                message_content += (
+                    f"An error occurred fetching set for **{pokemon}**: {str(e)}\n\n"
+                )
+            finally:
+                if driver:
+                    driver.quit()
+        message_content = "```" + "\n" + message_content + "```"
+        if message_content.strip() != "``````":
+            await ctx.send(message_content)
+        else:
+            await ctx.send("Unable to fetch data for the selected Pokémon sets.")
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:

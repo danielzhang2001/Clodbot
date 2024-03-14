@@ -71,7 +71,7 @@ class GiveSet:
             if slot:
                 move = random.choice(slot)["move"]
                 moves.append(move)
-        moves_str = "\n- " + "\n- ".join(moves)
+        moves_str = "\n- " + "\n- ".join(moves) if moves else ""
         formatted_set = f"{name}{item_str}{ability_str}{evs_str}{nature_str}{moves_str}"
         return formatted_set.strip()
 
