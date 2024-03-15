@@ -110,6 +110,7 @@ class GiveSet:
         )
         prompt = f"Please select a set type for **{formatted_name}**:\n"
         view = View()
+        print(f"SET NAMES: {set_names}")
         for set_name in set_names:
             button = Button(label=set_name, style=ButtonStyle.secondary)
             view.add_item(button)

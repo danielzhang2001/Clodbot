@@ -10,10 +10,9 @@ from smogon.set import *
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 from discord import Interaction
-from discord import ButtonStyle
-from discord.ui import Button, View
-from discord.ext import commands
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Tuple
+from discord.ext import commands
 
 
 class GiveSet:
@@ -97,23 +96,29 @@ class GiveSet:
         return final_results
 
     @staticmethod
-    async def set_prompt(
-        ctx,
-        pokemon: str,
-        generation: Optional[str] = None,
-        format: Optional[str] = None,
-    ) -> None:
+    async def set_prompt(ctx, pokemon: str, generation: Optional[str] = None, format: Optional[str] = None): -> None:
         # Displays prompt with buttons for selection of Pokemon sets.
-        set_names = get_set_names(pokemon, generation, format)
-        formatted_name = "-".join(
-            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-        )
-        prompt = f"Please select a set type for **{formatted_name}**:\n"
-        view = View()
-        for set_name in set_names:
-            button = Button(label=set_name, style=ButtonStyle.secondary)
-            view.add_item(button)
-        await ctx.send(prompt, view=view)
+        unique_id = str(uuid.uuid4())
+        views = {}
+        prompt = ""
+        messages = []
+        GiveSet.awaiting_response[unique_id] = {
+            "user_id": ctx.author.id,
+            "pokemon_data": pokemon_data,
+            "views": views,
+            "message_ids": [],
+            "lock": asyncio.Lock(),
+        }
+        if len(pokemon_data) > 1:
+            views, prompt = get_multiview(unique_id, pokemon_data)
+        else:
+            pokemon, sets, url, _, _ = pokemon_data[0]
+            views, prompt = get_view(unique_id, (pokemon, sets, url))
+        await ctx.send(prompt)
+        for formatted_name, view in views.items():
+            message = await ctx.send(view=view)
+            GiveSet.awaiting_response[unique_id]["views"][message.id] = view
+            GiveSet.awaiting_response[unique_id]["message_ids"].append(message.id)
 
     @staticmethod
     async def set_selection(

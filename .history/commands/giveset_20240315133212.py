@@ -10,10 +10,9 @@ from smogon.set import *
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 from discord import Interaction
-from discord import ButtonStyle
-from discord.ui import Button, View
-from discord.ext import commands
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Tuple
+from discord.ext import commands
 
 
 class GiveSet:
@@ -113,7 +112,7 @@ class GiveSet:
         for set_name in set_names:
             button = Button(label=set_name, style=ButtonStyle.secondary)
             view.add_item(button)
-        await ctx.send(prompt, view=view)
+        ctx.send(prompt, view=view)
 
     @staticmethod
     async def set_selection(

@@ -132,12 +132,14 @@ def get_set_names(
         generation = get_latest_gen(pokemon)
     gen_value = get_gen(generation)
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
+    print(f"{url}")
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
         set_names = []
         if not format:
             format = get_first_format(pokemon, generation)
+        print(f"POKEMON GENERATION FORMAT: {pokemon} {generation} {format}")
         for strategy in data.get("strategies", []):
             if (
                 strategy["format"].replace(" ", "-").lower()

@@ -10,8 +10,7 @@ from smogon.set import *
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 from discord import Interaction
-from discord import ButtonStyle
-from discord.ui import Button, View
+from discord.ui import View
 from discord.ext import commands
 from typing import Optional, List, Dict, Tuple
 

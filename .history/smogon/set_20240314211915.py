@@ -41,30 +41,17 @@ def get_latest_gen(pokemon: str) -> Optional[str]:
         if response.status_code == 200:
             data = response.json()
             if data.get("strategies"):
-                gen_key = [
-                    key for key, value in gen_dict.items() if value == gen_value
-                ][0]
+                gen_key = [key for key, value in gen_dict.items() if value == gen_value][
+                    0
+                ]
                 return gen_key
             if "error" in data:
                 print(f"Error for gen {gen_key} and pokemon {pokemon}: {data['error']}")
                 continue
     return None
 
-
 def get_first_format(pokemon: str, generation: str) -> Optional[str]:
     # Returns the first format given the Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        strategies = data.get("strategies", [])
-        if strategies:
-            return strategies[0]["format"]
-        else:
-            return None
-    else:
-        return None
 
 
 def get_random_gen(pokemon: str) -> Optional[str]:
@@ -128,21 +115,20 @@ def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
 def get_set_names(
     pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
 ) -> Optional[List[str]]:
-    if not generation:
-        generation = get_latest_gen(pokemon)
     gen_value = get_gen(generation)
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
         set_names = []
+        if not generation:
+            generation = get_latest_gen(pokemon)
         if not format:
-            format = get_first_format(pokemon, generation)
+            strategies = data.get("strategies", [])
+            if strategies:
+                format = strategies[0]["format"]
         for strategy in data.get("strategies", []):
-            if (
-                strategy["format"].replace(" ", "-").lower()
-                == format.replace(" ", "-").lower()
-            ):
+            if strategy["format"].replace(" ", "-").lower() == format.lower():
                 for moveset in strategy.get("movesets", []):
                     set_names.append(moveset["name"])
         return set_names

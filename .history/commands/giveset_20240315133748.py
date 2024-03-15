@@ -10,8 +10,7 @@ from smogon.set import *
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 from discord import Interaction
-from discord import ButtonStyle
-from discord.ui import Button, View
+from discord.ui import View
 from discord.ext import commands
 from typing import Optional, List, Dict, Tuple
 
@@ -110,6 +109,7 @@ class GiveSet:
         )
         prompt = f"Please select a set type for **{formatted_name}**:\n"
         view = View()
+        print(f"SET NAMES: {set_names}")
         for set_name in set_names:
             button = Button(label=set_name, style=ButtonStyle.secondary)
             view.add_item(button)

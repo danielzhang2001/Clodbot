@@ -10,10 +10,9 @@ from smogon.set import *
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 from discord import Interaction
-from discord import ButtonStyle
-from discord.ui import Button, View
-from discord.ext import commands
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Tuple
+from discord.ext import commands
 
 
 class GiveSet:
@@ -97,23 +96,13 @@ class GiveSet:
         return final_results
 
     @staticmethod
-    async def set_prompt(
-        ctx,
-        pokemon: str,
-        generation: Optional[str] = None,
-        format: Optional[str] = None,
-    ) -> None:
+    async def set_prompt(ctx, pokemon: str, generation: Optional[str] = None, format: Optional[str] = None): -> None:
         # Displays prompt with buttons for selection of Pokemon sets.
         set_names = get_set_names(pokemon, generation, format)
         formatted_name = "-".join(
             part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-        )
-        prompt = f"Please select a set type for **{formatted_name}**:\n"
-        view = View()
-        for set_name in set_names:
-            button = Button(label=set_name, style=ButtonStyle.secondary)
-            view.add_item(button)
-        await ctx.send(prompt, view=view)
+    )
+    prompt = f"Please select a set type for **{formatted_name}**:\n"
 
     @staticmethod
     async def set_selection(

@@ -138,11 +138,9 @@ def get_set_names(
         set_names = []
         if not format:
             format = get_first_format(pokemon, generation)
+        print(f"POKEMON GENERATION FORMAT: {pokemon} {generation} {format}")
         for strategy in data.get("strategies", []):
-            if (
-                strategy["format"].replace(" ", "-").lower()
-                == format.replace(" ", "-").lower()
-            ):
+            if strategy["format"].replace(" ", "-").lower() == format.lower():
                 for moveset in strategy.get("movesets", []):
                     set_names.append(moveset["name"])
         return set_names
