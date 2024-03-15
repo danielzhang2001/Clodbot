@@ -10,9 +10,10 @@ from smogon.set import *
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
 from discord import Interaction
-from datetime import datetime, timedelta
-from typing import Optional, List, Dict, Tuple
+from discord import ButtonStyle
+from discord.ui import Button, View
 from discord.ext import commands
+from typing import Optional, List, Dict, Tuple
 
 
 class GiveSet:
@@ -30,9 +31,6 @@ class GiveSet:
     @staticmethod
     def fetch_set(pokemon: str, generation: str, format: str, set: str) -> str:
         # Fetches and displays set data based on Pokemon, Generation, Format and Set names given.
-        print(
-            f"POKEMON GENERATION FORMAT SET IS AS FOLLOWS: {pokemon} {generation} {format} {set}"
-        )
         gen_code = get_gen(generation)
         url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_code}/{pokemon}"
         response = requests.get(url)
@@ -76,17 +74,6 @@ class GiveSet:
         return formatted_set.strip()
 
     @staticmethod
-    async def fetch_set_async(
-        pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
-    ) -> Tuple[Optional[List[str]], Optional[str]]:
-        # Helper function for fetching sets asynchronously to save time.
-        loop = asyncio.get_running_loop()
-        sets, url = await loop.run_in_executor(
-            None, GiveSet.fetch_set, pokemon, generation, format
-        )
-        return sets, url
-
-    @staticmethod
     async def fetch_multiset_async(
         requests: List[Dict[str, Optional[str]]]
     ) -> List[Tuple[Optional[List[str]], Optional[str]]]:
@@ -111,33 +98,22 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(
-        ctx: commands.Context,
-        pokemon_data: List[
-            Tuple[str, Optional[List[str]], Optional[str], Optional[str], Optional[str]]
-        ],
+        ctx,
+        pokemon: str,
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
     ) -> None:
         # Displays prompt with buttons for selection of Pokemon sets.
-        unique_id = str(uuid.uuid4())
-        views = {}
-        prompt = ""
-        messages = []
-        GiveSet.awaiting_response[unique_id] = {
-            "user_id": ctx.author.id,
-            "pokemon_data": pokemon_data,
-            "views": views,
-            "message_ids": [],
-            "lock": asyncio.Lock(),
-        }
-        if len(pokemon_data) > 1:
-            views, prompt = get_multiview(unique_id, pokemon_data)
-        else:
-            pokemon, sets, url, _, _ = pokemon_data[0]
-            views, prompt = get_view(unique_id, (pokemon, sets, url))
-        await ctx.send(prompt)
-        for formatted_name, view in views.items():
-            message = await ctx.send(view=view)
-            GiveSet.awaiting_response[unique_id]["views"][message.id] = view
-            GiveSet.awaiting_response[unique_id]["message_ids"].append(message.id)
+        set_names = get_set_names(pokemon, generation, format)
+        formatted_name = "-".join(
+            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
+        )
+        prompt = f"Please select a set type for **{formatted_name}**:\n"
+        view = View()
+        for set_name in set_names:
+            button = Button(label=set_name, style=ButtonStyle.secondary)
+            view.add_item(button)
+        await ctx.send(prompt, view=view)
 
     @staticmethod
     async def set_selection(

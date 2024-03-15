@@ -107,16 +107,7 @@ async def give_set(ctx, *args):
         pokemon = parts[0]
         generation = parts[1] if len(parts) > 1 else None
         format = parts[2] if len(parts) > 2 else None
-        sets, url = await GiveSet.fetch_set_async(pokemon, generation, format)
-        if sets:
-            await GiveSet.set_prompt(ctx, [(pokemon, sets, url, generation, format)])
-        else:
-            await ctx.send(
-                f"No sets found for **{pokemon}**"
-                + (f" in Generation **{generation}**" if generation else "")
-                + (f" with Format **{format}**" if format else "")
-                + "."
-            )
+        await GiveSet.set_prompt(ctx, pokemon, generation, format)
 
 
 @bot.event
