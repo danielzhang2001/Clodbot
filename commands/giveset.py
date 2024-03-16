@@ -154,21 +154,16 @@ class GiveSet:
     @staticmethod
     async def fetch_randomset_async(pokemon: str) -> Optional[str]:
         # Helper function for fetching random sets asynchronously to save time.
-        loop = asyncio.get_running_loop()
-        random_gen = await loop.run_in_executor(None, get_random_gen, pokemon)
+        random_gen = get_random_gen(pokemon)
         if not random_gen:
             return None
-        random_format = await loop.run_in_executor(
-            None, get_random_format, pokemon, random_gen
-        )
+        random_format = get_random_format(pokemon, random_gen)
         if not random_format:
             return None
-        random_set = await loop.run_in_executor(
-            None, get_random_set, pokemon, random_gen, random_format
-        )
+        random_set = get_random_set(pokemon, random_gen, random_format)
         if not random_set:
             return None
-        formatted_set = await loop.run_in_executor(
-            None, GiveSet.fetch_set, random_set, pokemon, random_gen, random_format
+        formatted_set = await GiveSet.fetch_set(
+            random_set, pokemon, random_gen, random_format
         )
         return formatted_set
