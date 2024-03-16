@@ -44,9 +44,18 @@ async def on_ready():
     print(f"{bot.user} has connected to Discord!")
 
 
-# COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.
-# IF SHEET NAME DOES NOT EXIST, CREATE THE SHEET AND STORE INFORMATION IN
-# IF SHEET NAME DOES EXIST, USE THAT SHEET AND UPDATE IT WITH INFORMATION
+@bot.event
+async def on_interaction(interaction):
+    # Displays set information and changes button style if necessary when a button is clicked.
+    if interaction.type == discord.InteractionType.component:
+        custom_id = interaction.data["custom_id"]
+        parts = custom_id.split("_")
+        pokemon = parts[0]
+        generation = parts[1] if parts[1] != "none" else None
+        format = parts[2] if parts[2] != "none" else None
+        set_name = "_".join(parts[3:])
+        await interaction.response.defer()
+        await GiveSet.set_selection(interaction, set_name, pokemon, generation, format)
 
 
 @bot.command(name="analyze")
@@ -110,32 +119,9 @@ async def give_set(ctx, *args):
         await GiveSet.set_prompt(ctx, pokemon, generation, format)
 
 
-@bot.event
-async def on_interaction(interaction):
-    # Handles button functionality such that when one is clicked, the appropriate set is displayed.
-    if interaction.type == discord.InteractionType.component:
-        custom_id = interaction.data["custom_id"]
-        if custom_id.startswith("set_"):
-            _, unique_id, pokemon, set_index = custom_id.split("_", 3)
-            set_index = int(set_index)
-            context = GiveSet.awaiting_response.get(unique_id)
-            if context and interaction.user.id == context["user_id"]:
-                await interaction.response.defer()
-                pokemon_data = context["pokemon_data"]
-                selected_pokemon = next(
-                    (data for data in pokemon_data if data[0] == pokemon), None
-                )
-                if not selected_pokemon:
-                    await interaction.followup.send(
-                        "Could not find the selected Pokémon's data.", ephemeral=True
-                    )
-                    return
-                _, sets, url, _, _ = selected_pokemon
-                selected_set = sets[set_index]
-                await GiveSet.set_selection(
-                    interaction, unique_id, set_index, selected_set, url, pokemon
-                )
-
+# COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.
+# IF SHEET NAME DOES NOT EXIST, CREATE THE SHEET AND STORE INFORMATION IN
+# IF SHEET NAME DOES EXIST, USE THAT SHEET AND UPDATE IT WITH INFORMATION
 
 # Running Discord bot
 load_dotenv()

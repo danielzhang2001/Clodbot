@@ -29,49 +29,28 @@ class GiveSet:
         return pokemon_names
 
     @staticmethod
-    def fetch_set(pokemon: str, generation: str, format: str, set: str) -> str:
+    async def fetch_set(
+        set_name: str,
+        pokemon: str,
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
+    ) -> str:
         # Fetches and displays set data based on Pokemon, Generation, Format and Set names given.
-        gen_code = get_gen(generation)
-        url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_code}/{pokemon}"
+        if not generation:
+            generation = get_latest_gen(pokemon)
+        gen_value = get_gen(generation)
+        url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()
+            if not format:
+                format = get_first_format(pokemon, generation)
             for strategy in data.get("strategies", []):
-                if strategy["format"].lower() == format.lower():
+                if strategy["format"].lower() == format.replace("-", " ").lower():
                     for moveset in strategy.get("movesets", []):
-                        if moveset["name"].lower() == set.lower():
-                            return GiveSet.format_set(moveset)
+                        if moveset["name"].lower() == set_name.lower():
+                            return format_set(moveset)
         return "Set not found."
-
-    @staticmethod
-    def format_set(moveset: dict) -> str:
-        # Returns the formatted set data from the moveset information given.
-        name = moveset["pokemon"]
-        item = moveset.get("items", [])
-        item_str = f" @ {item[0]}" if item else ""
-        ability = moveset.get("abilities", [])
-        ability_str = f"\nAbility: {ability[0]}" if ability else ""
-        evs_list = moveset.get("evconfigs", [])
-        if evs_list:
-            evs_dict = evs_list[0]
-            evs = " / ".join(
-                f"{value} {key.capitalize()}"
-                for key, value in evs_dict.items()
-                if value > 0
-            )
-            evs_str = f"\nEVs: {evs}" if evs else ""
-        else:
-            evs_str = ""
-        nature = moveset.get("natures", [])
-        nature_str = f"\n{nature[0]} Nature" if nature else ""
-        moves = []
-        for slot in moveset.get("moveslots", []):
-            if slot:
-                move = random.choice(slot)["move"]
-                moves.append(move)
-        moves_str = "\n- " + "\n- ".join(moves)
-        formatted_set = f"{name}{item_str}{ability_str}{evs_str}{nature_str}{moves_str}"
-        return formatted_set.strip()
 
     @staticmethod
     async def fetch_multiset_async(
@@ -98,96 +77,49 @@ class GiveSet:
 
     @staticmethod
     async def set_prompt(
-        ctx,
+        ctx: commands.Context,
         pokemon: str,
         generation: Optional[str] = None,
         format: Optional[str] = None,
     ) -> None:
         # Displays prompt with buttons for selection of Pokemon sets.
         set_names = get_set_names(pokemon, generation, format)
-        formatted_name = "-".join(
-            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
+        prompt = (
+            f"Please select a set type for **{pokemon.upper()}"
+            f"{' ' + get_gen(generation).upper() if generation else ''}"
+            f"{' ' + format.upper() if format else ''}**:\n"
         )
-        prompt = f"Please select a set type for **{formatted_name}**:\n"
         view = View()
         for set_name in set_names:
-            button = Button(label=set_name, style=ButtonStyle.secondary)
+            btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+            button = Button(
+                label=set_name, custom_id=btn_id, style=ButtonStyle.secondary
+            )
             view.add_item(button)
         await ctx.send(prompt, view=view)
 
     @staticmethod
     async def set_selection(
-        interaction: Interaction,
-        unique_id: str,
-        set_index: int,
+        interaction,
         set_name: str,
-        url: str,
         pokemon: str,
-    ) -> None:
-        # Handles button functionality from set_prompt when clicked
-        context = GiveSet.awaiting_response.get(unique_id)
-        if not context:
-            await interaction.followup.send(
-                "Session expired or not found.", ephemeral=True
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
+    ):
+        # Fetches and display the appropriate set data when a button is clicked.
+        set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
+        if set_data:
+            formatted_set = f"```\n{set_data}\n```"
+            prompt = (
+                f"Please select a set type for **{pokemon.upper()}"
+                f"{' ' + get_gen(generation).upper() if generation else ''}"
+                f"{' ' + format.upper() if format else ''}**:\n"
             )
-            return
-        lock = context["lock"]
-        async with lock:
-            if "selected_sets" not in context:
-                context["selected_sets"] = {}
-            selected_sets = context["selected_sets"]
-            if pokemon in selected_sets and selected_sets[pokemon] == set_index:
-                del selected_sets[pokemon]
-            else:
-                selected_sets[pokemon] = set_index
-            pokemon_data = context["pokemon_data"]
-            for data in pokemon_data:
-                if data[0] == pokemon:
-                    _, _, _, generation, format = data
-                    break
-            set_display = GiveSet.check_setinfo_cache(
-                pokemon, set_name, generation, format
+            await interaction.edit_original_response(content=prompt + formatted_set)
+        else:
+            await interaction.edit_original_response(
+                content="Could not fetch the set data."
             )
-            if not set_display:
-                driver = None
-                try:
-                    chrome_options = Options()
-                    chrome_options.add_argument("--headless")
-                    chrome_options.add_argument("--log-level=3")
-                    driver = webdriver.Chrome(options=chrome_options)
-                    driver.get(url)
-                    if get_export_btn(driver, set_name):
-                        set_data = get_textarea(driver, set_name)
-                        GiveSet.update_setinfo_cache(
-                            pokemon, set_name, set_data, generation, format
-                        )
-                        set_display = set_data
-                    else:
-                        await interaction.followup.send(
-                            "Error fetching set data.", ephemeral=True
-                        )
-                        return
-                except Exception as e:
-                    await interaction.followup.send(
-                        f"An error occurred: {str(e)}", ephemeral=True
-                    )
-                    return
-                finally:
-                    if driver:
-                        driver.quit()
-            if set_display:
-                await update_message(
-                    context,
-                    interaction,
-                    unique_id,
-                    pokemon,
-                    set_index,
-                    set_display,
-                )
-            else:
-                await interaction.followup.send(
-                    "Error fetching set data.", ephemeral=True
-                )
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
@@ -237,6 +169,6 @@ class GiveSet:
         if not random_set:
             return None
         formatted_set = await loop.run_in_executor(
-            None, GiveSet.fetch_set, pokemon, random_gen, random_format, random_set
+            None, GiveSet.fetch_set, random_set, pokemon, random_gen, random_format
         )
         return formatted_set
