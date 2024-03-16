@@ -284,7 +284,6 @@ async def update_message(
         return
     await message.edit(content=message_content, view=view)
 
-
 def format_set(moveset: dict) -> str:
     # Returns the formatted set data from the moveset information given.
     name = moveset["pokemon"]
@@ -296,20 +295,20 @@ def format_set(moveset: dict) -> str:
     if evs_list:
         evs_dict = evs_list[0]
         evs = " / ".join(
-            f"{value} {key.capitalize()}"
-            for key, value in evs_dict.items()
-            if value > 0
-        )
-        evs_str = f"\nEVs: {evs}" if evs else ""
-    else:
-        evs_str = ""
-    nature = moveset.get("natures", [])
-    nature_str = f"\n{nature[0]} Nature" if nature else ""
-    moves = []
-    for slot in moveset.get("moveslots", []):
-        if slot:
-            move = random.choice(slot)["move"]
-            moves.append(move)
-    moves_str = "\n- " + "\n- ".join(moves)
-    formatted_set = f"{name}{item_str}{ability_str}{evs_str}{nature_str}{moves_str}"
-    return formatted_set.strip()
+                f"{value} {key.capitalize()}"
+                for key, value in evs_dict.items()
+                if value > 0
+            )
+            evs_str = f"\nEVs: {evs}" if evs else ""
+        else:
+            evs_str = ""
+        nature = moveset.get("natures", [])
+        nature_str = f"\n{nature[0]} Nature" if nature else ""
+        moves = []
+        for slot in moveset.get("moveslots", []):
+            if slot:
+                move = random.choice(slot)["move"]
+                moves.append(move)
+        moves_str = "\n- " + "\n- ".join(moves)
+        formatted_set = f"{name}{item_str}{ability_str}{evs_str}{nature_str}{moves_str}"
+        return formatted_set.strip()

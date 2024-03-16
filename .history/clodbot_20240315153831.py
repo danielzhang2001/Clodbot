@@ -50,12 +50,17 @@ async def on_interaction(interaction):
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
         parts = custom_id.split("_")
+        if len(parts) < 4:
+            await interaction.response.send_message(
+                "There was an error processing this interaction.", ephemeral=True
+            )
+            return
         pokemon = parts[0]
         generation = parts[1] if parts[1] != "none" else None
         format = parts[2] if parts[2] != "none" else None
         set_name = "_".join(parts[3:])
         await interaction.response.defer()
-        await GiveSet.set_selection(interaction, set_name, pokemon, generation, format)
+        await GiveSet.set_selection(interaction, pokemon, generation, format, set_name)
 
 
 @bot.command(name="analyze")

@@ -55,7 +55,7 @@ async def on_interaction(interaction):
         format = parts[2] if parts[2] != "none" else None
         set_name = "_".join(parts[3:])
         await interaction.response.defer()
-        await GiveSet.set_selection(interaction, set_name, pokemon, generation, format)
+        await GiveSet.set_selection(interaction, pokemon, generation, format, set)
 
 
 @bot.command(name="analyze")

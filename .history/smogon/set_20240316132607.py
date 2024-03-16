@@ -14,15 +14,15 @@ from typing import Optional, Dict, List, Tuple
 def get_gen_dict() -> Dict[str, str]:
     # Returns generation dictionary.
     return {
-        "gen1": "rb",
-        "gen2": "gs",
-        "gen3": "rs",
-        "gen4": "dp",
-        "gen5": "bw",
-        "gen6": "xy",
-        "gen7": "sm",
-        "gen8": "ss",
-        "gen9": "sv",
+        "gen1": "RB",
+        "gen2": "GS",
+        "gen3": "RS",
+        "gen4": "DP",
+        "gen5": "BW",
+        "gen6": "XY",
+        "gen7": "SM",
+        "gen8": "SS",
+        "gen9": "SV",
     }
 
 

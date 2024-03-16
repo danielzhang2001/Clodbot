@@ -46,7 +46,7 @@ class GiveSet:
             if not format:
                 format = get_first_format(pokemon, generation)
             for strategy in data.get("strategies", []):
-                if strategy["format"].lower() == format.replace("-", " ").lower():
+                if strategy["format"].lower() == format.lower():
                     for moveset in strategy.get("movesets", []):
                         if moveset["name"].lower() == set_name.lower():
                             return format_set(moveset)

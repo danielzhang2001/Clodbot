@@ -49,6 +49,7 @@ async def on_interaction(interaction):
     # Displays set information and changes button style if necessary when a button is clicked.
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
+        print(f"CUSTOM ID: {custom_id}")
         parts = custom_id.split("_")
         pokemon = parts[0]
         generation = parts[1] if parts[1] != "none" else None

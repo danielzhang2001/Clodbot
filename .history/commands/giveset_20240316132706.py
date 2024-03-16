@@ -46,7 +46,7 @@ class GiveSet:
             if not format:
                 format = get_first_format(pokemon, generation)
             for strategy in data.get("strategies", []):
-                if strategy["format"].lower() == format.replace("-", " ").lower():
+                if strategy["format"].lower() == format.lower():
                     for moveset in strategy.get("movesets", []):
                         if moveset["name"].lower() == set_name.lower():
                             return format_set(moveset)
@@ -87,7 +87,7 @@ class GiveSet:
         prompt = (
             f"Please select a set type for **{pokemon.upper()}"
             f"{' ' + get_gen(generation).upper() if generation else ''}"
-            f"{' ' + format.upper() if format else ''}**:\n"
+            f"{' ' + format.replace('-', ' ').upper() if format else ''}**:\n"
         )
         view = View()
         for set_name in set_names:
@@ -110,11 +110,11 @@ class GiveSet:
         set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
         if set_data:
             formatted_set = f"```\n{set_data}\n```"
-            prompt = (
-                f"Please select a set type for **{pokemon.upper()}"
-                f"{' ' + get_gen(generation).upper() if generation else ''}"
-                f"{' ' + format.upper() if format else ''}**:\n"
+            formatted_name = "-".join(
+                part.capitalize() if len(part) > 1 else part
+                for part in pokemon.split("-")
             )
+            prompt = f"Please select a set type for **{formatted_name}**:\n"
             await interaction.edit_original_response(content=prompt + formatted_set)
         else:
             await interaction.edit_original_response(

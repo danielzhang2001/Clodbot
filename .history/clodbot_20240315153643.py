@@ -49,13 +49,17 @@ async def on_interaction(interaction):
     # Displays set information and changes button style if necessary when a button is clicked.
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
-        parts = custom_id.split("_")
+        parts = custom_id.split("_", 3)  # Split into at most 4 parts
         pokemon = parts[0]
         generation = parts[1] if parts[1] != "none" else None
         format = parts[2] if parts[2] != "none" else None
-        set_name = "_".join(parts[3:])
-        await interaction.response.defer()
-        await GiveSet.set_selection(interaction, set_name, pokemon, generation, format)
+        set_name = parts[3] if len(parts) > 3 else None  # Ensure there's a fourth part
+
+        if set_name:  # Proceed only if set_name is not None
+            await interaction.response.defer()
+            await GiveSet.set_selection(
+                interaction, pokemon, generation, format, set_name
+            )
 
 
 @bot.command(name="analyze")
