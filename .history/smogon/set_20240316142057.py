@@ -325,7 +325,7 @@ def format_set(moveset: dict) -> str:
     else:
         ivs_str = ""
     tera = moveset.get("teratypes", [])
-    tera_str = f"\nTera Type: {random.choice(tera)}" if tera else ""
+    tera_str = f"\nTera Type: {random.choice(tera)}" if tera_types else ""
     nature = moveset.get("natures", [])
     nature_str = f"\n{nature[0]} Nature" if nature else ""
     moves = []

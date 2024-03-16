@@ -291,7 +291,7 @@ def format_set(moveset: dict) -> str:
     item = moveset.get("items", [])
     item_str = f" @ {item[0]}" if item else ""
     level = moveset.get("levels", [])
-    level_str = f"\nLevel: {level[0]}" if level else ""
+    level_str = f"\nLevel: {levels[0]}" if level else ""
     ability = moveset.get("abilities", [])
     ability_str = f"\nAbility: {ability[0]}" if ability else ""
     evs_list = moveset.get("evconfigs", [])
@@ -318,14 +318,12 @@ def format_set(moveset: dict) -> str:
                 if key != "spa" and key != "spd" and key != "spe"
                 else f"{value} {'Atk' if key == 'atk' else 'Def' if key == 'def' else 'SpA' if key == 'spa' else 'SpD' if key == 'spd' else 'Spe'}"
             )
-            for key, value in ivs_dict.items()
-            if value != 31
+            for key, value in evs_dict.items()
+            if value > 0
         )
         ivs_str = f"\nIVs: {ivs}" if ivs else ""
-    else:
-        ivs_str = ""
     tera = moveset.get("teratypes", [])
-    tera_str = f"\nTera Type: {random.choice(tera)}" if tera else ""
+    tera_str = f"\nTera Type: {random.choice(tera)}" if tera_types else ""
     nature = moveset.get("natures", [])
     nature_str = f"\n{nature[0]} Nature" if nature else ""
     moves = []
@@ -334,5 +332,7 @@ def format_set(moveset: dict) -> str:
             move = random.choice(slot)["move"]
             moves.append(move)
     moves_str = "\n- " + "\n- ".join(moves)
-    formatted_set = f"{name}{item_str}{ability_str}{level_str}{evs_str}{ivs_str}{tera_str}{nature_str}{moves_str}"
+    formatted_set = (
+        f"{name}{item_str}{ability_str}{evs_str}{tera_str}{nature_str}{moves_str}"
+    )
     return formatted_set.strip()

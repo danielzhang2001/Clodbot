@@ -154,13 +154,13 @@ class GiveSet:
     @staticmethod
     async def fetch_randomset_async(pokemon: str) -> Optional[str]:
         # Helper function for fetching random sets asynchronously to save time.
-        random_gen = get_random_gen(pokemon)
+        random_gen = await get_random_gen(pokemon)
         if not random_gen:
             return None
-        random_format = get_random_format(pokemon, random_gen)
+        random_format = await get_random_format(pokemon, random_gen)
         if not random_format:
             return None
-        random_set = get_random_set(pokemon, random_gen, random_format)
+        random_set = await get_random_set(pokemon, random_gen, random_format)
         if not random_set:
             return None
         formatted_set = await GiveSet.fetch_set(
