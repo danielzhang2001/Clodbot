@@ -211,20 +211,22 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def update_buttons(view: ui.View, selected_sets: dict) -> None:
-    # Updates button styles in one row based on whether they are selected or not.
-    for item in view.children:
-        item_id_parts = item.custom_id.split("_")
-        if len(item_id_parts) == 4:
-            _, _, button_pokemon, button_set_index_str = item_id_parts
-            button_set_index = int(button_set_index_str)
-            if (
-                button_pokemon in selected_sets
-                and selected_sets[button_pokemon] == button_set_index
-            ):
-                item.style = ButtonStyle.success
+def update_buttons(message, button_id: str, deselected: bool) -> None:
+    # Update the coloring of the buttons when a button is selected or deselected.
+    view = ui.View()
+    for component in message.components:
+        for item in component.children:
+            if deselected and item.custom_id == button_id:
+                style = ButtonStyle.secondary
             else:
-                item.style = ButtonStyle.secondary
+                style = (
+                    ButtonStyle.success
+                    if item.custom_id == button_id
+                    else ButtonStyle.secondary
+                )
+            button = ui.Button(style=style, label=item.label, custom_id=item.custom_id)
+            view.add_item(button)
+    return view
 
 
 async def update_button_rows(
