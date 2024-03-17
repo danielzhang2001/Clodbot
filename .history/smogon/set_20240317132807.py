@@ -211,22 +211,24 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def update_buttons(message, button_id: str, deselected: bool) -> None:
-    # Update the coloring of the buttons when a button is selected or deselected.
-    view = ui.View()
+def update_buttons(message, button_id: str) -> None:
+    # Update the coloring of the buttons when it is clicked.
+    new_view = ui.View()
+    # Iterate through the components (buttons) in the existing view
     for component in message.components:
         for item in component.children:
-            if deselected and item.custom_id == button_id:
-                style = ButtonStyle.secondary
-            else:
-                style = (
-                    ButtonStyle.success
-                    if item.custom_id == button_id
-                    else ButtonStyle.secondary
-                )
-            button = ui.Button(style=style, label=item.label, custom_id=item.custom_id)
-            view.add_item(button)
-    return view
+            # Check if this button is the one that was clicked
+            new_style = (
+                ButtonStyle.success
+                if item.custom_id == button_id
+                else ButtonStyle.secondary
+            )
+            # Create a new button with the updated style
+            new_button = ui.Button(
+                style=new_style, label=item.label, custom_id=item.custom_id
+            )
+            new_view.add_item(new_button)
+    return new_view
 
 
 async def update_button_rows(

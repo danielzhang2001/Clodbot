@@ -115,18 +115,14 @@ class GiveSet:
             f"{' ' + get_gen(generation).upper() if generation else ''}"
             f"{' ' + format.upper() if format else ''}**:\n"
         )
+
         if current_state == new_state:
             GiveSet.selected_states[interaction.message.id] = None
-            formatted_set = ""
+            set_data = None
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            formatted_set = f"```\n{set_data}\n```"
             GiveSet.selected_states[interaction.message.id] = new_state
-        view = update_buttons(
-            interaction.message,
-            interaction.data["custom_id"],
-            GiveSet.selected_states[interaction.message.id] is None,
-        )
+        view = update_buttons(interaction.message, interaction.data["custom_id"])
         await interaction.edit_original_response(
             content=prompt + formatted_set, view=view
         )

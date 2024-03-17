@@ -117,10 +117,9 @@ class GiveSet:
         )
         if current_state == new_state:
             GiveSet.selected_states[interaction.message.id] = None
-            formatted_set = ""
+            set_data = None
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            formatted_set = f"```\n{set_data}\n```"
             GiveSet.selected_states[interaction.message.id] = new_state
         view = update_buttons(
             interaction.message,

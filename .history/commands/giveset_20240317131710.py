@@ -18,7 +18,6 @@ from typing import Optional, List, Dict, Tuple
 
 class GiveSet:
     awaiting_response = {}
-    selected_states = {}
 
     @staticmethod
     def fetch_all_pokemon() -> List[str]:
@@ -108,28 +107,30 @@ class GiveSet:
         format: Optional[str] = None,
     ):
         # Fetches and display the appropriate set data when a button is clicked.
-        current_state = GiveSet.selected_states.get(interaction.message.id, None)
-        new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
-        prompt = (
-            f"Please select a set type for **{pokemon.upper()}"
-            f"{' ' + get_gen(generation).upper() if generation else ''}"
-            f"{' ' + format.upper() if format else ''}**:\n"
-        )
-        if current_state == new_state:
-            GiveSet.selected_states[interaction.message.id] = None
-            formatted_set = ""
-        else:
-            set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
+        set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
+        if set_data:
             formatted_set = f"```\n{set_data}\n```"
-            GiveSet.selected_states[interaction.message.id] = new_state
-        view = update_buttons(
-            interaction.message,
-            interaction.data["custom_id"],
-            GiveSet.selected_states[interaction.message.id] is None,
-        )
-        await interaction.edit_original_response(
-            content=prompt + formatted_set, view=view
-        )
+            prompt = (
+                f"Please select a set type for **{pokemon.upper()}"
+                f"{' ' + get_gen(generation).upper() if generation else ''}"
+                f"{' ' + format.upper() if format else ''}**:\n"
+            )
+            set_names = get_set_names(pokemon, generation, format)
+            view = View()
+            for name in set_names:
+                btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{name}"
+                button_style = (
+                    ButtonStyle.success if name == set_name else ButtonStyle.secondary
+                )
+                button = Button(label=name, custom_id=btn_id, style=button_style)
+            view.add_item(button)
+            await interaction.edit_original_response(
+                content=prompt + formatted_set, view=updated_view
+            )
+        else:
+            await interaction.edit_original_response(
+                content="Could not fetch the set data."
+            )
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:

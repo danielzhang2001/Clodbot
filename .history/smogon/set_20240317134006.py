@@ -219,11 +219,11 @@ def update_buttons(message, button_id: str, deselected: bool) -> None:
             if deselected and item.custom_id == button_id:
                 style = ButtonStyle.secondary
             else:
-                style = (
-                    ButtonStyle.success
-                    if item.custom_id == button_id
-                    else ButtonStyle.secondary
-                )
+            style = (
+                ButtonStyle.success
+                if item.custom_id == button_id
+                else ButtonStyle.secondary
+            )
             button = ui.Button(style=style, label=item.label, custom_id=item.custom_id)
             view.add_item(button)
     return view

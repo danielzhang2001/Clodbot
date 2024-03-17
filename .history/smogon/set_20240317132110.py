@@ -211,21 +211,14 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def update_buttons(message, button_id: str, deselected: bool) -> None:
-    # Update the coloring of the buttons when a button is selected or deselected.
-    view = ui.View()
-    for component in message.components:
-        for item in component.children:
-            if deselected and item.custom_id == button_id:
-                style = ButtonStyle.secondary
+def update_buttons(message, button_id: str) -> None:
+    # Update the coloring of the buttons when it is clicked.
+    for item in view.children:
+        if hasattr(item, "custom_id"):
+            if item.custom_id == button_id:
+                item.style = ButtonStyle.success
             else:
-                style = (
-                    ButtonStyle.success
-                    if item.custom_id == button_id
-                    else ButtonStyle.secondary
-                )
-            button = ui.Button(style=style, label=item.label, custom_id=item.custom_id)
-            view.add_item(button)
+                item.style = ButtonStyle.secondary
     return view
 
 
