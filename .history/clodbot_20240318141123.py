@@ -85,16 +85,16 @@ async def give_set(ctx, *args):
                 if len(request_parts) > 1 and request_parts[1].startswith("gen")
                 else None
             )
-            format = (
-                " ".join(request_parts[2:])
-                if len(request_parts) > 2
-                else (
-                    " ".join(request_parts[1:])
-                    if len(request_parts) > 1 and not request_parts[1].startswith("gen")
-                    else None
-                )
+        format = (
+            " ".join(request_parts[2:])
+            if len(request_parts) > 2
+            else (
+                " ".join(request_parts[1:])
+                if len(request_parts) > 1 and not request_parts[1].startswith("gen")
+                else None
             )
-            await GiveSet.set_prompt(ctx, pokemon, generation, format)
+        )
+        await GiveSet.set_prompt(ctx, pokemon, generation, format)
     else:
         parts = input_str.split()
         pokemon = parts[0]

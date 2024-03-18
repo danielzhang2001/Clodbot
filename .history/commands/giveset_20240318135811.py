@@ -112,8 +112,8 @@ class GiveSet:
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
         prompt = (
             f"Please select a set type for **{pokemon.upper()}"
-            f"{' ' + get_gen(generation).upper() if get_gen(generation) else ''}"
-            f"{' ' + format.upper() if format else ''}**:\n"
+            f"{' ' + get_gen(generation).upper() if get_gen(generation) else ""}"
+            f"{' ' + format.upper() if format else "}**:\n"
         )
         if current_state == new_state:
             GiveSet.selected_states[interaction.message.id] = None

@@ -90,6 +90,7 @@ class GiveSet:
             f"{' ' + get_gen(generation).upper() if get_gen(generation) else ''}"
             f"{' ' + format.upper() if format else ''}**:\n"
         )
+        print(f"prompt: {prompt}")
         view = View()
         for set_name in set_names:
             btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"

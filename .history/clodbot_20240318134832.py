@@ -77,24 +77,24 @@ async def give_set(ctx, *args):
         await GiveSet.fetch_random_sets(ctx, input_str)
     elif "," in input_str:
         parts = input_str.split(",")
-        for part in parts:
-            request_parts = part.strip().split()
-            pokemon = request_parts[0]
-            generation = (
-                request_parts[1]
-                if len(request_parts) > 1 and request_parts[1].startswith("gen")
+    for part in parts:
+        request_parts = part.strip().split()
+        pokemon = request_parts[0]
+        generation = (
+            request_parts[1]
+            if len(request_parts) > 1 and request_parts[1].startswith("gen")
+            else None
+        )
+        format = (
+            " ".join(request_parts[2:])
+            if len(request_parts) > 2
+            else (
+                " ".join(request_parts[1:])
+                if len(request_parts) > 1 and not request_parts[1].startswith("gen")
                 else None
             )
-            format = (
-                " ".join(request_parts[2:])
-                if len(request_parts) > 2
-                else (
-                    " ".join(request_parts[1:])
-                    if len(request_parts) > 1 and not request_parts[1].startswith("gen")
-                    else None
-                )
-            )
-            await GiveSet.set_prompt(ctx, pokemon, generation, format)
+        )
+        await GiveSet.set_prompt(ctx, pokemon, generation, format)
     else:
         parts = input_str.split()
         pokemon = parts[0]

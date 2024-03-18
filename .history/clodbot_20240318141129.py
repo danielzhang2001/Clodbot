@@ -94,7 +94,7 @@ async def give_set(ctx, *args):
                     else None
                 )
             )
-            await GiveSet.set_prompt(ctx, pokemon, generation, format)
+        await GiveSet.set_prompt(ctx, pokemon, generation, format)
     else:
         parts = input_str.split()
         pokemon = parts[0]

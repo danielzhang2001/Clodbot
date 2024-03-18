@@ -28,8 +28,6 @@ def get_gen_dict() -> Dict[str, str]:
 
 def get_gen(generation: str) -> Optional[str]:
     # Returns the generation value from the dictionary with the given Generation.
-    if generation is None:
-        return None
     return get_gen_dict().get(generation.lower())
 
 
