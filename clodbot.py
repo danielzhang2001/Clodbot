@@ -77,40 +77,24 @@ async def give_set(ctx, *args):
         await GiveSet.fetch_random_sets(ctx, input_str)
     elif "," in input_str:
         parts = input_str.split(",")
-        pokemon_requests = []
         for part in parts:
             request_parts = part.strip().split()
-            pokemon_requests.append(
-                {
-                    "pokemon": request_parts[0],
-                    "generation": (
-                        request_parts[1]
-                        if len(request_parts) > 1 and request_parts[1].startswith("gen")
-                        else None
-                    ),
-                    "format": (
-                        " ".join(request_parts[2:])
-                        if len(request_parts) > 2
-                        else (
-                            " ".join(request_parts[1:])
-                            if len(request_parts) > 1
-                            and not request_parts[1].startswith("gen")
-                            else None
-                        )
-                    ),
-                }
+            pokemon = request_parts[0]
+            generation = (
+                request_parts[1]
+                if len(request_parts) > 1 and request_parts[1].startswith("gen")
+                else None
             )
-        pokemon_sets = await GiveSet.fetch_multiset_async(pokemon_requests)
-        pokemon_data = []
-        for request, (name, sets, url) in zip(pokemon_requests, pokemon_sets):
-            generation = request["generation"]
-            format = request["format"]
-            if sets:
-                pokemon_data.append((name, sets, url, generation, format))
-        if pokemon_data:
-            await GiveSet.set_prompt(ctx, pokemon_data)
-        else:
-            await ctx.send("No sets found for the provided Pokémon.")
+            format = (
+                " ".join(request_parts[2:])
+                if len(request_parts) > 2
+                else (
+                    " ".join(request_parts[1:])
+                    if len(request_parts) > 1 and not request_parts[1].startswith("gen")
+                    else None
+                )
+            )
+            await GiveSet.set_prompt(ctx, pokemon, generation, format)
     else:
         parts = input_str.split()
         pokemon = parts[0]
