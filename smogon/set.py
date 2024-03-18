@@ -28,6 +28,8 @@ def get_gen_dict() -> Dict[str, str]:
 
 def get_gen(generation: str) -> Optional[str]:
     # Returns the generation value from the dictionary with the given Generation.
+    if generation is None:
+        return None
     return get_gen_dict().get(generation.lower())
 
 
@@ -243,48 +245,6 @@ async def update_button_rows(
                 await message.edit(view=view)
             except Exception as e:
                 print(f"Failed to update message {message_id}: {e}")
-
-
-async def update_message(
-    context: dict,
-    interaction: Interaction,
-    unique_id: str,
-    pokemon: Optional[str] = None,
-    set_index: Optional[int] = None,
-    set_display: Optional[str] = None,
-) -> None:
-    # Updates the set message of either adding or deleting a set after a set button is clicked.
-    context.setdefault("sets", {})
-    if set_index is not None:
-        set_index = int(set_index)
-    channel = interaction.client.get_channel(interaction.channel_id)
-    selected_sets = context.get("selected_sets", {})
-    if set_display and pokemon and set_index is not None:
-        context["sets"].setdefault(pokemon, {})
-        context["sets"][pokemon][set_index] = set_display
-    message_content = context.get("prompt_message", "")
-    for selected_pokemon, selected_index in selected_sets.items():
-        if (
-            selected_pokemon in context["sets"]
-            and selected_index in context["sets"][selected_pokemon]
-        ):
-            set_info = context["sets"][selected_pokemon][selected_index]
-            message_content += f"{set_info}\n\n"
-    if message_content.strip():
-        message_content = f"```{message_content}```"
-    await update_button_rows(context, interaction, selected_sets)
-    firstrow_id = context.get("message_ids", [None])[0]
-    if firstrow_id is None:
-        await interaction.followup.send(
-            "Error: Button message ID not found.", ephemeral=True
-        )
-        return
-    message = await channel.fetch_message(firstrow_id)
-    view = context["views"].get(firstrow_id)
-    if not view:
-        await interaction.followup.send("Error: Button view not found.", ephemeral=True)
-        return
-    await message.edit(content=message_content, view=view)
 
 
 def format_set(moveset: dict) -> str:
