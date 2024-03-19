@@ -16,6 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
+import requests
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -70,9 +71,8 @@ async def analyze_replay(ctx, *args):
 
 @bot.command(name="giveset")
 async def give_set(ctx, *args):
-    # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided, or gives a random set.
+    # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
     input_str = " ".join(args).strip()
-    requests = []
     if input_str.startswith("random"):
         await GiveSet.fetch_random_sets(ctx, input_str)
     else:
@@ -82,8 +82,21 @@ async def give_set(ctx, *args):
             requests.append(
                 {
                     "pokemon": request_parts[0],
-                    "generation": request_parts[1] if len(request_parts) > 1 else None,
-                    "format": request_parts[2] if len(request_parts) == 3 else None,
+                    "generation": (
+                        request_parts[1]
+                        if len(request_parts) > 1 and request_parts[1].startswith("gen")
+                        else None
+                    ),
+                    "format": (
+                        " ".join(request_parts[2:])
+                        if len(request_parts) > 2
+                        else (
+                            " ".join(request_parts[1:])
+                            if len(request_parts) > 1
+                            and not request_parts[1].startswith("gen")
+                            else None
+                        )
+                    ),
                 }
             )
         await GiveSet.set_prompt(ctx, requests)

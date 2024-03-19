@@ -89,8 +89,10 @@ class GiveSet:
                 request["generation"],
                 request["format"],
             )
+            print(f"THIS GENERAITON IS: {generation}")
             set_names = get_set_names(pokemon, generation, format)
             gen_code = get_gen(generation).upper() if get_gen(generation) else ""
+            print(f"GEN CODE: {gen_code}")
             format = format.upper() if format else ""
             if index > 0:
                 prompt += ", "

@@ -94,7 +94,7 @@ class GiveSet:
             format = format.upper() if format else ""
             if index > 0:
                 prompt += ", "
-            prompt += f"**{pokemon.upper()}{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}**"
+            prompt += f"**{pokemon.upper()}**{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}"
             for set_name in set_names:
                 btn_id = (
                     f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"

@@ -90,7 +90,9 @@ class GiveSet:
                 request["format"],
             )
             set_names = get_set_names(pokemon, generation, format)
-            gen_code = get_gen(generation).upper() if get_gen(generation) else ""
+            gen_code = (
+                get_gen(generation).upper() if get_gen(generation.lower()) else ""
+            )
             format = format.upper() if format else ""
             if index > 0:
                 prompt += ", "

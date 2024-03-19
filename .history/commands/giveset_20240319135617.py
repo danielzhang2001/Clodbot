@@ -92,19 +92,15 @@ class GiveSet:
             set_names = get_set_names(pokemon, generation, format)
             gen_code = get_gen(generation).upper() if get_gen(generation) else ""
             format = format.upper() if format else ""
-            if index > 0:
-                prompt += ", "
-            prompt += f"**{pokemon.upper()}{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}**"
-            for set_name in set_names:
-                btn_id = (
-                    f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
-                )
-                button = Button(
-                    label=set_name, custom_id=btn_id, style=ButtonStyle.secondary
-                )
-                view.add_item(button)
-        prompt += ":"
-        await ctx.send(prompt, view=view)
+        if index > 0:
+            prompt += ", "
+            prompt += f"**{pokemon.upper()}**{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}"
+        for set_name in set_names:
+            btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+            button = Button(
+                label=set_name, custom_id=btn_id, style=ButtonStyle.secondary
+            )
+            view.add_item(button)
 
     @staticmethod
     async def set_selection(

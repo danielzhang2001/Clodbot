@@ -83,7 +83,7 @@ async def give_set(ctx, *args):
                 {
                     "pokemon": request_parts[0],
                     "generation": request_parts[1] if len(request_parts) > 1 else None,
-                    "format": request_parts[2] if len(request_parts) == 3 else None,
+                    "format": request_parts[2],
                 }
             )
         await GiveSet.set_prompt(ctx, requests)

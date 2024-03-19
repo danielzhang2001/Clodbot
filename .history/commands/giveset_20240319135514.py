@@ -83,27 +83,19 @@ class GiveSet:
         # Displays prompt with buttons for selection of Pokemon sets.
         prompt = "Please select a set type for "
         view = View()
-        for index, request in enumerate(requests):
-            pokemon, generation, format = (
-                request["pokemon"],
-                request["generation"],
-                request["format"],
+        set_names = get_set_names(pokemon, generation, format)
+        prompt = (
+            f"Please select a set type for **{pokemon.upper()}"
+            f"{' ' + get_gen(generation).upper() if get_gen(generation) else ''}"
+            f"{' ' + format.upper() if format else ''}**:\n"
+        )
+        view = View()
+        for set_name in set_names:
+            btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+            button = Button(
+                label=set_name, custom_id=btn_id, style=ButtonStyle.secondary
             )
-            set_names = get_set_names(pokemon, generation, format)
-            gen_code = get_gen(generation).upper() if get_gen(generation) else ""
-            format = format.upper() if format else ""
-            if index > 0:
-                prompt += ", "
-            prompt += f"**{pokemon.upper()}{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}**"
-            for set_name in set_names:
-                btn_id = (
-                    f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
-                )
-                button = Button(
-                    label=set_name, custom_id=btn_id, style=ButtonStyle.secondary
-                )
-                view.add_item(button)
-        prompt += ":"
+            view.add_item(button)
         await ctx.send(prompt, view=view)
 
     @staticmethod

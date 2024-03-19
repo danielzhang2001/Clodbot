@@ -70,7 +70,7 @@ async def analyze_replay(ctx, *args):
 
 @bot.command(name="giveset")
 async def give_set(ctx, *args):
-    # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided, or gives a random set.
+    # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
     input_str = " ".join(args).strip()
     requests = []
     if input_str.startswith("random"):
@@ -82,8 +82,8 @@ async def give_set(ctx, *args):
             requests.append(
                 {
                     "pokemon": request_parts[0],
-                    "generation": request_parts[1] if len(request_parts) > 1 else None,
-                    "format": request_parts[2] if len(request_parts) == 3 else None,
+                    "generation": request_parts[1] if len(components) > 1 else None,
+                    "format": request_parts[2],
                 }
             )
         await GiveSet.set_prompt(ctx, requests)
