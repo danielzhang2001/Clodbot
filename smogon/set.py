@@ -152,56 +152,6 @@ def get_set_names(
         return None
 
 
-def get_view(
-    unique_id: str, pokemon_data: Tuple[str, Optional[List[str]], Optional[str]]
-) -> Tuple[Dict[str, ui.View], str]:
-    # Creates a prompt + buttons for Pokemon sets for a single Pokemon.
-    pokemon, sets, url = pokemon_data
-    view = ui.View()
-    formatted_name = "-".join(
-        part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-    )
-    prompt = f"Please select a set type for **{formatted_name}**:\n"
-    for index, set_name in enumerate(sets):
-        button_id = f"set_{unique_id}_{pokemon}_{index}"
-        button = ui.Button(label=set_name, custom_id=button_id)
-        view.add_item(button)
-    return {formatted_name: view}, prompt
-
-
-def get_multiview(
-    unique_id: str,
-    pokemon_data: List[
-        Tuple[str, Optional[List[str]], Optional[str], Optional[str], Optional[str]]
-    ],
-) -> Tuple[Dict[str, ui.View], str]:
-    # Creates a prompt and buttons for Pokemon sets for multiple Pokemon.
-    views = {}
-    formatted_names = [
-        "-".join(
-            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-        )
-        for pokemon, _, _, _, _ in pokemon_data
-    ]
-    prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
-    for pokemon, sets, url, _, _ in pokemon_data:
-        view = ui.View()
-        formatted_name = "-".join(
-            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-        )
-        view.add_item(
-            ui.Button(
-                label=f"{formatted_name}:", style=ButtonStyle.primary, disabled=True
-            )
-        )
-        for index, set_name in enumerate(sets):
-            button_id = f"set_{unique_id}_{pokemon}_{index}"
-            button = ui.Button(label=set_name, custom_id=button_id)
-            view.add_item(button)
-        views[formatted_name] = view
-    return views, prompt
-
-
 def format_name(pokemon: str) -> str:
     # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
     formatted_parts = []
