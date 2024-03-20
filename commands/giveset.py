@@ -54,29 +54,6 @@ class GiveSet:
         return "Set not found."
 
     @staticmethod
-    async def fetch_multiset_async(
-        requests: List[Dict[str, Optional[str]]]
-    ) -> List[Tuple[Optional[List[str]], Optional[str]]]:
-        # Uses fetch_set to fetch multiple sets with potential different specifications of Generation and Format asynchronously.
-        loop = asyncio.get_running_loop()
-        tasks = [
-            loop.run_in_executor(
-                None,
-                GiveSet.fetch_set,
-                request["pokemon"],
-                request.get("generation"),
-                request.get("format"),
-            )
-            for request in requests
-        ]
-        results = await asyncio.gather(*tasks)
-        final_results = [
-            (requests[i]["pokemon"], result[0], result[1])
-            for i, result in enumerate(results)
-        ]
-        return final_results
-
-    @staticmethod
     async def set_prompt(
         ctx: commands.Context, requests: List[Dict[str, Optional[str]]]
     ) -> None:
@@ -96,7 +73,7 @@ class GiveSet:
             prompt += f"**{pokemon.upper()}{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}**"
         prompt += ":"
         await ctx.send(prompt)
-
+        request_count = len(requests)
         for request in requests:
             view = View()
             pokemon, generation, format = (
@@ -105,10 +82,16 @@ class GiveSet:
                 request["format"],
             )
             set_names = get_set_names(pokemon, generation, format)
-            for set_name in set_names:
-                btn_id = (
-                    f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+            if len(requests) > 1:
+                view.add_item(
+                    Button(
+                        label=pokemon.upper() + ":",
+                        style=ButtonStyle.primary,
+                        disabled=True,
+                    )
                 )
+            for set_name in set_names:
+                btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
                 button = Button(label=set_name, custom_id=btn_id)
                 view.add_item(button)
             await ctx.send(view=view)
@@ -121,7 +104,8 @@ class GiveSet:
         generation: Optional[str] = None,
         format: Optional[str] = None,
     ):
-        # Fetches and display the appropriate set data when a button is clicked.
+        # Fetches and displays the appropriate set data when a button is clicked.
+        multiple = int(interaction.data["custom_id"].split("_")[-1]) > 1
         current_state = GiveSet.selected_states.get(interaction.message.id, None)
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
         if current_state == new_state:
@@ -135,6 +119,7 @@ class GiveSet:
             interaction.message,
             interaction.data["custom_id"],
             GiveSet.selected_states[interaction.message.id] is None,
+            multiple,
         )
         await interaction.edit_original_response(content=formatted_set, view=view)
 
