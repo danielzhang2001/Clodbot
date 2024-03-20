@@ -81,7 +81,7 @@ class GiveSet:
         ctx: commands.Context, requests: List[Dict[str, Optional[str]]]
     ) -> None:
         # Displays prompt with buttons for selection of Pokemon sets.
-        prompt = "Please select a set type for "
+        prompt = "Please selecta a set type for "
         for index, request in enumerate(requests):
             view = View()
             pokemon, generation, format = (
@@ -124,6 +124,11 @@ class GiveSet:
         # Fetches and display the appropriate set data when a button is clicked.
         current_state = GiveSet.selected_states.get(interaction.message.id, None)
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+        prompt = (
+            f"Please select a set type for **{pokemon.upper()}"
+            f"{' ' + get_gen(generation).upper() if get_gen(generation) else ''}"
+            f"{' ' + format.upper() if format else ''}**:\n"
+        )
         if current_state == new_state:
             GiveSet.selected_states[interaction.message.id] = None
             formatted_set = ""
@@ -136,7 +141,9 @@ class GiveSet:
             interaction.data["custom_id"],
             GiveSet.selected_states[interaction.message.id] is None,
         )
-        await interaction.edit_original_response(content=formatted_set, view=view)
+        await interaction.edit_original_response(
+            content=prompt + formatted_set, view=view
+        )
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:

@@ -136,7 +136,9 @@ class GiveSet:
             interaction.data["custom_id"],
             GiveSet.selected_states[interaction.message.id] is None,
         )
-        await interaction.edit_original_response(content=formatted_set, view=view)
+        await interaction.edit_original_response(
+            content=prompt + formatted_set, view=view
+        )
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
