@@ -168,11 +168,14 @@ def update_buttons(message, button_id: str, deselected: bool, multiple: bool) ->
     view = ui.View()
     for component in message.components:
         for index, item in enumerate(component.children):
-            disabled = False
             if multiple and index == 0:
-                style = ButtonStyle.primary
-                disabled = True
-            elif deselected and item.custom_id == button_id:
+                button = ui.Button(
+                    style=item.style,
+                    label=item.label,
+                    custom_id=item.custom_id,
+                    disabled=True,
+                )
+            if deselected and item.custom_id == button_id:
                 style = ButtonStyle.secondary
             else:
                 style = (
@@ -180,12 +183,7 @@ def update_buttons(message, button_id: str, deselected: bool, multiple: bool) ->
                     if item.custom_id == button_id
                     else ButtonStyle.secondary
                 )
-            button = ui.Button(
-                style=style,
-                label=item.label,
-                custom_id=item.custom_id,
-                disabled=disabled,
-            )
+            button = ui.Button(style=style, label=item.label, custom_id=item.custom_id)
             view.add_item(button)
     return view
 

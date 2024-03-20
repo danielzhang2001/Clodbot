@@ -168,24 +168,25 @@ def update_buttons(message, button_id: str, deselected: bool, multiple: bool) ->
     view = ui.View()
     for component in message.components:
         for index, item in enumerate(component.children):
-            disabled = False
-            if multiple and index == 0:
-                style = ButtonStyle.primary
-                disabled = True
-            elif deselected and item.custom_id == button_id:
-                style = ButtonStyle.secondary
-            else:
-                style = (
-                    ButtonStyle.success
-                    if item.custom_id == button_id
-                    else ButtonStyle.secondary
+            if multiple_pokemon and index == 0:
+                button = ui.Button(
+                    style=item.style,
+                    label=item.label,
+                    custom_id=item.custom_id,
+                    disabled=True,
                 )
-            button = ui.Button(
-                style=style,
-                label=item.label,
-                custom_id=item.custom_id,
-                disabled=disabled,
-            )
+            else:
+                if deselected and item.custom_id == button_id:
+                    style = ButtonStyle.secondary
+                else:
+                    style = (
+                        ButtonStyle.success
+                        if item.custom_id == button_id
+                        else ButtonStyle.secondary
+                    )
+                button = ui.Button(
+                    style=style, label=item.label, custom_id=item.custom_id
+                )
             view.add_item(button)
     return view
 

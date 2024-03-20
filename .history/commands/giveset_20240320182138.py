@@ -19,6 +19,7 @@ from typing import Optional, List, Dict, Tuple
 class GiveSet:
     awaiting_response = {}
     selected_states = {}
+    requests_count = {}
 
     @staticmethod
     def fetch_all_pokemon() -> List[str]:
@@ -73,7 +74,7 @@ class GiveSet:
             prompt += f"**{pokemon.upper()}{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}**"
         prompt += ":"
         await ctx.send(prompt)
-        request_count = len(requests)
+
         for request in requests:
             view = View()
             pokemon, generation, format = (
@@ -91,7 +92,9 @@ class GiveSet:
                     )
                 )
             for set_name in set_names:
-                btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
+                btn_id = (
+                    f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+                )
                 button = Button(label=set_name, custom_id=btn_id)
                 view.add_item(button)
             await ctx.send(view=view)
@@ -105,7 +108,6 @@ class GiveSet:
         format: Optional[str] = None,
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
-        multiple = int(interaction.data["custom_id"].split("_")[-1]) > 1
         current_state = GiveSet.selected_states.get(interaction.message.id, None)
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
         if current_state == new_state:
@@ -119,7 +121,7 @@ class GiveSet:
             interaction.message,
             interaction.data["custom_id"],
             GiveSet.selected_states[interaction.message.id] is None,
-            multiple,
+            len(requests) > 1,
         )
         await interaction.edit_original_response(content=formatted_set, view=view)
 

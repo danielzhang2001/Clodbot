@@ -91,7 +91,9 @@ class GiveSet:
                     )
                 )
             for set_name in set_names:
-                btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
+                btn_id = (
+                    f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+                )
                 button = Button(label=set_name, custom_id=btn_id)
                 view.add_item(button)
             await ctx.send(view=view)
@@ -105,7 +107,6 @@ class GiveSet:
         format: Optional[str] = None,
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
-        multiple = int(interaction.data["custom_id"].split("_")[-1]) > 1
         current_state = GiveSet.selected_states.get(interaction.message.id, None)
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
         if current_state == new_state:
@@ -115,11 +116,12 @@ class GiveSet:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             formatted_set = f"```\n{set_data}\n```"
             GiveSet.selected_states[interaction.message.id] = new_state
+        print(f"{GiveSet.requests_count.get(interaction.message.id, 1)}")
         view = update_buttons(
             interaction.message,
             interaction.data["custom_id"],
             GiveSet.selected_states[interaction.message.id] is None,
-            multiple,
+            GiveSet.requests_count.get(interaction.message.id, 1) > 1,
         )
         await interaction.edit_original_response(content=formatted_set, view=view)
 

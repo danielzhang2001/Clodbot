@@ -106,6 +106,7 @@ class GiveSet:
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
         multiple = int(interaction.data["custom_id"].split("_")[-1]) > 1
+        print(f"{multiple}")
         current_state = GiveSet.selected_states.get(interaction.message.id, None)
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
         if current_state == new_state:
