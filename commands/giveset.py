@@ -19,6 +19,8 @@ from typing import Optional, List, Dict, Tuple
 class GiveSet:
     awaiting_response = {}
     selected_states = {}
+    selected_sets = {}
+    first_row = {}
 
     @staticmethod
     def fetch_all_pokemon() -> List[str]:
@@ -74,7 +76,7 @@ class GiveSet:
         prompt += ":"
         await ctx.send(prompt)
         request_count = len(requests)
-        for request in requests:
+        for index, request in enumerate(requests):
             view = View()
             pokemon, generation, format = (
                 request["pokemon"],
@@ -94,7 +96,11 @@ class GiveSet:
                 btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
                 button = Button(label=set_name, custom_id=btn_id)
                 view.add_item(button)
-            await ctx.send(view=view)
+            if index == 0:
+                first_row = await ctx.send(view=view)
+                GiveSet.first_row[ctx.channel.id] = first_row.id
+            else:
+                await ctx.send(view=view)
 
     @staticmethod
     async def set_selection(
@@ -106,22 +112,30 @@ class GiveSet:
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
         multiple = int(interaction.data["custom_id"].split("_")[-1]) > 1
-        current_state = GiveSet.selected_states.get(interaction.message.id, None)
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
-        if current_state == new_state:
-            GiveSet.selected_states[interaction.message.id] = None
-            formatted_set = ""
+        if GiveSet.selected_states.get(interaction.message.id) == new_state:
+            GiveSet.selected_states.pop(interaction.message.id, None)
+            if pokemon in GiveSet.selected_sets.get(interaction.message.id, {}):
+                GiveSet.selected_sets[interaction.message.id].pop(pokemon)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            formatted_set = f"```\n{set_data}\n```"
             GiveSet.selected_states[interaction.message.id] = new_state
-        view = update_buttons(
-            interaction.message,
-            interaction.data["custom_id"],
-            GiveSet.selected_states[interaction.message.id] is None,
-            multiple,
+            GiveSet.selected_sets.setdefault(interaction.message.id, {})[
+                pokemon
+            ] = set_data
+        set_data = "\n\n".join(
+            [
+                data
+                for _, data in GiveSet.selected_sets.get(
+                    interaction.message.id, {}
+                ).items()
+            ]
         )
-        await interaction.edit_original_response(content=formatted_set, view=view)
+        first_row = GiveSet.first_row.get(interaction.channel.id)
+        first_message = await interaction.channel.fetch_message(first_row)
+        existing_content = first_message.content.strip("`")
+        updated_content = f"```\n{existing_content}\n{set_data}\n```"
+        await first_message.edit(content=updated_content)
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
