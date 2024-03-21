@@ -20,7 +20,7 @@ class GiveSet:
     awaiting_response = {}
     selected_states = {}
     selected_sets = {}
-    first_row = {}
+    initial_prompt = {}
 
     @staticmethod
     def fetch_all_pokemon() -> List[str]:
@@ -74,9 +74,10 @@ class GiveSet:
                 prompt += ", "
             prompt += f"**{pokemon.upper()}{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}**"
         prompt += ":"
-        await ctx.send(prompt)
+        initial_message = await ctx.send(prompt)
+        GiveSet.initial_prompt[ctx.channel.id] = initial_message.id
         request_count = len(requests)
-        for index, request in enumerate(requests):
+        for request in requests:
             view = View()
             pokemon, generation, format = (
                 request["pokemon"],
@@ -96,11 +97,7 @@ class GiveSet:
                 btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
                 button = Button(label=set_name, custom_id=btn_id)
                 view.add_item(button)
-            if index == 0:
-                first_row = await ctx.send(view=view)
-                GiveSet.first_row[ctx.channel.id] = first_row.id
-            else:
-                await ctx.send(view=view)
+            await ctx.send(view=view)
 
     @staticmethod
     async def set_selection(
@@ -111,31 +108,52 @@ class GiveSet:
         format: Optional[str] = None,
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
+        message_id = interaction.message.id
+        channel_id = interaction.channel.id
         multiple = int(interaction.data["custom_id"].split("_")[-1]) > 1
+
+        # Determine new or existing selection and update stored data accordingly
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
-        if GiveSet.selected_states.get(interaction.message.id) == new_state:
-            GiveSet.selected_states.pop(interaction.message.id, None)
-            if pokemon in GiveSet.selected_sets.get(interaction.message.id, {}):
-                GiveSet.selected_sets[interaction.message.id].pop(pokemon)
+        if GiveSet.selected_states.get(message_id) == new_state:
+            # Deselection case
+            GiveSet.selected_states.pop(message_id, None)
+            if pokemon in GiveSet.selected_sets.get(message_id, {}):
+                GiveSet.selected_sets[message_id].pop(pokemon)
         else:
+            # Selection case
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            GiveSet.selected_states[interaction.message.id] = new_state
-            GiveSet.selected_sets.setdefault(interaction.message.id, {})[
-                pokemon
-            ] = set_data
-        set_data = "\n\n".join(
-            [
-                data
-                for _, data in GiveSet.selected_sets.get(
-                    interaction.message.id, {}
-                ).items()
-            ]
+            GiveSet.selected_states[message_id] = new_state
+            GiveSet.selected_sets.setdefault(message_id, {})[pokemon] = set_data
+
+        # Prepare formatted sets string from all selected sets
+        formatted_sets = "\n\n".join(
+            [data for _, data in GiveSet.selected_sets.get(message_id, {}).items()]
         )
-        first_row = GiveSet.first_row.get(interaction.channel.id)
-        first_message = await interaction.channel.fetch_message(first_row)
-        existing_content = first_message.content.strip("`")
-        updated_content = f"```\n{existing_content}\n{set_data}\n```"
-        await first_message.edit(content=updated_content)
+        if formatted_sets:
+            formatted_sets = f"```\n{formatted_sets}\n```"
+
+        if multiple:
+            # Fetch the initial prompt message using stored ID
+            initial_message_id = GiveSet.initial_prompt.get(channel_id)
+            if initial_message_id:
+                initial_message = await interaction.channel.fetch_message(
+                    initial_message_id
+                )
+                # Update the initial prompt with the aggregated set data
+                await initial_message.edit(
+                    content=formatted_sets + "\n" + initial_message.content
+                )
+                # Skip further processing to prevent duplicating button rows
+                return
+
+        # Update button interaction response for single selections or if multiple handling fails
+        view = update_buttons(
+            interaction.message,
+            interaction.data["custom_id"],
+            GiveSet.selected_states.get(message_id) is None,
+            multiple,
+        )
+        await interaction.edit_original_response(view=view)
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:

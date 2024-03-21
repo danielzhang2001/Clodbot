@@ -123,7 +123,7 @@ class GiveSet:
             GiveSet.selected_sets.setdefault(interaction.message.id, {})[
                 pokemon
             ] = set_data
-        set_data = "\n\n".join(
+        formatted_sets = "\n\n".join(
             [
                 data
                 for _, data in GiveSet.selected_sets.get(
@@ -131,11 +131,20 @@ class GiveSet:
                 ).items()
             ]
         )
-        first_row = GiveSet.first_row.get(interaction.channel.id)
-        first_message = await interaction.channel.fetch_message(first_row)
-        existing_content = first_message.content.strip("`")
-        updated_content = f"```\n{existing_content}\n{set_data}\n```"
-        await first_message.edit(content=updated_content)
+        if formatted_sets:
+            formatted_sets = f"```\n{formatted_sets}\n```"
+        if multiple:
+            first_row = GiveSet.first_row.get(interaction.channel.id)
+            if first_row:
+                first_message = await interaction.channel.fetch_message(first_row)
+                updated_content = (
+                    f"```\n{formatted_sets}\n"
+                    + first_message.content.lstrip("```").rstrip("```")
+                    + "\n```"
+                )
+                await first_message.edit(content=updated_content)
+                return
+        await interaction.edit_original_response(content=formatted_sets)
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:

@@ -131,11 +131,14 @@ class GiveSet:
                 ).items()
             ]
         )
-        first_row = GiveSet.first_row.get(interaction.channel.id)
-        first_message = await interaction.channel.fetch_message(first_row)
-        existing_content = first_message.content.strip("`")
-        updated_content = f"```\n{existing_content}\n{set_data}\n```"
-        await first_message.edit(content=updated_content)
+        if multiple:
+            first_row = GiveSet.first_row.get(interaction.channel.id)
+            if first_row:
+                first_message = await interaction.channel.fetch_message(first_row)
+                updated_content = f"\n\n{set_data}\n" + first_message.content + "\n\n"
+                await first_message.edit(content=updated_content)
+                return
+        await interaction.edit_original_response(content=formatted_sets)
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:

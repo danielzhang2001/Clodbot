@@ -133,8 +133,7 @@ class GiveSet:
         )
         first_row = GiveSet.first_row.get(interaction.channel.id)
         first_message = await interaction.channel.fetch_message(first_row)
-        existing_content = first_message.content.strip("`")
-        updated_content = f"```\n{existing_content}\n{set_data}\n```"
+        updated_content = f"\n\n{set_data}\n" + first_message.content + "\n\n"
         await first_message.edit(content=updated_content)
 
     @staticmethod

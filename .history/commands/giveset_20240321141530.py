@@ -76,7 +76,7 @@ class GiveSet:
         prompt += ":"
         await ctx.send(prompt)
         request_count = len(requests)
-        for index, request in enumerate(requests):
+        for request in requests:
             view = View()
             pokemon, generation, format = (
                 request["pokemon"],
@@ -96,9 +96,9 @@ class GiveSet:
                 btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
                 button = Button(label=set_name, custom_id=btn_id)
                 view.add_item(button)
-            if index == 0:
+            if request_index == 0:
                 first_row = await ctx.send(view=view)
-                GiveSet.first_row[ctx.channel.id] = first_row.id
+                GiveSest.first_row[ctx.channel.id] = first_row.id
             else:
                 await ctx.send(view=view)
 
@@ -123,7 +123,7 @@ class GiveSet:
             GiveSet.selected_sets.setdefault(interaction.message.id, {})[
                 pokemon
             ] = set_data
-        set_data = "\n\n".join(
+        formatted_sets = "\n\n".join(
             [
                 data
                 for _, data in GiveSet.selected_sets.get(
@@ -131,11 +131,22 @@ class GiveSet:
                 ).items()
             ]
         )
-        first_row = GiveSet.first_row.get(interaction.channel.id)
-        first_message = await interaction.channel.fetch_message(first_row)
-        existing_content = first_message.content.strip("`")
-        updated_content = f"```\n{existing_content}\n{set_data}\n```"
-        await first_message.edit(content=updated_content)
+        if formatted_sets:
+            formatted_sets = f"```\n{formatted_sets}\n```"
+        if multiple:
+            first_row_message_id = GiveSet.first_row_buttons_message_id.get(channel_id)
+            if first_row_message_id:
+                first_row_message = await interaction.channel.fetch_message(first_row_message_id)
+                formatted_sets = "\n\n".join([data for _, data in GiveSet.selected_sets.get(interaction.message.id, {}).items()])
+                if formatted_sets:
+                    formatted_sets = f"```\n{formatted_sets}\n```"
+            updated_view = update_buttons(first_row_message, interaction.data["custom_id"], GiveSet.selected_states.get(interaction.message.id) is None, True)
+            await first_row_message.edit(content=formatted_sets + first_row_message.content, view=updated_view)
+            return
+    else:
+        formatted_set = f"```\n{set_data}\n```" if set_data else ""
+        updated_view = update_buttons(interaction.message, interaction.data["custom_id"], GiveSet.selected_states.get(interaction.message.id) is None, False)
+        await interaction.edit_original_response(content=formatted_set, view=updated_view)
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
