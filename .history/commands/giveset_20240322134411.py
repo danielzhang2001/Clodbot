@@ -122,7 +122,7 @@ class GiveSet:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             GiveSet.selected_states[interaction.message.id] = new_state
             GiveSet.selected_sets.setdefault(interaction.message.id, {})[
-                pokemon_state
+                pokemon
             ] = set_data
         set_data = "\n\n".join(
             data
@@ -130,13 +130,11 @@ class GiveSet:
         )
         first_row = GiveSet.first_row.get(interaction.channel.id)
         first_message = await interaction.channel.fetch_message(first_row)
-        selected_row = await interaction.channel.fetch_message(interaction.message.id)
         updated_view = update_buttons(
-            selected_row, interaction.data["custom_id"], deselected, request_count > 1
+            first_message, interaction.data["custom_id"], deselected, request_count > 1
         )
         updated_content = f"```{set_data}```" if set_data else ""
-        await interaction.message.edit(view=updated_view)
-        await first_message.edit(content=updated_content)
+        await first_message.edit(content=updated_content, view=updated_view)
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:

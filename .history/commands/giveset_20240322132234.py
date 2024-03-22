@@ -114,15 +114,15 @@ class GiveSet:
         request_count = int(interaction.data["custom_id"].split("_")[-1])
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
         deselected = GiveSet.selected_states.get(interaction.message.id) == new_state
-        pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
-        if deselected:
+        if GiveSet.selected_states.get(interaction.message.id) == new_state:
             GiveSet.selected_states.pop(interaction.message.id, None)
-            GiveSet.selected_sets[interaction.message.id].pop(pokemon_state, None)
+            if pokemon in GiveSet.selected_sets.get(interaction.message.id, {}):
+                GiveSet.selected_sets[interaction.message.id].pop(pokemon)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             GiveSet.selected_states[interaction.message.id] = new_state
             GiveSet.selected_sets.setdefault(interaction.message.id, {})[
-                pokemon_state
+                pokemon
             ] = set_data
         set_data = "\n\n".join(
             data
@@ -130,12 +130,12 @@ class GiveSet:
         )
         first_row = GiveSet.first_row.get(interaction.channel.id)
         first_message = await interaction.channel.fetch_message(first_row)
-        selected_row = await interaction.channel.fetch_message(interaction.message.id)
-        updated_view = update_buttons(
-            selected_row, interaction.data["custom_id"], deselected, request_count > 1
+        existing_content = first_message.content.strip("`")
+        updated_content = (
+            f"```\n{existing_content}\n{set_data}\n```"
+            if set_data
+            else f"```\n{existing_content}\n```"
         )
-        updated_content = f"```{set_data}```" if set_data else ""
-        await interaction.message.edit(view=updated_view)
         await first_message.edit(content=updated_content)
 
     @staticmethod

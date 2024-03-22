@@ -135,7 +135,6 @@ class GiveSet:
             selected_row, interaction.data["custom_id"], deselected, request_count > 1
         )
         updated_content = f"```{set_data}```" if set_data else ""
-        await interaction.message.edit(view=updated_view)
         await first_message.edit(content=updated_content)
 
     @staticmethod
