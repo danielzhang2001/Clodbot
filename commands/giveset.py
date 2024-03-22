@@ -111,30 +111,31 @@ class GiveSet:
         format: Optional[str] = None,
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
-        multiple = int(interaction.data["custom_id"].split("_")[-1]) > 1
-        new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
-        if GiveSet.selected_states.get(interaction.message.id) == new_state:
+        request_count = int(interaction.data["custom_id"].split("_")[-1])
+        new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
+        deselected = GiveSet.selected_states.get(interaction.message.id) == new_state
+        pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
+        if deselected:
             GiveSet.selected_states.pop(interaction.message.id, None)
-            if pokemon in GiveSet.selected_sets.get(interaction.message.id, {}):
-                GiveSet.selected_sets[interaction.message.id].pop(pokemon)
+            GiveSet.selected_sets[interaction.message.id].pop(pokemon_state, None)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             GiveSet.selected_states[interaction.message.id] = new_state
             GiveSet.selected_sets.setdefault(interaction.message.id, {})[
-                pokemon
+                pokemon_state
             ] = set_data
         set_data = "\n\n".join(
-            [
-                data
-                for _, data in GiveSet.selected_sets.get(
-                    interaction.message.id, {}
-                ).items()
-            ]
+            data
+            for _, data in GiveSet.selected_sets.get(interaction.message.id, {}).items()
         )
         first_row = GiveSet.first_row.get(interaction.channel.id)
         first_message = await interaction.channel.fetch_message(first_row)
-        existing_content = first_message.content.strip("`")
-        updated_content = f"```\n{existing_content}\n{set_data}\n```"
+        selected_row = await interaction.channel.fetch_message(interaction.message.id)
+        updated_view = update_buttons(
+            selected_row, interaction.data["custom_id"], deselected, request_count > 1
+        )
+        updated_content = f"```{set_data}```" if set_data else ""
+        await interaction.message.edit(view=updated_view)
         await first_message.edit(content=updated_content)
 
     @staticmethod
