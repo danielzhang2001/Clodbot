@@ -240,14 +240,8 @@ def format_set(moveset: dict) -> str:
     moves = []
     for slot in moveset.get("moveslots", []):
         if slot:
-            available_moves = [move["move"] for move in slot]
-            selected_move = random.choice(available_moves)
-            moves.append(selected_move)
-            available_moves.remove(selected_move)
-            while selected_move in moves[:-1]:
-                selected_move = random.choice(available_moves)
-                moves[-1] = selected_move
-                available_moves.remove(selected_move)
+            move = random.choice(slot)["move"]
+            moves.append(move)
     moves_str = "\n- " + "\n- ".join(moves)
     formatted_set = f"{name}{item_str}{ability_str}{level_str}{evs_str}{ivs_str}{tera_str}{nature_str}{moves_str}"
     return formatted_set.strip()

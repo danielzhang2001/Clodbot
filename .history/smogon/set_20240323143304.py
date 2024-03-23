@@ -5,7 +5,7 @@ General functions in scraping Pokemon Smogon sets.
 import asyncio
 import requests
 import random
-from discord import ui, ButtonStyle, Interaction, Message
+from discord import ui, ButtonStyle, Interaction
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
@@ -163,19 +163,16 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def update_buttons(
-    message: Message, button_id: str, deselected: bool, multiple: bool
-) -> None:
+def update_buttons(message, button_id: str, deselected: bool, multiple: bool) -> None:
     # Update the coloring of the buttons when a button is selected or deselected.
     view = ui.View()
-    first_button = True
+    first_button = False
     for component in message.components:
         for item in component.children:
             disabled = False
-            if multiple and first_button:
+            if multiple and not first_button:
                 style = ButtonStyle.primary
                 disabled = True
-                first_button = False
             elif deselected and item.custom_id == button_id:
                 style = ButtonStyle.secondary
             else:
@@ -240,14 +237,8 @@ def format_set(moveset: dict) -> str:
     moves = []
     for slot in moveset.get("moveslots", []):
         if slot:
-            available_moves = [move["move"] for move in slot]
-            selected_move = random.choice(available_moves)
-            moves.append(selected_move)
-            available_moves.remove(selected_move)
-            while selected_move in moves[:-1]:
-                selected_move = random.choice(available_moves)
-                moves[-1] = selected_move
-                available_moves.remove(selected_move)
+            move = random.choice(slot)["move"]
+            moves.append(move)
     moves_str = "\n- " + "\n- ".join(moves)
     formatted_set = f"{name}{item_str}{ability_str}{level_str}{evs_str}{ivs_str}{tera_str}{nature_str}{moves_str}"
     return formatted_set.strip()

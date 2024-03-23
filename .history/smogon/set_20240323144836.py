@@ -248,6 +248,6 @@ def format_set(moveset: dict) -> str:
                 selected_move = random.choice(available_moves)
                 moves[-1] = selected_move
                 available_moves.remove(selected_move)
-    moves_str = "\n- " + "\n- ".join(moves)
-    formatted_set = f"{name}{item_str}{ability_str}{level_str}{evs_str}{ivs_str}{tera_str}{nature_str}{moves_str}"
+        moves_str = "\n- " + "\n- ".join(moves)
+        formatted_set = f"{name}{item_str}{ability_str}{level_str}{evs_str}{ivs_str}{tera_str}{nature_str}{moves_str}"
     return formatted_set.strip()
