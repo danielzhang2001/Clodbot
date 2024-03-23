@@ -5,7 +5,7 @@ General functions in scraping Pokemon Smogon sets.
 import asyncio
 import requests
 import random
-from discord import ui, ButtonStyle, Interaction
+from discord import ui, ButtonStyle, Interaction, Message
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
@@ -163,15 +163,19 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def update_buttons(message, button_id: str, deselected: bool, multiple: bool) -> None:
+def update_buttons(
+    message: Message, button_id: str, deselected: bool, multiple: bool
+) -> None:
     # Update the coloring of the buttons when a button is selected or deselected.
     view = ui.View()
+    first_button = True
     for component in message.components:
-        for index, item in enumerate(component.children):
+        for item in component.children:
             disabled = False
-            if multiple and index == 0:
+            if multiple and first_button:
                 style = ButtonStyle.primary
                 disabled = True
+                first_button = False
             elif deselected and item.custom_id == button_id:
                 style = ButtonStyle.secondary
             else:
@@ -188,22 +192,6 @@ def update_buttons(message, button_id: str, deselected: bool, multiple: bool) ->
             )
             view.add_item(button)
     return view
-
-
-async def update_button_rows(
-    context: dict, interaction: Interaction, selected_sets: dict
-) -> None:
-    channel = interaction.client.get_channel(interaction.channel_id)
-    # Iterates over all button rows to change button styles.
-    for message_id in context.get("message_ids", []):
-        view = context["views"].get(message_id)
-        if view:
-            update_buttons(view, selected_sets)
-            try:
-                message = await channel.fetch_message(message_id)
-                await message.edit(view=view)
-            except Exception as e:
-                print(f"Failed to update message {message_id}: {e}")
 
 
 def format_set(moveset: dict) -> str:
@@ -252,8 +240,14 @@ def format_set(moveset: dict) -> str:
     moves = []
     for slot in moveset.get("moveslots", []):
         if slot:
-            move = random.choice(slot)["move"]
-            moves.append(move)
+            available_moves = [move["move"] for move in slot]
+            selected_move = random.choice(available_moves)
+            moves.append(selected_move)
+            available_moves.remove(selected_move)
+            while selected_move in moves[:-1]:
+                selected_move = random.choice(available_moves)
+                moves[-1] = selected_move
+                available_moves.remove(selected_move)
     moves_str = "\n- " + "\n- ".join(moves)
     formatted_set = f"{name}{item_str}{ability_str}{level_str}{evs_str}{ivs_str}{tera_str}{nature_str}{moves_str}"
     return formatted_set.strip()
