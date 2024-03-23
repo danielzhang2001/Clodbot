@@ -115,21 +115,30 @@ class GiveSet:
         new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
         deselected = GiveSet.selected_states.get(interaction.message.id) == new_state
         pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
-
         if deselected:
             GiveSet.selected_states.pop(interaction.message.id, None)
-            GiveSet.selected_sets[interaction.message.id].pop(pokemon_state, None)
+            GiveSet.selected_sets[interaction.message.id].pop(pokemon_state)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             GiveSet.selected_states[interaction.message.id] = new_state
             GiveSet.selected_sets.setdefault(interaction.message.id, {})[
                 pokemon_state
             ] = set_data
-        set_data = "\n\n".join(
-            data
-            for message in GiveSet.selected_sets.values()
-            for _, data in message.items()
-        )
+        print(f"SELECTED SETS:\n{GiveSet.selected_sets}")
+        current_selected_sets = GiveSet.selected_sets.get(interaction.message.id, {})
+
+        # Initialize an empty list to hold the set data strings
+        set_data_list = []
+
+        # Iterate through each pokemon_state's set info in the current selected sets
+        print(f"current_selected_sets.items(): {current_selected_sets}")
+        for _, set_info in current_selected_sets.items():
+            print(f"SET INFO:\n{set_info}")  # Print the set info for debugging
+            set_data_list.append(set_info)
+
+        # Join the set data strings from the list into a single string with "\n\n" separator
+        set_data = "\n\n".join(set_data_list)
+        print(f"SET DATA:\n{set_data}")
         first_row = GiveSet.first_row.get(interaction.channel.id)
         first_message = await interaction.channel.fetch_message(first_row)
         selected_row = await interaction.channel.fetch_message(interaction.message.id)

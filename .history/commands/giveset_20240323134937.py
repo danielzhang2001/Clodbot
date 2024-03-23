@@ -127,9 +127,10 @@ class GiveSet:
             ] = set_data
         set_data = "\n\n".join(
             data
-            for message in GiveSet.selected_sets.values()
-            for _, data in message.items()
+            for message_sets in GiveSet.selected_sets.values()
+            for _, data in message_sets.items()
         )
+
         first_row = GiveSet.first_row.get(interaction.channel.id)
         first_message = await interaction.channel.fetch_message(first_row)
         selected_row = await interaction.channel.fetch_message(interaction.message.id)

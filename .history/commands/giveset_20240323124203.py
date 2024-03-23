@@ -118,7 +118,8 @@ class GiveSet:
 
         if deselected:
             GiveSet.selected_states.pop(interaction.message.id, None)
-            GiveSet.selected_sets[interaction.message.id].pop(pokemon_state, None)
+            if pokemon_state in GiveSet.selected_sets.get(interaction.message.id, {}):
+                GiveSet.selected_sets[interaction.message.id].pop(pokemon_state)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             GiveSet.selected_states[interaction.message.id] = new_state
@@ -127,8 +128,7 @@ class GiveSet:
             ] = set_data
         set_data = "\n\n".join(
             data
-            for message in GiveSet.selected_sets.values()
-            for _, data in message.items()
+            for _, data in GiveSet.selected_sets.get(interaction.message.id, {}).items()
         )
         first_row = GiveSet.first_row.get(interaction.channel.id)
         first_message = await interaction.channel.fetch_message(first_row)
