@@ -5,7 +5,7 @@ The function to give Pokemon sets from Smogon based on different types of criter
 import uuid
 import asyncio
 import random
-import requests
+import aiohttp
 from smogon.set import *
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
@@ -23,13 +23,15 @@ class GiveSet:
     first_row = {}
 
     @staticmethod
-    def fetch_all_pokemon() -> List[str]:
+    async def fetch_all_pokemon() -> List[str]:
         # Retrieves a list of all Pokemon using PokeAPI.
         url = "https://pokeapi.co/api/v2/pokemon-species?limit=10000"
-        response = requests.get(url)
-        data = response.json()
-        pokemon_names = [species["name"] for species in data["results"]]
-        return pokemon_names
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    pokemon_names = [species["name"] for species in data["results"]]
+                    return pokemon_names
 
     @staticmethod
     async def fetch_set(
@@ -40,20 +42,23 @@ class GiveSet:
     ) -> str:
         # Fetches and displays set data based on Pokemon, Generation, Format and Set names given.
         if not generation:
-            generation = get_latest_gen(pokemon)
+            generation = await get_latest_gen(pokemon)
         gen_value = get_gen(generation)
         url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            if not format:
-                format = get_first_format(pokemon, generation)
-            for strategy in data.get("strategies", []):
-                if strategy["format"].lower() == format.replace("-", " ").lower():
-                    for moveset in strategy.get("movesets", []):
-                        if moveset["name"].lower() == set_name.lower():
-                            return format_set(moveset)
-        return "Set not found."
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if not format:
+                        format = await get_first_format(pokemon, generation)
+                    for strategy in data.get("strategies", []):
+                        if (
+                            strategy["format"].lower()
+                            == format.replace("-", " ").lower()
+                        ):
+                            for moveset in strategy.get("movesets", []):
+                                if moveset["name"].lower() == set_name.lower():
+                                    return format_set(moveset)
 
     @staticmethod
     async def set_prompt(
@@ -83,7 +88,7 @@ class GiveSet:
                 request["generation"],
                 request["format"],
             )
-            set_names = get_set_names(pokemon, generation, format)
+            set_names = await get_set_names(pokemon, generation, format)
             if len(requests) > 1:
                 view.add_item(
                     Button(
@@ -153,7 +158,7 @@ class GiveSet:
                     "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
                 )
                 return
-        pokemon = GiveSet.fetch_all_pokemon()
+        pokemon = await GiveSet.fetch_all_pokemon()
         loop = asyncio.get_event_loop()
         formatted_sets = []
         while len(formatted_sets) < num:
@@ -173,13 +178,13 @@ class GiveSet:
     @staticmethod
     async def fetch_randomset_async(pokemon: str) -> Optional[str]:
         # Helper function for fetching random sets asynchronously to save time.
-        random_gen = get_random_gen(pokemon)
+        random_gen = await get_random_gen(pokemon)
         if not random_gen:
             return None
-        random_format = get_random_format(pokemon, random_gen)
+        random_format = await get_random_format(pokemon, random_gen)
         if not random_format:
             return None
-        random_set = get_random_set(pokemon, random_gen, random_format)
+        random_set = await get_random_set(pokemon, random_gen, random_format)
         if not random_set:
             return None
         formatted_set = await GiveSet.fetch_set(
