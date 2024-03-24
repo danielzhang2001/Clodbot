@@ -42,15 +42,15 @@ class GiveSet:
     ) -> str:
         # Fetches and displays set data based on Pokemon, Generation, Format and Set names given.
         if not generation:
-            generation = await get_latest_gen(pokemon)
+            generation = get_latest_gen(pokemon)
         gen_value = get_gen(generation)
         url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
-                if response.status == 200:
+                if response.status_code == 200:
                     data = await response.json()
                     if not format:
-                        format = await get_first_format(pokemon, generation)
+                        format = get_first_format(pokemon, generation)
                     for strategy in data.get("strategies", []):
                         if (
                             strategy["format"].lower()
@@ -88,7 +88,7 @@ class GiveSet:
                 request["generation"],
                 request["format"],
             )
-            set_names = await get_set_names(pokemon, generation, format)
+            set_names = get_set_names(pokemon, generation, format)
             if len(requests) > 1:
                 view.add_item(
                     Button(
@@ -178,13 +178,13 @@ class GiveSet:
     @staticmethod
     async def fetch_randomset_async(pokemon: str) -> Optional[str]:
         # Helper function for fetching random sets asynchronously to save time.
-        random_gen = await get_random_gen(pokemon)
+        random_gen = get_random_gen(pokemon)
         if not random_gen:
             return None
-        random_format = await get_random_format(pokemon, random_gen)
+        random_format = get_random_format(pokemon, random_gen)
         if not random_format:
             return None
-        random_set = await get_random_set(pokemon, random_gen, random_format)
+        random_set = get_random_set(pokemon, random_gen, random_format)
         if not random_set:
             return None
         formatted_set = await GiveSet.fetch_set(

@@ -74,13 +74,13 @@ async def get_random_gen(pokemon: str) -> Optional[str]:
     async with aiohttp.ClientSession() as session:
         for gen_code in generations:
             async with session.get(url.format(gen_code, pokemon.lower())) as response:
-                if response.status == 200:
+                if response.status_code == 200:
                     data = await response.json()
                     if data.get("strategies"):
                         gen_key = [
                             key for key, value in gen_dict.items() if value == gen_code
                         ][0]
-                        return gen_key
+                    return gen_key
     return None
 
 
@@ -90,7 +90,7 @@ async def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-            if response.status == 200:
+            if response.status_code == 200:
                 data = await response.json()
                 strategies = data.get("strategies", [])
                 formats = [

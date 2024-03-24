@@ -42,7 +42,7 @@ async def get_latest_gen(pokemon: str) -> Optional[str]:
         for gen_value in generations:
             async with session.get(url.format(gen_value, pokemon.lower())) as response:
                 if response.status == 200:
-                    data = await response.json()
+                    data = response.json()
                     if data.get("strategies"):
                         gen_key = [
                             key for key, value in gen_dict.items() if value == gen_value
@@ -58,14 +58,14 @@ async def get_first_format(pokemon: str, generation: str) -> Optional[str]:
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
-                data = await response.json()
+                data = response.json()
                 strategies = data.get("strategies", [])
                 if strategies:
                     return strategies[0]["format"]
     return None
 
 
-async def get_random_gen(pokemon: str) -> Optional[str]:
+def get_random_gen(pokemon: str) -> Optional[str]:
     # Returns a random eligible gen using the Smogon API given a Pokemon.
     gen_dict = get_gen_dict()
     generations = list(gen_dict.values())
@@ -74,24 +74,24 @@ async def get_random_gen(pokemon: str) -> Optional[str]:
     async with aiohttp.ClientSession() as session:
         for gen_code in generations:
             async with session.get(url.format(gen_code, pokemon.lower())) as response:
-                if response.status == 200:
-                    data = await response.json()
+                if response.status_code == 200:
+                    data = response.json()
                     if data.get("strategies"):
                         gen_key = [
                             key for key, value in gen_dict.items() if value == gen_code
                         ][0]
-                        return gen_key
+                    return gen_key
     return None
 
 
-async def get_random_format(pokemon: str, generation: str) -> Optional[str]:
+def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
     gen_value = get_gen(generation)
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-            if response.status == 200:
-                data = await response.json()
+            if response.status_code == 200:
+                data = response.json()
                 strategies = data.get("strategies", [])
                 formats = [
                     strategy["format"]
@@ -103,47 +103,45 @@ async def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     return None
 
 
-async def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
+def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
     # Returns a random eligible set name using the Smogon API given a Pokemon, Generation and Format.
     gen_value = get_gen(generation)
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                data = await response.json()
-                for strategy in data.get("strategies", []):
-                    if strategy.get("format") == format:
-                        if strategy.get("movesets"):
-                            set_names = [
-                                moveset["name"] for moveset in strategy["movesets"]
-                            ]
-                            return random.choice(set_names)
-    return None
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        for strategy in data.get("strategies", []):
+            if strategy.get("format") == format:
+                if strategy.get("movesets"):
+                    set_names = [moveset["name"] for moveset in strategy["movesets"]]
+                    return random.choice(set_names)
+    else:
+        return None
 
 
-async def get_set_names(
+def get_set_names(
     pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
 ) -> Optional[List[str]]:
     if not generation:
-        generation = await get_latest_gen(pokemon)
+        generation = get_latest_gen(pokemon)
     gen_value = get_gen(generation)
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                data = await response.json()
-                set_names = []
-                if not format:
-                    format = await get_first_format(pokemon, generation)
-                for strategy in data.get("strategies", []):
-                    if (
-                        strategy["format"].replace(" ", "-").lower()
-                        == format.replace(" ", "-").lower()
-                    ):
-                        for moveset in strategy.get("movesets", []):
-                            set_names.append(moveset["name"])
-                return set_names
-    return None
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        set_names = []
+        if not format:
+            format = get_first_format(pokemon, generation)
+        for strategy in data.get("strategies", []):
+            if (
+                strategy["format"].replace(" ", "-").lower()
+                == format.replace(" ", "-").lower()
+            ):
+                for moveset in strategy.get("movesets", []):
+                    set_names.append(moveset["name"])
+        return set_names
+    else:
+        return None
 
 
 def format_name(pokemon: str) -> str:
@@ -155,6 +153,37 @@ def format_name(pokemon: str) -> str:
         else:
             formatted_parts.append(part.lower())
     return "-".join(formatted_parts)
+
+
+def update_buttons(
+    message: Message, button_id: str, deselected: bool, multiple: bool
+) -> None:
+    # Update the coloring of the buttons when a button is selected or deselected.
+    view = ui.View()
+    first_button = True
+    for component in message.components:
+        for item in component.children:
+            disabled = False
+            if multiple and first_button:
+                style = ButtonStyle.primary
+                disabled = True
+                first_button = False
+            elif deselected and item.custom_id == button_id:
+                style = ButtonStyle.secondary
+            else:
+                style = (
+                    ButtonStyle.success
+                    if item.custom_id == button_id
+                    else ButtonStyle.secondary
+                )
+            button = ui.Button(
+                style=style,
+                label=item.label,
+                custom_id=item.custom_id,
+                disabled=disabled,
+            )
+            view.add_item(button)
+    return view
 
 
 def format_set(moveset: dict) -> str:
@@ -214,34 +243,3 @@ def format_set(moveset: dict) -> str:
     moves_str = "\n- " + "\n- ".join(moves)
     formatted_set = f"{name}{item_str}{ability_str}{level_str}{evs_str}{ivs_str}{tera_str}{nature_str}{moves_str}"
     return formatted_set.strip()
-
-
-def update_buttons(
-    message: Message, button_id: str, deselected: bool, multiple: bool
-) -> None:
-    # Update the coloring of the buttons when a button is selected or deselected.
-    view = ui.View()
-    first_button = True
-    for component in message.components:
-        for item in component.children:
-            disabled = False
-            if multiple and first_button:
-                style = ButtonStyle.primary
-                disabled = True
-                first_button = False
-            elif deselected and item.custom_id == button_id:
-                style = ButtonStyle.secondary
-            else:
-                style = (
-                    ButtonStyle.success
-                    if item.custom_id == button_id
-                    else ButtonStyle.secondary
-                )
-            button = ui.Button(
-                style=style,
-                label=item.label,
-                custom_id=item.custom_id,
-                disabled=disabled,
-            )
-            view.add_item(button)
-    return view

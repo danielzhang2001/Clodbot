@@ -47,7 +47,7 @@ class GiveSet:
         url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
-                if response.status == 200:
+                if response.status_code == 200:
                     data = await response.json()
                     if not format:
                         format = await get_first_format(pokemon, generation)

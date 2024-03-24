@@ -80,7 +80,7 @@ async def get_random_gen(pokemon: str) -> Optional[str]:
                         gen_key = [
                             key for key, value in gen_dict.items() if value == gen_code
                         ][0]
-                        return gen_key
+                    return gen_key
     return None
 
 
