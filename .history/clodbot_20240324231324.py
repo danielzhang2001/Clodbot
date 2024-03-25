@@ -49,10 +49,10 @@ async def on_interaction(interaction):
     if interaction.type == discord.InteractionType.component:
         custom_id = interaction.data["custom_id"]
         parts = custom_id.split("_")
-        pokemon = parts[1]
-        generation = parts[2] if parts[2] != "none" else None
-        format = parts[3] if parts[3] != "none" else None
-        set_name = parts[4]
+        pokemon = parts[0]
+        generation = parts[1] if parts[1] != "none" else None
+        format = parts[2] if parts[2] != "none" else None
+        set_name = parts[3]
         await interaction.response.defer()
         await GiveSet.set_selection(interaction, set_name, pokemon, generation, format)
 
@@ -71,6 +71,8 @@ async def analyze_replay(ctx, *args):
 @bot.command(name="giveset")
 async def give_set(ctx, *args):
     # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided, or gives a random set.
+    GiveSet.selected_sets[ctx.channel.id] = {}
+    GiveSet.selected_states[ctx.channel.id] = {}
     input_str = " ".join(args).strip()
     requests = []
     if input_str.startswith("random"):

@@ -119,9 +119,7 @@ class GiveSet:
         key = parts[0]
         request_count = int(parts[-1])
         state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
-        deselected = False
-        if state in GiveSet.selected_states.get(key, []):
-            deselected = True
+        deselected = GiveSet.selected_states.get(key) == state
         if deselected:
             GiveSet.selected_states.pop(key, None)
             GiveSet.selected_sets[key].pop(state)

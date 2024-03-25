@@ -119,9 +119,7 @@ class GiveSet:
         key = parts[0]
         request_count = int(parts[-1])
         state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
-        deselected = False
-        if state in GiveSet.selected_states.get(key, []):
-            deselected = True
+        deselected = GiveSet.selected_states.get(key) == state
         if deselected:
             GiveSet.selected_states.pop(key, None)
             GiveSet.selected_sets[key].pop(state)
@@ -129,17 +127,23 @@ class GiveSet:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
             GiveSet.selected_states.setdefault(key, [])
+            # Find and replace the state if it exists, otherwise append
             state_found = False
-            for i, state in enumerate(GiveSet.selected_states[key]):
-                existing_state = "_".join(state.split("_")[:3])
-                if existing_state == pokemon_state:
+            for i, existing_state in enumerate(GiveSet.selected_states[key]):
+                existing_pokemon_state = "_".join(existing_state.split("_")[:3])
+                if existing_pokemon_state == pokemon_state:
                     GiveSet.selected_states[key][i] = f"{pokemon_state}_{set_name}"
                     state_found = True
                     break
+
             if not state_found:
-                GiveSet.selected_states[key].append(f"{state}")
+                GiveSet.selected_states[key].append(f"{pokemon_state}_{set_name}")
+
+            # Update the selected_sets with the new set data
             GiveSet.selected_sets.setdefault(key, {})
             GiveSet.selected_sets[key][pokemon_state] = [set_data]
+            GiveSet.selected_states[key] = state
+            GiveSet.selected_sets.setdefault(key, {})[state] = [set_data]
         set_data = "\n\n".join(
             "\n\n".join(data for data in sets)
             for sets in GiveSet.selected_sets.get(key, {}).values()
