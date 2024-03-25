@@ -65,6 +65,7 @@ class GiveSet:
         ctx: commands.Context, requests: List[Dict[str, Optional[str]]]
     ) -> None:
         # Displays prompt with buttons for selection of Pokemon sets.
+        key = str(uuid.uuid4())
         prompt = "Please select a set type for "
         for index, request in enumerate(requests):
             view = View()
@@ -98,14 +99,12 @@ class GiveSet:
                     )
                 )
             for set_name in set_names:
-                btn_id = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
+                btn_id = f"{key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
                 button = Button(label=set_name, custom_id=btn_id)
                 view.add_item(button)
+            message = await ctx.send(view=view)
             if index == 0:
-                first_row = await ctx.send(view=view)
-                GiveSet.first_row[ctx.channel.id] = first_row.id
-            else:
-                await ctx.send(view=view)
+                GiveSet.first_row[key] = message.id
 
     @staticmethod
     async def set_selection(
@@ -116,32 +115,42 @@ class GiveSet:
         format: Optional[str] = None,
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
-        request_count = int(interaction.data["custom_id"].split("_")[-1])
-        new_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
-        deselected = GiveSet.selected_states.get(interaction.message.id) == new_state
-        pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
-
+        parts = interaction.data["custom_id"].split("_")
+        key = parts[0]
+        request_count = int(parts[-1])
+        state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+        deselected = False
+        if state in GiveSet.selected_states.get(key, []):
+            deselected = True
         if deselected:
-            GiveSet.selected_states.pop(interaction.message.id, None)
-            GiveSet.selected_sets[interaction.message.id].pop(pokemon_state, None)
+            GiveSet.selected_states.pop(key, None)
+            GiveSet.selected_sets[key].pop(state)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            GiveSet.selected_states[interaction.message.id] = new_state
-            GiveSet.selected_sets.setdefault(interaction.message.id, {})[
-                pokemon_state
-            ] = set_data
+            pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
+            GiveSet.selected_states.setdefault(key, [])
+            state_found = False
+            for i, state in enumerate(GiveSet.selected_states[key]):
+                existing_state = "_".join(state.split("_")[:3])
+                if existing_state == pokemon_state:
+                    GiveSet.selected_states[key][i] = f"{pokemon_state}_{set_name}"
+                    state_found = True
+                    break
+            if not state_found:
+                GiveSet.selected_states[key].append(f"{state}")
+            GiveSet.selected_sets.setdefault(key, {})
+            GiveSet.selected_sets[key][pokemon_state] = [set_data]
         set_data = "\n\n".join(
-            data
-            for message in GiveSet.selected_sets.values()
-            for _, data in message.items()
+            "\n\n".join(data for data in sets)
+            for sets in GiveSet.selected_sets.get(key, {}).values()
         )
-        first_row = GiveSet.first_row.get(interaction.channel.id)
+        first_row = GiveSet.first_row.get(key)
         first_message = await interaction.channel.fetch_message(first_row)
         selected_row = await interaction.channel.fetch_message(interaction.message.id)
         updated_view = update_buttons(
             selected_row, interaction.data["custom_id"], deselected, request_count > 1
         )
-        updated_content = f"```{set_data}```" if set_data else ""
+        updated_content = f"```\n{set_data}```\n" if set_data else ""
         await selected_row.edit(view=updated_view)
         await first_message.edit(content=updated_content)
 
