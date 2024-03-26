@@ -122,14 +122,16 @@ class GiveSet:
         pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
         deselected = state in GiveSet.selected_states.get(key, [])
         if deselected:
+            print(f"DESELECTED!")
             GiveSet.selected_states[key].remove(state)
             GiveSet.selected_sets[key].pop(pokemon_state)
         else:
+            print(f"SELECTED!")
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             GiveSet.selected_states.setdefault(key, [])
             state_found = False
-            for i, selected in enumerate(GiveSet.selected_states[key]):
-                existing_state = "_".join(selected.split("_")[:3])
+            for i, state in enumerate(GiveSet.selected_states[key]):
+                existing_state = "_".join(state.split("_")[:3])
                 if existing_state == pokemon_state:
                     GiveSet.selected_states[key][i] = f"{pokemon_state}_{set_name}"
                     state_found = True
