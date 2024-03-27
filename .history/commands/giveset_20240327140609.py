@@ -57,10 +57,7 @@ class GiveSet:
                             == format.replace("-", " ").lower()
                         ):
                             for moveset in strategy.get("movesets", []):
-                                if (
-                                    moveset["name"].lower().replace(" ", "")
-                                    == set_name.lower()
-                                ):
+                                if moveset["name"].lower() == set_name.lower():
                                     return format_set(moveset)
 
     @staticmethod
@@ -139,9 +136,11 @@ class GiveSet:
                     state_found = True
                     break
             if not state_found:
+                print(f"STATE IS NOT FOUND, WHY? STATE IS CURRENTLY {state}")
                 GiveSet.selected_states[key].append(f"{state}")
             GiveSet.selected_sets.setdefault(key, {})
             GiveSet.selected_sets[key][pokemon_state] = [set_data]
+        print(f"SELECTED SET: {GiveSet.selected_sets.get(key)}")
         set_data = "\n\n".join(
             "\n\n".join(data for data in sets)
             for sets in GiveSet.selected_sets.get(key, {}).values()

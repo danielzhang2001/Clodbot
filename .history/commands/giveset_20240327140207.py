@@ -57,10 +57,7 @@ class GiveSet:
                             == format.replace("-", " ").lower()
                         ):
                             for moveset in strategy.get("movesets", []):
-                                if (
-                                    moveset["name"].lower().replace(" ", "")
-                                    == set_name.lower()
-                                ):
+                                if moveset["name"].lower() == set_name.lower():
                                     return format_set(moveset)
 
     @staticmethod

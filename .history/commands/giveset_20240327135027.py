@@ -57,10 +57,7 @@ class GiveSet:
                             == format.replace("-", " ").lower()
                         ):
                             for moveset in strategy.get("movesets", []):
-                                if (
-                                    moveset["name"].lower().replace(" ", "")
-                                    == set_name.lower()
-                                ):
+                                if moveset["name"].lower() == set_name.lower():
                                     return format_set(moveset)
 
     @staticmethod
@@ -76,9 +73,10 @@ class GiveSet:
         else:
             request = requests[0]
             pokemon = request["pokemon"]
-            generation = (get_gen(request.get("generation")) or "none").upper()
-            format = (request.get("format", "none") or "none").upper()
-            prompt += f"**{pokemon.upper()}{f' {generation}' if generation != 'NONE' else ''}{f' {format}' if format != 'NONE' else ''}**"
+            generation = request.get("generation", "none")
+            format = request.get("format", "none").upper()
+            gen_code = (get_gen(generation) or "").upper()
+            prompt += f"**{pokemon.upper()}{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}**"
         prompt += ":"
         await ctx.send(prompt)
         tasks = [
@@ -103,7 +101,6 @@ class GiveSet:
                 )
             for set_name in set_names:
                 btn_id = f"{key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
-                btn_id = btn_id.replace(" ", "")
                 button = Button(label=set_name, custom_id=btn_id)
                 view.add_item(button)
             message = await ctx.send(view=view)

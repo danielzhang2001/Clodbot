@@ -57,10 +57,7 @@ class GiveSet:
                             == format.replace("-", " ").lower()
                         ):
                             for moveset in strategy.get("movesets", []):
-                                if (
-                                    moveset["name"].lower().replace(" ", "")
-                                    == set_name.lower()
-                                ):
+                                if moveset["name"].lower() == set_name.lower():
                                     return format_set(moveset)
 
     @staticmethod
@@ -69,30 +66,34 @@ class GiveSet:
     ) -> None:
         # Displays prompt with buttons for selection of Pokemon sets.
         key = str(uuid.uuid4())
-        request_count = len(requests)
         prompt = "Please select a set type for "
-        if request_count > 1:
-            prompt += "the following Pokemon"
-        else:
-            request = requests[0]
-            pokemon = request["pokemon"]
-            generation = (get_gen(request.get("generation")) or "none").upper()
-            format = (request.get("format", "none") or "none").upper()
-            prompt += f"**{pokemon.upper()}{f' {generation}' if generation != 'NONE' else ''}{f' {format}' if format != 'NONE' else ''}**"
-        prompt += ":"
-        await ctx.send(prompt)
         tasks = [
-            get_set_names(req["pokemon"], req["generation"], req["format"])
+            GiveSet.fetch_set_names(req["pokemon"], req["generation"], req["format"])
             for req in requests
         ]
-        results = await asyncio.gather(*tasks)
-        for index, (request, set_names) in enumerate(zip(requests, results)):
+        for index, request in enumerate(requests):
             view = View()
             pokemon, generation, format = (
                 request["pokemon"],
-                request.get("generation", "none"),
-                request.get("format", "none"),
+                request["generation"],
+                request["format"],
             )
+            gen_code = get_gen(generation).upper() if get_gen(generation) else ""
+            format = format.upper() if format else ""
+            if index > 0:
+                prompt += ", "
+            prompt += f"**{pokemon.upper()}{f' {gen_code}' if gen_code else ''}{f' {format}' if format else ''}**"
+        prompt += ":"
+        await ctx.send(prompt)
+        request_count = len(requests)
+        for index, request in enumerate(requests):
+            view = View()
+            pokemon, generation, format = (
+                request["pokemon"],
+                request["generation"],
+                request["format"],
+            )
+            set_names = await get_set_names(pokemon, generation, format)
             if len(requests) > 1:
                 view.add_item(
                     Button(
@@ -103,7 +104,6 @@ class GiveSet:
                 )
             for set_name in set_names:
                 btn_id = f"{key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
-                btn_id = btn_id.replace(" ", "")
                 button = Button(label=set_name, custom_id=btn_id)
                 view.add_item(button)
             message = await ctx.send(view=view)
