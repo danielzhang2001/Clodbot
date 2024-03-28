@@ -87,25 +87,7 @@ class GiveSet:
         ]
         results = await asyncio.gather(*tasks)
         for index, (request, set_names) in enumerate(zip(requests, results)):
-            view = View()
-            pokemon, generation, format = (
-                request["pokemon"],
-                request.get("generation", "none"),
-                request.get("format", "none"),
-            )
-            if len(requests) > 1:
-                view.add_item(
-                    Button(
-                        label=pokemon.upper() + ":",
-                        style=ButtonStyle.primary,
-                        disabled=True,
-                    )
-                )
-            for set_name in set_names:
-                btn_id = f"{key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}"
-                btn_id = btn_id.replace(" ", "")
-                button = Button(label=set_name, custom_id=btn_id)
-                view.add_item(button)
+            view = get_view(key, request, set_names, request_count)
             message = await ctx.send(view=view)
             if index == 0:
                 GiveSet.first_row[key] = message.id
