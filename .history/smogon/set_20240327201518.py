@@ -5,8 +5,7 @@ General functions in scraping Pokemon Smogon sets.
 import asyncio
 import aiohttp
 import random
-from discord import ButtonStyle, Interaction, Message
-from discord.ui import Button, View
+from discord import ui, ButtonStyle, Interaction, Message
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
@@ -125,7 +124,6 @@ async def get_random_set(pokemon: str, generation: str, format: str) -> Optional
 async def get_set_names(
     pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
 ) -> Optional[List[str]]:
-    # Returns all set names associated with the Pokemon, Generation and Format provided. If no Generation, assumed to be latest one, and if no Format, assumed to be first one.
     if not generation:
         generation = await get_latest_gen(pokemon)
     gen_value = get_gen(generation)
@@ -148,30 +146,22 @@ async def get_set_names(
     return None
 
 
-def get_view(
+def create_view(
     key: str,
     request: Dict[str, Optional[str]],
     set_names: List[str],
     request_count: int,
 ) -> View:
-    # Returns the view with a set of buttons for each Pokemon request.
     view = View()
-    pokemon, generation, format_code = (
+    pokemon, generation, format = (
         request["pokemon"],
         request.get("generation", "none"),
         request.get("format", "none"),
     )
-    if request_count > 1:
-        view.add_item(
-            Button(
-                label=pokemon.upper() + ":", style=ButtonStyle.primary, disabled=True
-            )
-        )
     for set_name in set_names:
-        btn_id = f"{key}_{pokemon}_{generation or 'none'}_{format_code or 'none'}_{set_name}_{request_count}".replace(
-            " ", ""
-        )
-        view.add_item(Button(label=set_name, custom_id=btn_id))
+        btn_id = f"{key}_{pokemon}_{generation}_{format}_{set_name.replace(' ', '')}_{request_count}"
+        button = Button(label=set_name, custom_id=btn_id.replace(" ", ""))
+        view.add_item(button)
     return view
 
 
@@ -249,7 +239,7 @@ def update_buttons(
     message: Message, button_id: str, deselected: bool, multiple: bool
 ) -> None:
     # Update the coloring of the buttons when a button is selected or deselected.
-    view = View()
+    view = ui.View()
     first_button = True
     for component in message.components:
         for item in component.children:
@@ -266,7 +256,7 @@ def update_buttons(
                     if item.custom_id == button_id
                     else ButtonStyle.secondary
                 )
-            button = Button(
+            button = ui.Button(
                 style=style,
                 label=item.label,
                 custom_id=item.custom_id,

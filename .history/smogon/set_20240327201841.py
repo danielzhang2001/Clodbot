@@ -156,22 +156,15 @@ def get_view(
 ) -> View:
     # Returns the view with a set of buttons for each Pokemon request.
     view = View()
-    pokemon, generation, format_code = (
+    pokemon, generation, format = (
         request["pokemon"],
         request.get("generation", "none"),
         request.get("format", "none"),
     )
-    if request_count > 1:
-        view.add_item(
-            Button(
-                label=pokemon.upper() + ":", style=ButtonStyle.primary, disabled=True
-            )
-        )
     for set_name in set_names:
-        btn_id = f"{key}_{pokemon}_{generation or 'none'}_{format_code or 'none'}_{set_name}_{request_count}".replace(
-            " ", ""
-        )
-        view.add_item(Button(label=set_name, custom_id=btn_id))
+        btn_id = f"{key}_{pokemon}_{generation}_{format}_{set_name.replace(' ', '')}_{request_count}"
+        button = Button(label=set_name, custom_id=btn_id.replace(" ", ""))
+        view.add_item(button)
     return view
 
 

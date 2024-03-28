@@ -172,7 +172,7 @@ def get_view(
             " ", ""
         )
         view.add_item(Button(label=set_name, custom_id=btn_id))
-    return view
+        return view
 
 
 def format_name(pokemon: str) -> str:

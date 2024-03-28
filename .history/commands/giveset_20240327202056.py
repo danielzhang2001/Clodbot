@@ -87,7 +87,9 @@ class GiveSet:
         ]
         results = await asyncio.gather(*tasks)
         for index, (request, set_names) in enumerate(zip(requests, results)):
-            view = get_view(key, request, set_names, request_count)
+            view = GiveSet.create_view_for_pokemon(
+                key, request, set_names, request_count
+            )
             message = await ctx.send(view=view)
             if index == 0:
                 GiveSet.first_row[key] = message.id
