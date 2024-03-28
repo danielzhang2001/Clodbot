@@ -31,7 +31,12 @@ def get_gen(generation: str) -> Optional[str]:
     # Returns the generation value from the dictionary with the given Generation.
     if generation is None:
         return None
-    return get_gen_dict().get(generation.lower())
+    gen_dict = get_gen_dict()
+    if generation.lower() in gen_dict:
+        return gen_dict[generation.lower()]
+    if generation in gen_dict.values():
+        return generation.lower()
+    return None
 
 
 async def get_latest_gen(pokemon: str) -> Optional[str]:
