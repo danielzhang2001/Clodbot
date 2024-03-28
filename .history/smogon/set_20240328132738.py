@@ -35,7 +35,7 @@ def get_gen(generation: str) -> Optional[str]:
     if generation.lower() in gen_dict:
         return gen_dict[generation.lower()]
     if generation in gen_dict.values():
-        return generation.lower()
+        return generation
     return None
 
 
