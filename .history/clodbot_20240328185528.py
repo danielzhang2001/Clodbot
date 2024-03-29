@@ -23,11 +23,19 @@ intents.typing = False
 intents.presences = False
 intents.message_content = True
 
-bot = commands.Bot(
-    command_prefix=["clodbot, ", "Clodbot, "],
-    intents=intents,
-    case_insensitive=True,
-)
+bot = commands.Bot(command_prefix=custom_prefix, intents=intents, case_insensitive=True)
+
+gen_dict = {
+    "gen1": "rb",
+    "gen2": "gs",
+    "gen3": "rs",
+    "gen4": "dp",
+    "gen5": "bw",
+    "gen6": "xy",
+    "gen7": "sm",
+    "gen8": "ss",
+    "gen9": "sv",
+}
 
 
 @bot.event

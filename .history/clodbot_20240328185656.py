@@ -23,11 +23,30 @@ intents.typing = False
 intents.presences = False
 intents.message_content = True
 
-bot = commands.Bot(
-    command_prefix=["clodbot, ", "Clodbot, "],
-    intents=intents,
-    case_insensitive=True,
-)
+
+def custom_prefix(bot, message):
+    # Define the prefix in a case-insensitive manner
+    prefix = "clodbot, "
+    # Check if the message starts with the prefix, case-insensitively
+    if message.content.lower().startswith(prefix):
+        return prefix
+    # Fallback to the default prefix if the check fails
+    return "Clodbot, "
+
+
+bot = commands.Bot(command_prefix=custom_prefix, intents=intents, case_insensitive=True)
+
+gen_dict = {
+    "gen1": "rb",
+    "gen2": "gs",
+    "gen3": "rs",
+    "gen4": "dp",
+    "gen5": "bw",
+    "gen6": "xy",
+    "gen7": "sm",
+    "gen8": "ss",
+    "gen9": "sv",
+}
 
 
 @bot.event

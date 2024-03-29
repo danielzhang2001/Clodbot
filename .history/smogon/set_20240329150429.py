@@ -37,7 +37,7 @@ def get_gen(generation: str) -> Optional[str]:
     gen_dict = get_gen_dict()
     if generation.lower() in gen_dict:
         return gen_dict[generation.lower()]
-    if generation.lower() in gen_dict.values():
+    if generation in gen_dict.values():
         return generation.lower()
     return None
 
@@ -154,21 +154,6 @@ async def get_set_names(
                             set_names.append(moveset["name"])
                 return set_names
     return None
-
-
-def get_prompt(requests: List[Dict[str, Optional[str]]]) -> str:
-    # Returns the initial prompt for the Pokemon(s) specified.
-    prompt = "Please select a set type for "
-    if len(requests) > 1:
-        prompt += "the following Pokemon"
-    else:
-        request = requests[0]
-        pokemon = request["pokemon"]
-        generation = (get_gen(request.get("generation")) or "none").upper()
-        format = (request.get("format") or "none").upper()
-        prompt += f"**{pokemon.upper()}{f' {generation}' if generation != 'NONE' else ''}{f' {format}' if format != 'NONE' else ''}**"
-    prompt += ":"
-    return prompt
 
 
 def get_view(

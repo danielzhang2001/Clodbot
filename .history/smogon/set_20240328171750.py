@@ -37,7 +37,7 @@ def get_gen(generation: str) -> Optional[str]:
     gen_dict = get_gen_dict()
     if generation.lower() in gen_dict:
         return gen_dict[generation.lower()]
-    if generation.lower() in gen_dict.values():
+    if generation in gen_dict.values():
         return generation.lower()
     return None
 
@@ -156,21 +156,6 @@ async def get_set_names(
     return None
 
 
-def get_prompt(requests: List[Dict[str, Optional[str]]]) -> str:
-    # Returns the initial prompt for the Pokemon(s) specified.
-    prompt = "Please select a set type for "
-    if len(requests) > 1:
-        prompt += "the following Pokemon"
-    else:
-        request = requests[0]
-        pokemon = request["pokemon"]
-        generation = (get_gen(request.get("generation")) or "none").upper()
-        format = (request.get("format") or "none").upper()
-        prompt += f"**{pokemon.upper()}{f' {generation}' if generation != 'NONE' else ''}{f' {format}' if format != 'NONE' else ''}**"
-    prompt += ":"
-    return prompt
-
-
 def get_view(
     key: str,
     request: Dict[str, Optional[str]],
@@ -179,7 +164,7 @@ def get_view(
 ) -> View:
     # Returns the view with a set of buttons for each Pokemon request.
     view = View()
-    pokemon, generation, format = (
+    pokemon, generation, format_code = (
         request["pokemon"],
         request.get("generation", "none"),
         request.get("format", "none"),
@@ -187,26 +172,11 @@ def get_view(
     if request_count > 1:
         view.add_item(
             Button(
-                label=" ".join(
-                    [pokemon.upper()]
-                    + [
-                        generation.upper()
-                        for generation in [get_gen(request.get("generation")) or "none"]
-                        if generation != "none"
-                    ]
-                    + [
-                        format.upper()
-                        for format in [request.get("format") or "none"]
-                        if format != "none"
-                    ]
-                )
-                + ":",
-                style=ButtonStyle.primary,
-                disabled=True,
+                label=pokemon.upper() + ":", style=ButtonStyle.primary, disabled=True
             )
         )
     for set_name in set_names:
-        btn_id = f"{key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}".replace(
+        btn_id = f"{key}_{pokemon}_{generation or 'none'}_{format_code or 'none'}_{set_name}_{request_count}".replace(
             " ", ""
         )
         view.add_item(Button(label=set_name, custom_id=btn_id))
@@ -315,13 +285,12 @@ def update_buttons(
 
 
 async def remove_set(key, state, pokemon_state):
-    # Removes the set information from the selected sets and Pokemon information from the selected states.
+    # Removes the set information from the po
     selected_states[key].remove(state)
     selected_sets[key].pop(pokemon_state)
 
 
 async def add_set(key, set_data, set_name, pokemon, generation, format):
-    # Adds the set information to the selected sets and Pokemon information to the selected states.
     selected_states.setdefault(key, [])
     state_found = False
     pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"

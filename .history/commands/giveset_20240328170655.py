@@ -68,7 +68,16 @@ class GiveSet:
         # Displays prompt with buttons for selection of Pokemon sets.
         key = str(uuid.uuid4())
         request_count = len(requests)
-        prompt = get_prompt(requests)
+        prompt = "Please select a set type for "
+        if request_count > 1:
+            prompt += "the following Pokemon"
+        else:
+            request = requests[0]
+            pokemon = request["pokemon"]
+            generation = (get_gen(request.get("generation")) or "none").upper()
+            format = (request.get("format", "none") or "none").upper()
+            prompt += f"**{pokemon.upper()}{f' {generation}' if generation != 'NONE' else ''}{f' {format}' if format != 'NONE' else ''}**"
+        prompt += ":"
         await ctx.send(prompt)
         tasks = [
             get_set_names(req["pokemon"], req["generation"], req["format"])
@@ -99,8 +108,7 @@ class GiveSet:
         if deselected:
             await remove_set(key, state, pokemon_state)
         else:
-            set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            await add_set(key, set_data, set_name, pokemon, generation, format)
+            await add_set(key, set_name, pokemon, generation, format)
         set_data = "\n\n".join(
             "\n\n".join(data for data in sets)
             for sets in selected_sets.get(key, {}).values()

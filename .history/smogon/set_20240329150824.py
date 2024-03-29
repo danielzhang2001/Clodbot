@@ -37,7 +37,7 @@ def get_gen(generation: str) -> Optional[str]:
     gen_dict = get_gen_dict()
     if generation.lower() in gen_dict:
         return gen_dict[generation.lower()]
-    if generation.lower() in gen_dict.values():
+    if generation in gen_dict.values():
         return generation.lower()
     return None
 
@@ -156,10 +156,10 @@ async def get_set_names(
     return None
 
 
-def get_prompt(requests: List[Dict[str, Optional[str]]]) -> str:
+def get_prompt(requests: List[Dict[str, Optional[str]]], request_count: int) -> str:
     # Returns the initial prompt for the Pokemon(s) specified.
     prompt = "Please select a set type for "
-    if len(requests) > 1:
+    if request_count > 1:
         prompt += "the following Pokemon"
     else:
         request = requests[0]
@@ -175,7 +175,6 @@ def get_view(
     key: str,
     request: Dict[str, Optional[str]],
     set_names: List[str],
-    request_count: int,
 ) -> View:
     # Returns the view with a set of buttons for each Pokemon request.
     view = View()
@@ -184,7 +183,7 @@ def get_view(
         request.get("generation", "none"),
         request.get("format", "none"),
     )
-    if request_count > 1:
+    if len(request)request_count > 1:
         view.add_item(
             Button(
                 label=" ".join(

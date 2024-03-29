@@ -29,6 +29,18 @@ bot = commands.Bot(
     case_insensitive=True,
 )
 
+gen_dict = {
+    "gen1": "rb",
+    "gen2": "gs",
+    "gen3": "rs",
+    "gen4": "dp",
+    "gen5": "bw",
+    "gen6": "xy",
+    "gen7": "sm",
+    "gen8": "ss",
+    "gen9": "sv",
+}
+
 
 @bot.event
 async def on_ready():
