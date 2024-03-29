@@ -5,6 +5,7 @@ The main module for running ClodBot.
 # pylint: disable=import-error
 import os
 import discord  # type: ignore
+import re
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
 import aiohttp
@@ -22,19 +23,11 @@ intents.typing = False
 intents.presences = False
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="Clodbot, ", intents=intents)
-
-gen_dict = {
-    "gen1": "rb",
-    "gen2": "gs",
-    "gen3": "rs",
-    "gen4": "dp",
-    "gen5": "bw",
-    "gen6": "xy",
-    "gen7": "sm",
-    "gen8": "ss",
-    "gen9": "sv",
-}
+bot = commands.Bot(
+    command_prefix=["clodbot, ", "Clodbot, "],
+    intents=intents,
+    case_insensitive=True,
+)
 
 
 @bot.event

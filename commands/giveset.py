@@ -18,8 +18,6 @@ from typing import Optional, List, Dict, Tuple
 
 class GiveSet:
     awaiting_response = {}
-    selected_states = {}
-    selected_sets = {}
     first_row = {}
 
     @staticmethod
@@ -70,16 +68,7 @@ class GiveSet:
         # Displays prompt with buttons for selection of Pokemon sets.
         key = str(uuid.uuid4())
         request_count = len(requests)
-        prompt = "Please select a set type for "
-        if request_count > 1:
-            prompt += "the following Pokemon"
-        else:
-            request = requests[0]
-            pokemon = request["pokemon"]
-            generation = (get_gen(request.get("generation")) or "none").upper()
-            format = (request.get("format", "none") or "none").upper()
-            prompt += f"**{pokemon.upper()}{f' {generation}' if generation != 'NONE' else ''}{f' {format}' if format != 'NONE' else ''}**"
-        prompt += ":"
+        prompt = get_prompt(requests)
         await ctx.send(prompt)
         tasks = [
             get_set_names(req["pokemon"], req["generation"], req["format"])
@@ -106,27 +95,15 @@ class GiveSet:
         request_count = int(parts[-1])
         state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
         pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
-        deselected = state in GiveSet.selected_states.get(key, [])
+        deselected = state in selected_states.get(key, [])
         if deselected:
-            GiveSet.selected_states[key].remove(state)
-            GiveSet.selected_sets[key].pop(pokemon_state)
+            await remove_set(key, state, pokemon_state)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            GiveSet.selected_states.setdefault(key, [])
-            state_found = False
-            for i, selected in enumerate(GiveSet.selected_states[key]):
-                existing_state = "_".join(selected.split("_")[:3])
-                if existing_state == pokemon_state:
-                    GiveSet.selected_states[key][i] = f"{pokemon_state}_{set_name}"
-                    state_found = True
-                    break
-            if not state_found:
-                GiveSet.selected_states[key].append(f"{state}")
-            GiveSet.selected_sets.setdefault(key, {})
-            GiveSet.selected_sets[key][pokemon_state] = [set_data]
+            await add_set(key, set_data, set_name, pokemon, generation, format)
         set_data = "\n\n".join(
             "\n\n".join(data for data in sets)
-            for sets in GiveSet.selected_sets.get(key, {}).values()
+            for sets in selected_sets.get(key, {}).values()
         )
         first_row = GiveSet.first_row.get(key)
         first_message = await interaction.channel.fetch_message(first_row)
