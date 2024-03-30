@@ -62,60 +62,6 @@ class GiveSet:
                                     return format_set(moveset)
 
     @staticmethod
-    async def set_prompt(
-        ctx: commands.Context, requests: List[Dict[str, Optional[str]]]
-    ) -> None:
-        # Displays prompt with buttons for selection of Pokemon sets.
-        key = str(uuid.uuid4())
-        request_count = len(requests)
-        prompt = get_prompt(requests)
-        await ctx.send(prompt)
-        tasks = [
-            get_set_names(req["pokemon"], req["generation"], req["format"])
-            for req in requests
-        ]
-        results = await asyncio.gather(*tasks)
-        for index, (request, set_names) in enumerate(zip(requests, results)):
-            view = get_view(key, request, set_names, request_count)
-            message = await ctx.send(view=view)
-            if index == 0:
-                GiveSet.first_row[key] = message.id
-
-    @staticmethod
-    async def set_selection(
-        interaction,
-        set_name: str,
-        pokemon: str,
-        generation: Optional[str] = None,
-        format: Optional[str] = None,
-    ):
-        # Fetches and displays the appropriate set data when a button is clicked.
-        parts = interaction.data["custom_id"].split("_")
-        key = parts[0]
-        request_count = int(parts[-1])
-        state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
-        pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
-        deselected = state in selected_states.get(key, [])
-        if deselected:
-            await remove_set(key, state, pokemon_state)
-        else:
-            set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            await add_set(key, set_data, set_name, pokemon, generation, format)
-        set_data = "\n\n".join(
-            "\n\n".join(data for data in sets)
-            for sets in selected_sets.get(key, {}).values()
-        )
-        first_row = GiveSet.first_row.get(key)
-        first_message = await interaction.channel.fetch_message(first_row)
-        selected_row = await interaction.channel.fetch_message(interaction.message.id)
-        updated_view = update_buttons(
-            selected_row, interaction.data["custom_id"], deselected, request_count > 1
-        )
-        updated_content = f"```\n{set_data}```\n" if set_data else ""
-        await selected_row.edit(view=updated_view)
-        await first_message.edit(content=updated_content)
-
-    @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
         # Generates and displays random Pokemon sets with random eligible Generations and Formats.
         args_list = input_str.split()
@@ -161,3 +107,62 @@ class GiveSet:
             random_set, pokemon, random_gen, random_format
         )
         return formatted_set
+
+    @staticmethod
+    async def set_prompt(
+        ctx: commands.Context, requests: List[Dict[str, Optional[str]]]
+    ) -> None:
+        # Displays prompt with buttons for selection of Pokemon sets.
+        tasks = [
+            get_set_names(req["pokemon"], req["generation"], req["format"])
+            for req in requests
+        ]
+        results = await asyncio.gather(*tasks)
+        valid_requests, valid_results = await filter_requests(ctx, requests, results)
+        if not valid_requests:
+            return
+        key = str(uuid.uuid4())
+        request_count = len(valid_requests)
+        prompt = get_prompt(valid_requests)
+        await ctx.send(prompt)
+        for index, (request, set_names) in enumerate(
+            zip(valid_requests, valid_results)
+        ):
+            view = get_view(key, request, set_names, request_count)
+            message = await ctx.send(view=view)
+            if index == 0:
+                GiveSet.first_row[key] = message.id
+
+    @staticmethod
+    async def set_selection(
+        interaction,
+        set_name: str,
+        pokemon: str,
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
+    ):
+        # Fetches and displays the appropriate set data when a button is clicked.
+        parts = interaction.data["custom_id"].split("_")
+        key = parts[0]
+        request_count = int(parts[-1])
+        state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+        pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
+        deselected = state in selected_states.get(key, [])
+        if deselected:
+            await remove_set(key, state, pokemon_state)
+        else:
+            set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
+            await add_set(key, set_data, set_name, pokemon, generation, format)
+        set_data = "\n\n".join(
+            "\n\n".join(data for data in sets)
+            for sets in selected_sets.get(key, {}).values()
+        )
+        first_row = GiveSet.first_row.get(key)
+        first_message = await interaction.channel.fetch_message(first_row)
+        selected_row = await interaction.channel.fetch_message(interaction.message.id)
+        updated_view = update_buttons(
+            selected_row, interaction.data["custom_id"], deselected, request_count > 1
+        )
+        updated_content = f"```\n{set_data}```\n" if set_data else ""
+        await selected_row.edit(view=updated_view)
+        await first_message.edit(content=updated_content)

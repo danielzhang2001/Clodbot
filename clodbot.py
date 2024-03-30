@@ -86,7 +86,6 @@ async def give_set(ctx, *args):
 # IF SHEET NAME DOES NOT EXIST, CREATE THE SHEET AND STORE INFORMATION IN
 # IF SHEET NAME DOES EXIST, USE THAT SHEET AND UPDATE IT WITH INFORMATION
 
-# Running Discord bot
 load_dotenv()
 bot_token = os.environ["DISCORD_BOT_TOKEN"]
 bot.run(bot_token)
