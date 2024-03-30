@@ -139,6 +139,7 @@ async def get_set_names(
                     ):
                         for moveset in strategy.get("movesets", []):
                             set_names.append(moveset["name"])
+                print(f"SET NAMES: {set_names}")
                 return set_names
     return None
 

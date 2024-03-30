@@ -118,16 +118,24 @@ class GiveSet:
             for req in requests
         ]
         results = await asyncio.gather(*tasks)
-        valid_requests, valid_results = await filter_requests(ctx, requests, results)
+        valid_requests = []
+        valid_results = []
+        for request, set_names in zip(requests, results):
+            if set_names is None:
+                pokemon = request["pokemon"]
+                generation = request.get("generation", "")
+                format = request.get("format", "")
+                await ctx.send(f"{pokemon} {generation} {format} is not valid")
+            else:
+                valid_requests.append(request)
+                valid_results.append(set_names)
         if not valid_requests:
             return
         key = str(uuid.uuid4())
         request_count = len(valid_requests)
-        prompt = get_prompt(valid_requests)
+        prompt = get_prompt(requests)
         await ctx.send(prompt)
-        for index, (request, set_names) in enumerate(
-            zip(valid_requests, valid_results)
-        ):
+        for index, (request, set_names) in enumerate(zip(requests, results)):
             view = get_view(key, request, set_names, request_count)
             message = await ctx.send(view=view)
             if index == 0:

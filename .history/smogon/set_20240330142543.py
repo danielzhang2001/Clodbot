@@ -7,7 +7,6 @@ import aiohttp
 import random
 from discord import ButtonStyle, Interaction, Message
 from discord.ui import Button, View
-from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
@@ -139,6 +138,7 @@ async def get_set_names(
                     ):
                         for moveset in strategy.get("movesets", []):
                             set_names.append(moveset["name"])
+                print(f"SET NAMES: {set_names}")
                 return set_names
     return None
 
@@ -348,7 +348,7 @@ async def filter_requests(
     requests: List[Dict[str, Optional[str]]],
     results: List[Optional[List[str]]],
 ) -> Tuple[List[Dict[str, Optional[str]]], List[List[str]]]:
-    # Filters in only valid Pokemon requests and sends an error message for each invalid request.
+    #
     valid_requests = []
     valid_results = []
     for request, set_names in zip(requests, results):

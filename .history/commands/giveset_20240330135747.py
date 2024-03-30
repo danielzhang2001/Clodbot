@@ -113,21 +113,16 @@ class GiveSet:
         ctx: commands.Context, requests: List[Dict[str, Optional[str]]]
     ) -> None:
         # Displays prompt with buttons for selection of Pokemon sets.
+        key = str(uuid.uuid4())
+        request_count = len(requests)
         tasks = [
             get_set_names(req["pokemon"], req["generation"], req["format"])
             for req in requests
         ]
         results = await asyncio.gather(*tasks)
-        valid_requests, valid_results = await filter_requests(ctx, requests, results)
-        if not valid_requests:
-            return
-        key = str(uuid.uuid4())
-        request_count = len(valid_requests)
-        prompt = get_prompt(valid_requests)
+        prompt = get_prompt(requests)
         await ctx.send(prompt)
-        for index, (request, set_names) in enumerate(
-            zip(valid_requests, valid_results)
-        ):
+        for index, (request, set_names) in enumerate(zip(requests, results)):
             view = get_view(key, request, set_names, request_count)
             message = await ctx.send(view=view)
             if index == 0:

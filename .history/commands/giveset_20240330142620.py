@@ -118,7 +118,9 @@ class GiveSet:
             for req in requests
         ]
         results = await asyncio.gather(*tasks)
-        valid_requests, valid_results = await filter_requests(ctx, requests, results)
+        valid_requests, valid_results = await filter_valid_requests(
+            ctx, requests, results
+        )
         if not valid_requests:
             return
         key = str(uuid.uuid4())

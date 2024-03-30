@@ -7,7 +7,6 @@ import aiohttp
 import random
 from discord import ButtonStyle, Interaction, Message
 from discord.ui import Button, View
-from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
@@ -139,6 +138,7 @@ async def get_set_names(
                     ):
                         for moveset in strategy.get("movesets", []):
                             set_names.append(moveset["name"])
+                print(f"SET NAMES: {set_names}")
                 return set_names
     return None
 

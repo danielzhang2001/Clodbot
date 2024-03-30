@@ -7,7 +7,6 @@ import aiohttp
 import random
 from discord import ButtonStyle, Interaction, Message
 from discord.ui import Button, View
-from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
@@ -132,6 +131,8 @@ async def get_set_names(
                 set_names = []
                 if not format:
                     format = await get_first_format(pokemon, generation)
+                    if format is None:
+                        return None
                 for strategy in data.get("strategies", []):
                     if (
                         strategy["format"].replace(" ", "-").lower()
@@ -341,29 +342,3 @@ def update_buttons(
             )
             view.add_item(button)
     return view
-
-
-async def filter_requests(
-    ctx: commands.Context,
-    requests: List[Dict[str, Optional[str]]],
-    results: List[Optional[List[str]]],
-) -> Tuple[List[Dict[str, Optional[str]]], List[List[str]]]:
-    # Filters in only valid Pokemon requests and sends an error message for each invalid request.
-    valid_requests = []
-    valid_results = []
-    for request, set_names in zip(requests, results):
-        if set_names is None or not set_names:
-            pokemon = request["pokemon"]
-            generation = request.get("generation", "")
-            format = request.get("format", "")
-            await ctx.send(
-                "Cannot find sets for "
-                + " ".join(
-                    [f"**{part}**" for part in [pokemon, generation, format] if part]
-                )
-                + "."
-            )
-        else:
-            valid_requests.append(request)
-            valid_results.append(set_names)
-    return valid_requests, valid_results

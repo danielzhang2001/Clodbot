@@ -7,7 +7,6 @@ import aiohttp
 import random
 from discord import ButtonStyle, Interaction, Message
 from discord.ui import Button, View
-from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
@@ -119,11 +118,7 @@ async def get_set_names(
     # Returns all set names associated with the Pokemon, Generation and Format provided. If no Generation, assumed to be latest one, and if no Format, assumed to be first one.
     if not generation:
         generation = await get_latest_gen(pokemon)
-        if generation is None:
-            return None
     gen_value = get_gen(generation)
-    if gen_value is None:
-        return None
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -288,6 +283,12 @@ def format_set(moveset: dict) -> str:
     return formatted_set.strip()
 
 
+async def remove_set(key, state, pokemon_state):
+    # Removes the set information from the selected sets and Pokemon information from the selected states.
+    selected_states[key].remove(state)
+    selected_sets[key].pop(pokemon_state)
+
+
 async def add_set(key, set_data, set_name, pokemon, generation, format):
     # Adds the set information to the selected sets and Pokemon information to the selected states.
     selected_states.setdefault(key, [])
@@ -304,12 +305,6 @@ async def add_set(key, set_data, set_name, pokemon, generation, format):
         selected_states[key].append(state)
     selected_sets.setdefault(key, {})
     selected_sets[key][pokemon_state] = [set_data]
-
-
-async def remove_set(key, state, pokemon_state):
-    # Removes the set information from the selected sets and Pokemon information from the selected states.
-    selected_states[key].remove(state)
-    selected_sets[key].pop(pokemon_state)
 
 
 def update_buttons(
@@ -341,29 +336,3 @@ def update_buttons(
             )
             view.add_item(button)
     return view
-
-
-async def filter_requests(
-    ctx: commands.Context,
-    requests: List[Dict[str, Optional[str]]],
-    results: List[Optional[List[str]]],
-) -> Tuple[List[Dict[str, Optional[str]]], List[List[str]]]:
-    # Filters in only valid Pokemon requests and sends an error message for each invalid request.
-    valid_requests = []
-    valid_results = []
-    for request, set_names in zip(requests, results):
-        if set_names is None or not set_names:
-            pokemon = request["pokemon"]
-            generation = request.get("generation", "")
-            format = request.get("format", "")
-            await ctx.send(
-                "Cannot find sets for "
-                + " ".join(
-                    [f"**{part}**" for part in [pokemon, generation, format] if part]
-                )
-                + "."
-            )
-        else:
-            valid_requests.append(request)
-            valid_results.append(set_names)
-    return valid_requests, valid_results
