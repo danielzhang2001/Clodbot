@@ -7,6 +7,7 @@ import aiohttp
 import random
 from discord import ButtonStyle, Interaction, Message
 from discord.ui import Button, View
+from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
@@ -60,20 +61,6 @@ async def get_latest_gen(pokemon: str) -> Optional[str]:
     return None
 
 
-async def get_first_format(pokemon: str, generation: str) -> Optional[str]:
-    # Returns the first format given the Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                data = await response.json()
-                strategies = data.get("strategies", [])
-                if strategies:
-                    return strategies[0]["format"]
-    return None
-
-
 async def get_random_gen(pokemon: str) -> Optional[str]:
     # Returns a random eligible gen using the Smogon API given a Pokemon.
     gen_dict = get_gen_dict()
@@ -90,6 +77,20 @@ async def get_random_gen(pokemon: str) -> Optional[str]:
                             key for key, value in gen_dict.items() if value == gen_code
                         ][0]
                         return gen_key
+    return None
+
+
+async def get_first_format(pokemon: str, generation: str) -> Optional[str]:
+    # Returns the first format given the Pokemon and Generation.
+    gen_value = get_gen(generation)
+    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                strategies = data.get("strategies", [])
+                if strategies:
+                    return strategies[0]["format"]
     return None
 
 
@@ -112,31 +113,17 @@ async def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     return None
 
 
-async def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
-    # Returns a random eligible set name using the Smogon API given a Pokemon, Generation and Format.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                data = await response.json()
-                for strategy in data.get("strategies", []):
-                    if strategy.get("format") == format:
-                        if strategy.get("movesets"):
-                            set_names = [
-                                moveset["name"] for moveset in strategy["movesets"]
-                            ]
-                            return random.choice(set_names)
-    return None
-
-
 async def get_set_names(
     pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
 ) -> Optional[List[str]]:
     # Returns all set names associated with the Pokemon, Generation and Format provided. If no Generation, assumed to be latest one, and if no Format, assumed to be first one.
     if not generation:
         generation = await get_latest_gen(pokemon)
+        if generation is None:
+            return None
     gen_value = get_gen(generation)
+    if gen_value is None:
+        return None
     url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -153,6 +140,24 @@ async def get_set_names(
                         for moveset in strategy.get("movesets", []):
                             set_names.append(moveset["name"])
                 return set_names
+    return None
+
+
+async def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
+    # Returns a random eligible set name using the Smogon API given a Pokemon, Generation and Format.
+    gen_value = get_gen(generation)
+    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                for strategy in data.get("strategies", []):
+                    if strategy.get("format") == format:
+                        if strategy.get("movesets"):
+                            set_names = [
+                                moveset["name"] for moveset in strategy["movesets"]
+                            ]
+                            return random.choice(set_names)
     return None
 
 
@@ -283,6 +288,30 @@ def format_set(moveset: dict) -> str:
     return formatted_set.strip()
 
 
+async def add_set(key, set_data, set_name, pokemon, generation, format):
+    # Adds the set information to the selected sets and Pokemon information to the selected states.
+    selected_states.setdefault(key, [])
+    state_found = False
+    pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
+    state = f"{pokemon_state}_{set_name}"
+    for i, selected_state in enumerate(selected_states[key]):
+        existing_state = "_".join(selected_state.split("_")[:3])
+        if existing_state == pokemon_state:
+            selected_states[key][i] = state
+            state_found = True
+            break
+    if not state_found:
+        selected_states[key].append(state)
+    selected_sets.setdefault(key, {})
+    selected_sets[key][pokemon_state] = [set_data]
+
+
+async def remove_set(key, state, pokemon_state):
+    # Removes the set information from the selected sets and Pokemon information from the selected states.
+    selected_states[key].remove(state)
+    selected_sets[key].pop(pokemon_state)
+
+
 def update_buttons(
     message: Message, button_id: str, deselected: bool, multiple: bool
 ) -> None:
@@ -314,25 +343,27 @@ def update_buttons(
     return view
 
 
-async def remove_set(key, state, pokemon_state):
-    # Removes the set information from the selected sets and Pokemon information from the selected states.
-    selected_states[key].remove(state)
-    selected_sets[key].pop(pokemon_state)
-
-
-async def add_set(key, set_data, set_name, pokemon, generation, format):
-    # Adds the set information to the selected sets and Pokemon information to the selected states.
-    selected_states.setdefault(key, [])
-    state_found = False
-    pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
-    state = f"{pokemon_state}_{set_name}"
-    for i, selected_state in enumerate(selected_states[key]):
-        existing_state = "_".join(selected_state.split("_")[:3])
-        if existing_state == pokemon_state:
-            selected_states[key][i] = state
-            state_found = True
-            break
-    if not state_found:
-        selected_states[key].append(state)
-    selected_sets.setdefault(key, {})
-    selected_sets[key][pokemon_state] = [set_data]
+async def filter_requests(
+    ctx: commands.Context,
+    requests: List[Dict[str, Optional[str]]],
+    results: List[Optional[List[str]]],
+) -> Tuple[List[Dict[str, Optional[str]]], List[List[str]]]:
+    # Filters in only valid Pokemon requests and sends an error message for each invalid request.
+    valid_requests = []
+    valid_results = []
+    for request, set_names in zip(requests, results):
+        if set_names is None or not set_names:
+            pokemon = request["pokemon"]
+            generation = request.get("generation", "")
+            format = request.get("format", "")
+            await ctx.send(
+                "Cannot find sets for "
+                + " ".join(
+                    [f"**{part}**" for part in [pokemon, generation, format] if part]
+                )
+                + "."
+            )
+        else:
+            valid_requests.append(request)
+            valid_results.append(set_names)
+    return valid_requests, valid_results
