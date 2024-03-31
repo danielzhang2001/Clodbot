@@ -14,7 +14,6 @@ from discord import ButtonStyle
 from discord.ui import Button, View
 from discord.ext import commands
 from typing import Optional, List, Dict, Tuple
-from uuid import uuid4
 
 
 class GiveSet:
@@ -122,43 +121,43 @@ class GiveSet:
         valid_requests, valid_results = await filter_requests(ctx, requests, results)
         if not valid_requests:
             return
-        prompt_key = uuid4().hex[:20]
+        prompt_key = str(uuid.uuid4())
         request_count = len(valid_requests)
         prompt = get_prompt(valid_requests)
         await ctx.send(prompt)
         for index, (request, set_names) in enumerate(
             zip(valid_requests, valid_results)
         ):
-            message_key = uuid4().hex[:5]
-            view = get_view(prompt_key, message_key, request, set_names, request_count)
+            view = get_view(prompt_key, request, set_names, request_count)
             message = await ctx.send(view=view)
             if index == 0:
-                GiveSet.first_row[prompt_key] = message.id
+                GiveSet.first_row[key] = message.id
 
     @staticmethod
     async def set_selection(
         interaction,
         prompt_key: str,
         message_key: str,
-        button_key: str,
-        request_count: int,
+        request_count: str,
         set_name: str,
         pokemon: str,
         generation: Optional[str] = None,
         format: Optional[str] = None,
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
-        deselected = message_key + button_key in selected_states.get(prompt_key, [])
+        state = f"{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}"
+        pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
+        deselected = state in selected_states.get(prompt_key, [])
         if deselected:
-            await remove_set(prompt_key, message_key, button_key)
+            await remove_set(prompt_key, message_key)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            await add_set(prompt_key, message_key, button_key, set_data)
+            await add_set(prompt_key, set_data, set_name, pokemon, generation, format)
         set_data = "\n\n".join(
             "\n\n".join(data for data in sets)
-            for sets in selected_sets.get(prompt_key, {}).values()
+            for sets in selected_sets.get(key, {}).values()
         )
-        first_row = GiveSet.first_row.get(prompt_key)
+        first_row = GiveSet.first_row.get(key)
         first_message = await interaction.channel.fetch_message(first_row)
         selected_row = await interaction.channel.fetch_message(interaction.message.id)
         updated_view = update_buttons(

@@ -44,18 +44,16 @@ async def on_interaction(interaction):
         parts = custom_id.split("_")
         prompt_key = parts[0]
         message_key = parts[1]
-        button_key = parts[2]
-        pokemon = parts[3]
-        generation = parts[4] if parts[4] != "none" else None
-        format = parts[5] if parts[5] != "none" else None
-        set_name = parts[6]
-        request_count = int(parts[7])
+        pokemon = parts[2]
+        generation = parts[3] if parts[3] != "none" else None
+        format = parts[4] if parts[4] != "none" else None
+        set_name = parts[5]
+        request_count = int(parts[6])
         await interaction.response.defer()
         await GiveSet.set_selection(
             interaction,
             prompt_key,
             message_key,
-            button_key,
             request_count,
             set_name,
             pokemon,

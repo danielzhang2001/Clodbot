@@ -150,8 +150,10 @@ class GiveSet:
         # Fetches and displays the appropriate set data when a button is clicked.
         deselected = message_key + button_key in selected_states.get(prompt_key, [])
         if deselected:
+            print("DESELECTED!")
             await remove_set(prompt_key, message_key, button_key)
         else:
+            print("SELECTED!")
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             await add_set(prompt_key, message_key, button_key, set_data)
         set_data = "\n\n".join(

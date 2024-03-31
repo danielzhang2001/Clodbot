@@ -11,7 +11,6 @@ from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
-from uuid import uuid4
 
 selected_states = {}
 selected_sets = {}
@@ -179,7 +178,6 @@ def get_prompt(requests: List[Dict[str, Optional[str]]]) -> str:
 
 def get_view(
     prompt_key: str,
-    message_key: str,
     request: Dict[str, Optional[str]],
     set_names: List[str],
     request_count: int,
@@ -212,12 +210,11 @@ def get_view(
                 disabled=True,
             )
         )
-    for name in set_names:
-        button_key = uuid4().hex[:5]
-        button_id = f"{prompt_key}_{message_key}_{button_key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{name}_{request_count}".replace(
+    for set_name in set_names:
+        btn_id = f"{prompt_key}_{message_key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{set_name}_{request_count}".replace(
             " ", ""
         )
-        view.add_item(Button(label=name, custom_id=button_id))
+        view.add_item(Button(label=set_name, custom_id=btn_id))
     return view
 
 
@@ -291,22 +288,29 @@ def format_set(moveset: dict) -> str:
     return formatted_set.strip()
 
 
-async def add_set(prompt_key, message_key, button_key, set_data):
+async def add_set(prompt_key, set_data, set_name, pokemon, generation, format):
     # Adds the set information to the selected sets and Pokemon information to the selected states.
     selected_states.setdefault(prompt_key, [])
     selected_sets.setdefault(prompt_key, {})
-    selected_states[prompt_key].append(message_key + button_key)
-    selected_sets[prompt_key][message_key] = [set_data]
+    state_found = False
+    pokemon_state = f"{pokemon}_{generation or 'none'}_{format or 'none'}"
+    state = f"{pokemon_state}_{set_name}"
+    for i, selected_state in enumerate(selected_states[prompt_key]):
+        existing_state = "_".join(selected_state.split("_")[:3])
+        if existing_state == pokemon_state:
+            selected_states[key][i] = state
+            state_found = True
+            break
+    if not state_found:
+        selected_states[key].append(state)
+
+    selected_sets[key][pokemon_state] = [set_data]
 
 
-async def remove_set(prompt_key, message_key, button_key):
+async def remove_set(prompt_key, message_key):
     # Removes the set information from the selected sets and Pokemon information from the selected states.
-    selected_states[prompt_key] = [
-        state
-        for state in selected_states[prompt_key]
-        if not state.startswith(message_key)
-    ]
-    selected_sets[prompt_key].pop(message_key)
+    selected_states[prompt_key].remove(message_key)
+    selected_sets[key].pop(message_key)
 
 
 def update_buttons(

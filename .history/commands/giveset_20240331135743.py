@@ -129,31 +129,30 @@ class GiveSet:
         for index, (request, set_names) in enumerate(
             zip(valid_requests, valid_results)
         ):
-            message_key = uuid4().hex[:5]
+            message_key = uuid4().hex[:10]
             view = get_view(prompt_key, message_key, request, set_names, request_count)
             message = await ctx.send(view=view)
             if index == 0:
-                GiveSet.first_row[prompt_key] = message.id
+                GiveSet.first_row[key] = message.id
 
     @staticmethod
     async def set_selection(
         interaction,
         prompt_key: str,
         message_key: str,
-        button_key: str,
-        request_count: int,
+        request_count: str,
         set_name: str,
         pokemon: str,
         generation: Optional[str] = None,
         format: Optional[str] = None,
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
-        deselected = message_key + button_key in selected_states.get(prompt_key, [])
+        deselected = message_key in selected_states.get(prompt_key, [])
         if deselected:
-            await remove_set(prompt_key, message_key, button_key)
+            await remove_set(prompt_key, message_key)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            await add_set(prompt_key, message_key, button_key, set_data)
+            await add_set(prompt_key, message_key, set_data)
         set_data = "\n\n".join(
             "\n\n".join(data for data in sets)
             for sets in selected_sets.get(prompt_key, {}).values()

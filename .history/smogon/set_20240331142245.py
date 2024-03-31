@@ -301,11 +301,7 @@ async def add_set(prompt_key, message_key, button_key, set_data):
 
 async def remove_set(prompt_key, message_key, button_key):
     # Removes the set information from the selected sets and Pokemon information from the selected states.
-    selected_states[prompt_key] = [
-        state
-        for state in selected_states[prompt_key]
-        if not state.startswith(message_key)
-    ]
+    selected_states[prompt_key].remove(message_key + button_key)
     selected_sets[prompt_key].pop(message_key)
 
 

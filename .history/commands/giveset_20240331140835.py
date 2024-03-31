@@ -140,7 +140,7 @@ class GiveSet:
         interaction,
         prompt_key: str,
         message_key: str,
-        button_key: str,
+        btn_key: str,
         request_count: int,
         set_name: str,
         pokemon: str,
@@ -148,12 +148,12 @@ class GiveSet:
         format: Optional[str] = None,
     ):
         # Fetches and displays the appropriate set data when a button is clicked.
-        deselected = message_key + button_key in selected_states.get(prompt_key, [])
+        deselected = message_key + btn_key in selected_states.get(prompt_key, [])
         if deselected:
-            await remove_set(prompt_key, message_key, button_key)
+            await remove_set(prompt_key, message_key)
         else:
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
-            await add_set(prompt_key, message_key, button_key, set_data)
+            await add_set(prompt_key, message_key, set_data)
         set_data = "\n\n".join(
             "\n\n".join(data for data in sets)
             for sets in selected_sets.get(prompt_key, {}).values()

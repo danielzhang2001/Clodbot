@@ -213,11 +213,11 @@ def get_view(
             )
         )
     for name in set_names:
-        button_key = uuid4().hex[:5]
-        button_id = f"{prompt_key}_{message_key}_{button_key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{name}_{request_count}".replace(
+        btn_key = uuid4().hex[:5]
+        btn_id = f"{prompt_key}_{message_key}_{btn_key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{name}_{request_count}".replace(
             " ", ""
         )
-        view.add_item(Button(label=name, custom_id=button_id))
+        view.add_item(Button(label=name, custom_id=btn_id))
     return view
 
 
@@ -291,22 +291,18 @@ def format_set(moveset: dict) -> str:
     return formatted_set.strip()
 
 
-async def add_set(prompt_key, message_key, button_key, set_data):
+async def add_set(prompt_key, message_key, btn_key, set_data):
     # Adds the set information to the selected sets and Pokemon information to the selected states.
     selected_states.setdefault(prompt_key, [])
     selected_sets.setdefault(prompt_key, {})
-    selected_states[prompt_key].append(message_key + button_key)
+    selected_states[prompt_key].append(message_key + btn_key)
     selected_sets[prompt_key][message_key] = [set_data]
 
 
-async def remove_set(prompt_key, message_key, button_key):
+async def remove_set(prompt_key, message_key, btn_key):
     # Removes the set information from the selected sets and Pokemon information from the selected states.
-    selected_states[prompt_key] = [
-        state
-        for state in selected_states[prompt_key]
-        if not state.startswith(message_key)
-    ]
-    selected_sets[prompt_key].pop(message_key)
+    selected_states[prompt_key].remove(message_key + btn_key)
+    selected_sets[prompt_key].pop(message_key + btn_key)
 
 
 def update_buttons(
