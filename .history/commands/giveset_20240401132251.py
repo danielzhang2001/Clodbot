@@ -15,6 +15,7 @@ from discord.ui import Button, View
 from discord.ext import commands
 from typing import Optional, List, Dict, Tuple
 from uuid import uuid4
+from datetime import datetime
 
 
 class GiveSet:
@@ -133,7 +134,7 @@ class GiveSet:
             view = get_view(prompt_key, message_key, request, set_names, request_count)
             message = await ctx.send(view=view)
             if index == 0:
-                GiveSet.first_row[prompt_key] = message.id
+                GiveSet.first_row[prompt_key] = (message.id, datetime.utcnow())
 
     @staticmethod
     async def set_selection(
@@ -159,6 +160,7 @@ class GiveSet:
             for sets in selected_sets.get(prompt_key, {}).values()
         )
         first_row = GiveSet.first_row.get(prompt_key)
+        message_id =
         first_message = await interaction.channel.fetch_message(first_row)
         selected_row = await interaction.channel.fetch_message(interaction.message.id)
         updated_view = update_buttons(

@@ -7,7 +7,7 @@ import pickle
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
-def authenticate_sheets():
+def authenticate_google_sheets():
     creds = None
     if os.path.exists("token.pickle"):
         with open("token.pickle", "rb") as token:

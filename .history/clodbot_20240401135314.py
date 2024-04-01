@@ -90,7 +90,8 @@ async def analyze_replay(ctx: commands.Context, replay: str) -> None:
             "```"
         )
         return
-    message = await Analyze.analyze_replay(replay)
+    replay_link = " ".join(args)
+    message = await Analyze.analyze_replay(replay_link)
     if message:
         await ctx.send(message)
     else:

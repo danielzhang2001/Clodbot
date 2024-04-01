@@ -6,10 +6,10 @@ import uuid
 import asyncio
 import random
 import aiohttp
-import discord
 from smogon.set import *
 from asyncio import Lock
 from concurrent.futures import ThreadPoolExecutor
+from discord import Interaction
 from discord import ButtonStyle
 from discord.ui import Button, View
 from discord.ext import commands
@@ -137,7 +137,7 @@ class GiveSet:
 
     @staticmethod
     async def set_selection(
-        interaction: discord.Interaction,
+        interaction: Interaction,
         prompt_key: str,
         message_key: str,
         button_key: str,

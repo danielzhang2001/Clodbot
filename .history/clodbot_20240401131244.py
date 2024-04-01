@@ -15,10 +15,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-from googleapiclient.discovery import build
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
-from commands.sheets import authenticate_sheets
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -80,17 +78,10 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError) 
 
 
 @bot.command(name="analyze")
-async def analyze_replay(ctx: commands.Context, replay: str) -> None:
+async def analyze_replay(ctx: commands.Context, *args: str) -> None:
     # Analyzes replay and sends stats in a message to Discord.
-    if not replay:
-        await ctx.send(
-            "Please provide arguments as shown in the following:\n"
-            "```\n"
-            "Clodbot, analyze (Replay Link)\n"
-            "```"
-        )
-        return
-    message = await Analyze.analyze_replay(replay)
+    replay_link = " ".join(args)
+    message = await Analyze.analyze_replay(replay_link)
     if message:
         await ctx.send(message)
     else:
@@ -100,15 +91,6 @@ async def analyze_replay(ctx: commands.Context, replay: str) -> None:
 @bot.command(name="giveset")
 async def give_set(ctx: commands.Context, *args: str) -> None:
     # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided, or gives a random set.
-    if not args:
-        await ctx.send(
-            "Please provide arguments as shown in the following:\n"
-            "```\n"
-            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
-            "Clodbot, giveset random (Optional Number)\n"
-            "```"
-        )
-        return
     input_str = " ".join(args).strip()
     requests = []
     invalid_parts = []
@@ -133,13 +115,6 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
                 f"Too many arguments provided for {', '.join(invalid_parts)}. Please provide at most a Pokemon, Generation, and Format."
             )
         await GiveSet.set_prompt(ctx, requests)
-
-
-@bot.command(name="update")
-async def update_sheets(ctx: commands.Context, replay: str, sheets: str):
-    creds = authenticate_google_sheets()
-    service = build("sheets", "v4", credentials=creds)
-    # Your code to interact with the sheets goes here
 
 
 # COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.

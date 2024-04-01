@@ -9,6 +9,7 @@ import discord
 from discord.ui import Button, View
 from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
 from uuid import uuid4
 
@@ -290,9 +291,7 @@ def format_set(moveset: dict) -> str:
     return formatted_set.strip()
 
 
-async def add_set(
-    prompt_key: str, message_key: str, button_key: str, set_data: str
-) -> None:
+async def add_set(prompt_key, message_key, button_key, set_data):
     # Adds the set information to the selected sets and Pokemon information to the selected states.
     selected_states.setdefault(prompt_key, [])
     selected_sets.setdefault(prompt_key, {})
@@ -300,7 +299,7 @@ async def add_set(
     selected_sets[prompt_key][message_key] = [set_data]
 
 
-async def remove_set(prompt_key: str, message_key: str, button_key: str) -> None:
+async def remove_set(prompt_key, message_key, button_key):
     # Removes the set information from the selected sets and Pokemon information from the selected states.
     selected_states[prompt_key] = [
         state

@@ -5,10 +5,11 @@ General functions in scraping Pokemon Smogon sets.
 import asyncio
 import aiohttp
 import random
-import discord
+from discord import ButtonStyle, Interaction, Message
 from discord.ui import Button, View
 from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
 from uuid import uuid4
 
@@ -207,7 +208,7 @@ def get_view(
                     ]
                 )
                 + ":",
-                style=discord.ButtonStyle.primary,
+                style=ButtonStyle.primary,
                 disabled=True,
             )
         )
@@ -290,9 +291,7 @@ def format_set(moveset: dict) -> str:
     return formatted_set.strip()
 
 
-async def add_set(
-    prompt_key: str, message_key: str, button_key: str, set_data: str
-) -> None:
+async def add_set(prompt_key, message_key, button_key, set_data):
     # Adds the set information to the selected sets and Pokemon information to the selected states.
     selected_states.setdefault(prompt_key, [])
     selected_sets.setdefault(prompt_key, {})
@@ -300,7 +299,7 @@ async def add_set(
     selected_sets[prompt_key][message_key] = [set_data]
 
 
-async def remove_set(prompt_key: str, message_key: str, button_key: str) -> None:
+async def remove_set(prompt_key, message_key, button_key):
     # Removes the set information from the selected sets and Pokemon information from the selected states.
     selected_states[prompt_key] = [
         state
@@ -311,7 +310,7 @@ async def remove_set(prompt_key: str, message_key: str, button_key: str) -> None
 
 
 def update_buttons(
-    message: discord.Message, button_id: str, deselected: bool, multiple: bool
+    message: Message, button_id: str, deselected: bool, multiple: bool
 ) -> None:
     # Update the coloring of the buttons when a button is selected or deselected.
     view = View()
@@ -320,16 +319,16 @@ def update_buttons(
         for item in component.children:
             disabled = False
             if multiple and first_button:
-                style = discord.ButtonStyle.primary
+                style = ButtonStyle.primary
                 disabled = True
                 first_button = False
             elif deselected and item.custom_id == button_id:
-                style = discord.ButtonStyle.secondary
+                style = ButtonStyle.secondary
             else:
                 style = (
-                    discord.ButtonStyle.success
+                    ButtonStyle.success
                     if item.custom_id == button_id
-                    else discord.ButtonStyle.secondary
+                    else ButtonStyle.secondary
                 )
             button = Button(
                 style=style,
@@ -360,10 +359,14 @@ async def filter_requests(
                 invalid_parts.append(f"**{generation}**")
             if format:
                 invalid_parts.append(f"**{format}**")
-            invalid_requests.append(" ".join(invalid_parts))
+            await ctx.send(
+                "Cannot find sets for "
+                + " ".join(
+                    [f"**{part}**" for part in [pokemon, generation, format] if part]
+                )
+                + "."
+            )
         else:
             valid_requests.append(request)
             valid_results.append(set_names)
-    if invalid_requests:
-        await ctx.send("Cannot find sets for " + ", ".join(invalid_requests) + ".")
     return valid_requests, valid_results
