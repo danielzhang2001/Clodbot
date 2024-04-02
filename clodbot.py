@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
-from commands.sheets import authenticate_sheets
+from commands.update import authenticate_sheets
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -80,9 +80,10 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError) 
 
 
 @bot.command(name="analyze")
-async def analyze_replay(ctx: commands.Context, replay: str) -> None:
+async def analyze_replay(ctx: commands.Context, *args: str) -> None:
     # Analyzes replay and sends stats in a message to Discord.
-    if not replay:
+    replay_link = " ".join(args)
+    if not replay_link:
         await ctx.send(
             "Please provide arguments as shown in the following:\n"
             "```\n"
@@ -90,7 +91,7 @@ async def analyze_replay(ctx: commands.Context, replay: str) -> None:
             "```"
         )
         return
-    message = await Analyze.analyze_replay(replay)
+    message = await Analyze.analyze_replay(replay_link)
     if message:
         await ctx.send(message)
     else:
@@ -136,15 +137,37 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
 
 
 @bot.command(name="update")
-async def update_sheets(ctx: commands.Context, replay: str, sheets: str):
-    creds = authenticate_google_sheets()
+async def update_sheets(ctx: commands.Context, replay_link: str, sheets_url: str):
+    try:
+        sheets_id = sheets_url.split("/d/")[1].split("/")[0]
+    except IndexError:
+        await ctx.send("Invalid Google Sheets URL provided.")
+        return
+    replay_data = await Analyze.analyze_replay(replay_link)
+    if not replay_data:
+        await ctx.send(f"No data found for the replay: {replay_link}")
+        return
+    creds = authenticate_sheets()
     service = build("sheets", "v4", credentials=creds)
-    # Your code to interact with the sheets goes here
+    values = [[replay_data]]
+    body = {"values": values}
+    range_to_update = "Stats!A1"
+    try:
+        result = (
+            service.spreadsheets()
+            .values()
+            .update(
+                spreadsheetId=sheets_id,
+                range=range_to_update,
+                valueInputOption="USER_ENTERED",
+                body=body,
+            )
+            .execute()
+        )
+        await ctx.send(f"Updated the sheet with ID: {sheets_id}")
+    except Exception as e:
+        await ctx.send(f"Failed to update the sheet: {str(e)}")
 
-
-# COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.
-# IF SHEET NAME DOES NOT EXIST, CREATE THE SHEET AND STORE INFORMATION IN
-# IF SHEET NAME DOES EXIST, USE THAT SHEET AND UPDATE IT WITH INFORMATION
 
 load_dotenv()
 bot_token = os.environ["DISCORD_BOT_TOKEN"]
