@@ -15,8 +15,8 @@ class Analyze:
         try:
             response = requests.get(replay_link + ".log")
             response.raise_for_status()
-            raw_data = response.text
-        except requests.exceptions.RequestException:
+            raw_data = requests.get(replay_link + ".log").text
+        except requests.exceptions.RequestException as exception:
             return f"**{replay_link}** is an invalid replay link."
         players = get_player_names(raw_data)
         pokes = get_pokes(raw_data)

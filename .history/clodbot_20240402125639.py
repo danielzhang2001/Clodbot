@@ -138,6 +138,7 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
 
 @bot.command(name="update")
 async def update_sheets(ctx: commands.Context, replay_link: str, sheets_url: str):
+    # Extract the spreadsheet ID from the sheets_url
     try:
         sheets_id = sheets_url.split("/d/")[1].split("/")[0]
     except IndexError:
