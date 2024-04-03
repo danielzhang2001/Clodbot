@@ -19,7 +19,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
-from commands.update import Update
+from commands.update import authenticate_sheets
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -93,7 +93,10 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
         )
         return
     message = await Analyze.analyze_replay(replay_link)
-    await ctx.send(message)
+    if message:
+        await ctx.send(message)
+    else:
+        await ctx.send("No data found in this replay.")
 
 
 @bot.command(name="giveset")
@@ -137,22 +140,20 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
 @bot.command(name="update")
 async def update_sheet(ctx: commands.Context, *args: str):
     if len(args) != 2:
-        await ctx.send(
-            "Please provide arguments as shown in the following:\n"
-            "```\n"
-            "Clodbot, update (Sheets Link) (Replay Link)\n"
-            "```"
-        )
+        await ctx.send("Please provide both a replay link and a Google Sheets URL.")
         return
-    sheets_link, replay_link = args
+    sheets_url, replay_link = args
     try:
-        sheets_id = sheets_link.split("/d/")[1].split("/")[0]
+        sheets_id = sheets_url.split("/d/")[1].split("/")[0]
     except IndexError:
         await ctx.send("Invalid Google Sheets URL provided.")
         return
     replay_data = await Analyze.analyze_replay(replay_link)
-    creds = Update.authenticate_sheet()
-    update_message = await Update.update_sheet(creds, sheets_id, replay_data)
+    if not replay_data:
+        await ctx.send(f"No data found for the replay: {replay_link}")
+        return
+    creds = authenticate_sheets()
+    update_message = update_sheet(creds, sheets_id, replay_data)
     await ctx.send(update_message)
 
 

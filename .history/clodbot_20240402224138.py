@@ -19,7 +19,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
-from commands.update import Update
+from commands.update import authenticate_sheets
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -93,7 +93,10 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
         )
         return
     message = await Analyze.analyze_replay(replay_link)
-    await ctx.send(message)
+    if message:
+        await ctx.send(message)
+    else:
+        await ctx.send("No data found in this replay.")
 
 
 @bot.command(name="giveset")
@@ -135,25 +138,59 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
 
 
 @bot.command(name="update")
-async def update_sheet(ctx: commands.Context, *args: str):
-    if len(args) != 2:
-        await ctx.send(
-            "Please provide arguments as shown in the following:\n"
-            "```\n"
-            "Clodbot, update (Sheets Link) (Replay Link)\n"
-            "```"
-        )
-        return
-    sheets_link, replay_link = args
+async def update_sheets(ctx: commands.Context, replay_link: str, sheets_url: str):
     try:
-        sheets_id = sheets_link.split("/d/")[1].split("/")[0]
+        sheets_id = sheets_url.split("/d/")[1].split("/")[0]
     except IndexError:
         await ctx.send("Invalid Google Sheets URL provided.")
         return
     replay_data = await Analyze.analyze_replay(replay_link)
-    creds = Update.authenticate_sheet()
-    update_message = await Update.update_sheet(creds, sheets_id, replay_data)
-    await ctx.send(update_message)
+    if not replay_data:
+        await ctx.send(f"No data found for the replay: {replay_link}")
+        return
+    creds = authenticate_sheets()
+    service = build("sheets", "v4", credentials=creds)
+    try:
+        sheet_metadata = service.spreadsheets().get(spreadsheetId=sheets_id).execute()
+        sheets = sheet_metadata.get("sheets", "")
+        sheet_names = [sheet["properties"]["title"] for sheet in sheets]
+        if "Stats" not in sheet_names:
+            body = {
+                "requests": [
+                    {
+                        "addSheet": {
+                            "properties": {
+                                "title": "Stats",
+                                "gridProperties": {"rowCount": 1000, "columnCount": 26},
+                            }
+                        }
+                    }
+                ]
+            }
+            service.spreadsheets().batchUpdate(
+                spreadsheetId=sheets_id, body=body
+            ).execute()
+    except HttpError as err:
+        await ctx.send(f"Google Sheets API error: {err}")
+        return
+    values = [[replay_data]]
+    body = {"values": values}
+    range_to_update = "Stats!A1"
+    try:
+        result = (
+            service.spreadsheets()
+            .values()
+            .update(
+                spreadsheetId=sheets_id,
+                range=range_to_update,
+                valueInputOption="USER_ENTERED",
+                body=body,
+            )
+            .execute()
+        )
+        await ctx.send(f"Updated the 'Stats' sheet with ID: {sheets_id}")
+    except Exception as e:
+        await ctx.send(f"Failed to update the sheet: {str(e)}")
 
 
 load_dotenv()

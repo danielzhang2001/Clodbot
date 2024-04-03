@@ -15,7 +15,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 class Update:
     @staticmethod
-    def authenticate_sheet():
+    def authenticate_sheets():
         creds = None
         token_path = os.path.join("sheets", "token.pickle")
         credentials_path = os.path.join("sheets", "credentials.json")

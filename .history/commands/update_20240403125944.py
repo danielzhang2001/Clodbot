@@ -5,6 +5,13 @@ The function to give update Google Sheets with Pokemon Showdown replay informati
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from googleapiclient.errors import HttpError
+import os.path
+import pickle
+
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import os.path
@@ -15,7 +22,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 class Update:
     @staticmethod
-    def authenticate_sheet():
+    def authenticate_sheets():
         creds = None
         token_path = os.path.join("sheets", "token.pickle")
         credentials_path = os.path.join("sheets", "credentials.json")

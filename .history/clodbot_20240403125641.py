@@ -19,7 +19,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
-from commands.update import Update
+from commands.update import authenticate_sheets
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -151,8 +151,8 @@ async def update_sheet(ctx: commands.Context, *args: str):
         await ctx.send("Invalid Google Sheets URL provided.")
         return
     replay_data = await Analyze.analyze_replay(replay_link)
-    creds = Update.authenticate_sheet()
-    update_message = await Update.update_sheet(creds, sheets_id, replay_data)
+    creds = authenticate_sheets()
+    update_message = update_sheet(creds, sheets_id, replay_data)
     await ctx.send(update_message)
 
 

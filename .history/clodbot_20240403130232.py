@@ -20,6 +20,7 @@ from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
 from commands.update import Update
+from commands.update import authenticate_sheets
 
 intents = discord.Intents.default()
 intents.typing = False
