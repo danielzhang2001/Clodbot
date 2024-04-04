@@ -9,6 +9,8 @@ def get_player_names(raw_data):
     # Retrieves player names.
     player_info = re.findall(r"\|player\|(p\d)\|(.+?)\|", raw_data)
     players = {player[0]: player[1] for player in player_info}
+    print(f"PLAYER INFO: {player_info}")
+    print(f"PLAYERS: {players}")
     return players
 
 
@@ -179,9 +181,9 @@ def get_loser(raw_data):
     # Retrieves the losing player(s).
     winner = get_winner(raw_data)
     players = get_player_names(raw_data)
-    players.pop(winner)
-    loser = players[0]
-    return loser
+    for id, name in players.items():
+        if name != winner:
+            return name
 
 
 def get_difference(raw_data, players):

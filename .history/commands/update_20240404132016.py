@@ -43,11 +43,14 @@ class Update:
         # Updates sheets with replay data.
         service = build("sheets", "v4", credentials=creds)
         try:
+            # Fetch the replay log data
             response = requests.get(replay_link + ".log")
             response.raise_for_status()
             raw_data = response.text
             names_dict = get_player_names(raw_data)
             player_names = [names_dict["p1"], names_dict["p2"]]
+
+            # Ensure "Stats" sheet exists
             sheet_metadata = (
                 service.spreadsheets().get(spreadsheetId=sheets_id).execute()
             )
@@ -55,6 +58,7 @@ class Update:
             stats_sheet_exists = any(
                 sheet["properties"]["title"] == "Stats" for sheet in sheets
             )
+
             if not stats_sheet_exists:
                 body = {
                     "requests": [
@@ -74,6 +78,8 @@ class Update:
                 service.spreadsheets().batchUpdate(
                     spreadsheetId=sheets_id, body=body
                 ).execute()
+
+            # Read the existing names in "Stats" sheet
             range_name = "Stats!B2:E1000"
             result = (
                 service.spreadsheets()
@@ -82,16 +88,28 @@ class Update:
                 .execute()
             )
             values = result.get("values", [])
-            existing_names = [item for sublist in values for item in sublist if item]
+
+            # Flatten the list for easier checking
+            existing_names = [
+                item for sublist in values for item in sublist if item
+            ]  # Removes any empty strings
+
+            # Determine the insertion range for new names not already listed
             new_names = [name for name in player_names if name not in existing_names]
+
             if not new_names:
                 return "All player names are already listed in the sheet."
+
+            # Calculate the row and column for new name insertion
             next_available_row = 2 + (len(existing_names) // 4)
             next_available_column_index = len(existing_names) % 4
-            column_letters = ["B", "D", "F", "H"]
+            column_letters = ["B", "C", "D", "E"]
+
             for name in new_names:
-                if next_available_row > 1000 or next_available_column_index > 3:
-                    break
+                if (
+                    next_available_row > 1000 or next_available_column_index > 3
+                ):  # Limits to 'E1000'
+                    break  # No more insertion if it exceeds 'E1000'
                 next_cell = (
                     f"{column_letters[next_available_column_index]}{next_available_row}"
                 )
@@ -99,6 +117,8 @@ class Update:
                 if next_available_column_index > 3:
                     next_available_column_index = 0
                     next_available_row += 1
+
+                # Update the sheet with the new name
                 update_range = f"Stats!{next_cell}"
                 body = {"values": [[name]]}
                 service.spreadsheets().values().update(
@@ -107,6 +127,7 @@ class Update:
                     valueInputOption="USER_ENTERED",
                     body=body,
                 ).execute()
+
             return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"

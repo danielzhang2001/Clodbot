@@ -151,8 +151,9 @@ async def update_sheet(ctx: commands.Context, *args: str):
     except IndexError:
         await ctx.send("Invalid Google Sheets URL provided.")
         return
+    replay_data = await Analyze.analyze_replay(replay_link)
     creds = Update.authenticate_sheet()
-    update_message = await Update.update_sheet(creds, sheets_id, replay_link)
+    update_message = await Update.update_sheet(creds, sheets_id, replay_data)
     await ctx.send(update_message)
 
 

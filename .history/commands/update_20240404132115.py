@@ -88,7 +88,7 @@ class Update:
                 return "All player names are already listed in the sheet."
             next_available_row = 2 + (len(existing_names) // 4)
             next_available_column_index = len(existing_names) % 4
-            column_letters = ["B", "D", "F", "H"]
+            column_letters = ["B", "C", "D", "E"]
             for name in new_names:
                 if next_available_row > 1000 or next_available_column_index > 3:
                     break
