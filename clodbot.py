@@ -136,6 +136,7 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
 
 @bot.command(name="update")
 async def update_sheet(ctx: commands.Context, *args: str):
+    # Updates sheet with data from replay.
     if len(args) != 2:
         await ctx.send(
             "Please provide arguments as shown in the following:\n"
@@ -150,9 +151,8 @@ async def update_sheet(ctx: commands.Context, *args: str):
     except IndexError:
         await ctx.send("Invalid Google Sheets URL provided.")
         return
-    replay_data = await Analyze.analyze_replay(replay_link)
     creds = Update.authenticate_sheet()
-    update_message = await Update.update_sheet(creds, sheets_id, replay_data)
+    update_message = await Update.update_sheet(creds, sheets_id, replay_link)
     await ctx.send(update_message)
 
 
