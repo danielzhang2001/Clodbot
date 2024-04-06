@@ -68,10 +68,12 @@ class Update:
             )
             values = result.get("values", [])
             print(f"{values}")
+            print(f"UPDATE SHEET VALUE LENGTH: {len(values)}")
             existing_names = set(cell for row in values for cell in row if cell)
             for name in player_names:
                 if name not in existing_names:
-                    print(f"NEXT CELL:{Update.next_cell(values)}")
+                    col_letter, row_index = Update.next_cell(values)
+                    next_cell = f"{col_letter}{row_index}"
                     update_range = f"Stats!{next_cell}"
                     body = {"values": [[name]]}
                     # service.spreadsheets().values().update(
@@ -96,13 +98,11 @@ class Update:
     @staticmethod
     def next_cell(values):
         # Returns the row and column indices for the top of the next available section.
-        letters = ["B", "F", "J", "N"]
-        last_index = 0
         for section in range(0, len(values), 15):
             names_row = values[section]
             details_row = values[section + 1]
-            for index, letter in enumerate(letters):
-                start_index = index * 4
+            for index, letter in enumerate(["B", "F", "J", "N"]):
+                start_index = index * 3
                 group_cells = [
                     names_row[start_index] if len(names_row) > start_index else "",
                     details_row[start_index] if len(details_row) > start_index else "",
@@ -117,7 +117,13 @@ class Update:
                         else ""
                     ),
                 ]
+                print(f"GROUP CELLS: {group_cells}")
                 if any(cell == "" for cell in group_cells):
-                    return f"{letter}{section + 2}"
-                last_index = index
-        return f"{(letters[(last_index + 1) % len(letters)])}{(len(values) + 3)}"
+                    print(
+                        f"Empty cell found in block starting at row {section + 1}, column {letter}"
+                    )
+                    return (
+                        letter,
+                        section + 2,
+                    )
+        return None

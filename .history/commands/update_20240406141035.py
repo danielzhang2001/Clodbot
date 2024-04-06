@@ -66,12 +66,12 @@ class Update:
                 .get(spreadsheetId=sheets_id, range="Stats!B2:P285")
                 .execute()
             )
-            values = result.get("values", [])
-            print(f"{values}")
+            values = Update.filter_range(result.get("values", []))
             existing_names = set(cell for row in values for cell in row if cell)
             for name in player_names:
                 if name not in existing_names:
-                    print(f"NEXT CELL:{Update.next_cell(values)}")
+                    col_letter, row_index = Update.next_cell(values)
+                    next_cell = f"{col_letter}{row_index}"
                     update_range = f"Stats!{next_cell}"
                     body = {"values": [[name]]}
                     # service.spreadsheets().values().update(
@@ -96,28 +96,69 @@ class Update:
     @staticmethod
     def next_cell(values):
         # Returns the row and column indices for the top of the next available section.
-        letters = ["B", "F", "J", "N"]
-        last_index = 0
-        for section in range(0, len(values), 15):
-            names_row = values[section]
-            details_row = values[section + 1]
-            for index, letter in enumerate(letters):
-                start_index = index * 4
+        column_letters = ["B", "D", "F", "H"]  # Maps to columns B, D, F, H for "Name"
+        rows_per_block = 14  # Two rows to check, then skip 12 rows
+
+        for block_start in range(
+            0, len(values), rows_per_block
+        ):  # Step through blocks of 14 rows
+            # Ensure we have at least 2 rows to check in the current block
+            if block_start + 1 >= len(values):
+                continue  # Skip if the second row doesn't exist
+
+            # Names are expected in the first row of the block
+            names_row = values[block_start]
+            # Details (Pokemon, Kills, Deaths) are in the second row of the block
+            details_row = values[block_start + 1]
+
+            # Iterate over each group position in the defined columns
+            for col_idx, col_letter in enumerate(column_letters):
+                # Calculate indices for details based on groups of 3 adjacent cells in the details row
+                details_start_idx = col_idx * 3
+
+                # Collect all relevant cells for the group (Name + Pokemon, Kills, Deaths)
                 group_cells = [
-                    names_row[start_index] if len(names_row) > start_index else "",
-                    details_row[start_index] if len(details_row) > start_index else "",
+                    names_row[col_idx] if len(names_row) > col_idx else "",
                     (
-                        details_row[start_index + 1]
-                        if len(details_row) > start_index + 1
+                        details_row[details_start_idx]
+                        if len(details_row) > details_start_idx
                         else ""
                     ),
                     (
-                        details_row[start_index + 2]
-                        if len(details_row) > start_index + 2
+                        details_row[details_start_idx + 1]
+                        if len(details_row) > details_start_idx + 1
+                        else ""
+                    ),
+                    (
+                        details_row[details_start_idx + 2]
+                        if len(details_row) > details_start_idx + 2
                         else ""
                     ),
                 ]
+
+                # Check if any required cell in the group is empty
                 if any(cell == "" for cell in group_cells):
-                    return f"{letter}{section + 2}"
-                last_index = index
-        return f"{(letters[(last_index + 1) % len(letters)])}{(len(values) + 3)}"
+                    print(
+                        f"Empty cell found in block starting at row {block_start + 1}, column {col_letter}"
+                    )
+                    return (
+                        col_letter,
+                        block_start + 2,
+                    )  # Return the spreadsheet row number for "Name"
+
+        return None  # Return None if no empty cell is found
+
+    @staticmethod
+    def filter_range(values):
+        # Filters range of values to only relevant columns and rows.
+        filtered_values = []
+        for index, row in enumerate(values):
+            batch_index = index // 15
+            row_index = index % 15
+            if row_index < 14:
+                filtered_row = [
+                    row[i] if len(row) > i else ""
+                    for i in [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14]
+                ]
+            filtered_values.append(filtered_row)
+        return filtered_values

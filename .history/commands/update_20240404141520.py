@@ -52,72 +52,63 @@ class Update:
                 service.spreadsheets().get(spreadsheetId=sheets_id).execute()
             )
             sheets = sheet_metadata.get("sheets", "")
-            sheet_exists = any(
+            stats_sheet_exists = any(
                 sheet["properties"]["title"] == "Stats" for sheet in sheets
             )
-            if not sheet_exists:
-                body = {"requests": [{"addSheet": {"properties": {"title": "Stats"}}}]}
+            if not stats_sheet_exists:
+                body = {
+                    "requests": [
+                        {
+                            "addSheet": {
+                                "properties": {
+                                    "title": "Stats",
+                                    "gridProperties": {
+                                        "rowCount": 1000,
+                                        "columnCount": 26,
+                                    },
+                                }
+                            }
+                        }
+                    ]
+                }
                 service.spreadsheets().batchUpdate(
                     spreadsheetId=sheets_id, body=body
                 ).execute()
+            range_name = "Stats!B2:E1000"
             result = (
                 service.spreadsheets()
                 .values()
-                .get(spreadsheetId=sheets_id, range="Stats!B2:P285")
+                .get(spreadsheetId=sheets_id, range=range_name)
                 .execute()
             )
             values = result.get("values", [])
-            print(f"{values}")
-            existing_names = set(cell for row in values for cell in row if cell)
-            for name in player_names:
-                if name not in existing_names:
-                    print(f"NEXT CELL:{Update.next_cell(values)}")
-                    update_range = f"Stats!{next_cell}"
-                    body = {"values": [[name]]}
-                    # service.spreadsheets().values().update(
-                    #    spreadsheetId=sheets_id,
-                    #    range=update_range,
-                    #    valueInputOption="USER_ENTERED",
-                    #    body=body,
-                    # ).execute()
-                    # row_adjusted_index = (row_index - 2) // 2
-                    # if len(values) <= row_adjusted_index:
-                    #    while len(values) < row_adjusted_index + 1:
-                    #        values.append(["", "", "", ""])
-                    # values[row_adjusted_index][
-                    #    ["B", "D", "F", "H"].index(col_letter)
-                    # ] = name
+            existing_names = [item for sublist in values for item in sublist if item]
+            new_names = [name for name in player_names if name not in existing_names]
+            if not new_names:
+                return "All player names are already listed in the sheet."
+            next_row = 2 + (len(existing_names) // 4)
+            next_column = len(existing_names) % 4
+            column_letters = ["B", "D", "F", "H"]
+            for name in new_names:
+                if next_row > 1000 or next_column > 3:
+                    break
+                next_cell = (
+                    f"{column_letters[next_available_column_index]}{next_available_row}"
+                )
+                next_column += 1
+                if next_column > 3:
+                    next_column = 0
+                    next_row += 1
+                update_range = f"Stats!{next_cell}"
+                body = {"values": [[name]]}
+                service.spreadsheets().values().update(
+                    spreadsheetId=sheets_id,
+                    range=update_range,
+                    valueInputOption="USER_ENTERED",
+                    body=body,
+                ).execute()
             return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"
         except Exception as e:
             return f"Failed to update the sheet: {e}"
-
-    @staticmethod
-    def next_cell(values):
-        # Returns the row and column indices for the top of the next available section.
-        letters = ["B", "F", "J", "N"]
-        last_index = 0
-        for section in range(0, len(values), 15):
-            names_row = values[section]
-            details_row = values[section + 1]
-            for index, letter in enumerate(letters):
-                start_index = index * 4
-                group_cells = [
-                    names_row[start_index] if len(names_row) > start_index else "",
-                    details_row[start_index] if len(details_row) > start_index else "",
-                    (
-                        details_row[start_index + 1]
-                        if len(details_row) > start_index + 1
-                        else ""
-                    ),
-                    (
-                        details_row[start_index + 2]
-                        if len(details_row) > start_index + 2
-                        else ""
-                    ),
-                ]
-                if any(cell == "" for cell in group_cells):
-                    return f"{letter}{section + 2}"
-                last_index = index
-        return f"{(letters[(last_index + 1) % len(letters)])}{(len(values) + 3)}"

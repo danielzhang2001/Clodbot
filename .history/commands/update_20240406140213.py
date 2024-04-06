@@ -66,12 +66,12 @@ class Update:
                 .get(spreadsheetId=sheets_id, range="Stats!B2:P285")
                 .execute()
             )
-            values = result.get("values", [])
-            print(f"{values}")
+            values = Update.filter_range(result.get("values", []))
             existing_names = set(cell for row in values for cell in row if cell)
             for name in player_names:
                 if name not in existing_names:
-                    print(f"NEXT CELL:{Update.next_cell(values)}")
+                    col_letter, row_index = Update.next_cell(values)
+                    next_cell = f"{col_letter}{row_index}"
                     update_range = f"Stats!{next_cell}"
                     body = {"values": [[name]]}
                     # service.spreadsheets().values().update(
@@ -96,28 +96,28 @@ class Update:
     @staticmethod
     def next_cell(values):
         # Returns the row and column indices for the top of the next available section.
-        letters = ["B", "F", "J", "N"]
-        last_index = 0
-        for section in range(0, len(values), 15):
-            names_row = values[section]
-            details_row = values[section + 1]
-            for index, letter in enumerate(letters):
-                start_index = index * 4
-                group_cells = [
-                    names_row[start_index] if len(names_row) > start_index else "",
-                    details_row[start_index] if len(details_row) > start_index else "",
-                    (
-                        details_row[start_index + 1]
-                        if len(details_row) > start_index + 1
-                        else ""
-                    ),
-                    (
-                        details_row[start_index + 2]
-                        if len(details_row) > start_index + 2
-                        else ""
-                    ),
+        for row_index, row in enumerate(values):
+            for group_index in range(0, len(row), 4):
+                group = row[group_index : group_index + 3]
+                print(f"GROUP: {group}")
+                if any(cell == "" for cell in group):
+                    col = chr(66 + (group_index // 4) * 2)
+                    row = (row_index * 14) + 2
+                    print(f"COL AND ROW: {col} {row}")
+                    return col, row
+        return None
+
+    @staticmethod
+    def filter_range(values):
+        # Filters range of values to only relevant columns and rows.
+        filtered_values = []
+        for index, row in enumerate(values):
+            batch_index = index // 15
+            row_index = index % 15
+            if row_index < 14:
+                filtered_row = [
+                    row[i] if len(row) > i else ""
+                    for i in [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14]
                 ]
-                if any(cell == "" for cell in group_cells):
-                    return f"{letter}{section + 2}"
-                last_index = index
-        return f"{(letters[(last_index + 1) % len(letters)])}{(len(values) + 3)}"
+            filtered_values.append(filtered_row)
+        return filtered_values

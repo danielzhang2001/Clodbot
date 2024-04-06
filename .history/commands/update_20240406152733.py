@@ -71,7 +71,8 @@ class Update:
             existing_names = set(cell for row in values for cell in row if cell)
             for name in player_names:
                 if name not in existing_names:
-                    print(f"NEXT CELL:{Update.next_cell(values)}")
+                    print(f"NEXT CELL: {Update.next_cell(values)})
+                    next_cell = f"{col_letter}{row_index}"
                     update_range = f"Stats!{next_cell}"
                     body = {"values": [[name]]}
                     # service.spreadsheets().values().update(

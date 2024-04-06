@@ -66,27 +66,27 @@ class Update:
                 .get(spreadsheetId=sheets_id, range="Stats!B2:P285")
                 .execute()
             )
-            values = result.get("values", [])
-            print(f"{values}")
+            values = Update.filter_range(result.get("values", []))
             existing_names = set(cell for row in values for cell in row if cell)
             for name in player_names:
                 if name not in existing_names:
-                    print(f"NEXT CELL:{Update.next_cell(values)}")
+                    col_letter, row_index = Update.next_cell(values)
+                    next_cell = f"{col_letter}{row_index}"
                     update_range = f"Stats!{next_cell}"
                     body = {"values": [[name]]}
-                    # service.spreadsheets().values().update(
-                    #    spreadsheetId=sheets_id,
-                    #    range=update_range,
-                    #    valueInputOption="USER_ENTERED",
-                    #    body=body,
-                    # ).execute()
-                    # row_adjusted_index = (row_index - 2) // 2
-                    # if len(values) <= row_adjusted_index:
-                    #    while len(values) < row_adjusted_index + 1:
-                    #        values.append(["", "", "", ""])
-                    # values[row_adjusted_index][
-                    #    ["B", "D", "F", "H"].index(col_letter)
-                    # ] = name
+                    service.spreadsheets().values().update(
+                        spreadsheetId=sheets_id,
+                        range=update_range,
+                        valueInputOption="USER_ENTERED",
+                        body=body,
+                    ).execute()
+                    row_adjusted_index = (row_index - 2) // 2
+                    if len(values) <= row_adjusted_index:
+                        while len(values) < row_adjusted_index + 1:
+                            values.append(["", "", "", ""])
+                    values[row_adjusted_index][
+                        ["B", "D", "F", "H"].index(col_letter)
+                    ] = name
             return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"
@@ -95,29 +95,28 @@ class Update:
 
     @staticmethod
     def next_cell(values):
-        # Returns the row and column indices for the top of the next available section.
-        letters = ["B", "F", "J", "N"]
-        last_index = 0
-        for section in range(0, len(values), 15):
-            names_row = values[section]
-            details_row = values[section + 1]
-            for index, letter in enumerate(letters):
-                start_index = index * 4
-                group_cells = [
-                    names_row[start_index] if len(names_row) > start_index else "",
-                    details_row[start_index] if len(details_row) > start_index else "",
-                    (
-                        details_row[start_index + 1]
-                        if len(details_row) > start_index + 1
-                        else ""
-                    ),
-                    (
-                        details_row[start_index + 2]
-                        if len(details_row) > start_index + 2
-                        else ""
-                    ),
+        # Returns the row and column indices for the next available cell.
+        row_index = 2
+        while True:
+            current_row = values[row_index - 2] if (row_index - 2) < len(values) else []
+            for col_index, letter in enumerate(column_letters):
+                if len(current_row) <= col_index or current_row[col_index] == "":
+                    return letter, row_index
+            row_index += 2
+
+    @staticmethod
+    def filter_range(values):
+        # Filters range of values to only relevant columns and rows.
+        filtered_values = []
+        row_pattern = 16
+        for index, row in enumerate(values):
+            batch_index = index // row_pattern
+            row_index = index % row_pattern
+            if row_index < 14:
+                filtered_row = [
+                    row[i] if len(row) > i else ""
+                    for i in [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14]
                 ]
-                if any(cell == "" for cell in group_cells):
-                    return f"{letter}{section + 2}"
-                last_index = index
-        return f"{(letters[(last_index + 1) % len(letters)])}{(len(values) + 3)}"
+                print(f"{filtered_row}")
+            filtered_values.append(filtered_row)
+        return filtered_values

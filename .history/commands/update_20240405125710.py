@@ -52,10 +52,10 @@ class Update:
                 service.spreadsheets().get(spreadsheetId=sheets_id).execute()
             )
             sheets = sheet_metadata.get("sheets", "")
-            sheet_exists = any(
+            stats_sheet_exists = any(
                 sheet["properties"]["title"] == "Stats" for sheet in sheets
             )
-            if not sheet_exists:
+            if not stats_sheet_exists:
                 body = {"requests": [{"addSheet": {"properties": {"title": "Stats"}}}]}
                 service.spreadsheets().batchUpdate(
                     spreadsheetId=sheets_id, body=body
@@ -63,30 +63,34 @@ class Update:
             result = (
                 service.spreadsheets()
                 .values()
-                .get(spreadsheetId=sheets_id, range="Stats!B2:P285")
+                .get(spreadsheetId=sheets_id, range="Stats!B2:H1000")
                 .execute()
             )
-            values = result.get("values", [])
-            print(f"{values}")
+            all_values = result.get("values", [])
+            values = Update.filter_columns_and_rows(all_values)
             existing_names = set(cell for row in values for cell in row if cell)
             for name in player_names:
                 if name not in existing_names:
-                    print(f"NEXT CELL:{Update.next_cell(values)}")
+                    col_letter, row_index = Update.next_cell(
+                        values, ["B", "D", "F", "H"]
+                    )
+                    next_cell = f"{col_letter}{row_index}"
                     update_range = f"Stats!{next_cell}"
                     body = {"values": [[name]]}
-                    # service.spreadsheets().values().update(
-                    #    spreadsheetId=sheets_id,
-                    #    range=update_range,
-                    #    valueInputOption="USER_ENTERED",
-                    #    body=body,
-                    # ).execute()
-                    # row_adjusted_index = (row_index - 2) // 2
-                    # if len(values) <= row_adjusted_index:
-                    #    while len(values) < row_adjusted_index + 1:
-                    #        values.append(["", "", "", ""])
-                    # values[row_adjusted_index][
-                    #    ["B", "D", "F", "H"].index(col_letter)
-                    # ] = name
+                    service.spreadsheets().values().update(
+                        spreadsheetId=sheets_id,
+                        range=update_range,
+                        valueInputOption="USER_ENTERED",
+                        body=body,
+                    ).execute()
+                    print(f"UPDATED {name} on CELL {next_cell}")
+                    row_adjusted_index = (row_index - 2) // 2
+                    if len(values) <= row_adjusted_index:
+                        while len(values) < row_adjusted_index + 1:
+                            values.append(["", "", "", ""])
+                    values[row_adjusted_index][
+                        ["B", "D", "F", "H"].index(col_letter)
+                    ] = name
             return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"
@@ -94,30 +98,25 @@ class Update:
             return f"Failed to update the sheet: {e}"
 
     @staticmethod
-    def next_cell(values):
-        # Returns the row and column indices for the top of the next available section.
-        letters = ["B", "F", "J", "N"]
-        last_index = 0
-        for section in range(0, len(values), 15):
-            names_row = values[section]
-            details_row = values[section + 1]
-            for index, letter in enumerate(letters):
-                start_index = index * 4
-                group_cells = [
-                    names_row[start_index] if len(names_row) > start_index else "",
-                    details_row[start_index] if len(details_row) > start_index else "",
-                    (
-                        details_row[start_index + 1]
-                        if len(details_row) > start_index + 1
-                        else ""
-                    ),
-                    (
-                        details_row[start_index + 2]
-                        if len(details_row) > start_index + 2
-                        else ""
-                    ),
-                ]
-                if any(cell == "" for cell in group_cells):
-                    return f"{letter}{section + 2}"
-                last_index = index
-        return f"{(letters[(last_index + 1) % len(letters)])}{(len(values) + 3)}"
+    def next_cell(values, column_letters):
+        # Returns the row and column indices for the next available cell.
+
+        row_index = 2
+        while True:
+            current_row = values[row_index - 2] if (row_index - 2) < len(values) else []
+            print(f"CURRENT ROW: {current_row}")
+            for col_index, letter in enumerate(column_letters):
+                # Check if current row has less columns than needed or the cell is empty
+                if len(current_row) <= col_index or current_row[col_index] == "":
+                    print(f"COL AND ROW: {letter} {row_index}")
+                    return letter, row_index
+            row_index += 2
+
+    @staticmethod
+    def filter_columns_and_rows(api_values):
+        filtered_values = []
+        for index, row in enumerate(api_values):
+            if (index + 2) % 2 == 0:
+                filtered_row = [row[i] if len(row) > i else "" for i in [0, 2, 4, 6]]
+                filtered_values.append(filtered_row)
+        return filtered_values
