@@ -9,8 +9,6 @@ def get_player_names(raw_data):
     # Retrieves player names.
     player_info = re.findall(r"\|player\|(p\d)\|(.+?)\|", raw_data)
     players = {player[0]: player[1] for player in player_info}
-    print(f"PLAYER INFO: {player_info}")
-    print(f"PLAYERS: {players}")
     return players
 
 
