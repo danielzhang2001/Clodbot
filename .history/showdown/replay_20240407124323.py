@@ -81,6 +81,8 @@ def initialize_stats(
 
 def process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2):
     # Populates the death values for all Pokemon based on the faints in the log.
+    player1_fainted = 0
+    player2_fainted = 0
     faints = [line for line in raw_data.split("\n") if re.match(r"^\|faint\|", line)]
     for faint in faints:
         if faint:
@@ -101,7 +103,11 @@ def process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_p
                     "kills": 0,
                     "deaths": 1,
                 }
-    return stats
+            if player == "p1":
+                player1_fainted += 1
+            else:
+                player2_fainted += 1
+    return stats, player1_fainted, player2_fainted
 
 
 def process_kills(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2):
@@ -147,7 +153,7 @@ def process_kills(raw_data, stats, nickname_mapping_player1, nickname_mapping_pl
     return stats
 
 
-def process_revives(raw_data, stats):
+def process_revives(raw_data, stats, player1_fainted, player2_fainted):
     # Repopulates the death values for Pokemon that have been revived by Revival Blessing. If revived, take away one death.
     revives = re.findall(r"\|-heal\|(p\d): (\w+)\|", raw_data)
     for revive in revives:
@@ -155,7 +161,12 @@ def process_revives(raw_data, stats):
         for _, value in stats.items():
             if value["poke"] == revived_pokemon and value["player"] == player:
                 value["deaths"] -= 1
-    return stats
+                if player == "p1":
+                    player1_fainted -= 1
+                else:
+                    player2_fainted -= 1
+                break
+    return stats, player1_fainted, player2_fainted
 
 
 def get_winner(raw_data):

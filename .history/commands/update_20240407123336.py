@@ -79,7 +79,7 @@ class Update:
                 if name not in values:
                     cell_range = next_cell(values)
                     update_range = f"Stats!{cell_range}"
-                    body = {"values": [[name], ["Pokemon"]]}
+                    body = {"values": [[name]]}
                     service.spreadsheets().values().update(
                         spreadsheetId=sheets_id,
                         range=update_range,
@@ -99,7 +99,7 @@ class Update:
                                         "startColumnIndex": ord(col_letter) - ord("A"),
                                         "endColumnIndex": ord(col_letter)
                                         - ord("A")
-                                        + 3,
+                                        + 1,
                                     },
                                     "mergeType": "MERGE_ALL",
                                 }

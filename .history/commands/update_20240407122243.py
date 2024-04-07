@@ -53,21 +53,14 @@ class Update:
                 service.spreadsheets().get(spreadsheetId=sheets_id).execute()
             )
             sheets = sheet_metadata.get("sheets", "")
-            stats_sheet_id = None
-            for sheet in sheets:
-                if sheet["properties"]["title"] == "Stats":
-                    stats_sheet_id = sheet["properties"]["sheetId"]
-                    break
-            if stats_sheet_id is None:
+            sheet_exists = any(
+                sheet["properties"]["title"] == "Stats" for sheet in sheets
+            )
+            if not sheet_exists:
                 body = {"requests": [{"addSheet": {"properties": {"title": "Stats"}}}]}
-                add_sheet_response = (
-                    service.spreadsheets()
-                    .batchUpdate(spreadsheetId=sheets_id, body=body)
-                    .execute()
-                )
-                stats_sheet_id = add_sheet_response["replies"][0]["addSheet"][
-                    "properties"
-                ]["sheetId"]
+                service.spreadsheets().batchUpdate(
+                    spreadsheetId=sheets_id, body=body
+                ).execute()
             result = (
                 service.spreadsheets()
                 .values()
@@ -75,43 +68,48 @@ class Update:
                 .execute()
             )
             values = result.get("values", [])
+            print(f"{values}")
+            existing_names = set(cell for row in values for cell in row if cell)
             for name in player_names:
-                if name not in values:
-                    cell_range = next_cell(values)
-                    update_range = f"Stats!{cell_range}"
-                    body = {"values": [[name], ["Pokemon"]]}
+                if name not in existing_names:
+                    update_range = f"Stats!{next_cell(values)}"
+                    body = {"values": [[name]]}
                     service.spreadsheets().values().update(
                         spreadsheetId=sheets_id,
                         range=update_range,
                         valueInputOption="USER_ENTERED",
                         body=body,
                     ).execute()
-                    col_letter = cell_range[0]
-                    row_number = int(cell_range[1:])
+                    merge_start = next_cell(values)
+                    merge_end = next_cell(values)[0] + str(
+                        int(next_cell(values)[1:]) + 2
+                    )
                     merge_body = {
                         "requests": [
                             {
                                 "mergeCells": {
                                     "range": {
-                                        "sheetId": stats_sheet_id,
-                                        "startRowIndex": row_number - 1,
-                                        "endRowIndex": row_number,
-                                        "startColumnIndex": ord(col_letter) - ord("A"),
-                                        "endColumnIndex": ord(col_letter)
+                                        "sheetId": sheets_id,
+                                        "startRowIndex": int(cell_range[1:]) - 1,
+                                        "endRowIndex": int(merge_end[1:]),
+                                        "startColumnIndex": ord(cell_range[0])
+                                        - ord("A"),  # Convert 'B' to index 1
+                                        "endColumnIndex": ord(cell_range[0])
                                         - ord("A")
-                                        + 3,
+                                        + 1,  # Keeps single column span
                                     },
                                     "mergeType": "MERGE_ALL",
                                 }
                             },
                             {
-                                "repeatCell": {
+                                "updateCells": {
                                     "range": {
-                                        "sheetId": stats_sheet_id,
-                                        "startRowIndex": row_number - 1,
-                                        "endRowIndex": row_number + 2,
-                                        "startColumnIndex": ord(col_letter) - ord("A"),
-                                        "endColumnIndex": ord(col_letter)
+                                        "sheetId": sheets_id,
+                                        "startRowIndex": int(cell_range[1:]) - 1,
+                                        "endRowIndex": int(merge_end[1:]),
+                                        "startColumnIndex": ord(cell_range[0])
+                                        - ord("A"),
+                                        "endColumnIndex": ord(cell_range[0])
                                         - ord("A")
                                         + 1,
                                     },
@@ -125,10 +123,6 @@ class Update:
                             },
                         ]
                     }
-                    service.spreadsheets().batchUpdate(
-                        spreadsheetId=sheets_id,
-                        body=merge_body,
-                    ).execute()
             return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"

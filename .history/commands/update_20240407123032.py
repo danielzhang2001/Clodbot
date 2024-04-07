@@ -76,42 +76,43 @@ class Update:
             )
             values = result.get("values", [])
             for name in player_names:
-                if name not in values:
+                if name not in valuess:
                     cell_range = next_cell(values)
                     update_range = f"Stats!{cell_range}"
-                    body = {"values": [[name], ["Pokemon"]]}
+                    body = {"values": [[name]]}
                     service.spreadsheets().values().update(
                         spreadsheetId=sheets_id,
                         range=update_range,
                         valueInputOption="USER_ENTERED",
                         body=body,
                     ).execute()
-                    col_letter = cell_range[0]
-                    row_number = int(cell_range[1:])
+                    merge_range = cell_range[0] + str(int(cell_range[1:]) + 2)
                     merge_body = {
                         "requests": [
                             {
                                 "mergeCells": {
                                     "range": {
-                                        "sheetId": stats_sheet_id,
-                                        "startRowIndex": row_number - 1,
-                                        "endRowIndex": row_number,
-                                        "startColumnIndex": ord(col_letter) - ord("A"),
-                                        "endColumnIndex": ord(col_letter)
+                                        "sheetId": sheets_id,
+                                        "startRowIndex": int(cell_range[1:]) - 1,
+                                        "endRowIndex": int(merge_range[1:]),
+                                        "startColumnIndex": ord(cell_range[0])
+                                        - ord("A"),
+                                        "endColumnIndex": ord(cell_range[0])
                                         - ord("A")
-                                        + 3,
+                                        + 1,  # Keeps single column span
                                     },
                                     "mergeType": "MERGE_ALL",
                                 }
                             },
                             {
-                                "repeatCell": {
+                                "updateCells": {
                                     "range": {
-                                        "sheetId": stats_sheet_id,
-                                        "startRowIndex": row_number - 1,
-                                        "endRowIndex": row_number + 2,
-                                        "startColumnIndex": ord(col_letter) - ord("A"),
-                                        "endColumnIndex": ord(col_letter)
+                                        "sheetId": sheets_id,
+                                        "startRowIndex": int(cell_range[1:]) - 1,
+                                        "endRowIndex": int(merge_range[1:]),
+                                        "startColumnIndex": ord(cell_range[0])
+                                        - ord("A"),
+                                        "endColumnIndex": ord(cell_range[0])
                                         - ord("A")
                                         + 1,
                                     },

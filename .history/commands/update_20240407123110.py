@@ -76,10 +76,10 @@ class Update:
             )
             values = result.get("values", [])
             for name in player_names:
-                if name not in values:
+                if name not in valuess:
                     cell_range = next_cell(values)
                     update_range = f"Stats!{cell_range}"
-                    body = {"values": [[name], ["Pokemon"]]}
+                    body = {"values": [[name]]}
                     service.spreadsheets().values().update(
                         spreadsheetId=sheets_id,
                         range=update_range,
@@ -95,11 +95,11 @@ class Update:
                                     "range": {
                                         "sheetId": stats_sheet_id,
                                         "startRowIndex": row_number - 1,
-                                        "endRowIndex": row_number,
+                                        "endRowIndex": row_number + 2,
                                         "startColumnIndex": ord(col_letter) - ord("A"),
                                         "endColumnIndex": ord(col_letter)
                                         - ord("A")
-                                        + 3,
+                                        + 1,
                                     },
                                     "mergeType": "MERGE_ALL",
                                 }
