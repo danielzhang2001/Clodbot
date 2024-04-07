@@ -1,5 +1,5 @@
 """
-General functions in scraping Pokemon Smogon sets.
+General functions in getting Pokemon Smogon sets.
 """
 
 import asyncio

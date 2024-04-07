@@ -27,15 +27,13 @@ class Analyze:
         stats = initialize_stats(
             pokes, p1_count, nickname_mapping_player1, nickname_mapping_player2
         )
-        stats, player1_fainted, player2_fainted = process_faints(
+        stats = process_faints(
             raw_data, stats, nickname_mapping_player1, nickname_mapping_player2
         )
         stats = process_kills(
             raw_data, stats, nickname_mapping_player1, nickname_mapping_player2
         )
-        stats, player1_fainted, player2_fainted = process_revives(
-            raw_data, stats, player1_fainted, player2_fainted
-        )
+        stats = process_revives(raw_data, stats)
         winner = get_winner(raw_data)
         loser = get_loser(raw_data)
         difference = get_difference(raw_data, players)

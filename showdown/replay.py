@@ -23,9 +23,9 @@ def get_pokes(raw_data):
     pokes = [
         re.search(r"\|poke\|\w+\|([^,|\r\n]+)", line).group(1) for line in poke_lines
     ]
-    pokes_with_nicknames = [nickname_mapping.get(pokemon, pokemon) for pokemon in pokes]
-    pokes_with_nicknames = [re.sub(r"-\*$", "", poke) for poke in pokes_with_nicknames]
-    return pokes_with_nicknames
+    nicknamed_pokes = [nickname_mapping.get(pokemon, pokemon) for pokemon in pokes]
+    nicknamed_pokes = [re.sub(r"-\*$", "", poke) for poke in nicknamed_pokes]
+    return nicknamed_pokes
 
 
 def get_p1_count(raw_data):
@@ -81,8 +81,6 @@ def initialize_stats(
 
 def process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2):
     # Populates the death values for all Pokemon based on the faints in the log.
-    player1_fainted = 0
-    player2_fainted = 0
     faints = [line for line in raw_data.split("\n") if re.match(r"^\|faint\|", line)]
     for faint in faints:
         if faint:
@@ -103,11 +101,7 @@ def process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_p
                     "kills": 0,
                     "deaths": 1,
                 }
-            if player == "p1":
-                player1_fainted += 1
-            else:
-                player2_fainted += 1
-    return stats, player1_fainted, player2_fainted
+    return stats
 
 
 def process_kills(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2):
@@ -153,7 +147,7 @@ def process_kills(raw_data, stats, nickname_mapping_player1, nickname_mapping_pl
     return stats
 
 
-def process_revives(raw_data, stats, player1_fainted, player2_fainted):
+def process_revives(raw_data, stats):
     # Repopulates the death values for Pokemon that have been revived by Revival Blessing. If revived, take away one death.
     revives = re.findall(r"\|-heal\|(p\d): (\w+)\|", raw_data)
     for revive in revives:
@@ -161,12 +155,7 @@ def process_revives(raw_data, stats, player1_fainted, player2_fainted):
         for _, value in stats.items():
             if value["poke"] == revived_pokemon and value["player"] == player:
                 value["deaths"] -= 1
-                if player == "p1":
-                    player1_fainted -= 1
-                else:
-                    player2_fainted -= 1
-                break
-    return stats, player1_fainted, player2_fainted
+    return stats
 
 
 def get_winner(raw_data):
