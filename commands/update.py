@@ -40,95 +40,76 @@ class Update:
         return creds
 
     @staticmethod
-    async def update_sheet(creds: Credentials, sheets_id: str, replay_link: str) -> str:
+    async def update_sheet(
+        creds: Credentials, spreadsheet_id: str, replay_link: str
+    ) -> str:
         # Updates sheets with replay data.
         service = build("sheets", "v4", credentials=creds)
         try:
             response = requests.get(replay_link + ".log")
             response.raise_for_status()
             raw_data = response.text
-            names_dict = get_player_names(raw_data)
-            player_names = [names_dict["p1"], names_dict["p2"]]
+            players = get_player_names(raw_data)
+            pokes = get_pokes(raw_data)
+            p1_count = get_p1_count(raw_data)
+            nickname_mapping1, nickname_mapping2 = get_nickname_mappings(raw_data)
+            stats = get_stats(
+                raw_data,
+                pokes,
+                p1_count,
+                nickname_mapping1,
+                nickname_mapping2,
+            )
+            formatted_stats = format_stats(players, stats)
             sheet_metadata = (
-                service.spreadsheets().get(spreadsheetId=sheets_id).execute()
+                service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
             )
             sheets = sheet_metadata.get("sheets", "")
-            stats_sheet_id = None
+            sheet_id = None
             for sheet in sheets:
                 if sheet["properties"]["title"] == "Stats":
-                    stats_sheet_id = sheet["properties"]["sheetId"]
+                    sheet_id = sheet["properties"]["sheetId"]
                     break
-            if stats_sheet_id is None:
+            if sheet_id is None:
                 body = {"requests": [{"addSheet": {"properties": {"title": "Stats"}}}]}
-                add_sheet_response = (
+                sheet_response = (
                     service.spreadsheets()
-                    .batchUpdate(spreadsheetId=sheets_id, body=body)
+                    .batchUpdate(spreadsheetId=spreadsheet_id, body=body)
                     .execute()
                 )
-                stats_sheet_id = add_sheet_response["replies"][0]["addSheet"][
-                    "properties"
-                ]["sheetId"]
-            result = (
-                service.spreadsheets()
-                .values()
-                .get(spreadsheetId=sheets_id, range="Stats!B2:P285")
-                .execute()
-            )
-            values = result.get("values", [])
-            for name in player_names:
-                if name not in values:
+                sheet_id = sheet_response["replies"][0]["addSheet"]["properties"][
+                    "sheetId"
+                ]
+            for player_data in formatted_stats:
+                player_name = player_data[0]
+                pokemon = player_data[1]
+                result = (
+                    service.spreadsheets()
+                    .values()
+                    .get(spreadsheetId=spreadsheet_id, range="Stats!B2:P285")
+                    .execute()
+                )
+                values = result.get("values", [])
+                if player_name not in set(
+                    cell for row in values for cell in row if cell
+                ):
                     cell_range = next_cell(values)
                     update_range = f"Stats!{cell_range}"
-                    body = {"values": [[name], ["Pokemon"]]}
+                    data = (
+                        [[player_name], ["Pokemon", "Kills", "Deaths"]]
+                        + [[poke[0]] + poke[1] for poke in pokemon]
+                        + [[" "] * 3] * max(0, 12 - len(pokemon))
+                    )
+                    body = {"values": data}
                     service.spreadsheets().values().update(
-                        spreadsheetId=sheets_id,
+                        spreadsheetId=spreadsheet_id,
                         range=update_range,
                         valueInputOption="USER_ENTERED",
                         body=body,
                     ).execute()
-                    col_letter = cell_range[0]
-                    row_number = int(cell_range[1:])
-                    merge_body = {
-                        "requests": [
-                            {
-                                "mergeCells": {
-                                    "range": {
-                                        "sheetId": stats_sheet_id,
-                                        "startRowIndex": row_number - 1,
-                                        "endRowIndex": row_number,
-                                        "startColumnIndex": ord(col_letter) - ord("A"),
-                                        "endColumnIndex": ord(col_letter)
-                                        - ord("A")
-                                        + 3,
-                                    },
-                                    "mergeType": "MERGE_ALL",
-                                }
-                            },
-                            {
-                                "repeatCell": {
-                                    "range": {
-                                        "sheetId": stats_sheet_id,
-                                        "startRowIndex": row_number - 1,
-                                        "endRowIndex": row_number + 2,
-                                        "startColumnIndex": ord(col_letter) - ord("A"),
-                                        "endColumnIndex": ord(col_letter)
-                                        - ord("A")
-                                        + 1,
-                                    },
-                                    "cell": {
-                                        "userEnteredFormat": {
-                                            "horizontalAlignment": "CENTER"
-                                        }
-                                    },
-                                    "fields": "userEnteredFormat.horizontalAlignment",
-                                }
-                            },
-                        ]
-                    }
-                    service.spreadsheets().batchUpdate(
-                        spreadsheetId=sheets_id,
-                        body=merge_body,
-                    ).execute()
+                    col = cell_range[0]
+                    row = int(cell_range[1:])
+                    merge_cells(service, spreadsheet_id, sheet_id, col, row)
             return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"
