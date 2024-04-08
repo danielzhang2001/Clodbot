@@ -52,9 +52,7 @@ def next_cell(values: List[List[str]]) -> str:
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
 
 
-def merge_cells(
-    service: Resource, spreadsheet_id: str, sheet_id: int, col: str, row: int
-) -> None:
+def merge_cells(service: Resource, spreadsheet_id: int, col: str, row: int) -> None:
     # Merges the cells containing the name for formatting purposes.
     col = ord(col) - ord("A")
     merge_body = {
@@ -87,6 +85,6 @@ def merge_cells(
         ]
     }
     service.spreadsheets().batchUpdate(
-        spreadsheetId=spreadsheet_id,
+        spreadsheetId=sheet_id,
         body=merge_body,
     ).execute()

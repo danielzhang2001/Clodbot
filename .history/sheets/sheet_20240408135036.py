@@ -87,6 +87,6 @@ def merge_cells(
         ]
     }
     service.spreadsheets().batchUpdate(
-        spreadsheetId=spreadsheet_id,
+        spreadsheetId=sheet_id,
         body=merge_body,
     ).execute()

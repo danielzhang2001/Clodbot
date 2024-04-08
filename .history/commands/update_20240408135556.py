@@ -40,9 +40,7 @@ class Update:
         return creds
 
     @staticmethod
-    async def update_sheet(
-        creds: Credentials, spreadsheet_id: str, replay_link: str
-    ) -> str:
+    async def update_sheet(creds: Credentials, spreadsheet_id: str, replay_link: str) -> str:
         # Updates sheets with replay data.
         service = build("sheets", "v4", credentials=creds)
         try:
@@ -109,7 +107,7 @@ class Update:
                     ).execute()
                     col = cell_range[0]
                     row = int(cell_range[1:])
-                    merge_cells(service, spreadsheet_id, sheet_id, col, row)
+                    merge_cells(service, spreadsheet_id sheet_id, col, row)
             return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"

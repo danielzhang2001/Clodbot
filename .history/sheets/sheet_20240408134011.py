@@ -3,7 +3,6 @@ General functions in updating Google Sheets with Pokemon Showdown replay informa
 """
 
 from typing import List
-from googleapiclient.discovery import Resource
 
 
 def next_cell(values: List[List[str]]) -> str:
@@ -52,11 +51,9 @@ def next_cell(values: List[List[str]]) -> str:
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
 
 
-def merge_cells(
-    service: Resource, spreadsheet_id: str, sheet_id: int, col: str, row: int
-) -> None:
+def merge_cells(service, sheet_id, col, row):
     # Merges the cells containing the name for formatting purposes.
-    col = ord(col) - ord("A")
+    col = ord(column) - ord("A")
     merge_body = {
         "requests": [
             {
@@ -87,6 +84,6 @@ def merge_cells(
         ]
     }
     service.spreadsheets().batchUpdate(
-        spreadsheetId=spreadsheet_id,
+        spreadsheetId=sheet_id,
         body=merge_body,
     ).execute()

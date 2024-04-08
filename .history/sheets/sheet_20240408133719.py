@@ -3,7 +3,6 @@ General functions in updating Google Sheets with Pokemon Showdown replay informa
 """
 
 from typing import List
-from googleapiclient.discovery import Resource
 
 
 def next_cell(values: List[List[str]]) -> str:
@@ -51,42 +50,43 @@ def next_cell(values: List[List[str]]) -> str:
             last_index = index
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
 
-
-def merge_cells(
-    service: Resource, spreadsheet_id: str, sheet_id: int, col: str, row: int
-) -> None:
+def merge_cells(service, sheet_id, column, start_row):
     # Merges the cells containing the name for formatting purposes.
-    col = ord(col) - ord("A")
+    col_index = ord(column) - ord("A")
     merge_body = {
         "requests": [
-            {
-                "mergeCells": {
-                    "range": {
-                        "sheetId": sheet_id,
-                        "startRowIndex": row - 1,
-                        "endRowIndex": row,
-                        "startColumnIndex": col,
-                        "endColumnIndex": col + 3,
-                    },
-                    "mergeType": "MERGE_ALL",
-                }
-            },
-            {
-                "repeatCell": {
-                    "range": {
-                        "sheetId": sheet_id,
-                        "startRowIndex": row - 1,
-                        "endRowIndex": row,
-                        "startColumnIndex": col,
-                        "endColumnIndex": col + 1,
-                    },
-                    "cell": {"userEnteredFormat": {"horizontalAlignment": "CENTER"}},
-                    "fields": "userEnteredFormat.horizontalAlignment",
-                }
-            },
-        ]
-    }
-    service.spreadsheets().batchUpdate(
-        spreadsheetId=spreadsheet_id,
-        body=merge_body,
-    ).execute()
+                {
+                    "mergeCells": {
+                        "range": {
+                            "sheetId": sheet_id,
+                            "startRowIndex": start_row - 1,
+                            "endRowIndex": start_row,
+                            "startColumnIndex": col_index,
+                            "endColumnIndex": col_index + 3,
+                        },
+                        "mergeType": "MERGE_ALL",
+                    }
+                },
+                {
+                    "repeatCell": {
+                        "range": {
+                            "sheetId": sheet_id,
+                            "startRowIndex": start_row - 1,
+                            "endRowIndex": start_row,
+                            "startColumnIndex": col_index,
+                            "endColumnIndex": col_index + 1,
+                        },
+                        "cell": {
+                            "userEnteredFormat": {
+                                "horizontalAlignment": "CENTER"
+                            }
+                        },
+                        "fields": "userEnteredFormat.horizontalAlignment",
+                    }
+                },
+            ]
+        }
+        service.spreadsheets().batchUpdate(
+            spreadsheetId=sheet_id,
+            body=merge_body,
+        ).execute()

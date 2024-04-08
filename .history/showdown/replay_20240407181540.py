@@ -37,29 +37,31 @@ def get_p1_count(raw_data):
 
 def get_nickname_mappings(raw_data):
     # Retrieves the mappings from nickname/form name to actual Pokemon name for each player.
-    nickname_mapping1 = {}
-    nickname_mapping2 = {}
+    nickname_mapping_player1 = {}
+    nickname_mapping_player2 = {}
     switches = re.findall(r"\|switch\|(p\d)a: (.*?)(?:\||, )(.+?)\|", raw_data)
     replaces = re.findall(r"\|replace\|(p\d)a: (.*?)(?=\||$)(?:\|)(.*[^|\n])", raw_data)
     for player, nickname, pokemon in switches + replaces:
         if player == "p1":
-            nickname_mapping = nickname_mapping1
+            nickname_mapping = nickname_mapping_player1
         elif player == "p2":
-            nickname_mapping = nickname_mapping2
+            nickname_mapping = nickname_mapping_player2
         else:
             continue
         actual_name = re.sub(r",.*$", "", pokemon.strip())
         nickname_mapping[nickname.strip()] = actual_name
-    return nickname_mapping1, nickname_mapping2
+    return nickname_mapping_player1, nickname_mapping_player2
 
 
-def initialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2):
+def initialize_stats(
+    pokes, p1_count, nickname_mapping_player1, nickname_mapping_player2
+):
     # Initializes stats for each Pokemon, consisting of the player each Pokemon belongs to, the Pokemon itself, and its kills and deaths.
     mapped_pokes_player1 = [
-        nickname_mapping1.get(poke, poke) for poke in pokes[:p1_count]
+        nickname_mapping_player1.get(poke, poke) for poke in pokes[:p1_count]
     ]
     mapped_pokes_player2 = [
-        nickname_mapping2.get(poke, poke) for poke in pokes[p1_count:]
+        nickname_mapping_player2.get(poke, poke) for poke in pokes[p1_count:]
     ]
     stats = {}
     for player, poke_list in enumerate(
@@ -77,7 +79,7 @@ def initialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2):
     return stats
 
 
-def process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2):
+def process_faints(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2):
     # Populates the death values for all Pokemon based on the faints in the log.
     faints = [line for line in raw_data.split("\n") if re.match(r"^\|faint\|", line)]
     for faint in faints:
@@ -86,9 +88,9 @@ def process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2):
             player = match.group(1)
             fainted_pokemon = match.group(2)
             fainted_key = (
-                f"{player}: {nickname_mapping1.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
+                f"{player}: {nickname_mapping_player1.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
                 if player == "p1"
-                else f"{player}: {nickname_mapping2.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
+                else f"{player}: {nickname_mapping_player2.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
             )
             if fainted_key in stats:
                 stats[fainted_key]["deaths"] += 1
@@ -102,7 +104,7 @@ def process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2):
     return stats
 
 
-def process_kills(raw_data, stats, nickname_mapping1, nickname_mapping2):
+def process_kills(raw_data, stats, nickname_mapping_player1, nickname_mapping_player2):
     # Populates the kill values for all Pokemon based on the Pokemon on the opposing side when a Pokemon faints in the log.
     faints = [line for line in raw_data.split("\n") if re.match(r"^\|faint\|", line)]
     for faint in faints:
@@ -111,9 +113,9 @@ def process_kills(raw_data, stats, nickname_mapping1, nickname_mapping2):
             player = match.group(1)
             fainted_pokemon = match.group(2)
             fainted_key = (
-                f"{player}: {nickname_mapping1.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
+                f"{player}: {nickname_mapping_player1.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
                 if player == "p1"
-                else f"{player}: {nickname_mapping2.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
+                else f"{player}: {nickname_mapping_player2.get(fainted_pokemon.strip(), fainted_pokemon.strip())}"
             )
             index = raw_data.find(faint)
             above_lines = raw_data[:index].split("\n")[::-1]
@@ -128,9 +130,9 @@ def process_kills(raw_data, stats, nickname_mapping1, nickname_mapping2):
                         else:
                             player = "p1"
                         killer_key = (
-                            f"{player}: {nickname_mapping1.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}"
+                            f"{player}: {nickname_mapping_player1.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}"
                             if player == "p1"
-                            else f"{player}: {nickname_mapping2.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}"
+                            else f"{player}: {nickname_mapping_player2.get(killer_pokemon[1].strip(), killer_pokemon[1].strip())}"
                         )
                         if killer_key in stats:
                             stats[killer_key]["kills"] += 1
@@ -187,11 +189,19 @@ def get_difference(raw_data, players):
     return difference
 
 
-def get_stats(raw_data, pokes, p1_count, nickname_mapping1, nickname_mapping2):
+def get_stats(
+    raw_data, pokes, p1_count, nickname_mapping_player1, nickname_mapping_player2
+):
     # Processes and returns the final stats.
-    stats = initialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2)
-    stats = process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2)
-    stats = process_kills(raw_data, stats, nickname_mapping1, nickname_mapping2)
+    stats = initialize_stats(
+        pokes, p1_count, nickname_mapping_player1, nickname_mapping_player2
+    )
+    stats = process_faints(
+        raw_data, stats, nickname_mapping_player1, nickname_mapping_player2
+    )
+    stats = process_kills(
+        raw_data, stats, nickname_mapping_player1, nickname_mapping_player2
+    )
     return stats
 
 

@@ -21,13 +21,15 @@ class Analyze:
         players = get_player_names(raw_data)
         pokes = get_pokes(raw_data)
         p1_count = get_p1_count(raw_data)
-        nickname_mapping1, nickname_mapping2 = get_nickname_mappings(raw_data)
+        nickname_mapping_player1, nickname_mapping_player2 = get_nickname_mappings(
+            raw_data
+        )
         stats = get_stats(
             raw_data,
             pokes,
             p1_count,
-            nickname_mapping1,
-            nickname_mapping2,
+            nickname_mapping_player1,
+            nickname_mapping_player2,
         )
         stats = process_revives(raw_data, stats)
         winner = get_winner(raw_data)
