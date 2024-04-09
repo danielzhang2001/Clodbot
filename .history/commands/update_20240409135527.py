@@ -61,9 +61,11 @@ class Update:
                 nickname_mapping2,
             )
             formatted_stats = format_stats(players, stats)
+            print("WORKING?")
             sheet_metadata = (
                 service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
             )
+            print("WORKING STILL?")
             sheets = sheet_metadata.get("sheets", "")
             sheet_id = None
             for sheet in sheets:

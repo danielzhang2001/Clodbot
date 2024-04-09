@@ -21,6 +21,7 @@ class Update:
     @staticmethod
     def authenticate_sheet() -> Credentials:
         # Authenticates sheet functionality with appropriate credentials.
+        print("WORKING STILL?")
         creds = None
         token_path = os.path.join("sheets", "token.pickle")
         credentials_path = os.path.join("sheets", "credentials.json")
@@ -37,6 +38,7 @@ class Update:
                 creds = flow.run_local_server(port=0)
             with open(token_path, "wb") as token:
                 pickle.dump(creds, token)
+        print(f"CREDS: {creds}")
         return creds
 
     @staticmethod

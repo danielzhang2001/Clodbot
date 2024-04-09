@@ -95,9 +95,7 @@ class Update:
                 ):
                     cell_range = next_cell(values)
                     update_range = f"Stats!{cell_range}"
-                    update_data(
-                        service, spreadsheet_id, update_range, player_name, pokemon
-                    )
+
                     col = cell_range[0]
                     row = int(cell_range[1:])
                     merge_cells(service, spreadsheet_id, sheet_id, col, row)

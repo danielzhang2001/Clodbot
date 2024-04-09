@@ -21,22 +21,29 @@ class Update:
     @staticmethod
     def authenticate_sheet() -> Credentials:
         # Authenticates sheet functionality with appropriate credentials.
+        print("WORKING STILL?")
         creds = None
         token_path = os.path.join("sheets", "token.pickle")
         credentials_path = os.path.join("sheets", "credentials.json")
         if os.path.exists(token_path):
             with open(token_path, "rb") as token:
                 creds = pickle.load(token)
+        print("BRUH")
         if not creds or not creds.valid:
+            print("HELLO")
             if creds and creds.expired and creds.refresh_token:
+                print("STILL THERE??")
                 creds.refresh(Request())
             else:
+                print("IN THE ELSE NOW??")
                 flow = InstalledAppFlow.from_client_secrets_file(
                     credentials_path, SCOPES
                 )
                 creds = flow.run_local_server(port=0)
+            print("ALMOST THERE")
             with open(token_path, "wb") as token:
                 pickle.dump(creds, token)
+        print(f"CREDS: {creds}")
         return creds
 
     @staticmethod

@@ -2,7 +2,7 @@
 General functions in updating Google Sheets with Pokemon Showdown replay information.
 """
 
-from typing import List, Tuple
+from typing import List
 from googleapiclient.discovery import Resource
 
 
