@@ -2,7 +2,7 @@
 General functions in updating Google Sheets with Pokemon Showdown replay information.
 """
 
-from typing import List
+from typing import List, Tuple
 from googleapiclient.discovery import Resource
 
 
@@ -89,4 +89,26 @@ def merge_cells(
     service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id,
         body=merge_body,
+    ).execute()
+
+
+def update_data(
+    service: Resource,
+    spreadsheet_id: str,
+    range: str,
+    player_name: str,
+    pokemon: List[Tuple[str, List[int]]],
+) -> None:
+    # Updates the sheet with Player Name, Pokemon, Kills and Deaths data.
+    data = (
+        [[player_name], ["Pokemon", "Kills", "Deaths"]]
+        + [[poke[0]] + poke[1] for poke in pokemon]
+        + [[" "] * 3] * max(0, 12 - len(pokemon))
+    )
+    body = {"values": data}
+    service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id,
+        range=range,
+        valueInputOption="USER_ENTERED",
+        body=body,
     ).execute()

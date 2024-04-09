@@ -95,18 +95,9 @@ class Update:
                 ):
                     cell_range = next_cell(values)
                     update_range = f"Stats!{cell_range}"
-                    data = (
-                        [[player_name], ["Pokemon", "Kills", "Deaths"]]
-                        + [[poke[0]] + poke[1] for poke in pokemon]
-                        + [[" "] * 3] * max(0, 12 - len(pokemon))
+                    update_data(
+                        service, spreadsheet_id, update_range, player_name, pokemon
                     )
-                    body = {"values": data}
-                    service.spreadsheets().values().update(
-                        spreadsheetId=spreadsheet_id,
-                        range=update_range,
-                        valueInputOption="USER_ENTERED",
-                        body=body,
-                    ).execute()
                     col = cell_range[0]
                     row = int(cell_range[1:])
                     merge_cells(service, spreadsheet_id, sheet_id, col, row)
