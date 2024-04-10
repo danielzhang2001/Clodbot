@@ -92,6 +92,7 @@ class Update:
                 )
                 values = result.get("values", [])
                 if player_name in set(cell for row in values for cell in row if cell):
+                    print(f"{player_name} IN {values}")
                     update_data(
                         service,
                         spreadsheet_id,

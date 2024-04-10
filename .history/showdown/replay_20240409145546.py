@@ -3,17 +3,16 @@ General functions in analyzing Pokemon Showdown replay links.
 """
 
 import re
-from typing import Dict, List, Tuple
 
 
-def get_player_names(raw_data: str) -> Dict[str, str]:
+def get_player_names(raw_data: str) -> dict:
     # Retrieves player names.
     player_info = re.findall(r"\|player\|(p\d)\|(.+?)\|", raw_data)
     players = {player[0]: player[1] for player in player_info}
     return players
 
 
-def get_pokes(raw_data: str) -> List[str]:
+def get_pokes(raw_data: str) -> list:
     # Retrieves Pokemon names. If a Pokemon has a nickname, gets their nickname instead.
     nickname_mapping = {}
     switches = re.findall(r"\|switch\|.*?: (.*?)(?:\||, )(.+?)\|", raw_data)
@@ -91,7 +90,7 @@ def get_stats(
     p1_count: int,
     nickname_mapping1: Dict[str, str],
     nickname_mapping2: Dict[str, str],
-) -> Dict[str, Dict[str, Dict[str, int]]]:
+) -> Dict[str, Any]:
     # Processes and returns the final stats.
     stats = initialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2)
     stats = process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2)
@@ -160,10 +159,10 @@ def process_faints(
 
 def process_kills(
     raw_data: str,
-    stats: Dict[str, Dict[str, int]],
+    stats: Dict[str, Dict[str, Any]],
     nickname_mapping1: Dict[str, str],
     nickname_mapping2: Dict[str, str],
-) -> Dict[str, Dict[str, int]]:
+) -> Dict[str, Dict[str, Any]]:
     # Populates the kill values for all Pokemon based on the Pokemon on the opposing side when a Pokemon faints in the log.
     faints = [line for line in raw_data.split("\n") if re.match(r"^\|faint\|", line)]
     for faint in faints:
@@ -207,8 +206,8 @@ def process_kills(
 
 
 def process_revives(
-    raw_data: str, stats: Dict[str, Dict[str, int]]
-) -> Dict[str, Dict[str, int]]:
+    raw_data: str, stats: Dict[str, Dict[str, Any]]
+) -> Dict[str, Dict[str, Any]]:
     # Repopulates the death values for Pokemon that have been revived by Revival Blessing. If revived, take away one death.
     revives = re.findall(r"\|-heal\|(p\d): (\w+)\|", raw_data)
     for revive in revives:
@@ -219,9 +218,7 @@ def process_revives(
     return stats
 
 
-def format_stats(
-    players: Dict[str, str], stats: Dict[str, Dict[str, int]]
-) -> List[Tuple[str, List[Tuple[str, List[int]]]]]:
+def format_stats(players, stats):
     # Returns a list of players, their associated Pokemon and the kills and deaths that come with each Pokemon.
     formatted_stats = []
     for player_num, player_name in players.items():
@@ -237,13 +234,7 @@ def format_stats(
     return formatted_stats
 
 
-def create_message(
-    winner: str,
-    loser: str,
-    difference: str,
-    stats: Dict[str, Dict[str, int]],
-    players: Dict[str, str],
-) -> str:
+def create_message(winner, loser, difference, stats, players):
     # Creates and returns final message.
     formatted_stats = format_stats(players, stats)
     message = f"**Winner: ||{winner} {difference} {loser}||**\n\n"

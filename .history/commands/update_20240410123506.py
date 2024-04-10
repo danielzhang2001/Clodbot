@@ -83,7 +83,7 @@ class Update:
             for player_data in formatted_stats:
                 player_name = player_data[0]
                 pokemon = player_data[1]
-                existing_pokemon = [data[0] for data in pokemon]
+                existing_pokemon = [data[0] for data in pokemon_data]
                 result = (
                     service.spreadsheets()
                     .values()
@@ -99,7 +99,6 @@ class Update:
                         existing_pokemon,
                         pokemon,
                     )
-                else:
                     cell_range = next_cell(values)
                     update_range = f"Stats!{cell_range}"
                     insert_data(

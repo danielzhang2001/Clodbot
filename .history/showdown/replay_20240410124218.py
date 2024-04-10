@@ -207,8 +207,8 @@ def process_kills(
 
 
 def process_revives(
-    raw_data: str, stats: Dict[str, Dict[str, int]]
-) -> Dict[str, Dict[str, int]]:
+    raw_data: str, stats: Dict[str, Dict[str, Any]]
+) -> Dict[str, Dict[str, Any]]:
     # Repopulates the death values for Pokemon that have been revived by Revival Blessing. If revived, take away one death.
     revives = re.findall(r"\|-heal\|(p\d): (\w+)\|", raw_data)
     for revive in revives:
@@ -221,7 +221,7 @@ def process_revives(
 
 def format_stats(
     players: Dict[str, str], stats: Dict[str, Dict[str, int]]
-) -> List[Tuple[str, List[Tuple[str, List[int]]]]]:
+) -> List[List[Union[str, List[List[str, List[int]]]]]]:
     # Returns a list of players, their associated Pokemon and the kills and deaths that come with each Pokemon.
     formatted_stats = []
     for player_num, player_name in players.items():

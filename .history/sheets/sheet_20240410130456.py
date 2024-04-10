@@ -127,8 +127,10 @@ def update_data(
     base_range, row_range = range.split("!")
     start_row, _ = row_range[1:].split(":")
     start_row_index = int(start_row)
+
     pokemon_index = {name: idx for idx, name in enumerate(existing_pokemon)}
     current_max_row = start_row_index + len(existing_pokemon) - 1
+
     for pokemon, new_stats in new_pokemon_data:
         if pokemon in pokemon_index:
             row_to_update = start_row_index + pokemon_index[pokemon]
@@ -140,6 +142,7 @@ def update_data(
                 .execute()
             )
             current_values = current_values_result.get("values", [[0, 0]])
+
             if current_values:
                 current_kills = (
                     int(current_values[0][0]) if len(current_values[0]) > 0 else 0
@@ -150,20 +153,29 @@ def update_data(
                 updated_kills = current_kills + new_stats[0]
                 updated_deaths = current_deaths + new_stats[1]
                 update_values = [[updated_kills, updated_deaths]]
+
                 update_requests.append(
                     {"range": current_range, "values": update_values}
                 )
         else:
+            # If the Pokémon is new, prepare to insert it at the end of the list
             new_row_to_insert = current_max_row + 1
             insert_range = f"{base_range}!A{new_row_to_insert}:E{new_row_to_insert}"
-            insert_values = [[pokemon, "Pokemon", new_stats[0], new_stats[1]]]
+            insert_values = [
+                [pokemon, "Pokemon", new_stats[0], new_stats[1]]
+            ]  # Adjust the structure as needed
             insert_requests.append({"range": insert_range, "values": insert_values})
-            current_max_row += 1
+            current_max_row += (
+                1  # Update the max row index to place the next new entry correctly
+            )
+
+    # Execute updates and inserts if there are any
     if update_requests:
         update_body = {"valueInputOption": "USER_ENTERED", "data": update_requests}
         service.spreadsheets().values().batchUpdate(
             spreadsheetId=spreadsheet_id, body=update_body
         ).execute()
+
     if insert_requests:
         insert_body = {"valueInputOption": "USER_ENTERED", "data": insert_requests}
         service.spreadsheets().values().batchUpdate(

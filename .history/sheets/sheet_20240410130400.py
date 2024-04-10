@@ -123,12 +123,10 @@ def update_data(
 ) -> None:
     # Updates the Pokemon, Kills and Deaths data into the sheet.
     update_requests = []
-    insert_requests = []
     base_range, row_range = range.split("!")
     start_row, _ = row_range[1:].split(":")
-    start_row_index = int(start_row)
+    start_row_index = int(start_row)  # Converts the row number from string to int
     pokemon_index = {name: idx for idx, name in enumerate(existing_pokemon)}
-    current_max_row = start_row_index + len(existing_pokemon) - 1
     for pokemon, new_stats in new_pokemon_data:
         if pokemon in pokemon_index:
             row_to_update = start_row_index + pokemon_index[pokemon]
@@ -153,19 +151,8 @@ def update_data(
                 update_requests.append(
                     {"range": current_range, "values": update_values}
                 )
-        else:
-            new_row_to_insert = current_max_row + 1
-            insert_range = f"{base_range}!A{new_row_to_insert}:E{new_row_to_insert}"
-            insert_values = [[pokemon, "Pokemon", new_stats[0], new_stats[1]]]
-            insert_requests.append({"range": insert_range, "values": insert_values})
-            current_max_row += 1
     if update_requests:
-        update_body = {"valueInputOption": "USER_ENTERED", "data": update_requests}
+        body = {"valueInputOption": "USER_ENTERED", "data": update_requests}
         service.spreadsheets().values().batchUpdate(
-            spreadsheetId=spreadsheet_id, body=update_body
-        ).execute()
-    if insert_requests:
-        insert_body = {"valueInputOption": "USER_ENTERED", "data": insert_requests}
-        service.spreadsheets().values().batchUpdate(
-            spreadsheetId=spreadsheet_id, body=insert_body
+            spreadsheetId=spreadsheet_id, body=body
         ).execute()
