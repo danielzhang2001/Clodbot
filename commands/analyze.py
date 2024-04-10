@@ -10,7 +10,7 @@ from showdown.replay import *
 
 class Analyze:
     @staticmethod
-    async def analyze_replay(replay_link):
+    async def analyze_replay(replay_link: str) -> str:
         # Analyzes a replay link to display all necessary stats and send it in a message.
         try:
             response = requests.get(replay_link + ".log")

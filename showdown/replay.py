@@ -3,16 +3,17 @@ General functions in analyzing Pokemon Showdown replay links.
 """
 
 import re
+from typing import Dict, List, Tuple
 
 
-def get_player_names(raw_data):
+def get_player_names(raw_data: str) -> Dict[str, str]:
     # Retrieves player names.
     player_info = re.findall(r"\|player\|(p\d)\|(.+?)\|", raw_data)
     players = {player[0]: player[1] for player in player_info}
     return players
 
 
-def get_pokes(raw_data):
+def get_pokes(raw_data: str) -> List[str]:
     # Retrieves Pokemon names. If a Pokemon has a nickname, gets their nickname instead.
     nickname_mapping = {}
     switches = re.findall(r"\|switch\|.*?: (.*?)(?:\||, )(.+?)\|", raw_data)
@@ -28,14 +29,14 @@ def get_pokes(raw_data):
     return nicknamed_pokes
 
 
-def get_p1_count(raw_data):
+def get_p1_count(raw_data: str) -> int:
     # Retrieves the number of Pokemon player 1 has.
     poke_lines = [line for line in raw_data.split("\n") if "|poke|" in line]
     p1_count = sum(1 for line in poke_lines if "|poke|p1|" in line)
     return p1_count
 
 
-def get_nickname_mappings(raw_data):
+def get_nickname_mappings(raw_data: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     # Retrieves the mappings from nickname/form name to actual Pokemon name for each player.
     nickname_mapping1 = {}
     nickname_mapping2 = {}
@@ -53,7 +54,57 @@ def get_nickname_mappings(raw_data):
     return nickname_mapping1, nickname_mapping2
 
 
-def initialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2):
+def get_winner(raw_data: str) -> str:
+    # Retrieves the winning player.
+    winner = re.search(r"\|win\|(.+)", raw_data).group(1)
+    return winner
+
+
+def get_loser(raw_data: str) -> str:
+    # Retrieves the losing player.
+    winner = get_winner(raw_data)
+    players = get_player_names(raw_data)
+    for id, name in players.items():
+        if name != winner:
+            return name
+
+
+def get_difference(raw_data: str, players: Dict[str, str]) -> str:
+    # Retrieves the point difference from winning player to losing player based on the opposing player's faints.
+    player1_fainted = len(re.findall(r"\|faint\|p1", raw_data))
+    player2_fainted = len(re.findall(r"\|faint\|p2", raw_data))
+    winner = get_winner(raw_data)
+    if winner == players["p1"]:
+        difference = (
+            f"({player2_fainted - player1_fainted}-{player1_fainted - player1_fainted})"
+        )
+    else:
+        difference = (
+            f"({player1_fainted - player2_fainted}-{player2_fainted - player2_fainted})"
+        )
+    return difference
+
+
+def get_stats(
+    raw_data: str,
+    pokes: List[str],
+    p1_count: int,
+    nickname_mapping1: Dict[str, str],
+    nickname_mapping2: Dict[str, str],
+) -> Dict[str, Dict[str, Dict[str, int]]]:
+    # Processes and returns the final stats.
+    stats = initialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2)
+    stats = process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2)
+    stats = process_kills(raw_data, stats, nickname_mapping1, nickname_mapping2)
+    return stats
+
+
+def initialize_stats(
+    pokes: List[str],
+    p1_count: int,
+    nickname_mapping1: Dict[str, str],
+    nickname_mapping2: Dict[str, str],
+) -> Dict[str, Dict[str, int]]:
     # Initializes stats for each Pokemon, consisting of the player each Pokemon belongs to, the Pokemon itself, and its kills and deaths.
     mapped_pokes_player1 = [
         nickname_mapping1.get(poke, poke) for poke in pokes[:p1_count]
@@ -77,7 +128,12 @@ def initialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2):
     return stats
 
 
-def process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2):
+def process_faints(
+    raw_data: str,
+    stats: Dict[str, Dict[str, int]],
+    nickname_mapping1: Dict[str, str],
+    nickname_mapping2: Dict[str, str],
+) -> Dict[str, Dict[str, int]]:
     # Populates the death values for all Pokemon based on the faints in the log.
     faints = [line for line in raw_data.split("\n") if re.match(r"^\|faint\|", line)]
     for faint in faints:
@@ -102,7 +158,12 @@ def process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2):
     return stats
 
 
-def process_kills(raw_data, stats, nickname_mapping1, nickname_mapping2):
+def process_kills(
+    raw_data: str,
+    stats: Dict[str, Dict[str, int]],
+    nickname_mapping1: Dict[str, str],
+    nickname_mapping2: Dict[str, str],
+) -> Dict[str, Dict[str, int]]:
     # Populates the kill values for all Pokemon based on the Pokemon on the opposing side when a Pokemon faints in the log.
     faints = [line for line in raw_data.split("\n") if re.match(r"^\|faint\|", line)]
     for faint in faints:
@@ -145,7 +206,9 @@ def process_kills(raw_data, stats, nickname_mapping1, nickname_mapping2):
     return stats
 
 
-def process_revives(raw_data, stats):
+def process_revives(
+    raw_data: str, stats: Dict[str, Dict[str, int]]
+) -> Dict[str, Dict[str, int]]:
     # Repopulates the death values for Pokemon that have been revived by Revival Blessing. If revived, take away one death.
     revives = re.findall(r"\|-heal\|(p\d): (\w+)\|", raw_data)
     for revive in revives:
@@ -156,46 +219,9 @@ def process_revives(raw_data, stats):
     return stats
 
 
-def get_winner(raw_data):
-    # Retrieves the winning player.
-    winner = re.search(r"\|win\|(.+)", raw_data).group(1)
-    return winner
-
-
-def get_loser(raw_data):
-    # Retrieves the losing player(s).
-    winner = get_winner(raw_data)
-    players = get_player_names(raw_data)
-    for id, name in players.items():
-        if name != winner:
-            return name
-
-
-def get_difference(raw_data, players):
-    # Retrieves the point difference from winning player to losing player based on the opposing player's faints.
-    player1_fainted = len(re.findall(r"\|faint\|p1", raw_data))
-    player2_fainted = len(re.findall(r"\|faint\|p2", raw_data))
-    winner = get_winner(raw_data)
-    if winner == players["p1"]:
-        difference = (
-            f"({player2_fainted - player1_fainted}-{player1_fainted - player1_fainted})"
-        )
-    else:
-        difference = (
-            f"({player1_fainted - player2_fainted}-{player2_fainted - player2_fainted})"
-        )
-    return difference
-
-
-def get_stats(raw_data, pokes, p1_count, nickname_mapping1, nickname_mapping2):
-    # Processes and returns the final stats.
-    stats = initialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2)
-    stats = process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2)
-    stats = process_kills(raw_data, stats, nickname_mapping1, nickname_mapping2)
-    return stats
-
-
-def format_stats(players, stats):
+def format_stats(
+    players: Dict[str, str], stats: Dict[str, Dict[str, int]]
+) -> List[Tuple[str, List[Tuple[str, List[int]]]]]:
     # Returns a list of players, their associated Pokemon and the kills and deaths that come with each Pokemon.
     formatted_stats = []
     for player_num, player_name in players.items():
@@ -211,7 +237,13 @@ def format_stats(players, stats):
     return formatted_stats
 
 
-def create_message(winner, loser, difference, stats, players):
+def create_message(
+    winner: str,
+    loser: str,
+    difference: str,
+    stats: Dict[str, Dict[str, int]],
+    players: Dict[str, str],
+) -> str:
     # Creates and returns final message.
     formatted_stats = format_stats(players, stats)
     message = f"**Winner: ||{winner} {difference} {loser}||**\n\n"
