@@ -92,8 +92,8 @@ class Update:
                 values = result.get("values", [])
                 if check_labels(values, name):
                     cell_range = get_range(values, name)
-                    update_range = f"Stats!{cell_range}"
-                    update_data(service, spreadsheet_id, update_range, pokemon_data)
+                    print(f"CELL RANGE FOR {name}: {cell_range}")
+                    update_data(service, spreadsheet_id, cell_range, pokemon_data)
                 else:
                     cell = next_cell(values)
                     update_cell = f"Stats!{cell}"

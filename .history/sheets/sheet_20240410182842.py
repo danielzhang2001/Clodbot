@@ -117,68 +117,51 @@ def insert_data(
 def update_data(
     service: Resource,
     spreadsheet_id: str,
-    cell_range: str,
-    pokemon_data: List[Tuple[str, List[int]]],
+    range: str,
+    pokemon_data: List[Tuple[str, List[int]]]
 ) -> None:
     # Updates the Pokemon, Kills and Deaths data into the sheet.
-    sheet_name, range_part = cell_range.split("!")
-    start_range, end_range = range_part.split(":")
-    start_col = "".join(filter(str.isalpha, start_range))
-    end_col = "".join(filter(str.isalpha, end_range))
-    start_row = int("".join(filter(str.isdigit, start_range)))
-    end_row = int("".join(filter(str.isdigit, end_range)))
-    full_range = f"{sheet_name}!{start_col}{start_row}:{end_col}{end_row}"
+        base_range, row_range = range.split("!")
+    start_col, end_col = base_range.split(":")
+    start_row, end_row = map(int, row_range.split(":"))
+
+    # Fetch current data within the range to compare against new data
+    full_range = f"{start_col}{start_row}:{end_col}{end_row}"
     current_values_result = (
         service.spreadsheets()
         .values()
         .get(spreadsheetId=spreadsheet_id, range=full_range)
         .execute()
     )
-    current_values = current_values_result.get(
-        "values", [[] for _ in range(end_row - start_row + 1)]
-    )
-    current_pokemon = {}
-    first_empty_row = None
-    for idx, row in enumerate(current_values, start=start_row):
-        if row:
-            current_pokemon[row[0]] = idx
-        elif first_empty_row is None:
-            first_empty_row = idx
-    updates = []
-    for pokemon_name, (new_kills, new_deaths) in pokemon_data:
+    current_values = current_values_result.get("values", [[] for _ in range(start_row, end_row + 1)])
+
+    # Create a dictionary from current Pokemon to their row index for quick lookup
+    current_pokemon = {row[0]: idx for idx, row in enumerate(current_values, start=start_row) if row}
+    pokemon_updates = []
+    
+    # Iterate over new pokemon data to prepare updates or inserts
+    for pokemon_name, stats in pokemon_data:
         if pokemon_name in current_pokemon:
+            # Calculate actual row for the update
             row_index = current_pokemon[pokemon_name]
-            current_kills, current_deaths = map(
-                int, current_values[row_index - start_row][1:3]
-            )
-            updated_kills = current_kills + new_kills
-            updated_deaths = current_deaths + new_deaths
-            update_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"
-            updates.append(
-                {
-                    "range": update_range,
-                    "values": [[pokemon_name, updated_kills, updated_deaths]],
-                }
-            )
+            current_kills = int(current_values[row_index - start_row][1])
+            current_deaths = int(current_values[row_index - start_row][2])
+            updated_kills = current_kills + stats[0]
+            updated_deaths = current_deaths + stats[1]
+            update_range = f"{start_col[0]}{row_index}:{end_col[0]}{row_index}"
+            pokemon_updates.append({"range": update_range, "values": [[pokemon_name, updated_kills, updated_deaths]]})
         else:
-            insert_row = first_empty_row if first_empty_row else end_row + 1
-            insert_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
-            updates.append(
-                {
-                    "range": insert_range,
-                    "values": [[pokemon_name, new_kills, new_deaths]],
-                }
-            )
-            if first_empty_row:
-                first_empty_row += 1
-            else:
-                end_row += 1
-    if updates:
-        update_body = {"valueInputOption": "USER_ENTERED", "data": updates}
+            # Append new Pokemon data if not found
+            new_row = len(current_values) + start_row
+            insert_range = f"{start_col[0]}{new_row}:{end_col[0]}{new_row}"
+            pokemon_updates.append({"range": insert_range, "values": [[pokemon_name] + stats]})
+
+    # Batch update the spreadsheet with all changes
+    if pokemon_updates:
+        update_body = {"valueInputOption": "USER_ENTERED", "data": pokemon_updates}
         service.spreadsheets().values().batchUpdate(
             spreadsheetId=spreadsheet_id, body=update_body
         ).execute()
-
 
 def check_labels(values: List[List[str]], name: str) -> bool:
     # Returns whether the name is found in values alongside with the labels of "Pokemon", "Kills" and "Deaths" associated with it.

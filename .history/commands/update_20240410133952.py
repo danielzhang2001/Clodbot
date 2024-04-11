@@ -81,8 +81,9 @@ class Update:
                     "sheetId"
                 ]
             for player_data in formatted_stats:
-                name = player_data[0]
-                pokemon_data = player_data[1]
+                player_name = player_data[0]
+                pokemon = player_data[1]
+                existing_pokemon = [data[0] for data in pokemon]
                 result = (
                     service.spreadsheets()
                     .values()
@@ -90,18 +91,22 @@ class Update:
                     .execute()
                 )
                 values = result.get("values", [])
-                if check_labels(values, name):
-                    cell_range = get_range(values, name)
-                    update_range = f"Stats!{cell_range}"
-                    update_data(service, spreadsheet_id, update_range, pokemon_data)
-                else:
-                    cell = next_cell(values)
-                    update_cell = f"Stats!{cell}"
-                    insert_data(
-                        service, spreadsheet_id, update_cell, name, pokemon_data
+                if check_labels(values, player_name):
+                    update_data(
+                        service,
+                        spreadsheet_id,
+                        "Stats!B2:P285",
+                        existing_pokemon,
+                        pokemon,
                     )
-                    col = cell[0]
-                    row = int(cell[1:])
+                else:
+                    cell_range = next_cell(values)
+                    update_range = f"Stats!{cell_range}"
+                    insert_data(
+                        service, spreadsheet_id, update_range, player_name, pokemon
+                    )
+                    col = cell_range[0]
+                    row = int(cell_range[1:])
                     merge_cells(service, spreadsheet_id, sheet_id, col, row)
             return "Successfully updated the sheet with new player names."
         except HttpError as e:

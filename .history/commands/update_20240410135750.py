@@ -91,20 +91,39 @@ class Update:
                 )
                 values = result.get("values", [])
                 if check_labels(values, name):
-                    cell_range = get_range(values, name)
-                    update_range = f"Stats!{cell_range}"
-                    update_data(service, spreadsheet_id, update_range, pokemon_data)
+                    update_data(service, spreadsheet_id, "Stats!B2:P285", pokemon_data)
                 else:
-                    cell = next_cell(values)
-                    update_cell = f"Stats!{cell}"
+                    next_cell = next_cell(values)
+                    update_cell = f"Stats!{next_cell}"
                     insert_data(
                         service, spreadsheet_id, update_cell, name, pokemon_data
                     )
-                    col = cell[0]
-                    row = int(cell[1:])
+                    col = next_cell[0]
+                    row = int(next_cell[1:])
                     merge_cells(service, spreadsheet_id, sheet_id, col, row)
             return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"
         except Exception as e:
             return f"Failed to update the sheet: {e}"
+
+
+def find_pokemon_stats_range(values: List[List[str]], name: str) -> str:
+    # Searches for the name and returns the 12x3 cell range for Pokemon stats as A1 notation if found.
+    for row_index, row in enumerate(values):
+        if name in row:
+            name_index = row.index(name)
+            # Check if the next row contains "Pokemon", "Kills", and "Deaths"
+            if (
+                row_index + 1 < len(values)
+                and values[row_index + 1][name_index] == "Pokemon"
+                and values[row_index + 1][name_index + 1] == "Kills"
+                and values[row_index + 1][name_index + 2] == "Deaths"
+            ):
+                # Calculate the A1 notation range for the 12x3 stats sector
+                start_col = chr(65 + name_index)  # Convert index to column letter
+                end_col = chr(ord(start_col) + 2)  # Column for "Deaths"
+                start_row = row_index + 3  # Skip the header and labels row
+                end_row = start_row + 11  # 12 rows for the stats
+                return f"{start_col}{start_row}:{end_col}{end_row}"
+    return ""  # Return an empty string if the name and labels are not found

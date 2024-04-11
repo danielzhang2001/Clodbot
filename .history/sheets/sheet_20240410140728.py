@@ -117,66 +117,57 @@ def insert_data(
 def update_data(
     service: Resource,
     spreadsheet_id: str,
-    cell_range: str,
+    range: str,
     pokemon_data: List[Tuple[str, List[int]]],
 ) -> None:
     # Updates the Pokemon, Kills and Deaths data into the sheet.
-    sheet_name, range_part = cell_range.split("!")
-    start_range, end_range = range_part.split(":")
-    start_col = "".join(filter(str.isalpha, start_range))
-    end_col = "".join(filter(str.isalpha, end_range))
-    start_row = int("".join(filter(str.isdigit, start_range)))
-    end_row = int("".join(filter(str.isdigit, end_range)))
-    full_range = f"{sheet_name}!{start_col}{start_row}:{end_col}{end_row}"
-    current_values_result = (
-        service.spreadsheets()
-        .values()
-        .get(spreadsheetId=spreadsheet_id, range=full_range)
-        .execute()
-    )
-    current_values = current_values_result.get(
-        "values", [[] for _ in range(end_row - start_row + 1)]
-    )
-    current_pokemon = {}
-    first_empty_row = None
-    for idx, row in enumerate(current_values, start=start_row):
-        if row:
-            current_pokemon[row[0]] = idx
-        elif first_empty_row is None:
-            first_empty_row = idx
-    updates = []
-    for pokemon_name, (new_kills, new_deaths) in pokemon_data:
-        if pokemon_name in current_pokemon:
-            row_index = current_pokemon[pokemon_name]
-            current_kills, current_deaths = map(
-                int, current_values[row_index - start_row][1:3]
+    pokemon = [data[0] for data in pokemon_data]
+    update_requests = []
+    insert_requests = []
+    base_range, row_range = range.split("!")
+    start_row, _ = row_range[1:].split(":")
+    start_row_index = int(start_row)
+    pokemon_index = {name: idx for idx, name in enumerate(pokemon)}
+    current_max_row = start_row_index + len(pokemon) - 1
+    for pokemon, new_stats in pokemon_data:
+        if pokemon in pokemon_index:
+            row_to_update = start_row_index + pokemon_index[pokemon]
+            current_range = f"{base_range}!C{row_to_update}:E{row_to_update}"
+            current_values_result = (
+                service.spreadsheets()
+                .values()
+                .get(spreadsheetId=spreadsheet_id, range=current_range)
+                .execute()
             )
-            updated_kills = current_kills + new_kills
-            updated_deaths = current_deaths + new_deaths
-            update_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"
-            updates.append(
-                {
-                    "range": update_range,
-                    "values": [[pokemon_name, updated_kills, updated_deaths]],
-                }
-            )
+            current_values = current_values_result.get("values", [[0, 0]])
+            if current_values:
+                current_kills = (
+                    int(current_values[0][0]) if len(current_values[0]) > 0 else 0
+                )
+                current_deaths = (
+                    int(current_values[0][1]) if len(current_values[0]) > 1 else 0
+                )
+                updated_kills = current_kills + new_stats[0]
+                updated_deaths = current_deaths + new_stats[1]
+                update_values = [[updated_kills, updated_deaths]]
+                update_requests.append(
+                    {"range": current_range, "values": update_values}
+                )
         else:
-            insert_row = first_empty_row if first_empty_row else end_row + 1
-            insert_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
-            updates.append(
-                {
-                    "range": insert_range,
-                    "values": [[pokemon_name, new_kills, new_deaths]],
-                }
-            )
-            if first_empty_row:
-                first_empty_row += 1
-            else:
-                end_row += 1
-    if updates:
-        update_body = {"valueInputOption": "USER_ENTERED", "data": updates}
+            new_row_to_insert = current_max_row + 1
+            insert_range = f"{base_range}!A{new_row_to_insert}:E{new_row_to_insert}"
+            insert_values = [[pokemon, "Pokemon", new_stats[0], new_stats[1]]]
+            insert_requests.append({"range": insert_range, "values": insert_values})
+            current_max_row += 1
+    if update_requests:
+        update_body = {"valueInputOption": "USER_ENTERED", "data": update_requests}
         service.spreadsheets().values().batchUpdate(
             spreadsheetId=spreadsheet_id, body=update_body
+        ).execute()
+    if insert_requests:
+        insert_body = {"valueInputOption": "USER_ENTERED", "data": insert_requests}
+        service.spreadsheets().values().batchUpdate(
+            spreadsheetId=spreadsheet_id, body=insert_body
         ).execute()
 
 
@@ -199,10 +190,10 @@ def get_range(values: List[List[str]], name: str) -> str:
     # Searches for the name and returns the range of the section with Pokemon stats associated with that name.
     for row_index, row in enumerate(values):
         if name in row:
-            name_index = row.index(name) + 1
+            name_index = row.index(name)
             start_col = chr(65 + name_index)
             end_col = chr(ord(start_col) + 2)
-            start_row = row_index + 4
+            start_row = row_index + 3
             end_row = start_row + 11
             return f"{start_col}{start_row}:{end_col}{end_row}"
-    return None
+    return ""

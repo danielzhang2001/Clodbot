@@ -91,17 +91,17 @@ class Update:
                 )
                 values = result.get("values", [])
                 if check_labels(values, name):
-                    cell_range = get_range(values, name)
-                    update_range = f"Stats!{cell_range}"
-                    update_data(service, spreadsheet_id, update_range, pokemon_data)
+                    range = get_range(values, name)
+                    print(f"RANGE: {range}")
+                    update_data(service, spreadsheet_id, "Stats!B2:P285", pokemon_data)
                 else:
-                    cell = next_cell(values)
-                    update_cell = f"Stats!{cell}"
+                    next_cell = next_cell(values)
+                    update_cell = f"Stats!{next_cell}"
                     insert_data(
                         service, spreadsheet_id, update_cell, name, pokemon_data
                     )
-                    col = cell[0]
-                    row = int(cell[1:])
+                    col = next_cell[0]
+                    row = int(next_cell[1:])
                     merge_cells(service, spreadsheet_id, sheet_id, col, row)
             return "Successfully updated the sheet with new player names."
         except HttpError as e:

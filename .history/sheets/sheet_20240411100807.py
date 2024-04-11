@@ -121,13 +121,11 @@ def update_data(
     pokemon_data: List[Tuple[str, List[int]]],
 ) -> None:
     # Updates the Pokemon, Kills and Deaths data into the sheet.
-    sheet_name, range_part = cell_range.split("!")
-    start_range, end_range = range_part.split(":")
-    start_col = "".join(filter(str.isalpha, start_range))
-    end_col = "".join(filter(str.isalpha, end_range))
-    start_row = int("".join(filter(str.isdigit, start_range)))
-    end_row = int("".join(filter(str.isdigit, end_range)))
-    full_range = f"{sheet_name}!{start_col}{start_row}:{end_col}{end_row}"
+    start_col, end_col = cell_range[0], cell_range[cell_range.find(":") + 1]
+    start_row, end_row = int(cell_range[1 : cell_range.find(":")]), int(
+        cell_range[cell_range.find(":") + 2 :]
+    )
+    full_range = f"{start_col}{start_row}:{end_col}{end_row}"
     current_values_result = (
         service.spreadsheets()
         .values()
@@ -137,44 +135,38 @@ def update_data(
     current_values = current_values_result.get(
         "values", [[] for _ in range(end_row - start_row + 1)]
     )
-    current_pokemon = {}
-    first_empty_row = None
-    for idx, row in enumerate(current_values, start=start_row):
-        if row:
-            current_pokemon[row[0]] = idx
-        elif first_empty_row is None:
-            first_empty_row = idx
-    updates = []
-    for pokemon_name, (new_kills, new_deaths) in pokemon_data:
+    current_pokemon = {row[0]: i for i, row in enumerate(current_values) if row}
+    pokemon_updates = []
+    for pokemon_name, stats in pokemon_data:
+        print(f"POKEMON NAME: {pokemon_name}")
+        print(f"STATS: {stats}")
+        print(f"POKEMON DATA: {pokemon_data}")
         if pokemon_name in current_pokemon:
-            row_index = current_pokemon[pokemon_name]
-            current_kills, current_deaths = map(
-                int, current_values[row_index - start_row][1:3]
-            )
-            updated_kills = current_kills + new_kills
-            updated_deaths = current_deaths + new_deaths
-            update_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"
-            updates.append(
+            row_index = start_row + current_pokemon[pokemon_name]
+            current_kills = int(current_values[current_pokemon[pokemon_name]][1])
+            print(f"Current Kills for {pokemon_name}: {current_kills}")
+            current_deaths = int(current_values[current_pokemon[pokemon_name]][2])
+            print(f"Current Deaths for {pokemon_name}: {current_deaths}")
+            updated_kills = current_kills + stats[0]
+            print(f"Updated Kills for {pokemon_name}: {updated_kills}")
+            updated_deaths = current_deaths + stats[1]
+            print(f"Updated Deaths for {pokemon_name}: {updated_deaths}")
+            update_range = f"{start_col}{row_index}:{end_col}{row_index}"
+            pokemon_updates.append(
                 {
                     "range": update_range,
                     "values": [[pokemon_name, updated_kills, updated_deaths]],
                 }
             )
         else:
-            insert_row = first_empty_row if first_empty_row else end_row + 1
-            insert_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
-            updates.append(
-                {
-                    "range": insert_range,
-                    "values": [[pokemon_name, new_kills, new_deaths]],
-                }
+            new_row = end_row + 1
+            insert_range = f"{start_col}{new_row}:{end_col}{new_row}"
+            pokemon_updates.append(
+                {"range": insert_range, "values": [[pokemon_name] + stats]}
             )
-            if first_empty_row:
-                first_empty_row += 1
-            else:
-                end_row += 1
-    if updates:
-        update_body = {"valueInputOption": "USER_ENTERED", "data": updates}
+            end_row += 1
+    if pokemon_updates:
+        update_body = {"valueInputOption": "USER_ENTERED", "data": pokemon_updates}
         service.spreadsheets().values().batchUpdate(
             spreadsheetId=spreadsheet_id, body=update_body
         ).execute()
