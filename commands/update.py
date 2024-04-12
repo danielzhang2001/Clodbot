@@ -86,7 +86,7 @@ class Update:
                 result = (
                     service.spreadsheets()
                     .values()
-                    .get(spreadsheetId=spreadsheet_id, range="Stats!B2:P285")
+                    .get(spreadsheetId=spreadsheet_id, range="Stats!B2:T285")
                     .execute()
                 )
                 values = result.get("values", [])
@@ -97,9 +97,7 @@ class Update:
                 else:
                     cell = next_cell(values)
                     update_cell = f"Stats!{cell}"
-                    insert_data(
-                        service, spreadsheet_id, update_cell, name, pokemon_data
-                    )
+                    add_data(service, spreadsheet_id, update_cell, name, pokemon_data)
                     col = cell[0]
                     row = int(cell[1:])
                     merge_cells(service, spreadsheet_id, sheet_id, col, row)
