@@ -198,7 +198,7 @@ def update_pokemon(
     current_games = int(current_values[row_index - start_row][1])
     current_kills = int(current_values[row_index - start_row][2])
     current_deaths = int(current_values[row_index - start_row][3])
-    updated_games = current_games + 1
+    updated_games = current_games_played + 1
     updated_kills = current_kills + new_stats[0]
     updated_deaths = current_deaths + new_stats[1]
     update_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"

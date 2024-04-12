@@ -14,7 +14,7 @@ def next_cell(values: List[List[str]]) -> str:
         names_row = values[section]
         details_row = values[section + 1]
         for index, letter in enumerate(letters):
-            start_index = index * 5
+            start_index = index * 4
             group_cells = [
                 (
                     names_row[start_index]
@@ -33,7 +33,7 @@ def next_cell(values: List[List[str]]) -> str:
                     details_row[start_index + 1]
                     if (
                         len(details_row) > start_index + 1
-                        and details_row[start_index + 1] == "Games"
+                        and details_row[start_index + 1] == "Kills"
                     )
                     else "Invalid"
                 ),
@@ -41,15 +41,7 @@ def next_cell(values: List[List[str]]) -> str:
                     details_row[start_index + 2]
                     if (
                         len(details_row) > start_index + 2
-                        and details_row[start_index + 2] == "Kills"
-                    )
-                    else "Invalid"
-                ),
-                (
-                    details_row[start_index + 3]
-                    if (
-                        len(details_row) > start_index + 3
-                        and details_row[start_index + 3] == "Deaths"
+                        and details_row[start_index + 2] == "Deaths"
                     )
                     else "Invalid"
                 ),
@@ -107,11 +99,11 @@ def add_data(
     player_name: str,
     pokemon: List[Tuple[str, List[int]]],
 ) -> None:
-    # Adds the Player Name, Pokemon, Games, Kills and Deaths data into the sheet on the specific cell.
+    # Adds the Player Name, Pokemon, Games Played, Kills and Deaths data into the sheet on the specific cell.
     data = (
-        [[player_name], ["Pokemon", "Games", "Kills", "Deaths"]]
-        + [[poke[0], 1] + poke[1] for poke in pokemon]
-        + [[" "] * 4] * max(0, 12 - len(pokemon))
+        [[player_name], ["Pokemon", "Kills", "Deaths"]]
+        + [[poke[0]] + poke[1] for poke in pokemon]
+        + [[" "] * 3] * max(0, 12 - len(pokemon))
     )
     body = {"values": data}
     service.spreadsheets().values().update(
@@ -195,17 +187,14 @@ def update_pokemon(
 ) -> None:
     # Updates existing Pokemon entries to the appropriate section in the sheet.
     row_index = current_pokemon[pokemon_name]
-    current_games = int(current_values[row_index - start_row][1])
-    current_kills = int(current_values[row_index - start_row][2])
-    current_deaths = int(current_values[row_index - start_row][3])
-    updated_games = current_games + 1
+    current_kills, current_deaths = map(int, current_values[row_index - start_row][1:3])
     updated_kills = current_kills + new_stats[0]
     updated_deaths = current_deaths + new_stats[1]
     update_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"
     updates.append(
         {
             "range": update_range,
-            "values": [[pokemon_name, updated_games, updated_kills, updated_deaths]],
+            "values": [[pokemon_name, updated_kills, updated_deaths]],
         }
     )
 
@@ -224,10 +213,7 @@ def add_pokemon(
     insert_row = empty_row if empty_row is not None else end_row + 1
     insert_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
     updates.append(
-        {
-            "range": insert_range,
-            "values": [[pokemon_name, 1, new_stats[0], new_stats[1]]],
-        }
+        {"range": insert_range, "values": [[pokemon_name, new_stats[0], new_stats[1]]]}
     )
     if empty_row is not None:
         empty_row += 1
@@ -237,13 +223,13 @@ def add_pokemon(
 
 
 def check_labels(values: List[List[str]], name: str) -> bool:
-    # Returns whether the name is found in values alongside with the labels of "Pokemon", "Games", "Kills" and "Deaths" associated with it.
+    # Returns whether the name is found in values alongside with the labels of "Pokemon", "Kills" and "Deaths" associated with it.
     for row_index, row in enumerate(values):
         try:
             name_index = row.index(name)
             if row_index + 1 < len(values) and all(
                 values[row_index + 1][name_index + i] == label
-                for i, label in enumerate(["Pokemon", "Games", "Kills", "Deaths"])
+                for i, label in enumerate(["Pokemon", "Kills", "Deaths"])
             ):
                 return True
         except ValueError:
@@ -257,7 +243,7 @@ def get_range(values: List[List[str]], name: str) -> str:
         if name in row:
             name_index = row.index(name) + 1
             start_col = chr(65 + name_index)
-            end_col = chr(ord(start_col) + 3)
+            end_col = chr(ord(start_col) + 2)
             start_row = row_index + 4
             end_row = start_row + 11
             return f"{start_col}{start_row}:{end_col}{end_row}"

@@ -14,7 +14,7 @@ def next_cell(values: List[List[str]]) -> str:
         names_row = values[section]
         details_row = values[section + 1]
         for index, letter in enumerate(letters):
-            start_index = index * 5
+            start_index = index * 4
             group_cells = [
                 (
                     names_row[start_index]
@@ -40,16 +40,16 @@ def next_cell(values: List[List[str]]) -> str:
                 (
                     details_row[start_index + 2]
                     if (
-                        len(details_row) > start_index + 2
-                        and details_row[start_index + 2] == "Kills"
+                        len(details_row) > start_index + 1
+                        and details_row[start_index + 1] == "Kills"
                     )
                     else "Invalid"
                 ),
                 (
                     details_row[start_index + 3]
                     if (
-                        len(details_row) > start_index + 3
-                        and details_row[start_index + 3] == "Deaths"
+                        len(details_row) > start_index + 2
+                        and details_row[start_index + 2] == "Deaths"
                     )
                     else "Invalid"
                 ),
@@ -198,7 +198,7 @@ def update_pokemon(
     current_games = int(current_values[row_index - start_row][1])
     current_kills = int(current_values[row_index - start_row][2])
     current_deaths = int(current_values[row_index - start_row][3])
-    updated_games = current_games + 1
+    updated_games = current_games_played + 1
     updated_kills = current_kills + new_stats[0]
     updated_deaths = current_deaths + new_stats[1]
     update_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"

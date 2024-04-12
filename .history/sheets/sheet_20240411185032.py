@@ -2,19 +2,19 @@
 General functions in updating Google Sheets with Pokemon Showdown replay information.
 """
 
-from typing import Optional, List, Dict, Tuple
+from typing import List, Dict, Tuple
 from googleapiclient.discovery import Resource
 
 
 def next_cell(values: List[List[str]]) -> str:
     # Returns the row and column indices for the top of the next available section.
-    letters = ["B", "G", "L", "Q"]
+    letters = ["B", "F", "J", "N"]
     last_index = 3
     for section in range(0, len(values), 15):
         names_row = values[section]
         details_row = values[section + 1]
         for index, letter in enumerate(letters):
-            start_index = index * 5
+            start_index = index * 4
             group_cells = [
                 (
                     names_row[start_index]
@@ -33,7 +33,7 @@ def next_cell(values: List[List[str]]) -> str:
                     details_row[start_index + 1]
                     if (
                         len(details_row) > start_index + 1
-                        and details_row[start_index + 1] == "Games"
+                        and details_row[start_index + 1] == "Kills"
                     )
                     else "Invalid"
                 ),
@@ -41,15 +41,7 @@ def next_cell(values: List[List[str]]) -> str:
                     details_row[start_index + 2]
                     if (
                         len(details_row) > start_index + 2
-                        and details_row[start_index + 2] == "Kills"
-                    )
-                    else "Invalid"
-                ),
-                (
-                    details_row[start_index + 3]
-                    if (
-                        len(details_row) > start_index + 3
-                        and details_row[start_index + 3] == "Deaths"
+                        and details_row[start_index + 2] == "Deaths"
                     )
                     else "Invalid"
                 ),
@@ -74,7 +66,7 @@ def merge_cells(
                         "startRowIndex": row - 1,
                         "endRowIndex": row,
                         "startColumnIndex": col,
-                        "endColumnIndex": col + 4,
+                        "endColumnIndex": col + 3,
                     },
                     "mergeType": "MERGE_ALL",
                 }
@@ -100,18 +92,18 @@ def merge_cells(
     ).execute()
 
 
-def add_data(
+def insert_data(
     service: Resource,
     spreadsheet_id: str,
     cell: str,
     player_name: str,
     pokemon: List[Tuple[str, List[int]]],
 ) -> None:
-    # Adds the Player Name, Pokemon, Games, Kills and Deaths data into the sheet on the specific cell.
+    # Inserts the Player Name, Pokemon, Kills and Deaths data into the sheet on the specific cell.
     data = (
-        [[player_name], ["Pokemon", "Games", "Kills", "Deaths"]]
-        + [[poke[0], 1] + poke[1] for poke in pokemon]
-        + [[" "] * 4] * max(0, 12 - len(pokemon))
+        [[player_name], ["Pokemon", "Kills", "Deaths"]]
+        + [[poke[0]] + poke[1] for poke in pokemon]
+        + [[" "] * 3] * max(0, 12 - len(pokemon))
     )
     body = {"values": data}
     service.spreadsheets().values().update(
@@ -136,22 +128,24 @@ def update_data(
     start_row = int("".join(filter(str.isdigit, start_range)))
     end_row = int("".join(filter(str.isdigit, end_range)))
     full_range = f"{sheet_name}!{start_col}{start_row}:{end_col}{end_row}"
-    result = (
+    current_values_result = (
         service.spreadsheets()
         .values()
         .get(spreadsheetId=spreadsheet_id, range=full_range)
         .execute()
     )
-    current_values = result.get("values", [[] for _ in range(end_row - start_row + 1)])
+    current_values = current_values_result.get(
+        "values", [[] for _ in range(end_row - start_row + 1)]
+    )
     current_pokemon = {}
-    empty_row = None
+    first_empty_row = None
     for idx, row in enumerate(current_values, start=start_row):
         if row:
             current_pokemon[row[0]] = idx
-        elif empty_row is None:
-            empty_row = idx
+        elif first_empty_row is None:
+            first_empty_row = idx
     updates = []
-    for pokemon_name, new_stats in pokemon_data:
+    for pokemon_name, (new_kills, new_deaths) in pokemon_data:
         if pokemon_name in current_pokemon:
             update_pokemon(
                 sheet_name,
@@ -165,16 +159,18 @@ def update_data(
                 updates,
             )
         else:
-            empty_row, end_row = add_pokemon(
-                sheet_name,
-                start_col,
-                end_col,
-                pokemon_name,
-                new_stats,
-                empty_row,
-                end_row,
-                updates,
+            insert_row = first_empty_row if first_empty_row else end_row + 1
+            insert_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
+            updates.append(
+                {
+                    "range": insert_range,
+                    "values": [[pokemon_name, new_kills, new_deaths]],
+                }
             )
+            if first_empty_row:
+                first_empty_row += 1
+            else:
+                end_row += 1
     if updates:
         update_body = {"valueInputOption": "USER_ENTERED", "data": updates}
         service.spreadsheets().values().batchUpdate(
@@ -194,18 +190,18 @@ def update_pokemon(
     updates: List[Dict[str, List[Tuple[str, int, int]]]],
 ) -> None:
     # Updates existing Pokemon entries to the appropriate section in the sheet.
+    print(f"new Received current_pokemon: {current_pokemon}")
+    print(f"new Received current_values: {current_values}")
+    print(f"new Received start_row: {start_row}")
     row_index = current_pokemon[pokemon_name]
-    current_games = int(current_values[row_index - start_row][1])
-    current_kills = int(current_values[row_index - start_row][2])
-    current_deaths = int(current_values[row_index - start_row][3])
-    updated_games = current_games + 1
+    current_kills, current_deaths = map(int, current_values[row_index - start_row][1:3])
     updated_kills = current_kills + new_stats[0]
     updated_deaths = current_deaths + new_stats[1]
     update_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"
     updates.append(
         {
             "range": update_range,
-            "values": [[pokemon_name, updated_games, updated_kills, updated_deaths]],
+            "values": [[pokemon_name, updated_kills, updated_deaths]],
         }
     )
 
@@ -214,36 +210,31 @@ def add_pokemon(
     sheet_name: str,
     start_col: str,
     end_col: str,
-    pokemon_name: str,
-    new_stats: List[int],
-    empty_row: Optional[int],
     end_row: int,
+    pokemon_name: str,
+    stats: List[int],
     updates: List[Dict[str, List[Tuple[str, int, int]]]],
-) -> Tuple[Optional[int], int]:
-    # Adds new Pokemon entries to the appropriate section in the sheet.
-    insert_row = empty_row if empty_row is not None else end_row + 1
-    insert_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
+):
+    # Adds Pokemon entries to the appropriate section in the sheet.
+    new_row = current_end_row + 1
+    insert_range = f"{sheet_name}!{start_col}{new_row}:{end_col}{new_row}"
     updates.append(
         {
             "range": insert_range,
-            "values": [[pokemon_name, 1, new_stats[0], new_stats[1]]],
+            "values": [[pokemon_name] + stats],
         }
     )
-    if empty_row is not None:
-        empty_row += 1
-    else:
-        end_row += 1
-    return empty_row, end_row
+    return new_row
 
 
 def check_labels(values: List[List[str]], name: str) -> bool:
-    # Returns whether the name is found in values alongside with the labels of "Pokemon", "Games", "Kills" and "Deaths" associated with it.
+    # Returns whether the name is found in values alongside with the labels of "Pokemon", "Kills" and "Deaths" associated with it.
     for row_index, row in enumerate(values):
         try:
             name_index = row.index(name)
             if row_index + 1 < len(values) and all(
                 values[row_index + 1][name_index + i] == label
-                for i, label in enumerate(["Pokemon", "Games", "Kills", "Deaths"])
+                for i, label in enumerate(["Pokemon", "Kills", "Deaths"])
             ):
                 return True
         except ValueError:
@@ -257,7 +248,7 @@ def get_range(values: List[List[str]], name: str) -> str:
         if name in row:
             name_index = row.index(name) + 1
             start_col = chr(65 + name_index)
-            end_col = chr(ord(start_col) + 3)
+            end_col = chr(ord(start_col) + 2)
             start_row = row_index + 4
             end_row = start_row + 11
             return f"{start_col}{start_row}:{end_col}{end_row}"

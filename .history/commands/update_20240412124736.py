@@ -97,7 +97,9 @@ class Update:
                 else:
                     cell = next_cell(values)
                     update_cell = f"Stats!{cell}"
-                    add_data(service, spreadsheet_id, update_cell, name, pokemon_data)
+                    insert_data(
+                        service, spreadsheet_id, update_cell, name, pokemon_data
+                    )
                     col = cell[0]
                     row = int(cell[1:])
                     merge_cells(service, spreadsheet_id, sheet_id, col, row)
