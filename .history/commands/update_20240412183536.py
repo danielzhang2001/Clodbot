@@ -106,7 +106,7 @@ class Update:
                         name,
                         pokemon_data,
                     )
-            return "Sheet updated."
+            return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"
         except Exception as e:

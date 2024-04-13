@@ -21,6 +21,7 @@ def add_data(
     )
     num_rows = max(12, len(pokemon))
     cell_range = f"{sheet_name}!{col}{row}:{chr(ord(col) + 3)}{row + num_rows + 1}"
+    print(f"ADD DATA CELL RANGE: {cell_range}")
     data = (
         [[player_name], ["POKEMON", "GAMES", "KILLS", "DEATHS"]]
         + [[poke[0], 1] + poke[1] for poke in pokemon]
@@ -182,6 +183,7 @@ def merge_cells(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
     # Merges the cells in the range.
+    print(f"cell range: {cell_range}")
     _, cell_range = cell_range.split("!")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
@@ -304,8 +306,8 @@ def color_cells(
                             },
                             "secondBandColor": {
                                 "red": 0,
-                                "green": 0.22,
-                                "blue": 0.43,
+                                "green": 0.20,
+                                "blue": 0.40,
                             },
                         },
                     }
@@ -460,7 +462,7 @@ def check_labels(values: List[List[str]], name: str) -> bool:
             name_index = row.index(name)
             if row_index + 1 < len(values) and all(
                 values[row_index + 1][name_index + i] == label
-                for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
+                for i, label in enumerate(["Pokemon", "Games", "Kills", "Deaths"])
             ):
                 return True
         except ValueError:

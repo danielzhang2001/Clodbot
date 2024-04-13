@@ -21,6 +21,7 @@ def add_data(
     )
     num_rows = max(12, len(pokemon))
     cell_range = f"{sheet_name}!{col}{row}:{chr(ord(col) + 3)}{row + num_rows + 1}"
+    print(f"ADD DATA CELL RANGE: {cell_range}")
     data = (
         [[player_name], ["POKEMON", "GAMES", "KILLS", "DEATHS"]]
         + [[poke[0], 1] + poke[1] for poke in pokemon]
@@ -154,6 +155,7 @@ def update_pokemon(
 def format_data(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
+    print(f"FORMAT DATA CELL RANGE: {cell_range}")
     # Formats all of the data for the player section.
     format_cells(service, spreadsheet_id, sheet_id, cell_range)
     format_text(service, spreadsheet_id, sheet_id, cell_range)
@@ -162,8 +164,9 @@ def format_data(
 def format_cells(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
+    print(f"FORMAT CELLS CELL RANGE: {cell_range}")
     # Formats all of the cells for the player section.
-    name_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{cell_range.split('!')[1].split(':')[0][1:]}"
+    name_range = f"{cell_range.split('!')[0]}!{cell_range.split(':')[0]}:{cell_range.split(':')[1][0]}{cell_range.split(':')[0][1:]}"
     merge_cells(service, spreadsheet_id, sheet_id, name_range)
     outline_cells(service, spreadsheet_id, sheet_id, cell_range)
     color_cells(service, spreadsheet_id, sheet_id, cell_range)
@@ -173,7 +176,7 @@ def format_text(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
     # Formats all of the text for the player section.
-    header_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{int(cell_range.split('!')[1].split(':')[0][1:]) + 1}"
+    header_range = f"{cell_range.split('!')[0]}!{cell_range.split(':')[0]}:{cell_range.split(':')[1][0]}{int(cell_range.split(':')[0][1:])+1}"
     style_text(service, spreadsheet_id, sheet_id, cell_range)
     center_text(service, spreadsheet_id, sheet_id, header_range)
 
@@ -182,6 +185,7 @@ def merge_cells(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
     # Merges the cells in the range.
+    print(f"cell range: {cell_range}")
     _, cell_range = cell_range.split("!")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
@@ -292,11 +296,6 @@ def color_cells(
                             "endColumnIndex": end_col,
                         },
                         "rowProperties": {
-                            "headerColor": {
-                                "red": 0,
-                                "green": 0,
-                                "blue": 0,
-                            },
                             "firstBandColor": {
                                 "red": 0,
                                 "green": 0,
@@ -304,8 +303,8 @@ def color_cells(
                             },
                             "secondBandColor": {
                                 "red": 0,
-                                "green": 0.22,
-                                "blue": 0.43,
+                                "green": 0.15,
+                                "blue": 0.5,
                             },
                         },
                     }
@@ -460,7 +459,7 @@ def check_labels(values: List[List[str]], name: str) -> bool:
             name_index = row.index(name)
             if row_index + 1 < len(values) and all(
                 values[row_index + 1][name_index + i] == label
-                for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
+                for i, label in enumerate(["Pokemon", "Games", "Kills", "Deaths"])
             ):
                 return True
         except ValueError:

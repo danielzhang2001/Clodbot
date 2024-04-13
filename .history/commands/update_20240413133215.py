@@ -91,11 +91,13 @@ class Update:
                 )
                 values = result.get("values", [])
                 if check_labels(values, name):
+                    print("ALREADY THERE!")
                     stat_range = f"Stats!{get_range(values, name)}"
                     update_data(
                         service, spreadsheet_id, sheet_id, stat_range, pokemon_data
                     )
                 else:
+                    print("NOT THERE")
                     cell = next_cell(values)
                     start_cell = f"Stats!{next_cell(values)}"
                     add_data(

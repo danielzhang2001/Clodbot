@@ -460,7 +460,7 @@ def check_labels(values: List[List[str]], name: str) -> bool:
             name_index = row.index(name)
             if row_index + 1 < len(values) and all(
                 values[row_index + 1][name_index + i] == label
-                for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
+                for i, label in enumerate(["Pokemon", "Games", "Kills", "Deaths"])
             ):
                 return True
         except ValueError:

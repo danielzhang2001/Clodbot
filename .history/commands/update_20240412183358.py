@@ -97,16 +97,23 @@ class Update:
                     )
                 else:
                     cell = next_cell(values)
-                    start_cell = f"Stats!{next_cell(values)}"
+                    update_cell = f"Stats!{cell}"
                     add_data(
                         service,
                         spreadsheet_id,
                         sheet_id,
-                        start_cell,
+                        update_cell,
                         name,
                         pokemon_data,
                     )
-            return "Sheet updated."
+                    start_col = cell[0]
+                    start_row = "".join(filter(str.isdigit, cell))
+                    end_col = chr(ord(start_col) + 3)
+                    name_range = f"Stats!{start_col}{start_row}:{end_col}{start_row}"
+                    stat_range = f"Stats!{get_range(values, name)}"
+                    merge_cells(service, spreadsheet_id, sheet_id, name_range)
+                    bold_cells(service, spreadsheet_id, sheet_id, stat_range)
+            return "Successfully updated the sheet with new player names."
         except HttpError as e:
             return f"Google Sheets API error: {e}"
         except Exception as e:

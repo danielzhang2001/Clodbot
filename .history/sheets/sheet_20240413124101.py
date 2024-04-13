@@ -20,12 +20,13 @@ def add_data(
         "".join(filter(str.isdigit, start_cell))
     )
     num_rows = max(12, len(pokemon))
-    cell_range = f"{sheet_name}!{col}{row}:{chr(ord(col) + 3)}{row + num_rows + 1}"
     data = (
         [[player_name], ["POKEMON", "GAMES", "KILLS", "DEATHS"]]
         + [[poke[0], 1] + poke[1] for poke in pokemon]
         + [[" "] * 4] * max(0, 12 - len(pokemon))
     )
+    data_range = f"{col}{row}:{chr(ord(col) + 3)}{row + num_rows + 1}"
+    section_range = f"{sheet_name}!{data_range}"
     body = {"values": data}
     service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id,
@@ -33,7 +34,11 @@ def add_data(
         valueInputOption="USER_ENTERED",
         body=body,
     ).execute()
-    format_data(service, spreadsheet_id, sheet_id, cell_range)
+    name_range = f"{sheet_name}!{col}{row}:{chr(ord(col) + 3)}{row}"
+    merge_cells(service, spreadsheet_id, sheet_id, name_range)
+    outline_cells(service, spreadsheet_id, sheet_id, section_range)
+    color_cells(service, spreadsheet_id, sheet_id, section_range)
+    format_text(service, spreadsheet_id, sheet_id, section_range)
 
 
 def update_data(
@@ -151,37 +156,10 @@ def update_pokemon(
     )
 
 
-def format_data(
-    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
-) -> None:
-    # Formats all of the data for the player section.
-    format_cells(service, spreadsheet_id, sheet_id, cell_range)
-    format_text(service, spreadsheet_id, sheet_id, cell_range)
-
-
-def format_cells(
-    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
-) -> None:
-    # Formats all of the cells for the player section.
-    name_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{cell_range.split('!')[1].split(':')[0][1:]}"
-    merge_cells(service, spreadsheet_id, sheet_id, name_range)
-    outline_cells(service, spreadsheet_id, sheet_id, cell_range)
-    color_cells(service, spreadsheet_id, sheet_id, cell_range)
-
-
-def format_text(
-    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
-) -> None:
-    # Formats all of the text for the player section.
-    header_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{int(cell_range.split('!')[1].split(':')[0][1:]) + 1}"
-    style_text(service, spreadsheet_id, sheet_id, cell_range)
-    center_text(service, spreadsheet_id, sheet_id, header_range)
-
-
 def merge_cells(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
-    # Merges the cells in the range.
+    # Merges the cells containing the name for formatting purposes.
     _, cell_range = cell_range.split("!")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
@@ -212,7 +190,7 @@ def merge_cells(
 def outline_cells(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
-    # Bolds and colors the outline of all the cells in the range.
+    # Bolds and colors the outline gray of all the cells in the range for formatting purposes.
     _, cell_range = cell_range.split("!")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
@@ -272,7 +250,7 @@ def outline_cells(
 def color_cells(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
-    # Colors all the cells in the range.
+    # Colors all the cells in the range for formatting purposes.
     _, cell_range = cell_range.split("!")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
@@ -292,11 +270,6 @@ def color_cells(
                             "endColumnIndex": end_col,
                         },
                         "rowProperties": {
-                            "headerColor": {
-                                "red": 0,
-                                "green": 0,
-                                "blue": 0,
-                            },
                             "firstBandColor": {
                                 "red": 0,
                                 "green": 0,
@@ -304,8 +277,8 @@ def color_cells(
                             },
                             "secondBandColor": {
                                 "red": 0,
-                                "green": 0.22,
-                                "blue": 0.43,
+                                "green": 0.15,
+                                "blue": 0.5,
                             },
                         },
                     }
@@ -318,10 +291,10 @@ def color_cells(
     ).execute()
 
 
-def style_text(
+def color_text(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
-    # Colors all the text in the range and sets the font and font size.
+    # Colors all the text in the range white for formatting purposes.
     _, cell_range = cell_range.split("!")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
@@ -460,7 +433,7 @@ def check_labels(values: List[List[str]], name: str) -> bool:
             name_index = row.index(name)
             if row_index + 1 < len(values) and all(
                 values[row_index + 1][name_index + i] == label
-                for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
+                for i, label in enumerate(["Pokemon", "Games", "Kills", "Deaths"])
             ):
                 return True
         except ValueError:

@@ -91,6 +91,7 @@ class Update:
                 )
                 values = result.get("values", [])
                 if check_labels(values, name):
+                    print("ALREADY THERE!")
                     stat_range = f"Stats!{get_range(values, name)}"
                     update_data(
                         service, spreadsheet_id, sheet_id, stat_range, pokemon_data
