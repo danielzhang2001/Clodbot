@@ -74,6 +74,7 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError) 
             "Invalid command. Please enter one of the following:\n"
             "```\n"
             "Clodbot, analyze (Replay Link)\n"
+            "Clodbot, update (Google Sheets Link) (Replay Link)\n"
             "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
             "Clodbot, giveset random (Optional Number)\n"
             "```"

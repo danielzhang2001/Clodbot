@@ -6,110 +6,23 @@ from typing import Optional, List, Dict, Tuple
 from googleapiclient.discovery import Resource
 
 
-def next_cell(values: List[List[str]]) -> str:
-    # Returns the row and column indices for the top of the next available section.
-    letters = ["B", "G", "L", "Q"]
-    last_index = 3
-    for section in range(0, len(values), 15):
-        names_row = values[section]
-        details_row = values[section + 1]
-        for index, letter in enumerate(letters):
-            start_index = index * 5
-            group_cells = [
-                (
-                    names_row[start_index]
-                    if (len(names_row) > start_index and names_row[start_index] != "")
-                    else "Invalid"
-                ),
-                (
-                    details_row[start_index]
-                    if (
-                        len(details_row) > start_index
-                        and details_row[start_index] == "Pokemon"
-                    )
-                    else "Invalid"
-                ),
-                (
-                    details_row[start_index + 1]
-                    if (
-                        len(details_row) > start_index + 1
-                        and details_row[start_index + 1] == "Games"
-                    )
-                    else "Invalid"
-                ),
-                (
-                    details_row[start_index + 2]
-                    if (
-                        len(details_row) > start_index + 2
-                        and details_row[start_index + 2] == "Kills"
-                    )
-                    else "Invalid"
-                ),
-                (
-                    details_row[start_index + 3]
-                    if (
-                        len(details_row) > start_index + 3
-                        and details_row[start_index + 3] == "Deaths"
-                    )
-                    else "Invalid"
-                ),
-            ]
-            if any(cell == "Invalid" for cell in group_cells):
-                return f"{letter}{section + 2}"
-            last_index = index
-    return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
-
-
-def merge_cells(
-    service: Resource, spreadsheet_id: str, sheet_id: int, col: str, row: int
-) -> None:
-    # Merges the cells containing the name for formatting purposes.
-    col = ord(col) - ord("A")
-    merge_body = {
-        "requests": [
-            {
-                "mergeCells": {
-                    "range": {
-                        "sheetId": sheet_id,
-                        "startRowIndex": row - 1,
-                        "endRowIndex": row,
-                        "startColumnIndex": col,
-                        "endColumnIndex": col + 4,
-                    },
-                    "mergeType": "MERGE_ALL",
-                }
-            },
-            {
-                "repeatCell": {
-                    "range": {
-                        "sheetId": sheet_id,
-                        "startRowIndex": row - 1,
-                        "endRowIndex": row,
-                        "startColumnIndex": col,
-                        "endColumnIndex": col + 1,
-                    },
-                    "cell": {"userEnteredFormat": {"horizontalAlignment": "CENTER"}},
-                    "fields": "userEnteredFormat.horizontalAlignment",
-                }
-            },
-        ]
-    }
-    service.spreadsheets().batchUpdate(
-        spreadsheetId=spreadsheet_id,
-        body=merge_body,
-    ).execute()
-
-
 def add_data(
     service: Resource,
     spreadsheet_id: str,
+    sheet_id: int,
     cell: str,
     player_name: str,
     pokemon: List[Tuple[str, List[int]]],
 ) -> None:
-    # Adds the Player Name, Pokemon, Games, Kills and Deaths data into the sheet on the specific cell.
+    # Adds the Player Name, Pokemon, Games, Kills and Deaths data into the sheet on the specific cell, as well as does cell formatting.
+    sheet_name, start_cell = cell.split("!")
+    col, row = start_cell.rstrip("0123456789"), int(
+        "".join(filter(str.isdigit, start_cell))
+    )
+    num_rows = max(12, len(pokemon))
+    cell_range = f"{sheet_name}!{col}{row}:{chr(ord(col) + 3)}{row + num_rows + 1}"
     data = (
-        [[player_name], ["Pokemon", "Games", "Kills", "Deaths"]]
+        [[player_name], ["POKEMON", "GAMES", "KILLS", "DEATHS"]]
         + [[poke[0], 1] + poke[1] for poke in pokemon]
         + [[" "] * 4] * max(0, 12 - len(pokemon))
     )
@@ -120,17 +33,19 @@ def add_data(
         valueInputOption="USER_ENTERED",
         body=body,
     ).execute()
+    format_data(service, spreadsheet_id, sheet_id, cell_range)
 
 
 def update_data(
     service: Resource,
     spreadsheet_id: str,
+    sheet_id: int,
     cell_range: str,
     pokemon_data: List[Tuple[str, List[int]]],
 ) -> None:
     # Updates the Pokemon, Kills and Deaths data into the sheet.
-    sheet_name, range_part = cell_range.split("!")
-    start_range, end_range = range_part.split(":")
+    sheet_name, cell_range = cell_range.split("!")
+    start_range, end_range = cell_range.split(":")
     start_col = "".join(filter(str.isalpha, start_range))
     end_col = "".join(filter(str.isalpha, end_range))
     start_row = int("".join(filter(str.isdigit, start_range)))
@@ -182,6 +97,32 @@ def update_data(
         ).execute()
 
 
+def add_pokemon(
+    sheet_name: str,
+    start_col: str,
+    end_col: str,
+    pokemon_name: str,
+    new_stats: List[int],
+    empty_row: Optional[int],
+    end_row: int,
+    updates: List[Dict[str, List[Tuple[str, int, int]]]],
+) -> Tuple[Optional[int], int]:
+    # Adds new Pokemon entries to the appropriate section in the sheet.
+    insert_row = empty_row if empty_row is not None else end_row + 1
+    insert_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
+    updates.append(
+        {
+            "range": insert_range,
+            "values": [[pokemon_name, 1, new_stats[0], new_stats[1]]],
+        }
+    )
+    if empty_row is not None:
+        empty_row += 1
+    else:
+        end_row += 1
+    return empty_row, end_row
+
+
 def update_pokemon(
     sheet_name: str,
     start_col: str,
@@ -210,30 +151,306 @@ def update_pokemon(
     )
 
 
-def add_pokemon(
-    sheet_name: str,
-    start_col: str,
-    end_col: str,
-    pokemon_name: str,
-    new_stats: List[int],
-    empty_row: Optional[int],
-    end_row: int,
-    updates: List[Dict[str, List[Tuple[str, int, int]]]],
-) -> Tuple[Optional[int], int]:
-    # Adds new Pokemon entries to the appropriate section in the sheet.
-    insert_row = empty_row if empty_row is not None else end_row + 1
-    insert_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
-    updates.append(
-        {
-            "range": insert_range,
-            "values": [[pokemon_name, 1, new_stats[0], new_stats[1]]],
-        }
-    )
-    if empty_row is not None:
-        empty_row += 1
-    else:
-        end_row += 1
-    return empty_row, end_row
+def format_data(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Formats all of the data for the player section.
+    format_cells(service, spreadsheet_id, sheet_id, cell_range)
+    format_text(service, spreadsheet_id, sheet_id, cell_range)
+
+
+def format_cells(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Formats all of the cells for the player section.
+    name_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{cell_range.split('!')[1].split(':')[0][1:]}"
+    merge_cells(service, spreadsheet_id, sheet_id, name_range)
+    outline_cells(service, spreadsheet_id, sheet_id, cell_range)
+    color_cells(service, spreadsheet_id, sheet_id, cell_range)
+
+
+def format_text(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Formats all of the text for the player section.
+    header_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{int(cell_range.split('!')[1].split(':')[0][1:]) + 1}"
+    style_text(service, spreadsheet_id, sheet_id, cell_range)
+    center_text(service, spreadsheet_id, sheet_id, header_range)
+
+
+def merge_cells(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Merges the cells in the range.
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    body = {
+        "requests": [
+            {
+                "mergeCells": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startRowIndex": start_row,
+                        "endRowIndex": end_row,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
+                    },
+                    "mergeType": "MERGE_ALL",
+                }
+            },
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
+def outline_cells(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Bolds and colors the outline of all the cells in the range.
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    body = {
+        "requests": [
+            {
+                "updateBorders": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startRowIndex": start_row,
+                        "endRowIndex": end_row,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
+                    },
+                    "top": {
+                        "style": "SOLID",
+                        "width": 1,
+                        "color": {"red": 0.69, "green": 0.69, "blue": 0.69},
+                    },
+                    "bottom": {
+                        "style": "SOLID",
+                        "width": 1,
+                        "color": {"red": 0.69, "green": 0.69, "blue": 0.69},
+                    },
+                    "left": {
+                        "style": "SOLID",
+                        "width": 1,
+                        "color": {"red": 0.69, "green": 0.69, "blue": 0.69},
+                    },
+                    "right": {
+                        "style": "SOLID",
+                        "width": 1,
+                        "color": {"red": 0.69, "green": 0.69, "blue": 0.69},
+                    },
+                    "innerHorizontal": {
+                        "style": "SOLID",
+                        "width": 1,
+                        "color": {"red": 0.69, "green": 0.69, "blue": 0.69},
+                    },
+                    "innerVertical": {
+                        "style": "SOLID",
+                        "width": 1,
+                        "color": {"red": 0.69, "green": 0.69, "blue": 0.69},
+                    },
+                }
+            }
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
+def color_cells(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Colors all the cells in the range.
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    body = {
+        "requests": [
+            {
+                "addBanding": {
+                    "bandedRange": {
+                        "range": {
+                            "sheetId": sheet_id,
+                            "startRowIndex": start_row,
+                            "endRowIndex": end_row,
+                            "startColumnIndex": start_col,
+                            "endColumnIndex": end_col,
+                        },
+                        "rowProperties": {
+                            "headerColor": {
+                                "red": 0,
+                                "green": 0,
+                                "blue": 0,
+                            },
+                            "firstBandColor": {
+                                "red": 0,
+                                "green": 0,
+                                "blue": 0,
+                            },
+                            "secondBandColor": {
+                                "red": 0,
+                                "green": 0.22,
+                                "blue": 0.43,
+                            },
+                        },
+                    }
+                }
+            }
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
+def style_text(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Colors all the text in the range and sets the font and font size.
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    body = {
+        "requests": [
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startRowIndex": start_row,
+                        "endRowIndex": end_row,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
+                    },
+                    "cell": {
+                        "userEnteredFormat": {
+                            "textFormat": {
+                                "fontFamily": "Acme",
+                                "fontSize": 10,
+                                "foregroundColor": {
+                                    "red": 1.0,
+                                    "green": 1.0,
+                                    "blue": 1.0,
+                                },
+                            }
+                        }
+                    },
+                    "fields": "userEnteredFormat.textFormat",
+                }
+            }
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
+def center_text(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Centers all the text in the given cell range.
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    body = {
+        "requests": [
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startRowIndex": start_row,
+                        "endRowIndex": end_row,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
+                    },
+                    "cell": {
+                        "userEnteredFormat": {
+                            "horizontalAlignment": "CENTER",
+                            "verticalAlignment": "MIDDLE",
+                        }
+                    },
+                    "fields": "userEnteredFormat(horizontalAlignment,verticalAlignment)",
+                }
+            },
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
+def next_cell(values: List[List[str]]) -> str:
+    # Returns the row and column indices for the top of the next available section.
+    letters = ["B", "G", "L", "Q"]
+    last_index = 3
+    for section in range(0, len(values), 15):
+        names_row = values[section]
+        details_row = values[section + 1]
+        for index, letter in enumerate(letters):
+            start_index = index * 5
+            group_cells = [
+                (
+                    names_row[start_index]
+                    if (len(names_row) > start_index and names_row[start_index] != "")
+                    else "Invalid"
+                ),
+                (
+                    details_row[start_index]
+                    if (
+                        len(details_row) > start_index
+                        and details_row[start_index] == "POKEMON"
+                    )
+                    else "Invalid"
+                ),
+                (
+                    details_row[start_index + 1]
+                    if (
+                        len(details_row) > start_index + 1
+                        and details_row[start_index + 1] == "GAMES"
+                    )
+                    else "Invalid"
+                ),
+                (
+                    details_row[start_index + 2]
+                    if (
+                        len(details_row) > start_index + 2
+                        and details_row[start_index + 2] == "KILLS"
+                    )
+                    else "Invalid"
+                ),
+                (
+                    details_row[start_index + 3]
+                    if (
+                        len(details_row) > start_index + 3
+                        and details_row[start_index + 3] == "DEATHS"
+                    )
+                    else "Invalid"
+                ),
+            ]
+            if any(cell == "Invalid" for cell in group_cells):
+                return f"{letter}{section + 2}"
+            last_index = index
+    return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
 
 
 def check_labels(values: List[List[str]], name: str) -> bool:
@@ -243,7 +460,7 @@ def check_labels(values: List[List[str]], name: str) -> bool:
             name_index = row.index(name)
             if row_index + 1 < len(values) and all(
                 values[row_index + 1][name_index + i] == label
-                for i, label in enumerate(["Pokemon", "Games", "Kills", "Deaths"])
+                for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
             ):
                 return True
         except ValueError:
