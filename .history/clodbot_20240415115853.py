@@ -14,7 +14,6 @@ from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
 from commands.update import Update
-from errors import *
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -65,12 +64,8 @@ async def on_interaction(interaction: discord.Interaction) -> None:
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.CommandError) -> None:
     if isinstance(error, commands.CommandNotFound):
-        try:
-            raise InvalidCommand()
-        except InvalidCommand as e:
-            await ctx.send(str(e))
-    else:
-        await ctx.send(f'{str(error).split(": ", 2)[-1]}')
+        raise InvalidCommand()
+    await ctx.send(f'{str(error).split(": ", 2)[-1]}')
 
 
 @bot.command(name="analyze")
