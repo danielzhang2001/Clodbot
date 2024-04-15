@@ -1,15 +1,21 @@
 """
-General functions in scraping Pokemon Smogon sets.
+General functions in getting Pokemon Smogon sets.
 """
 
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from discord import ui, ButtonStyle
+import aiohttp
+import random
+import discord
+from discord.ui import Button, View
+from discord.ext import commands
+from concurrent.futures import ThreadPoolExecutor
+from typing import Optional, Dict, List, Tuple
+from uuid import uuid4
+
+selected_states = {}
+selected_sets = {}
 
 
-def get_gen_dict() -> dict:
+def get_gen_dict() -> Dict[str, str]:
     # Returns generation dictionary.
     return {
         "gen1": "rb",
@@ -24,202 +30,193 @@ def get_gen_dict() -> dict:
     }
 
 
-def get_gen(generation: str) -> str:
-    # Retrieves generation dictionary.
-    return get_gen_dict().get(generation.lower())
-
-
-def get_setnames(driver: webdriver.Chrome) -> list:
-    # Finds and returns all set names on the page.
-    try:
-        export_buttons = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.CLASS_NAME, "ExportButton"))
-        )
-        set_names = []
-        for export_button in export_buttons:
-            set_header = export_button.find_element(By.XPATH, "./following-sibling::h1")
-            set_names.append(set_header.text)
-        return set_names
-    except Exception as e:
-        print(f"Error in retrieving set names: {str(e)}")
+def get_gen(generation: str) -> Optional[str]:
+    # Returns the generation value from the dictionary with the given Generation.
+    if generation is None:
         return None
+    gen_dict = get_gen_dict()
+    if generation.lower() in gen_dict:
+        return gen_dict[generation.lower()]
+    if generation.lower() in gen_dict.values():
+        return generation.lower()
+    return None
 
 
-def get_export_btn(driver: webdriver.Chrome, set: str) -> bool:
-    # Finds and clicks export button for the specific set.
-    try:
-        set_header = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    f"//h1[translate(text(),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ') = '{set.upper()}']",
-                )
-            )
-        )
-        export_button = WebDriverWait(set_header, 10).until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    "./preceding-sibling::button[contains(@class, 'ExportButton')][1]",
-                )
-            )
-        )
-        export_button.click()
-        return True
-    except Exception as e:
-        print(f"Export Button Error: {str(e)}")
-        return False
+async def get_latest_gen(pokemon: str) -> Optional[str]:
+    # Returns the latest eligible generation for the given Pokemon.
+    gen_dict = get_gen_dict()
+    generations = list(gen_dict.values())[::-1]
+    url = "https://smogonapi.herokuapp.com/GetSmogonData/{}/{}"
+    async with aiohttp.ClientSession() as session:
+        for gen_value in generations:
+            async with session.get(url.format(gen_value, pokemon.lower())) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("strategies"):
+                        gen_key = [
+                            key for key, value in gen_dict.items() if value == gen_value
+                        ][0]
+                        return gen_key
+    return None
 
 
-def get_textarea(driver: webdriver.Chrome, pokemon: str) -> str:
-    # Finds and returns text area contents for a Pokemon set.
-    try:
-        textarea = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "textarea"))
-        )
-        return textarea.text
-    except Exception as e_textarea:
-        print(f"Textarea Error: {str(e_textarea)}")
+async def get_random_gen(pokemon: str) -> Optional[str]:
+    # Returns a random eligible gen using the Smogon API given a Pokemon.
+    gen_dict = get_gen_dict()
+    generations = list(gen_dict.values())
+    url = "https://smogonapi.herokuapp.com/GetSmogonData/{}/{}"
+    random.shuffle(generations)
+    async with aiohttp.ClientSession() as session:
+        for gen_code in generations:
+            async with session.get(url.format(gen_code, pokemon.lower())) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get("strategies"):
+                        gen_key = [
+                            key for key, value in gen_dict.items() if value == gen_code
+                        ][0]
+                        return gen_key
+    return None
+
+
+async def get_first_format(pokemon: str, generation: str) -> Optional[str]:
+    # Returns the first format given the Pokemon and Generation.
+    gen_value = get_gen(generation)
+    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                strategies = data.get("strategies", [])
+                if strategies:
+                    return strategies[0]["format"]
+    return None
+
+
+async def get_random_format(pokemon: str, generation: str) -> Optional[str]:
+    # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
+    gen_value = get_gen(generation)
+    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                strategies = data.get("strategies", [])
+                formats = [
+                    strategy["format"]
+                    for strategy in strategies
+                    if strategy.get("movesets")
+                ]
+                if formats:
+                    return random.choice(formats)
+    return None
+
+
+async def get_set_names(
+    pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
+) -> Optional[List[str]]:
+    # Returns all set names associated with the Pokemon, Generation and Format provided. If no Generation, assumed to be latest one, and if no Format, assumed to be first one.
+    if not generation:
+        generation = await get_latest_gen(pokemon)
+        if generation is None:
+            return None
+    gen_value = get_gen(generation)
+    if gen_value is None:
         return None
+    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                set_names = []
+                if not format:
+                    format = await get_first_format(pokemon, generation)
+                for strategy in data.get("strategies", []):
+                    if (
+                        strategy["format"].replace(" ", "-").lower()
+                        == format.replace(" ", "-").lower()
+                    ):
+                        for moveset in strategy.get("movesets", []):
+                            set_names.append(moveset["name"])
+                return set_names
+    return None
 
 
-def get_view(unique_id, pokemon_data):
-    # Creates a prompt + buttons for Pokemon sets for a single Pokemon.
-    pokemon, sets, url = pokemon_data
-    view = ui.View()
-    formatted_name = "-".join(
-        part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-    )
-    prompt = f"Please select a set type for **{formatted_name}**:\n"
-    for index, set_name in enumerate(sets):
-        button_id = f"set_{unique_id}_{pokemon}_{index}"
-        button = ui.Button(label=set_name, custom_id=button_id)
-        view.add_item(button)
-    return {formatted_name: view}, prompt
+async def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
+    # Returns a random eligible set name using the Smogon API given a Pokemon, Generation and Format.
+    gen_value = get_gen(generation)
+    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                for strategy in data.get("strategies", []):
+                    if strategy.get("format") == format:
+                        if strategy.get("movesets"):
+                            set_names = [
+                                moveset["name"] for moveset in strategy["movesets"]
+                            ]
+                            return random.choice(set_names)
+    return None
 
 
-def get_multiview(unique_id, pokemon_data):
-    # Creates a prompt + buttons for Pokemon sets for multiple Pokemon.
-    views = {}
-    formatted_names = [
-        "-".join(
-            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-        )
-        for pokemon, _, _ in pokemon_data
-    ]
-    prompt = f"Please select set types for {', '.join(['**' + name + '**' for name in formatted_names])}:\n\n"
-    for pokemon, sets, url in pokemon_data:
-        view = ui.View()
-        formatted_name = "-".join(
-            part.capitalize() if len(part) > 1 else part for part in pokemon.split("-")
-        )
-        view.add_item(
-            ui.Button(
-                label=f"{formatted_name}:", style=ButtonStyle.primary, disabled=True
-            )
-        )
-        for index, set_name in enumerate(sets):
-            button_id = f"set_{unique_id}_{pokemon}_{index}"
-            button = ui.Button(label=set_name, custom_id=button_id)
-            view.add_item(button)
-        views[formatted_name] = view
-    return views, prompt
-
-
-def get_setinfo(driver, pokemon, generation=None, format=None):
-    # Retrieves the set names and the url with the Driver, Pokemon, Generation (Optional) and Format (Optional) provided.
-    if generation:
-        gen_code = get_gen(generation)
-        if not gen_code:
-            return None, None
-        url = f"https://www.smogon.com/dex/{gen_code}/pokemon/{pokemon.lower()}/"
-        driver.get(url)
-        if format:
-            url += f"{format.lower()}/"
-            driver.get(url)
-            if not is_valid_format(driver, format) or not is_valid_pokemon(
-                driver, pokemon
-            ):
-                return None, None
-        else:
-            if not is_valid_pokemon(driver, pokemon):
-                return None, None
-        set_names = get_setnames(driver)
-        return set_names, url if set_names else (None, None)
+def get_prompt(requests: List[Dict[str, Optional[str]]]) -> str:
+    # Returns the initial prompt for the Pokemon(s) specified.
+    prompt = "Please select a set type for "
+    if len(requests) > 1:
+        prompt += "the following Pokemon"
     else:
-        for gen in reversed(get_gen_dict().values()):
-            url = f"https://www.smogon.com/dex/{gen}/pokemon/{pokemon.lower()}/"
-            driver.get(url)
-            if is_valid_pokemon(driver, pokemon) and has_export_buttons(driver):
-                set_names = get_setnames(driver)
-                return set_names, url if set_names else (None, None)
-    return None, None
+        request = requests[0]
+        pokemon = request["pokemon"]
+        generation = (get_gen(request.get("generation")) or "none").upper()
+        format = (request.get("format") or "none").upper()
+        prompt += f"**{pokemon.upper()}{f' {generation}' if generation != 'NONE' else ''}{f' {format}' if format != 'NONE' else ''}**"
+    prompt += ":"
+    return prompt
 
 
-def is_valid_pokemon(driver: webdriver.Chrome, pokemon: str) -> bool:
-    # Check if the Pokemon name exists on the page.
-    try:
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    f"//h1[translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='{pokemon.upper()}']",
+def get_view(
+    prompt_key: str,
+    message_key: str,
+    request: Dict[str, Optional[str]],
+    set_names: List[str],
+    request_count: int,
+) -> View:
+    # Returns the view with a set of buttons for each Pokemon request.
+    view = View()
+    pokemon, generation, format = (
+        request["pokemon"],
+        request.get("generation", "none"),
+        request.get("format", "none"),
+    )
+    if request_count > 1:
+        view.add_item(
+            Button(
+                label=" ".join(
+                    [pokemon.upper()]
+                    + [
+                        generation.upper()
+                        for generation in [get_gen(request.get("generation")) or "none"]
+                        if generation != "none"
+                    ]
+                    + [
+                        format.upper()
+                        for format in [request.get("format") or "none"]
+                        if format != "none"
+                    ]
                 )
+                + ":",
+                style=discord.ButtonStyle.primary,
+                disabled=True,
             )
         )
-        return True
-    except:
-        try:
-            WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        f"//h1[translate(text(), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')='{pokemon.upper().replace('-', ' ')}']",
-                    )
-                )
-            )
-            return True
-        except:
-            return False
-
-
-def is_valid_format(driver: webdriver.Chrome, format: str) -> bool:
-    # Check if the Pokemon format exists on the page.
-    try:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located(
-                (By.CLASS_NAME, "PokemonPage-StrategySelector")
-            )
+    for name in set_names:
+        button_key = uuid4().hex[:5]
+        button_id = f"{prompt_key}_{message_key}_{button_key}_{pokemon}_{generation or 'none'}_{format or 'none'}_{name}_{request_count}".replace(
+            " ", ""
         )
-        format_elements = driver.find_elements(
-            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li a"
-        )
-        for element in format_elements:
-            href = element.get_attribute("href")
-            url_format = href.split("/")[-2]
-            if format.lower() == url_format.lower():
-                return True
-        selected_format = driver.find_element(
-            By.CSS_SELECTOR, ".PokemonPage-StrategySelector ul li span.is-selected"
-        )
-        current_url = driver.current_url
-        url_format = current_url.split("/")[-2]
-        return format.lower() == url_format.lower()
-    except Exception as e:
-        print(f"Error checking format: {str(e)}")
-        return False
-
-
-def has_export_buttons(driver: webdriver.Chrome) -> bool:
-    # Checks if there are any export buttons on the page.
-    try:
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "ExportButton"))
-        )
-        return True
-    except Exception as e:
-        print(f"No Export Buttons Found: {str(e)}")
-        return False
+        view.add_item(Button(label=name, custom_id=button_id))
+    return view
 
 
 def format_name(pokemon: str) -> str:
@@ -233,69 +230,139 @@ def format_name(pokemon: str) -> str:
     return "-".join(formatted_parts)
 
 
-def update_buttons(view, selected_sets):
-    # Updates button styles based on whether they are selected or not.
-    for item in view.children:
-        item_id_parts = item.custom_id.split("_")
-        if len(item_id_parts) == 4:
-            _, _, button_pokemon, button_set_index_str = item_id_parts
-            button_set_index = int(button_set_index_str)
-            if (
-                button_pokemon in selected_sets
-                and selected_sets[button_pokemon] == button_set_index
-            ):
-                item.style = ButtonStyle.success
-            else:
-                item.style = ButtonStyle.secondary
-
-
-async def update_message(
-    context,
-    interaction,
-    unique_id,
-    pokemon=None,
-    set_index=None,
-    set_display=None,
-):
-    # Updates the set message of either adding or deleting a set after a set button is clicked.
-    context.setdefault("sets", {})
-    if set_index is not None:
-        set_index = int(set_index)
-    channel = interaction.client.get_channel(interaction.channel_id)
-    selected_sets = context.get("selected_sets", {})
-    if set_display and pokemon and set_index is not None:
-        if "sets" not in context:
-            context["sets"] = {}
-        if pokemon not in context["sets"]:
-            context["sets"][pokemon] = {}
-        context["sets"][pokemon][set_index] = set_display
-    message_content = ""
-    for selected_pokemon, selected_index in selected_sets.items():
-        if (
-            selected_pokemon in context["sets"]
-            and selected_index in context["sets"][selected_pokemon]
-        ):
-            set_info = context["sets"][selected_pokemon][selected_index]
-            message_content += f"{set_info}\n\n"
-    message_content = f"```{message_content}```" if message_content else None
-    original_id = interaction.message.id
-    view = context["views"].get(original_id)
-    if not view:
-        await interaction.followup.send(
-            "Original message view not found.", ephemeral=True
+def format_set(moveset: dict) -> str:
+    # Returns the formatted set data from the moveset information given.
+    name = moveset["pokemon"]
+    item = moveset.get("items", [])
+    item_str = f" @ {item[0]}" if item else ""
+    level = moveset.get("levels", [])
+    level_str = f"\nLevel: {level[0]}" if level else ""
+    ability = moveset.get("abilities", [])
+    ability_str = f"\nAbility: {ability[0]}" if ability else ""
+    evs_list = moveset.get("evconfigs", [])
+    if evs_list:
+        evs_dict = evs_list[0]
+        evs = " / ".join(
+            (
+                f"{value} {'HP' if key == 'hp' else key.capitalize()}"
+                if key != "spa" and key != "spd" and key != "spe"
+                else f"{value} {'Atk' if key == 'atk' else 'Def' if key == 'def' else 'SpA' if key == 'spa' else 'SpD' if key == 'spd' else 'Spe'}"
+            )
+            for key, value in evs_dict.items()
+            if value > 0
         )
-        return
-    update_buttons(view, selected_sets)
-    original_message = await channel.fetch_message(original_id)
-    await original_message.edit(view=view)
-    if "final_message" in context:
-        message_id = context["final_message"]
-        message = await channel.fetch_message(message_id)
-        if message_content:
-            await message.edit(content=message_content)
+        evs_str = f"\nEVs: {evs}" if evs else ""
+    else:
+        evs_str = ""
+    ivs_list = moveset.get("ivconfigs", [])
+    if ivs_list:
+        ivs_dict = ivs_list[0]
+        ivs = " / ".join(
+            (
+                f"{value} {'HP' if key == 'hp' else key.capitalize()}"
+                if key != "spa" and key != "spd" and key != "spe"
+                else f"{value} {'Atk' if key == 'atk' else 'Def' if key == 'def' else 'SpA' if key == 'spa' else 'SpD' if key == 'spd' else 'Spe'}"
+            )
+            for key, value in ivs_dict.items()
+            if value != 31
+        )
+        ivs_str = f"\nIVs: {ivs}" if ivs else ""
+    else:
+        ivs_str = ""
+    tera = moveset.get("teratypes", [])
+    tera_str = f"\nTera Type: {random.choice(tera)}" if tera else ""
+    nature = moveset.get("natures", [])
+    nature_str = f"\n{nature[0]} Nature" if nature else ""
+    moves = []
+    for slot in moveset.get("moveslots", []):
+        if slot:
+            available_moves = [move["move"] for move in slot]
+            selected_move = random.choice(available_moves)
+            moves.append(selected_move)
+            available_moves.remove(selected_move)
+            while selected_move in moves[:-1]:
+                selected_move = random.choice(available_moves)
+                moves[-1] = selected_move
+                available_moves.remove(selected_move)
+    moves_str = "\n- " + "\n- ".join(moves)
+    formatted_set = f"{name}{item_str}{ability_str}{level_str}{evs_str}{ivs_str}{tera_str}{nature_str}{moves_str}"
+    return formatted_set.strip()
+
+
+async def add_set(
+    prompt_key: str, message_key: str, button_key: str, set_data: str
+) -> None:
+    # Adds the set information to the selected sets and Pokemon information to the selected states.
+    selected_states.setdefault(prompt_key, [])
+    selected_sets.setdefault(prompt_key, {})
+    selected_states[prompt_key].append(message_key + button_key)
+    selected_sets[prompt_key][message_key] = [set_data]
+
+
+async def remove_set(prompt_key: str, message_key: str, button_key: str) -> None:
+    # Removes the set information from the selected sets and Pokemon information from the selected states.
+    selected_states[prompt_key] = [
+        state
+        for state in selected_states[prompt_key]
+        if not state.startswith(message_key)
+    ]
+    selected_sets[prompt_key].pop(message_key)
+
+
+def update_buttons(
+    message: discord.Message, button_id: str, deselected: bool, multiple: bool
+) -> None:
+    # Update the coloring of the buttons when a button is selected or deselected.
+    view = View()
+    first_button = True
+    for component in message.components:
+        for item in component.children:
+            disabled = False
+            if multiple and first_button:
+                style = discord.ButtonStyle.primary
+                disabled = True
+                first_button = False
+            elif deselected and item.custom_id == button_id:
+                style = discord.ButtonStyle.secondary
+            else:
+                style = (
+                    discord.ButtonStyle.success
+                    if item.custom_id == button_id
+                    else discord.ButtonStyle.secondary
+                )
+            button = Button(
+                style=style,
+                label=item.label,
+                custom_id=item.custom_id,
+                disabled=disabled,
+            )
+            view.add_item(button)
+    return view
+
+
+async def filter_requests(
+    ctx: commands.Context,
+    requests: List[Dict[str, Optional[str]]],
+    results: List[Optional[List[str]]],
+) -> Tuple[List[Dict[str, Optional[str]]], List[List[str]]]:
+    # Filters in only valid Pokemon requests and sends an error message for each invalid request.
+    valid_requests = []
+    valid_results = []
+    invalid_requests = []
+    for request, set_names in zip(requests, results):
+        if set_names is None or not set_names:
+            pokemon = request["pokemon"]
+            generation = request.get("generation", "")
+            format = request.get("format", "")
+            invalid_parts = [f"**{pokemon}**"]
+            if generation:
+                invalid_parts.append(f"**{generation}**")
+            if format:
+                invalid_parts.append(f"**{format}**")
+            invalid_requests.append(" ".join(invalid_parts))
         else:
-            await message.delete()
-            del context["final_message"]
-    elif message_content:
-        message = await channel.send(message_content)
-        context["final_message"] = message.id
+            valid_requests.append(request)
+            valid_results.append(set_names)
+    if invalid_requests:
+        await ctx.send("Cannot find sets for " + ", ".join(invalid_requests) + ".")
+    return valid_requests, valid_results

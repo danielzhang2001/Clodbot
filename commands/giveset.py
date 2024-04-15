@@ -2,268 +2,165 @@
 The function to give Pokemon sets from Smogon based on different types of criteria.
 """
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from smogon.set import *
-from discord import ui, ButtonStyle
-from asyncio import Lock
-from concurrent.futures import ThreadPoolExecutor
 import uuid
 import asyncio
-from datetime import datetime, timedelta
+import random
+import aiohttp
+import discord
+from discord import ButtonStyle
+from discord.ui import Button, View
+from discord.ext import commands
+from concurrent.futures import ThreadPoolExecutor
+from typing import Optional, List, Dict, Tuple
+from uuid import uuid4
+from smogon.set import *
+from errors import *
 
 
 class GiveSet:
     awaiting_response = {}
-    # For caching Pokemon names
-    pokemon_cache = {"names": [], "expiration": datetime.now()}
-    # For caching Pokemon set names
-    setname_cache = {}
-    # For caching Pokemon set info
-    setinfo_cache = {}
-    # Cache expiration duration
-    cache_duration = timedelta(hours=730)
+    first_row = {}
 
     @staticmethod
-    def get_setinfo_key(pokemon, set_name):
-        # Generates a key for accessing the cache of set data.
-        return f"{pokemon.lower()}_{set_name.lower()}"
+    async def fetch_pokemon() -> List[str]:
+        # Retrieves a list of all Pokemon using PokeAPI.
+        url = "https://pokeapi.co/api/v2/pokemon-species?limit=10000"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    pokemon_names = [species["name"] for species in data["results"]]
+                    return pokemon_names
 
     @staticmethod
-    def check_setinfo_cache(pokemon, set_name):
-        # Checks if data is available in the set data cache and not expired.
-        key = GiveSet.get_setinfo_key(pokemon, set_name)
-        if key in GiveSet.setinfo_cache:
-            data, expiration = GiveSet.setinfo_cache[key]
-            if datetime.now() < expiration:
-                return data
-        return None
+    async def fetch_set(
+        set_name: str,
+        pokemon: str,
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
+    ) -> str:
+        # Fetches and displays set data based on Pokemon, Generation, Format and Set names given.
+        if not generation:
+            generation = await get_latest_gen(pokemon)
+        gen_value = get_gen(generation)
+        url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if not format:
+                        format = await get_first_format(pokemon, generation)
+                    for strategy in data.get("strategies", []):
+                        if (
+                            strategy["format"].lower()
+                            == format.replace("-", " ").lower()
+                        ):
+                            for moveset in strategy.get("movesets", []):
+                                if (
+                                    moveset["name"].lower().replace(" ", "")
+                                    == set_name.lower()
+                                ):
+                                    return format_set(moveset)
 
     @staticmethod
-    def update_setinfo_cache(pokemon, set_name, set_data):
-        # Updates the set data cache with new data.
-        key = GiveSet.get_setinfo_key(pokemon, set_name)
-        expiration = datetime.now() + GiveSet.cache_duration
-        GiveSet.setinfo_cache[key] = (set_data, expiration)
+    async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
+        # Generates and displays random Pokemon sets with random eligible Generations and Formats.
+        args_list = input_str.split()
+        if len(args_list) == 1:
+            num = 1
+        elif len(args_list) == 2 and args_list[1].isdigit() and int(args_list[1]) >= 1:
+            num = int(args_list[1])
+        else:
+            raise InvalidRandom()
+        pokemon = await GiveSet.fetch_pokemon()
+        loop = asyncio.get_event_loop()
+        formatted_sets = []
+        while len(formatted_sets) < num:
+            remaining = num - len(formatted_sets)
+            selected_pokemon = random.sample(pokemon, k=min(remaining, len(pokemon)))
+            tasks = [
+                loop.create_task(GiveSet.fetch_randomset_async(pokemon))
+                for pokemon in selected_pokemon
+            ]
+            results = await asyncio.gather(*tasks)
+            formatted_sets.extend([i for i in results if i is not None])
+            for p in results:
+                if p and p[0] in pokemon:
+                    pokemon.remove(p[0])
+        await ctx.send(f"```\n" + "\n\n".join(formatted_sets) + "\n```")
 
     @staticmethod
-    def get_setname_key(pokemon, generation=None, format=None):
-        # Generates a key for accessing the cache of set names.
-        return (
-            pokemon.lower(),
-            str(generation).lower() if generation else None,
-            str(format).lower() if format else None,
+    async def fetch_randomset_async(pokemon: str) -> Optional[str]:
+        # Helper function for fetching random sets asynchronously to save time.
+        random_gen = await get_random_gen(pokemon)
+        if not random_gen:
+            return None
+        random_format = await get_random_format(pokemon, random_gen)
+        if not random_format:
+            return None
+        random_set = await get_random_set(pokemon, random_gen, random_format)
+        if not random_set:
+            return None
+        formatted_set = await GiveSet.fetch_set(
+            random_set, pokemon, random_gen, random_format
         )
+        return formatted_set
 
     @staticmethod
-    def check_setname_cache(pokemon, generation=None, format=None):
-        # Checks if data is available in the set names cache and not expired.
-        key = GiveSet.get_setname_key(pokemon, generation, format)
-        if key in GiveSet.setname_cache:
-            data, expiration = GiveSet.setname_cache[key]
-            if datetime.now() < expiration:
-                return data
-        return None
-
-    @staticmethod
-    def update_setname_cache(pokemon, data, generation=None, format=None):
-        # Updates the set names cache with new data.
-        key = GiveSet.get_setname_key(pokemon, generation, format)
-        expiration = datetime.now() + GiveSet.cache_duration
-        GiveSet.setname_cache[key] = (data, expiration)
-
-    @staticmethod
-    def fetch_cache():
-        # Stores all Pokemon from Bulbapedia into a cache, returns the cache.
-        current_time = datetime.now()
-        if current_time <= GiveSet.pokemon_cache["expiration"]:
-            return GiveSet.pokemon_cache["names"]
-        url = "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_National_Pok%C3%A9dex_number"
-        pokemon_names = []
-        try:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--log-level=3")
-            driver = webdriver.Chrome(options=chrome_options)
-            driver.get(url)
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
-                    )
-                )
-            )
-            pokemon_elements = driver.find_elements(
-                By.XPATH,
-                "//table[contains(@class, 'roundy')]//a[contains(@title, '(Pokémon)')]",
-            )
-            for element in pokemon_elements:
-                pokemon_name = element.text.replace(" ", "-")
-                if pokemon_name:
-                    pokemon_names.append(pokemon_name)
-        except Exception as e:
-            print(f"An error occurred while updating Pokémon cache: {str(e)}")
-        finally:
-            if driver:
-                driver.quit()
-        GiveSet.pokemon_cache["names"] = pokemon_names
-        GiveSet.pokemon_cache["expiration"] = current_time + GiveSet.cache_duration
-        return pokemon_names
-
-    @staticmethod
-    def fetch_set(pokemon, generation=None, format=None):
-        # Gets the set information based on existing criteria (Pokemon, Pokemon + Generation, Pokemon + Generation + Format).
-        cached_data = GiveSet.check_setname_cache(pokemon, generation, format)
-        if cached_data:
-            return cached_data
-        driver = None
-        try:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--log-level=3")
-            driver = webdriver.Chrome(options=chrome_options)
-            set_names, url = get_setinfo(driver, pokemon, generation, format)
-            GiveSet.update_setname_cache(pokemon, (set_names, url), generation, format)
-            return set_names, url
-        except Exception as e:
-            print(f"An error occurred: {str(e)}")
-            return None, None
-        finally:
-            if driver:
-                driver.quit()
-
-    @staticmethod
-    async def fetch_set_async(pokemon, generation=None, format=None):
-        # Helper function for fetching sets asynchronously to save time.
-        loop = asyncio.get_running_loop()  # For Python 3.7+
-        sets, url = await loop.run_in_executor(
-            None, GiveSet.fetch_set, pokemon, generation, format
-        )
-        return sets, url
-
-    @staticmethod
-    async def fetch_multiset_async(pokemon_names):
-        # Uses fetch_set_async multiple times to speed up process of fetching multiple Pokemon sets.
-        tasks = [GiveSet.fetch_set_async(name) for name in pokemon_names]
-        results = await asyncio.gather(*tasks)
-        return results
-
-    @staticmethod
-    async def set_prompt(ctx, pokemon_data):
+    async def set_prompt(
+        ctx: commands.Context, requests: List[Dict[str, Optional[str]]]
+    ) -> None:
         # Displays prompt with buttons for selection of Pokemon sets.
-        unique_id = str(uuid.uuid4())
-        views = {}
-        prompt = ""
-        messages = []
-        GiveSet.awaiting_response[unique_id] = {
-            "user_id": ctx.author.id,
-            "pokemon_data": pokemon_data,
-            "views": views,
-            "message_ids": [],
-            "lock": asyncio.Lock(),
-        }
-        if len(pokemon_data) > 1:
-            views, prompt = get_multiview(unique_id, pokemon_data)
-        else:
-            views, prompt = get_view(unique_id, pokemon_data[0])
-        await ctx.send(prompt)
-        for formatted_name, view in views.items():
-            message = await ctx.send(view=view)
-            GiveSet.awaiting_response[unique_id]["views"][message.id] = view
-            GiveSet.awaiting_response[unique_id]["message_ids"].append(message.id)
-
-    @staticmethod
-    async def set_selection(interaction, unique_id, set_index, set_name, url, pokemon):
-        # Handles button functionality from set_prompt when clicked
-        context = GiveSet.awaiting_response.get(unique_id)
-        if not context:
-            await interaction.followup.send(
-                "Session expired or not found.", ephemeral=True
-            )
+        tasks = [
+            get_set_names(req["pokemon"], req["generation"], req["format"])
+            for req in requests
+        ]
+        results = await asyncio.gather(*tasks)
+        valid_requests, valid_results = await filter_requests(ctx, requests, results)
+        if not valid_requests:
             return
-        lock = context["lock"]
-        async with lock:
-            if "selected_sets" not in context:
-                context["selected_sets"] = {}
-            selected_sets = context["selected_sets"]
-            if pokemon in selected_sets and selected_sets[pokemon] == set_index:
-                del selected_sets[pokemon]
-            else:
-                selected_sets[pokemon] = set_index
-            cache_key = GiveSet.get_setname_key(pokemon, set_name)
-            set_display = GiveSet.check_setinfo_cache(pokemon, set_name)
-            if not set_display:
-                driver = None
-                try:
-                    chrome_options = Options()
-                    chrome_options.add_argument("--headless")
-                    chrome_options.add_argument("--log-level=3")
-                    driver = webdriver.Chrome(options=chrome_options)
-                    driver.get(url)
-                    if get_export_btn(driver, set_name):
-                        set_data = get_textarea(driver, set_name)
-                        GiveSet.update_setinfo_cache(pokemon, set_name, set_data)
-                        set_display = set_data
-                    else:
-                        await interaction.followup.send(
-                            "Error fetching set data.", ephemeral=True
-                        )
-                        return
-                except Exception as e:
-                    await interaction.followup.send(
-                        f"An error occurred: {str(e)}", ephemeral=True
-                    )
-                    return
-                finally:
-                    if driver:
-                        driver.quit()
-            if set_display:
-                await update_message(
-                    context,
-                    interaction,
-                    unique_id,
-                    pokemon,
-                    set_index,
-                    set_display,
-                )
-            else:
-                await interaction.followup.send(
-                    "Error fetching set data.", ephemeral=True
-                )
+        prompt_key = uuid4().hex[:20]
+        request_count = len(valid_requests)
+        prompt = get_prompt(valid_requests)
+        await ctx.send(prompt)
+        for index, (request, set_names) in enumerate(
+            zip(valid_requests, valid_results)
+        ):
+            message_key = uuid4().hex[:5]
+            view = get_view(prompt_key, message_key, request, set_names, request_count)
+            message = await ctx.send(view=view)
+            if index == 0:
+                GiveSet.first_row[prompt_key] = message.id
 
     @staticmethod
-    async def display_sets(ctx, pokemon_data):
-        # Displays all sets in one textbox given multiple Pokemon and their sets.
-        message_content = ""
-        for pokemon, sets, url in pokemon_data:
-            set_name = sets[0]
-            driver = None
-            try:
-                chrome_options = Options()
-                chrome_options.add_argument("--headless")
-                chrome_options.add_argument("--log-level=3")
-                driver = webdriver.Chrome(options=chrome_options)
-                driver.get(url)
-                if get_export_btn(driver, set_name):
-                    set_data = get_textarea(driver, set_name)
-                    if set_data:
-                        message_content += f"{set_data}\n\n"
-                    else:
-                        message_content += (
-                            f"Error fetching set data for **{pokemon}**.\n\n"
-                        )
-                else:
-                    message_content += f"Error finding set for **{pokemon}**.\n\n"
-            except Exception as e:
-                message_content += (
-                    f"An error occurred fetching set for **{pokemon}**: {str(e)}\n\n"
-                )
-            finally:
-                if driver:
-                    driver.quit()
-        message_content = "```" + message_content + "```"
-        if message_content.strip() != "``````":
-            await ctx.send(message_content)
+    async def set_selection(
+        interaction: discord.Interaction,
+        prompt_key: str,
+        message_key: str,
+        button_key: str,
+        request_count: int,
+        set_name: str,
+        pokemon: str,
+        generation: Optional[str] = None,
+        format: Optional[str] = None,
+    ):
+        # Fetches and displays the appropriate set data when a button is clicked.
+        deselected = message_key + button_key in selected_states.get(prompt_key, [])
+        if deselected:
+            await remove_set(prompt_key, message_key, button_key)
         else:
-            await ctx.send("Unable to fetch data for the selected Pokémon sets.")
+            set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
+            await add_set(prompt_key, message_key, button_key, set_data)
+        set_data = "\n\n".join(
+            "\n\n".join(data for data in sets)
+            for sets in selected_sets.get(prompt_key, {}).values()
+        )
+        first_row = GiveSet.first_row.get(prompt_key)
+        first_message = await interaction.channel.fetch_message(first_row)
+        selected_row = await interaction.channel.fetch_message(interaction.message.id)
+        updated_view = update_buttons(
+            selected_row, interaction.data["custom_id"], deselected, request_count > 1
+        )
+        updated_content = f"```\n{set_data}```\n" if set_data else ""
+        await selected_row.edit(view=updated_view)
+        await first_message.edit(content=updated_content)
