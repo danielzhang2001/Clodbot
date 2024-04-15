@@ -14,6 +14,7 @@ from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
 from commands.update import Update
+from errors import *
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -64,15 +65,10 @@ async def on_interaction(interaction: discord.Interaction) -> None:
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.CommandError) -> None:
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send(
-            "Invalid command. Please enter one of the following:\n"
-            "```\n"
-            "Clodbot, analyze (Replay Link)\n"
-            "Clodbot, update (Google Sheets Link) (Replay Link)\n"
-            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
-            "Clodbot, giveset random (Optional Number)\n"
-            "```"
-        )
+        try:
+            raise InvalidCommand()
+        except InvalidCommand as e:
+            await ctx.send(str(e))
     else:
         await ctx.send(f'{str(error).split(": ", 2)[-1]}')
 
