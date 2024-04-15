@@ -1,12 +1,11 @@
 ---------------------------------------------------------
 # Clodbot
-Your friendly amphibian Pokemon Showdown Stat Tracker
+Your friendly amphibian Pokemon Utility Bot
 ---------------------------------------------------------
 
 About:
 
-A Pokemon Showdown bot to keep track of stats.
-As of right now, it displays the winner of a match, point differential and kill/death ratios for each Pokemon by feeding it a Pokemon Showdown replay.
+A Pokemon Showdown bot to keep track of stats, update Google Sheets and give sets.
 
 ---------------------------------------------------------
 
@@ -31,4 +30,7 @@ Starting up the bot:
 
 Using the bot:
 
-1) In the channel the bot is in, type “Clodbot, analyze (Pokemon Showdown Replay Link)” to display the stats!
+- Type "Clodbot, analyze (Pokemon Showdown Replay Link)" to display the stats
+- Type "Clodbot, update (Google Sheets Link) (Pokemon Showdown Replay Link)" to update the stats onto a "Stats" sheet
+- Type "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]" to get Pokemon sets
+- Type "Clodbot, giveset random (Optional Number)" to get random Pokemon sets
