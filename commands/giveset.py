@@ -7,14 +7,14 @@ import asyncio
 import random
 import aiohttp
 import discord
-from smogon.set import *
-from asyncio import Lock
-from concurrent.futures import ThreadPoolExecutor
 from discord import ButtonStyle
 from discord.ui import Button, View
 from discord.ext import commands
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, List, Dict, Tuple
 from uuid import uuid4
+from smogon.set import *
+from errors import *
 
 
 class GiveSet:
@@ -66,15 +66,12 @@ class GiveSet:
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
         # Generates and displays random Pokemon sets with random eligible Generations and Formats.
         args_list = input_str.split()
-        num = 1
-        if len(args_list) > 1:
-            if args_list[1].isdigit() and int(args_list[1]) >= 1:
-                num = int(args_list[1])
-            else:
-                await ctx.send(
-                    "Please follow this format: ```Clodbot, giveset random [Number >= 1, Nothing = 1]```"
-                )
-                return
+        if len(args_list) == 1:
+            num = 1
+        elif len(args_list) == 2 and args_list[1].isdigit() and int(args_list[1]) >= 1:
+            num = int(args_list[1])
+        else:
+            raise InvalidRandom()
         pokemon = await GiveSet.fetch_pokemon()
         loop = asyncio.get_event_loop()
         formatted_sets = []

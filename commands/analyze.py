@@ -6,6 +6,7 @@ The function to analyze a Pokemon Showdown replay link and display stats.
 # pylint: disable=wildcard-import,unused-wildcard-import
 import requests  # type: ignore
 from showdown.replay import *
+from errors import *
 
 
 class Analyze:
@@ -17,7 +18,7 @@ class Analyze:
             response.raise_for_status()
             raw_data = response.text
         except requests.exceptions.RequestException:
-            return f"**{replay_link}** is an invalid replay link."
+            raise InvalidReplay(replay_link)
         players = get_player_names(raw_data)
         pokes = get_pokes(raw_data)
         p1_count = get_p1_count(raw_data)
