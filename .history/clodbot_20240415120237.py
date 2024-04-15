@@ -68,7 +68,7 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError) 
         try:
             raise InvalidCommand()
         except InvalidCommand as e:
-            await ctx.send(str(e))
+            await ctx.send
     else:
         await ctx.send(f'{str(error).split(": ", 2)[-1]}')
 
