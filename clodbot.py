@@ -6,15 +6,9 @@ The main module for running ClodBot.
 import os
 import re
 import discord  # type: ignore
+import aiohttp
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
-import aiohttp
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
@@ -79,6 +73,8 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError) 
             "Clodbot, giveset random (Optional Number)\n"
             "```"
         )
+    else:
+        await ctx.send(f'{str(error).split(": ", 2)[-1]}')
 
 
 @bot.command(name="analyze")
@@ -112,7 +108,7 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
     input_str = " ".join(args).strip()
     requests = []
     invalid_parts = []
-    if input_str.startswith("random"):
+    if input_str.lower().startswith("random"):
         await GiveSet.fetch_random_sets(ctx, input_str)
     else:
         parts = [part.strip() for part in input_str.split(",")]
@@ -147,13 +143,8 @@ async def update_sheet(ctx: commands.Context, *args: str):
         )
         return
     sheets_link, replay_link = args
-    try:
-        sheets_id = sheets_link.split("/d/")[1].split("/")[0]
-    except IndexError:
-        await ctx.send("Invalid Google Sheets URL provided.")
-        return
     creds = Update.authenticate_sheet()
-    update_message = await Update.update_sheet(creds, sheets_id, replay_link)
+    update_message = await Update.update_sheet(creds, sheets_link, replay_link)
     await ctx.send(update_message)
 
 

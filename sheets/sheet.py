@@ -109,10 +109,10 @@ def add_pokemon(
 ) -> Tuple[Optional[int], int]:
     # Adds new Pokemon entries to the appropriate section in the sheet.
     insert_row = empty_row if empty_row is not None else end_row + 1
-    insert_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
+    cell_range = f"{sheet_name}!{start_col}{insert_row}:{end_col}{insert_row}"
     updates.append(
         {
-            "range": insert_range,
+            "range": cell_range,
             "values": [[pokemon_name, 1, new_stats[0], new_stats[1]]],
         }
     )
@@ -155,6 +155,7 @@ def format_data(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
     # Formats all of the data for the player section.
+    clear_cells(service, spreadsheet_id, sheet_id, cell_range)
     format_cells(service, spreadsheet_id, sheet_id, cell_range)
     format_text(service, spreadsheet_id, sheet_id, cell_range)
 
@@ -304,8 +305,8 @@ def color_cells(
                             },
                             "secondBandColor": {
                                 "red": 0,
-                                "green": 0.22,
-                                "blue": 0.43,
+                                "green": 0.23,
+                                "blue": 0.47,
                             },
                         },
                     }
@@ -313,6 +314,86 @@ def color_cells(
             }
         ]
     }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
+def color_background(service: Resource, spreadsheet_id: str, sheet_id: int) -> None:
+    # Colors the entire sheet.
+    body = {
+        "requests": [
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startRowIndex": 0,
+                        "endRowIndex": 1000,
+                        "startColumnIndex": 0,
+                        "endColumnIndex": 26,
+                    },
+                    "cell": {
+                        "userEnteredFormat": {
+                            "backgroundColor": {
+                                "red": 0.21,
+                                "green": 0.21,
+                                "blue": 0.21,
+                            }
+                        }
+                    },
+                    "fields": "userEnteredFormat.backgroundColor",
+                }
+            }
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
+def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str):
+    # Clears all formatting in the range.
+    banding_ids = get_bandings(service, spreadsheet_id, sheet_id, cell_range)
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    requests = [
+        {
+            "repeatCell": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "startRowIndex": start_row,
+                    "endRowIndex": end_row,
+                    "startColumnIndex": start_col,
+                    "endColumnIndex": end_col,
+                },
+                "cell": {
+                    "userEnteredFormat": {
+                        "backgroundColor": {"red": 0.21, "green": 0.21, "blue": 0.21},
+                        "textFormat": {
+                            "foregroundColor": None,
+                            "fontSize": 10,
+                            "bold": False,
+                            "italic": False,
+                            "strikethrough": False,
+                            "underline": False,
+                        },
+                        "horizontalAlignment": "LEFT",
+                        "verticalAlignment": "BOTTOM",
+                        "wrapStrategy": "OVERFLOW_CELL",
+                        "borders": None,
+                    }
+                },
+                "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment,wrapStrategy,borders)",
+            }
+        }
+    ]
+    for banding_id in banding_ids:
+        requests.append({"deleteBanding": {"bandedRangeId": banding_id}})
+    body = {"requests": requests}
     service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id, body=body
     ).execute()
@@ -399,6 +480,52 @@ def center_text(
     ).execute()
 
 
+def get_bandings(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> List[int]:
+    # Returns the IDs of overlapping bandings.
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    result = (
+        service.spreadsheets()
+        .get(spreadsheetId=spreadsheet_id, includeGridData=False)
+        .execute()
+    )
+    sheets = result.get("sheets", [])
+    sheet = next(
+        (
+            s
+            for s in sheets
+            if "properties" in s
+            and "sheetId" in s["properties"]
+            and s["properties"]["sheetId"] == sheet_id
+        ),
+        None,
+    )
+    if not sheet:
+        return []
+    banded_ranges = sheet.get("bandedRanges", [])
+    overlapping_ids = []
+    for banded_range in banded_ranges:
+        brange = banded_range.get("range", {})
+        if (
+            brange.get("sheetId") == sheet_id
+            and "sheetId" in brange
+            and not (
+                brange.get("endRowIndex", 0) <= start_row
+                or brange.get("startRowIndex", float("inf")) >= end_row
+                or brange.get("endColumnIndex", 0) <= start_col
+                or brange.get("startColumnIndex", float("inf")) >= end_col
+            )
+        ):
+            overlapping_ids.append(banded_range["bandedRangeId"])
+    return overlapping_ids
+
+
 def next_cell(values: List[List[str]]) -> str:
     # Returns the row and column indices for the top of the next available section.
     letters = ["B", "G", "L", "Q"]
@@ -456,15 +583,12 @@ def next_cell(values: List[List[str]]) -> str:
 def check_labels(values: List[List[str]], name: str) -> bool:
     # Returns whether the name is found in values alongside with the labels of "Pokemon", "Games", "Kills" and "Deaths" associated with it.
     for row_index, row in enumerate(values):
-        try:
-            name_index = row.index(name)
-            if row_index + 1 < len(values) and all(
-                values[row_index + 1][name_index + i] == label
-                for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
-            ):
-                return True
-        except ValueError:
-            continue
+        name_index = row.index(name)
+        if row_index + 1 < len(values) and all(
+            values[row_index + 1][name_index + i] == label
+            for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
+        ):
+            return True
     return False
 
 

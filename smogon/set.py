@@ -2,7 +2,6 @@
 General functions in getting Pokemon Smogon sets.
 """
 
-import asyncio
 import aiohttp
 import random
 import discord
