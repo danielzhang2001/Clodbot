@@ -1,5 +1,4 @@
 ---------------------------------------------------------
-# Clodbot
 Your friendly amphibian Pokemon Utility Bot
 
 About:
