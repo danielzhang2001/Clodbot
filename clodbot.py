@@ -4,39 +4,27 @@ The main module for running ClodBot.
 
 # pylint: disable=import-error
 import os
+import re
 import discord  # type: ignore
+import aiohttp
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
-import aiohttp
-import random
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from bs4 import BeautifulSoup
-
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
+from commands.update import Update
 
 intents = discord.Intents.default()
 intents.typing = False
 intents.presences = False
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="Clodbot, ", intents=intents)
-
-gen_dict = {
-    "gen1": "rb",
-    "gen2": "gs",
-    "gen3": "rs",
-    "gen4": "dp",
-    "gen5": "bw",
-    "gen6": "xy",
-    "gen7": "sm",
-    "gen8": "ss",
-    "gen9": "sv",
-}
+bot = commands.Bot(
+    command_prefix=["clodbot, ", "Clodbot, "],
+    intents=intents,
+    case_insensitive=True,
+)
 
 
 @bot.event
@@ -45,106 +33,121 @@ async def on_ready():
     print(f"{bot.user} has connected to Discord!")
 
 
-# COMMAND THAT TAKES IN REPLAY LINK AND GOOGLE SHEETS LINK AND STORES REPLAY INFORMATION IN A SPECIFIC SHEET NAME ON THE GOOGLE SHEETS.
-# IF SHEET NAME DOES NOT EXIST, CREATE THE SHEET AND STORE INFORMATION IN
-# IF SHEET NAME DOES EXIST, USE THAT SHEET AND UPDATE IT WITH INFORMATION
-
-
-@bot.command(name="analyze")
-async def analyze_replay(ctx, *args):
-    # Analyzes replay and sends stats in a message to Discord.
-    replay_link = " ".join(args)
-    message = await Analyze.analyze_replay(replay_link)
-    if message:
-        await ctx.send(message)
-    else:
-        await ctx.send("No data found in this replay.")
-
-
-@bot.command(name="giveset")
-async def give_set(ctx, *args):
-    # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided.
-    input_str = " ".join(args).strip()
-    if input_str.startswith("random"):
-        args_list = input_str.split()
-        num_pokemon = 1
-        if len(args_list) > 1 and args_list[1].isdigit():
-            num_pokemon = max(1, int(args_list[1]))
-        pokemon_names = random.sample(GiveSet.fetch_cache(), k=num_pokemon)
-        pokemon_sets = await GiveSet.fetch_multiset_async(pokemon_names)
-        pokemon_data = []
-        invalid_pokemon = []
-        for name, (sets, url) in zip(pokemon_names, pokemon_sets):
-            if sets:
-                pokemon_data.append((name, sets, url))
-            else:
-                invalid_pokemon.append(name)
-
-        if pokemon_data:
-            await GiveSet.display_sets(ctx, pokemon_data)
-        if invalid_pokemon:
-            await ctx.send(
-                "No sets found for the requested Pokémon: "
-                + ", ".join(invalid_pokemon)
-                + "."
-            )
-    elif "," in input_str:
-        pokemons = [p.strip() for p in input_str.split(",")]
-        pokemon_sets = await GiveSet.fetch_multiset_async(pokemons)
-        pokemon_data = [
-            (name, sets or ["No sets found"], url or "URL not found")
-            for name, (sets, url) in zip(pokemons, pokemon_sets)
-            if sets
-        ]
-        if pokemon_data:
-            await GiveSet.set_prompt(ctx, pokemon_data)
-        else:
-            await ctx.send("No sets found for the provided Pokémon.")
-    else:
-        parts = input_str.split()
-        pokemon = parts[0]
-        generation = parts[1] if len(parts) > 1 else None
-        format = parts[2] if len(parts) > 2 else None
-        sets, url = await GiveSet.fetch_set_async(pokemon, generation, format)
-        if sets:
-            await GiveSet.set_prompt(ctx, [(pokemon, sets, url)])
-        else:
-            await ctx.send(
-                f"No sets found for **{pokemon}**"
-                + (f" in Generation **{generation}**" if generation else "")
-                + (f" with Format **{format}**" if format else "")
-                + "."
-            )
+@bot.event
+async def on_interaction(interaction: discord.Interaction) -> None:
+    # Displays set information and changes button style if necessary when a button is clicked.
+    if interaction.type == discord.InteractionType.component:
+        custom_id = interaction.data["custom_id"]
+        parts = custom_id.split("_")
+        prompt_key = parts[0]
+        message_key = parts[1]
+        button_key = parts[2]
+        pokemon = parts[3]
+        generation = parts[4] if parts[4] != "none" else None
+        format = parts[5] if parts[5] != "none" else None
+        set_name = parts[6]
+        request_count = int(parts[7])
+        await interaction.response.defer()
+        await GiveSet.set_selection(
+            interaction,
+            prompt_key,
+            message_key,
+            button_key,
+            request_count,
+            set_name,
+            pokemon,
+            generation,
+            format,
+        )
 
 
 @bot.event
-async def on_interaction(interaction):
-    # Handles button functionality such that when one is clicked, the appropriate set is displayed.
-    if interaction.type == discord.InteractionType.component:
-        custom_id = interaction.data["custom_id"]
-        if custom_id.startswith("set_"):
-            _, unique_id, pokemon, set_index = custom_id.split("_", 3)
-            set_index = int(set_index)
-            context = GiveSet.awaiting_response.get(unique_id)
-            if context and interaction.user.id == context["user_id"]:
-                await interaction.response.defer()
-                pokemon_data = context["pokemon_data"]
-                selected_pokemon = next(
-                    (data for data in pokemon_data if data[0] == pokemon), None
-                )
-                if not selected_pokemon:
-                    await interaction.followup.send(
-                        "Could not find the selected Pokémon's data.", ephemeral=True
-                    )
-                    return
-                _, sets, url = selected_pokemon
-                selected_set = sets[set_index]
-                await GiveSet.set_selection(
-                    interaction, unique_id, set_index, selected_set, url, pokemon
-                )
+async def on_command_error(ctx: commands.Context, error: commands.CommandError) -> None:
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send(
+            "Invalid command. Please enter one of the following:\n"
+            "```\n"
+            "Clodbot, analyze (Replay Link)\n"
+            "Clodbot, update (Google Sheets Link) (Replay Link)\n"
+            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
+            "Clodbot, giveset random (Optional Number)\n"
+            "```"
+        )
+    else:
+        await ctx.send(f'{str(error).split(": ", 2)[-1]}')
 
 
-# Running Discord bot
+@bot.command(name="analyze")
+async def analyze_replay(ctx: commands.Context, *args: str) -> None:
+    # Analyzes replay and sends stats in a message to Discord.
+    replay_link = " ".join(args)
+    if not replay_link:
+        await ctx.send(
+            "Please provide arguments as shown in the following:\n"
+            "```\n"
+            "Clodbot, analyze (Replay Link)\n"
+            "```"
+        )
+        return
+    message = await Analyze.analyze_replay(replay_link)
+    await ctx.send(message)
+
+
+@bot.command(name="giveset")
+async def give_set(ctx: commands.Context, *args: str) -> None:
+    # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided, or gives a random set.
+    if not args:
+        await ctx.send(
+            "Please provide arguments as shown in the following:\n"
+            "```\n"
+            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
+            "Clodbot, giveset random (Optional Number)\n"
+            "```"
+        )
+        return
+    input_str = " ".join(args).strip()
+    requests = []
+    invalid_parts = []
+    if input_str.lower().startswith("random"):
+        await GiveSet.fetch_random_sets(ctx, input_str)
+    else:
+        parts = [part.strip() for part in input_str.split(",")]
+        for part in parts:
+            request_parts = part.strip().split()
+            if len(request_parts) > 3:
+                invalid_parts.append(f"**{part}**")
+                continue
+            requests.append(
+                {
+                    "pokemon": request_parts[0],
+                    "generation": request_parts[1] if len(request_parts) > 1 else None,
+                    "format": request_parts[2] if len(request_parts) == 3 else None,
+                }
+            )
+        if invalid_parts:
+            await ctx.send(
+                f"Too many arguments provided for {', '.join(invalid_parts)}. Please provide at most a Pokemon, Generation, and Format."
+            )
+        await GiveSet.set_prompt(ctx, requests)
+
+
+@bot.command(name="update")
+async def update_sheet(ctx: commands.Context, *args: str):
+    # Updates sheet with data from replay.
+    if len(args) != 2:
+        await ctx.send(
+            "Please provide arguments as shown in the following:\n"
+            "```\n"
+            "Clodbot, update (Sheets Link) (Replay Link)\n"
+            "```"
+        )
+        return
+    sheets_link, replay_link = args
+    creds = Update.authenticate_sheet()
+    update_message = await Update.update_sheet(creds, sheets_link, replay_link)
+    await ctx.send(update_message)
+
+
 load_dotenv()
 bot_token = os.environ["DISCORD_BOT_TOKEN"]
 bot.run(bot_token)
