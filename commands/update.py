@@ -1,5 +1,5 @@
 """
-The function to update Google Sheets with Pokemon Showdown replay information. 
+The function to update the Google Sheet with Pokemon Showdown replay information. 
 """
 
 import os.path
@@ -15,31 +15,7 @@ from sheets.sheet import *
 from errors import *
 
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-
-
 class Update:
-    @staticmethod
-    def authenticate_sheet() -> Credentials:
-        # Authenticates sheet functionality with appropriate credentials.
-        creds = None
-        token_path = os.path.join("sheets", "token.pickle")
-        credentials_path = os.path.join("sheets", "credentials.json")
-        if os.path.exists(token_path):
-            with open(token_path, "rb") as token:
-                creds = pickle.load(token)
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    credentials_path, SCOPES
-                )
-                creds = flow.run_local_server(port=0)
-            with open(token_path, "wb") as token:
-                pickle.dump(creds, token)
-        return creds
-
     @staticmethod
     async def update_sheet(
         creds: Credentials, sheets_link: str, replay_link: str
@@ -87,7 +63,7 @@ class Update:
             sheet_id = sheet_response["replies"][0]["addSheet"]["properties"]["sheetId"]
             color_background(service, spreadsheet_id, sheet_id)
         for player_data in formatted_stats:
-            name = player_data[0]
+            player_name = player_data[0]
             pokemon_data = player_data[1]
             result = (
                 service.spreadsheets()
@@ -96,12 +72,17 @@ class Update:
                 .execute()
             )
             values = result.get("values", [])
-            if check_labels(values, name):
-                stat_range = f"Stats!{get_range(values, name)}"
+            if check_labels(values, player_name):
+                stat_range = f"Stats!{get_stat_range(values, player_name)}"
                 update_data(service, spreadsheet_id, sheet_id, stat_range, pokemon_data)
             else:
                 start_cell = f"Stats!{next_cell(values)}"
                 add_data(
-                    service, spreadsheet_id, sheet_id, start_cell, name, pokemon_data
+                    service,
+                    spreadsheet_id,
+                    sheet_id,
+                    start_cell,
+                    player_name,
+                    pokemon_data,
                 )
         return f"Sheet updated [**HERE**]({sheets_link})."

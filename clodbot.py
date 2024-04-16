@@ -14,6 +14,8 @@ from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
 from commands.update import Update
+from commands.delete import Delete
+from sheets.sheet import authenticate_sheet
 from errors import *
 
 intents = discord.Intents.default()
@@ -76,16 +78,32 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError) 
 @bot.command(name="analyze")
 async def analyze_replay(ctx: commands.Context, *args: str) -> None:
     # Analyzes replay and sends stats in a message to Discord.
+    if not args:
+        raise NoAnalyze()
     replay_link = " ".join(args)
-    if not replay_link:
-        await ctx.send(
-            "Please provide arguments as shown in the following:\n"
-            "```\n"
-            "Clodbot, analyze (Replay Link)\n"
-            "```"
-        )
-        return
     message = await Analyze.analyze_replay(replay_link)
+    await ctx.send(message)
+
+
+@bot.command(name="update", aliases=["delete", "list"])
+async def manage_sheet(ctx: commands.Context, *args: str):
+    # Updates sheet with data from replay.
+    command = ctx.invoked_with
+    if len(args) != 2:
+        if command == "update":
+            raise NoUpdate()
+        elif command == "delete":
+            raise NoDelete()
+        elif command == "list":
+            raise NoList()
+    sheets_link, data = args
+    creds = authenticate_sheet()
+    if command == "update":
+        message = await Update.update_sheet(creds, sheets_link, data)
+    elif command == "delete":
+        message = await Delete.delete_player(creds, sheets_link, data)
+    elif command == "list":
+        message = await List.list_data(creds, sheets_link, data)
     await ctx.send(message)
 
 
@@ -93,14 +111,7 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
 async def give_set(ctx: commands.Context, *args: str) -> None:
     # Gives Pokemon set(s) based on Pokemon, Generation (Optional) and Format (Optional) provided, or gives a random set.
     if not args:
-        await ctx.send(
-            "Please provide arguments as shown in the following:\n"
-            "```\n"
-            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
-            "Clodbot, giveset random (Optional Number)\n"
-            "```"
-        )
-        return
+        raise NoGiveSet()
     input_str = " ".join(args).strip()
     requests = []
     invalid_parts = []
@@ -121,27 +132,8 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
                 }
             )
         if invalid_parts:
-            await ctx.send(
-                f"Too many arguments provided for {', '.join(invalid_parts)}. Please provide at most a Pokemon, Generation, and Format."
-            )
+            await ctx.send(InvalidParts(invalid_parts).args[0])
         await GiveSet.set_prompt(ctx, requests)
-
-
-@bot.command(name="update")
-async def update_sheet(ctx: commands.Context, *args: str):
-    # Updates sheet with data from replay.
-    if len(args) != 2:
-        await ctx.send(
-            "Please provide arguments as shown in the following:\n"
-            "```\n"
-            "Clodbot, update (Sheets Link) (Replay Link)\n"
-            "```"
-        )
-        return
-    sheets_link, replay_link = args
-    creds = Update.authenticate_sheet()
-    update_message = await Update.update_sheet(creds, sheets_link, replay_link)
-    await ctx.send(update_message)
 
 
 load_dotenv()
