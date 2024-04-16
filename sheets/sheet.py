@@ -2,8 +2,34 @@
 General functions in updating Google Sheets with Pokemon Showdown replay information.
 """
 
-from typing import Optional, List, Dict, Tuple
+import pickle
+import os.path
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import Resource
+from typing import Optional, List, Dict, Tuple
+
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+
+
+def authenticate_sheet() -> Credentials:
+    # Authenticates sheet functionality with appropriate credentials.
+    creds = None
+    token_path = os.path.join("sheets", "token.pickle")
+    credentials_path = os.path.join("sheets", "credentials.json")
+    if os.path.exists(token_path):
+        with open(token_path, "rb") as token:
+            creds = pickle.load(token)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
+            creds = flow.run_local_server(port=0)
+        with open(token_path, "wb") as token:
+            pickle.dump(creds, token)
+    return creds
 
 
 def add_data(
@@ -34,6 +60,14 @@ def add_data(
         body=body,
     ).execute()
     format_data(service, spreadsheet_id, sheet_id, cell_range)
+
+
+def delete_data(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Deletes all of the data for the player section.
+    clear_cells(service, spreadsheet_id, sheet_id, cell_range)
+    clear_text(service, spreadsheet_id, sheet_id, cell_range)
 
 
 def update_data(
@@ -149,6 +183,24 @@ def update_pokemon(
             "values": [[pokemon_name, updated_games, updated_kills, updated_deaths]],
         }
     )
+
+
+def create_player_message(values: List[List[str]]) -> str:
+    # Creates the message when asked to list players in the sheet.
+    names = get_players(values)
+    message = "PLAYER NAMES:\n```"
+    message += "\n".join(names)
+    message += "```"
+    return message
+
+
+def create_pokemon_message(values: List[List[str]]) -> str:
+    # Creates the message when asked to list Pokemon in the sheet.
+    names = get_pokemon(values)
+    message = "POKEMON NAMES:\n```"
+    message += "\n".join(names)
+    message += "```"
+    return message
 
 
 def format_data(
@@ -399,6 +451,44 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     ).execute()
 
 
+def clear_text(service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str):
+    # Clears all text in the range.
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    body = {
+        "requests": [
+            {
+                "updateCells": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startRowIndex": start_row,
+                        "endRowIndex": end_row,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
+                    },
+                    "fields": "userEnteredValue",
+                    "rows": [
+                        {
+                            "values": [
+                                {"userEnteredValue": {}}
+                                for _ in range(start_col, end_col)
+                            ]
+                        }
+                        for _ in range(start_row, end_row)
+                    ],
+                }
+            }
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
 def style_text(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
@@ -526,6 +616,30 @@ def get_bandings(
     return overlapping_ids
 
 
+def get_players(values: List[List[str]]) -> List[str]:
+    # Returns a list of all the player names.
+    names = set()
+    for i in range(0, len(values), 15):
+        if i < len(values):
+            names.update(name for name in values[i] if name != "")
+    return list(names)
+
+
+def get_pokemon(values: List[List[str]]) -> List[str]:
+    # Returns a list of all the Pokemon names.
+    pokemon = set()  # Use a set to automatically avoid duplicates
+    for i in range(2, len(values), 15):
+        for j in range(i, min(i + 12, len(values))):
+            row = values[j]
+            pokemon.update(
+                name
+                for name in row
+                if name
+                and not (name.replace(".", "", 1).isdigit() and name.count(".") <= 1)
+            )
+    return list(pokemon)
+
+
 def next_cell(values: List[List[str]]) -> str:
     # Returns the row and column indices for the top of the next available section.
     letters = ["B", "G", "L", "Q"]
@@ -580,19 +694,20 @@ def next_cell(values: List[List[str]]) -> str:
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
 
 
-def check_labels(values: List[List[str]], name: str) -> bool:
-    # Returns whether the name is found in values alongside with the labels of "Pokemon", "Games", "Kills" and "Deaths" associated with it.
+def check_labels(values: List[List[str]], player_name: str) -> bool:
+    # Returns whether the player name is found in values along with the labels of "Pokemon", "Games", "Kills" and "Deaths".
     for row_index, row in enumerate(values):
-        name_index = row.index(name)
-        if row_index + 1 < len(values) and all(
-            values[row_index + 1][name_index + i] == label
-            for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
-        ):
-            return True
+        if player_name in row:
+            name_index = row.index(player_name)
+            if row_index + 1 < len(values) and all(
+                values[row_index + 1][name_index + i] == label
+                for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
+            ):
+                return True
     return False
 
 
-def get_range(values: List[List[str]], name: str) -> str:
+def get_stat_range(values: List[List[str]], name: str) -> str:
     # Searches for the name and returns the range of the section with Pokemon stats associated with that name.
     for row_index, row in enumerate(values):
         if name in row:
@@ -601,5 +716,18 @@ def get_range(values: List[List[str]], name: str) -> str:
             end_col = chr(ord(start_col) + 3)
             start_row = row_index + 4
             end_row = start_row + 11
+            return f"{start_col}{start_row}:{end_col}{end_row}"
+    return None
+
+
+def get_section_range(values: List[List[str]], name: str) -> str:
+    # Searches for the name and returns the range of the entire section for that name.
+    for row_index, row in enumerate(values):
+        if name in row:
+            name_index = row.index(name) + 1
+            start_col = chr(65 + name_index)
+            end_col = chr(ord(start_col) + 3)
+            start_row = row_index + 2
+            end_row = start_row + 13
             return f"{start_col}{start_row}:{end_col}{end_row}"
     return None

@@ -10,6 +10,7 @@ from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, Dict, List, Tuple
 from uuid import uuid4
+from errors import *
 
 selected_states = {}
 selected_sets = {}
@@ -364,5 +365,5 @@ async def filter_requests(
             valid_requests.append(request)
             valid_results.append(set_names)
     if invalid_requests:
-        await ctx.send("Cannot find sets for " + ", ".join(invalid_requests) + ".")
+        await ctx.send(InvalidRequest(invalid_requests).args[0])
     return valid_requests, valid_results
