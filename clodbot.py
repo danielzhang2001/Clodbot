@@ -11,10 +11,7 @@ from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
-from commands.update import Update
-from commands.delete import Delete
-from commands.list import List
-from commands.set import Set
+from commands.managesheet import ManageSheet
 from sheets.sheet import authenticate_sheet
 from errors import *
 
@@ -89,8 +86,8 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
 
 
 @bot.command(name="sheet")
-async def sheet(ctx: commands.Context, *args: str):
-    # Updates sheet with data from replay.
+async def manage_sheet(ctx: commands.Context, *args: str) -> None:
+    # Manages Google Sheets data.
     if not args:
         raise NoSheet()
     command = args[0].lower()
@@ -101,12 +98,12 @@ async def sheet(ctx: commands.Context, *args: str):
     if command == "set":
         if len(remaining) != 1:
             raise NoSet()
-        message = Set.set_default(ctx, creds, remaining[0])
+        message = ManageSheet.set_default(ctx, creds, remaining[0])
         await ctx.send(message)
         return
     if len(remaining) == 1:
-        if Set.has_default(ctx):
-            sheet_link = Set.get_default(ctx)
+        if ManageSheet.has_default(ctx):
+            sheet_link = ManageSheet.get_default(ctx)
             data = remaining[0]
         else:
             raise NoDefault()
@@ -121,11 +118,11 @@ async def sheet(ctx: commands.Context, *args: str):
             raise NoList()
         return
     if command == "update":
-        message = await Update.update_sheet(creds, sheet_link, data)
+        message = await ManageSheet.update_sheet(creds, sheet_link, data)
     elif command == "delete":
-        message = await Delete.delete_player(creds, sheet_link, data)
+        message = await ManageSheet.delete_player(creds, sheet_link, data)
     elif command == "list":
-        message = await List.list_data(creds, sheet_link, data)
+        message = await ManageSheet.list_data(creds, sheet_link, data)
     await ctx.send(message)
 
 
