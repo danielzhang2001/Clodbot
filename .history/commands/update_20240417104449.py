@@ -2,14 +2,10 @@
 The function to update the Google Sheet with Pokemon Showdown replay information. 
 """
 
-import os.path
-import pickle
 import requests
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from showdown.replay import *
 from sheets.sheet import *
 from errors import *
@@ -18,14 +14,16 @@ from errors import *
 class Update:
     @staticmethod
     async def update_sheet(
-        creds: Credentials, sheets_link: str, replay_link: str
+        creds: Credentials, sheet_link: str, replay_link: str
     ) -> str:
         # Updates sheets with replay data.
-        try:
-            spreadsheet_id = sheets_link.split("/d/")[1].split("/")[0]
-        except IndexError:
-            raise InvalidSheet(sheets_link)
+        if not is_valid_sheet(creds, sheet_link):
+            raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
+        spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
+        sheet_metadata = (
+            service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        )
         try:
             response = requests.get(replay_link + ".log")
             response.raise_for_status()
@@ -40,12 +38,6 @@ class Update:
             raw_data, pokes, p1_count, nickname_mapping1, nickname_mapping2
         )
         formatted_stats = format_stats(players, stats)
-        try:
-            sheet_metadata = (
-                service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-            )
-        except HttpError:
-            raise InvalidSheet(sheets_link)
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
         sheet_range = "Stats!B2:T285"
@@ -85,4 +77,4 @@ class Update:
                     player_name,
                     pokemon_data,
                 )
-        return f"Sheet updated [**HERE**]({sheets_link})."
+        return f"Sheet updated [**HERE**]({sheet_link})."

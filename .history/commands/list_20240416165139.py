@@ -1,5 +1,5 @@
 """
-The function to delete a player name with all of their data from the Google Sheet.
+The function to list either all player names or Pokemon names from the Google Sheet.
 """
 
 import os.path
@@ -14,12 +14,12 @@ from sheets.sheet import *
 from errors import *
 
 
-class Delete:
+class List:
     @staticmethod
-    async def delete_player(
-        creds: Credentials, sheets_link: str, player_name: str
-    ) -> str:
-        # Deletes player section from the sheet.
+    async def list_data(creds: Credentials, sheets_link: str, data: str) -> str:
+        # Lists all player names from the sheet.
+        if data.lower() not in ("pokemon", "players"):
+            raise NoList()
         try:
             spreadsheet_id = sheets_link.split("/d/")[1].split("/")[0]
         except IndexError:
@@ -39,7 +39,10 @@ class Delete:
                 sheet_id = sheet["properties"]["sheetId"]
                 break
         if sheet_id is None:
-            raise NameDoesNotExist(player_name)
+            if data.lower() == "players":
+                raise NoPlayers()
+            elif data.lower() == "pokemon":
+                raise NoPokemon()
         result = (
             service.spreadsheets()
             .values()
@@ -47,8 +50,11 @@ class Delete:
             .execute()
         )
         values = result.get("values", [])
-        if player_name not in get_players(values):
-            raise NameDoesNotExist(player_name)
-        section_range = f"Stats!{get_section_range(values, player_name)}"
-        delete_data(service, spreadsheet_id, sheet_id, section_range)
-        return f"Player removed [**HERE**]({sheets_link})."
+        if data.lower() == "players":
+            if not get_players(values):
+                raise NoPlayers()
+            return create_player_message(values)
+        elif data.lower() == "pokemon":
+            if not get_pokemon(values):
+                raise NoPokemon()
+            return create_pokemon_message(values)
