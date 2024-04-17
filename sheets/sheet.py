@@ -7,18 +7,19 @@ import os.path
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import Resource
+from googleapiclient.discovery import Resource, build
+from googleapiclient.errors import HttpError
 from typing import Optional, List, Dict, Tuple
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
-def authenticate_sheet() -> Credentials:
+def authenticate_sheet(force_login=False) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
     creds = None
     token_path = os.path.join("sheets", "token.pickle")
     credentials_path = os.path.join("sheets", "credentials.json")
-    if os.path.exists(token_path):
+    if os.path.exists(token_path) and not force_login:
         with open(token_path, "rb") as token:
             creds = pickle.load(token)
     if not creds or not creds.valid:
@@ -187,19 +188,29 @@ def update_pokemon(
 
 def create_player_message(values: List[List[str]]) -> str:
     # Creates the message when asked to list players in the sheet.
-    names = get_players(values)
-    message = "PLAYER NAMES:\n```"
-    message += "\n".join(names)
-    message += "```"
+    sorted_players = sorted(get_players(values), key=lambda x: (-int(x[1]), int(x[2])))
+    message = "**PLAYERS:**\n```"
+    message += "\n".join(
+        [
+            f"{name} (Kills: {kills}, Deaths: {deaths})"
+            for name, kills, deaths in sorted_players
+        ]
+    )
+    message += "\n```"
     return message
 
 
 def create_pokemon_message(values: List[List[str]]) -> str:
     # Creates the message when asked to list Pokemon in the sheet.
-    names = get_pokemon(values)
-    message = "POKEMON NAMES:\n```"
-    message += "\n".join(names)
-    message += "```"
+    pokemon = sorted(get_pokemon(values), key=lambda x: (-int(x[1]), int(x[2])))
+    message = "**POKEMON:**\n```"
+    message += "\n".join(
+        [
+            f"{name} (Kills: {kills}, Deaths: {deaths})"
+            for name, kills, deaths in pokemon
+        ]
+    )
+    message += "\n```"
     return message
 
 
@@ -616,28 +627,72 @@ def get_bandings(
     return overlapping_ids
 
 
-def get_players(values: List[List[str]]) -> List[str]:
-    # Returns a list of all the player names.
-    names = set()
+def get_players(values: List[List[str]]) -> List[List[str]]:
+    # Returns a list of all the player names and their total kills/deaths.
+    players = []
+    if not values or len(values) < 3:
+        return players
     for i in range(0, len(values), 15):
-        if i < len(values):
-            names.update(name for name in values[i] if name != "")
-    return list(names)
+        header_row = values[i]
+        for index, name in enumerate(header_row):
+            if name.strip() == "":
+                continue
+            total_kills = 0
+            total_deaths = 0
+            for j in range(i + 2, min(i + 14, len(values))):
+                if index < len(values[j]):
+                    data_row = values[j]
+                    if len(data_row) > index + 3:
+                        kills = data_row[index + 2]
+                        deaths = data_row[index + 3]
+                        total_kills += int(kills) if kills.isdigit() else 0
+                        total_deaths += int(deaths) if deaths.isdigit() else 0
+            players.append([name, total_kills, total_deaths])
+    return players
 
 
-def get_pokemon(values: List[List[str]]) -> List[str]:
-    # Returns a list of all the Pokemon names.
-    pokemon = set()  # Use a set to automatically avoid duplicates
+def get_pokemon(values: List[List[str]]) -> List[List[str]]:
+    # Returns a list of all the Pokemon names and their total kills/deaths.
+    pokemon = []
     for i in range(2, len(values), 15):
         for j in range(i, min(i + 12, len(values))):
             row = values[j]
-            pokemon.update(
-                name
-                for name in row
-                if name
-                and not (name.replace(".", "", 1).isdigit() and name.count(".") <= 1)
-            )
-    return list(pokemon)
+            for idx, name in enumerate(row):
+                if name.strip() and not (
+                    name.strip().replace(".", "", 1).isdigit()
+                    and name.strip().count(".") <= 1
+                ):
+                    if idx + 2 < len(row) and idx + 3 < len(row):
+                        kills = row[idx + 2].strip()
+                        deaths = row[idx + 3].strip()
+                        pokemon.append([name.strip(), kills, deaths])
+    return pokemon
+
+
+def get_stat_range(values: List[List[str]], name: str) -> str:
+    # Searches for the name and returns the range of the section with Pokemon stats associated with that name.
+    for row_index, row in enumerate(values):
+        if name in row:
+            name_index = row.index(name) + 1
+            start_col = chr(65 + name_index)
+            end_col = chr(ord(start_col) + 3)
+            start_row = row_index + 4
+            end_row = start_row + 11
+            return f"{start_col}{start_row}:{end_col}{end_row}"
+    return None
+
+
+def get_section_range(values: List[List[str]], name: str) -> str:
+    # Searches for the name and returns the range of the entire section for that name.
+    for row_index, row in enumerate(values):
+        if name in row:
+            name_index = row.index(name) + 1
+            start_col = chr(65 + name_index)
+            end_col = chr(ord(start_col) + 3)
+            start_row = row_index + 2
+            end_row = start_row + 13
+            return f"{start_col}{start_row}:{end_col}{end_row}"
+    return None
 
 
 def next_cell(values: List[List[str]]) -> str:
@@ -707,27 +762,15 @@ def check_labels(values: List[List[str]], player_name: str) -> bool:
     return False
 
 
-def get_stat_range(values: List[List[str]], name: str) -> str:
-    # Searches for the name and returns the range of the section with Pokemon stats associated with that name.
-    for row_index, row in enumerate(values):
-        if name in row:
-            name_index = row.index(name) + 1
-            start_col = chr(65 + name_index)
-            end_col = chr(ord(start_col) + 3)
-            start_row = row_index + 4
-            end_row = start_row + 11
-            return f"{start_col}{start_row}:{end_col}{end_row}"
-    return None
-
-
-def get_section_range(values: List[List[str]], name: str) -> str:
-    # Searches for the name and returns the range of the entire section for that name.
-    for row_index, row in enumerate(values):
-        if name in row:
-            name_index = row.index(name) + 1
-            start_col = chr(65 + name_index)
-            end_col = chr(ord(start_col) + 3)
-            start_row = row_index + 2
-            end_row = start_row + 13
-            return f"{start_col}{start_row}:{end_col}{end_row}"
-    return None
+def is_valid_sheet(
+    creds: Credentials,
+    sheet_link: str,
+) -> bool:
+    # Checks if the sheet link is valid.
+    try:
+        spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
+        service = build("sheets", "v4", credentials=creds)
+        service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        return True
+    except (IndexError, HttpError):
+        return False
