@@ -10,8 +10,9 @@ class InvalidCommand(Exception):
             "Invalid command. Please enter one of the following:\n"
             "```\n"
             "Clodbot, analyze (Replay Link)\n"
-            "Clodbot, update (Google Sheets Link) (Replay Link)\n"
-            "Clodbot, delete (Google Sheets Link) (Player Name)\n"
+            "Clodbot, sheet update (Google Sheets Link) (Replay Link)\n"
+            "Clodbot, sheet delete (Google Sheets Link) (Player Name)\n"
+            "Clodbot, sheet list (Google Sheets Link) ['Players' OR 'Pokemon]\n"
             "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
             "Clodbot, giveset random (Optional Number)\n"
             "```"
@@ -27,7 +28,9 @@ class InvalidReplay(Exception):
 class InvalidSheet(Exception):
     # Exception raised for invalid Google Sheet links.
     def __init__(self, link):
-        super().__init__(f"**{link}** is an invalid Google Sheets link.")
+        super().__init__(
+            f"**{link}** is an invalid Google Sheets link or you don't have permission."
+        )
 
 
 class InvalidRandom(Exception):
@@ -86,13 +89,38 @@ class NoGiveSet(Exception):
         )
 
 
+class NoSheet(Exception):
+    # Exception raised when no argument for sheet is found.
+    def __init__(self):
+        super().__init__(
+            "Please follow this format:\n"
+            "```\n"
+            "Clodbot, sheet set (Google Sheets Link)\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Replay Link)\n"
+            "Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)\n"
+            "Clodbot, sheet list (Optional Google Sheets Link) ['Players' OR 'Pokemon]\n"
+            "```"
+        )
+
+
+class NoSet(Exception):
+    # Exception raised when no argument for set is found.
+    def __init__(self):
+        super().__init__(
+            "Please follow this format:\n"
+            "```\n"
+            "Clodbot, sheet set (Google Sheets Link)\n"
+            "```"
+        )
+
+
 class NoUpdate(Exception):
     # Exception raised when no argument for update is found.
     def __init__(self):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, update (Google Sheets Link) (Replay Link)\n"
+            "Clodbot, sheet update (Google Sheets Link) (Replay Link)\n"
             "```"
         )
 
@@ -103,7 +131,7 @@ class NoDelete(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, delete (Google Sheets Link) (Player Name)\n"
+            "Clodbot, sheet delete (Google Sheets Link) (Player Name)\n"
             "```"
         )
 
@@ -114,7 +142,7 @@ class NoList(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, list (Google Sheets Link) ['Player' OR 'Pokemon']\n"
+            "Clodbot, sheet list (Google Sheets Link) ['Player' OR 'Pokemon']\n"
             "```"
         )
 
@@ -129,3 +157,14 @@ class NoPokemon(Exception):
     # Exception raised when there are no Pokemon names found in the sheet.
     def __init__(self):
         super().__init__(f"There are no Pokemon in the sheet.")
+
+
+class NoDefault(Exception):
+    # Exception raised when there is no existence of a default link.
+    def __init__(self):
+        super().__init__(
+            f"No default sheet link set. Please set include the link in the command or set it as follows:\n"
+            "```\n"
+            "Clodbot, sheet set (Google Sheets Link)\n"
+            "```"
+        )
