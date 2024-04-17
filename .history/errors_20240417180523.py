@@ -14,7 +14,7 @@ class InvalidCommand(Exception):
             "Clodbot, sheet default\n"
             "Clodbot, sheet update (Optional Google Sheets Link) (Replay Link)\n"
             "Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)\n"
-            'Clodbot, sheet list (Optional Google Sheets Link) ["Players" OR "Pokemon"]\n'
+            "Clodbot, sheet list (Optional Google Sheets Link) [\"Players\" OR "Pokemon"]\n"
             "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
             "Clodbot, giveset random (Optional Number)\n"
             "```"

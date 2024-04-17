@@ -10,11 +10,11 @@ class InvalidCommand(Exception):
             "Invalid command. Please enter one of the following:\n"
             "```\n"
             "Clodbot, analyze (Replay Link)\n"
-            "Clodbot, sheet set (Optional Google Sheets Link)\n"
+            "Clodbot, sheet set (Google Sheets Link)\n"
             "Clodbot, sheet default\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Replay Link)\n"
-            "Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)\n"
-            'Clodbot, sheet list (Optional Google Sheets Link) ["Players" OR "Pokemon"]\n'
+            "Clodbot, sheet update (Google Sheets Link) (Replay Link)\n"
+            "Clodbot, sheet delete (Google Sheets Link) (Player Name)\n"
+            "Clodbot, sheet list (Google Sheets Link) ['Players' OR 'Pokemon]\n"
             "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
             "Clodbot, giveset random (Optional Number)\n"
             "```"
@@ -79,6 +79,18 @@ class NoAnalyze(Exception):
         )
 
 
+class NoGiveSet(Exception):
+    # Exception raised when no argument for giveset is found.
+    def __init__(self):
+        super().__init__(
+            "Please follow this format:\n"
+            "```\n"
+            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
+            "Clodbot, giveset random (Optional Number)\n"
+            "```"
+        )
+
+
 class NoSheet(Exception):
     # Exception raised when no argument for sheet is found.
     def __init__(self):
@@ -89,18 +101,6 @@ class NoSheet(Exception):
             "Clodbot, sheet update (Optional Google Sheets Link) (Replay Link)\n"
             "Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)\n"
             "Clodbot, sheet list (Optional Google Sheets Link) ['Players' OR 'Pokemon]\n"
-            "```"
-        )
-
-
-class NoGiveSet(Exception):
-    # Exception raised when no argument for giveset is found.
-    def __init__(self):
-        super().__init__(
-            "Please follow this format:\n"
-            "```\n"
-            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
-            "Clodbot, giveset random (Optional Number)\n"
             "```"
         )
 
@@ -122,7 +122,7 @@ class NoUpdate(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Replay Link)\n"
+            "Clodbot, sheet update (Google Sheets Link) (Replay Link)\n"
             "```"
         )
 
@@ -133,7 +133,7 @@ class NoDelete(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)\n"
+            "Clodbot, sheet delete (Google Sheets Link) (Player Name)\n"
             "```"
         )
 
@@ -144,7 +144,7 @@ class NoList(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet list (Optional Google Sheets Link) ['Player' OR 'Pokemon']\n"
+            "Clodbot, sheet list (Google Sheets Link) ['Player' OR 'Pokemon']\n"
             "```"
         )
 
