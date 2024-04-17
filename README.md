@@ -1,50 +1,27 @@
+Your Friendly Amphibian Pokemon Utility Bot
+
 ---------------------------------------------------------
-Your friendly amphibian Pokemon Utility Bot
 
 About:
 
-A Pokemon Showdown bot to keep track of stats, update Google Sheets and give sets.
-
----------------------------------------------------------
-
-Setup:
-
-Inviting the bot into your server locally:
-
-1) Go into https://discord.com/developers/applications
-
-2) Create a bot and go into it
-
-3) Click on OAuth2
-
-4) Go into URL Generator
-
-5) Check the “bot” checkbox in Scopes
-
-6) Check the “Send Messages” checkbox in Text Permissions
-
-7) Copy the generated URL and select the server you want to add the bot into
-
----------------------------------------------------------
-
-Starting up the bot:
-
-1) Clone this repository through an IDE of your choice
-
-2) Go into the .env file and replace the token with the token from the bot you created
-
-3) Under the Bot settings in the Discord developer app portal, also activate "Message Content Intent"
-
-4) Run clodbot.py in your IDE
+A Pokemon Showdown bot to keep track of stats, update those stats into Google Sheets and give sets.
 
 ---------------------------------------------------------
 
 Using the bot:
 
-- Type "Clodbot, analyze (Pokemon Showdown Replay Link)" to display the stats
+- Type "Clodbot, analyze (Pokemon Showdown Replay Link)" to display the stats from the replay on Discord.
 
-- Type "Clodbot, update (Google Sheets Link) (Pokemon Showdown Replay Link)" to update the stats onto a "Stats" sheet
+- Type "Clodbot, sheet set (Google Sheets Link)" to set the default Google Sheets link for future "sheet" commands.
 
-- Type "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]" to get Pokemon sets
+- Type "Clodbot, sheet default" to display the default sheet link on Discord.
 
-- Type "Clodbot, giveset random (Optional Number)" to get random Pokemon sets
+- Type "Clodbot, update (Optional Google Sheets Link) (Pokemon Showdown Replay Link)" to update the stats from the replay onto a "Stats" sheet in the link. Uses default link if Google Sheets link not provided.
+
+- Type "Clodbot, delete (Optional Google Sheets Link) (Player Name)" to delete the stats section with Player Name from the "Stats" sheet in the link. Uses default link if Google Sheets link not provided.
+
+- Type "Clodbot, list (Optional Google Sheets Link) ["Players" OR "Pokemon"] to display either all Player stats (if "Players") or all Pokemon stats (if "Pokemon") from the "Stats" sheet in the link on Discord. Uses default link if Google Sheets link not provided.
+
+- Type "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]" to display prompt(s) for set selection based on the provided parameters. Uses first format found if format not provided and latest generation if generation not provided.
+
+- Type "Clodbot, giveset random (Optional Number)" to display random set(s) for the specified amount of random Pokemon. Displays one if no number given. 
