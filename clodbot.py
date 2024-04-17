@@ -9,12 +9,9 @@ import discord  # type: ignore
 import aiohttp
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
-from commands.update import Update
-from commands.delete import Delete
+from commands.managesheet import ManageSheet
 from sheets.sheet import authenticate_sheet
 from errors import *
 
@@ -28,6 +25,8 @@ bot = commands.Bot(
     intents=intents,
     case_insensitive=True,
 )
+
+default_link = {}
 
 
 @bot.event
@@ -66,6 +65,7 @@ async def on_interaction(interaction: discord.Interaction) -> None:
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.CommandError) -> None:
+    # Handles if a command deviates from the standard format.
     if isinstance(error, commands.CommandNotFound):
         try:
             raise InvalidCommand()
@@ -85,25 +85,44 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
     await ctx.send(message)
 
 
-@bot.command(name="update", aliases=["delete", "list"])
-async def manage_sheet(ctx: commands.Context, *args: str):
-    # Updates sheet with data from replay.
-    command = ctx.invoked_with
-    if len(args) != 2:
+@bot.command(name="sheet")
+async def manage_sheet(ctx: commands.Context, *args: str) -> None:
+    # Manages Google Sheets data.
+    if not args:
+        raise NoSheet()
+    command = args[0].lower()
+    remaining = args[1:]
+    creds = authenticate_sheet()
+    if command not in ["set", "update", "delete", "list"]:
+        raise NoSheet()
+    if command == "set":
+        if len(remaining) != 1:
+            raise NoSet()
+        message = ManageSheet.set_default(ctx, creds, remaining[0])
+        await ctx.send(message)
+        return
+    if len(remaining) == 1:
+        if ManageSheet.has_default(ctx):
+            sheet_link = ManageSheet.get_default(ctx)
+            data = remaining[0]
+        else:
+            raise NoDefault()
+    elif len(remaining) == 2:
+        sheet_link, data = remaining
+    else:
         if command == "update":
             raise NoUpdate()
         elif command == "delete":
             raise NoDelete()
         elif command == "list":
             raise NoList()
-    sheets_link, data = args
-    creds = authenticate_sheet()
+        return
     if command == "update":
-        message = await Update.update_sheet(creds, sheets_link, data)
+        message = await ManageSheet.update_sheet(creds, sheet_link, data)
     elif command == "delete":
-        message = await Delete.delete_player(creds, sheets_link, data)
+        message = await ManageSheet.delete_player(creds, sheet_link, data)
     elif command == "list":
-        message = await List.list_data(creds, sheets_link, data)
+        message = await ManageSheet.list_data(creds, sheet_link, data)
     await ctx.send(message)
 
 
