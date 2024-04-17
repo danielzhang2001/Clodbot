@@ -1,4 +1,4 @@
-# Your Friendly Amphibian Pokemon Utility Bot
+# Your Pokemon Utility Bot
 
 ## About:
 
