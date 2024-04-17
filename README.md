@@ -8,7 +8,7 @@ A Pokemon Showdown bot to keep track of stats, update those stats into Google Sh
 
 ---------------------------------------------------------
 
-Using the bot:
+Bot Usage:
 
 - Type "Clodbot, analyze (Pokemon Showdown Replay Link)" to display the stats from the replay on Discord.
 
@@ -20,7 +20,7 @@ Using the bot:
 
 - Type "Clodbot, delete (Optional Google Sheets Link) (Player Name)" to delete the stats section with Player Name from the "Stats" sheet in the link. Uses default link if Google Sheets link not provided.
 
-- Type "Clodbot, list (Optional Google Sheets Link) ["Players" OR "Pokemon"] to display either all Player stats (if "Players") or all Pokemon stats (if "Pokemon") from the "Stats" sheet in the link on Discord. Uses default link if Google Sheets link not provided.
+- Type "Clodbot, list (Optional Google Sheets Link) ["Players" OR "Pokemon"]" to display either all Player stats (if "Players") or all Pokemon stats (if "Pokemon") from the "Stats" sheet in the link on Discord. Uses default link if Google Sheets link not provided.
 
 - Type "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]" to display prompt(s) for set selection based on the provided parameters. Uses first format found if format not provided and latest generation if generation not provided.
 
