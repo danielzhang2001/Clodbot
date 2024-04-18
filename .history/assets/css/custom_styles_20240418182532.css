@@ -5,21 +5,19 @@
     position: absolute;
     top: 0;
     z-index: 10;
-    width: 120px;
-    height: 30px;
-    padding: 5px 5px;
+    padding: 10px 50px;
+    width: 20px;
+    height: 15px;
     color: #fff;
-    font-size: 14px;
     font-weight: 700;
+    font-size: 14px;
     box-shadow: 0 0 10px rgba(0, 0, 0, .5);
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
     background-size: 20px 20px;
     background-color: #0090ff;
     background-repeat: no-repeat;
-    background-position: right 20px center;
-    text-align: center;
-    text-indent: -10px;
+    background-position: right 10px center;
 }
 
 .home {
