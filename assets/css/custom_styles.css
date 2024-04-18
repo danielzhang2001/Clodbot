@@ -7,7 +7,7 @@
     z-index: 10;
     width: 20px;
     height: 15px;
-    padding: 10px 50px;
+    padding: 5px 5px;
     color: #fff;
     font-size: 14px;
     font-weight: 700;
@@ -19,6 +19,7 @@
     background-repeat: no-repeat;
     background-position: right 10px center;
     text-align: center;
+    text-indent: -10px;
 }
 
 .home {
