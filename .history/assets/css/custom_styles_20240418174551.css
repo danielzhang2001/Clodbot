@@ -14,20 +14,23 @@
     background-size: 20px 20px;
     background-color: #0090ff;
     background-repeat: no-repeat;
-    background-position: 100% 50%;
+    background-position: right center;
 }
 
 .home {
     right: 540px;
     background-image: url('../images/home.png');
+    /* Specify as background-image */
 }
 
 .github {
     right: 350px;
     background-image: url('../images/github.png');
+    /* Specify as background-image */
 }
 
 .privacy {
     right: 160px;
     background-image: url('../images/privacy.png');
+    /* Specify as background-image */
 }
