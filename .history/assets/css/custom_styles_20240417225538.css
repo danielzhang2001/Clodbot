@@ -2,7 +2,7 @@
     display: block;
     position: absolute;
     top: 0;
-    right: 100px;
+    right: 10px;
     z-index: 10;
     padding: 10px 50px 10px 10px;
     color: #fff;
@@ -13,11 +13,10 @@
     border-bottom-right-radius: 2px;
 }
 
-.privacy_banner {
+.privacy_style {
     display: block;
     position: absolute;
     top: 0;
-    right: 160px;
     z-index: 10;
     padding: 10px 10px;
     color: #fff;
