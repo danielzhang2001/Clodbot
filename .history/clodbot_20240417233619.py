@@ -26,6 +26,8 @@ bot = commands.Bot(
     case_insensitive=True,
 )
 
+default_link = {}
+
 
 @bot.event
 async def on_ready():
@@ -94,34 +96,38 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
     if command not in ["set", "default", "update", "delete", "list"]:
         raise NoSheet()
     if command == "default":
-        message = ManageSheet.display_default(ctx)
-    elif command == "set":
+        if ManageSheet.has_default(ctx):
+            message = await ManageSheet.display_default(ctx)
+        else:
+            raise NoDefault()
+    if command == "set":
         if len(remaining) != 1:
             raise NoSet()
         message = ManageSheet.set_default(ctx, creds, remaining[0])
-    else:
-        if len(remaining) == 1:
-            if ManageSheet.has_default(ctx):
-                sheet_link = ManageSheet.get_default(ctx)
-                data = remaining[0]
-            else:
-                raise NoDefault()
-        elif len(remaining) == 2:
-            sheet_link, data = remaining
+        await ctx.send(message)
+        return
+    if len(remaining) == 1:
+        if ManageSheet.has_default(ctx):
+            sheet_link = ManageSheet.get_default(ctx)
+            data = remaining[0]
         else:
-            if command == "update":
-                raise NoUpdate()
-            elif command == "delete":
-                raise NoDelete()
-            elif command == "list":
-                raise NoList()
-            return
+            raise NoDefault()
+    elif len(remaining) == 2:
+        sheet_link, data = remaining
+    else:
         if command == "update":
-            message = await ManageSheet.update_sheet(creds, sheet_link, data)
+            raise NoUpdate()
         elif command == "delete":
-            message = await ManageSheet.delete_player(creds, sheet_link, data)
+            raise NoDelete()
         elif command == "list":
-            message = await ManageSheet.list_data(creds, sheet_link, data)
+            raise NoList()
+        return
+    if command == "update":
+        message = await ManageSheet.update_sheet(creds, sheet_link, data)
+    elif command == "delete":
+        message = await ManageSheet.delete_player(creds, sheet_link, data)
+    elif command == "list":
+        message = await ManageSheet.list_data(creds, sheet_link, data)
     await ctx.send(message)
 
 

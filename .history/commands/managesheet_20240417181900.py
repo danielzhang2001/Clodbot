@@ -11,8 +11,6 @@ from showdown.replay import *
 from sheets.sheet import *
 from errors import *
 
-default_link = {}
-
 
 class ManageSheet:
     @staticmethod
@@ -182,13 +180,3 @@ class ManageSheet:
         # Checks if a default sheet link is set.
         server_id = ctx.guild.id if ctx.guild else 0
         return server_id in default_link
-
-    @staticmethod
-    def display_default(ctx: Context) -> bool:
-        # Displays the current default link.
-        if ManageSheet.has_default(ctx):
-            return (
-                f"Current default sheet is [**HERE**]({ManageSheet.get_default(ctx)})."
-            )
-        else:
-            raise NoDefault()
