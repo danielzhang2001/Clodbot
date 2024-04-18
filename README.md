@@ -2,7 +2,7 @@
 ---------------------------------------------------------------------------------------------------
 ## About:
 
-A Pokemon Showdown bot to keep track of stats, update those stats into Google Sheets and give sets.
+A Pokemon Showdown bot to keep track of stats, update those stats into Google Sheets and give setsa.
 
 ## Bot Usage:
 
