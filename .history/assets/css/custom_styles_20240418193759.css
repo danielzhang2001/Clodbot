@@ -1,14 +1,19 @@
-.menu {
+.nav-bar {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
+    /* Adjusts space evenly between items */
     position: absolute;
     top: 0;
     width: 100%;
+    /* Full width of the viewport */
     height: 50px;
+    /* Adjust height as necessary */
     background-color: #0090ff;
+    /* Blue background for the nav bar */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    /* Ensures nav bar is on top */
 }
 
 .banner {
