@@ -29,7 +29,7 @@ class ManageSheet:
         sheet_metadata = (
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
-        title = sheet_metadata["properties"]["title"]
+        title = sheet_metadata.get("properties", {}).get("title", "Unknown Sheet")
         try:
             response = requests.get(replay_link + ".log")
             response.raise_for_status()
@@ -46,6 +46,7 @@ class ManageSheet:
         formatted_stats = format_stats(players, stats)
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
+        sheet_range = "Stats!B2:T285"
         for sheet in sheets:
             if sheet["properties"]["title"] == "Stats":
                 sheet_id = sheet["properties"]["sheetId"]
@@ -59,18 +60,13 @@ class ManageSheet:
             )
             sheet_id = sheet_response["replies"][0]["addSheet"]["properties"]["sheetId"]
             color_background(service, spreadsheet_id, sheet_id)
-        sheet_link = (
-            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-            if sheet_id
-            else sheet_link
-        )
         for player_data in formatted_stats:
             player_name = player_data[0]
             pokemon_data = player_data[1]
             result = (
                 service.spreadsheets()
                 .values()
-                .get(spreadsheetId=spreadsheet_id, range="Stats!B2:T285")
+                .get(spreadsheetId=spreadsheet_id, range=sheet_range)
                 .execute()
             )
             values = result.get("values", [])
@@ -87,7 +83,7 @@ class ManageSheet:
                     player_name,
                     pokemon_data,
                 )
-        return f"Sheet updated at [**{title}**]({sheet_link})."
+        return f"Sheet updated [**HERE**]({sheet_link})."
 
     @staticmethod
     async def delete_player(
@@ -103,34 +99,27 @@ class ManageSheet:
         sheet_metadata = (
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
-        title = sheet_metadata["properties"]["title"]
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
+        sheet_range = "Stats!B2:T285"
         for sheet in sheets:
             if sheet["properties"]["title"] == "Stats":
                 sheet_id = sheet["properties"]["sheetId"]
                 break
         if sheet_id is None:
             raise NameDoesNotExist(player_name)
-        sheet_link = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
         result = (
             service.spreadsheets()
             .values()
-            .get(spreadsheetId=spreadsheet_id, range="Stats!B2:T285")
+            .get(spreadsheetId=spreadsheet_id, range=sheet_range)
             .execute()
         )
         values = result.get("values", [])
-        players = [player[0] for player in get_players(values)]
-        if player_name.lower() in [player.lower() for player in players]:
-            player_name = next(
-                (name for name in players if name.lower() == player_name.lower()),
-                player_name,
-            )
-        else:
+        if player_name not in [player[0] for player in get_players(values)]:
             raise NameDoesNotExist(player_name)
         section_range = f"Stats!{get_section_range(values, player_name)}"
         delete_data(service, spreadsheet_id, sheet_id, section_range)
-        return f"**{player_name}** removed at [**{title}**]({sheet_link})."
+        return f"Player removed [**HERE**]({sheet_link})."
 
     @staticmethod
     async def list_data(creds: Credentials, sheet_link: str, data: str) -> str:
@@ -148,6 +137,7 @@ class ManageSheet:
             raise NoList()
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
+        sheet_range = "Stats!B2:T285"
         for sheet in sheets:
             if sheet["properties"]["title"] == "Stats":
                 sheet_id = sheet["properties"]["sheetId"]
@@ -160,7 +150,7 @@ class ManageSheet:
         result = (
             service.spreadsheets()
             .values()
-            .get(spreadsheetId=spreadsheet_id, range="Stats!B2:T285")
+            .get(spreadsheetId=spreadsheet_id, range=sheet_range)
             .execute()
         )
         values = result.get("values", [])
@@ -180,26 +170,9 @@ class ManageSheet:
             creds = authenticate_sheet(force_login=True)
             if not is_valid_sheet(creds, sheet_link):
                 raise InvalidSheet(sheet_link)
-        service = build("sheets", "v4", credentials=creds)
-        spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
-        sheet_metadata = (
-            service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-        )
-        title = sheet_metadata["properties"]["title"]
-        sheets = sheet_metadata.get("sheets", "")
-        sheet_id = None
-        for sheet in sheets:
-            if sheet["properties"]["title"] == "Stats":
-                sheet_id = sheet["properties"]["sheetId"]
-                break
-        sheet_link = (
-            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-            if sheet_id
-            else sheet_link
-        )
         server_id = ctx.guild.id if ctx.guild else 0
         default_link[server_id] = sheet_link
-        return f"Default sheet link set at [**{title}**]({sheet_link})."
+        return f"Default sheet link set [**HERE**]({sheet_link})."
 
     @staticmethod
     def get_default(ctx: Context) -> str:
@@ -214,26 +187,11 @@ class ManageSheet:
         return server_id in default_link
 
     @staticmethod
-    def display_default(ctx: Context, creds: Credentials) -> bool:
+    def display_default(ctx: Context) -> bool:
         # Displays the current default link.
         if ManageSheet.has_default(ctx):
-            service = build("sheets", "v4", credentials=creds)
-            spreadsheet_id = ManageSheet.get_default(ctx).split("/d/")[1].split("/")[0]
-            sheet_metadata = (
-                service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+            return (
+                f"Current default sheet is [**HERE**]({ManageSheet.get_default(ctx)})."
             )
-            title = sheet_metadata["properties"]["title"]
-            sheets = sheet_metadata.get("sheets", "")
-            sheet_id = None
-            for sheet in sheets:
-                if sheet["properties"]["title"] == "Stats":
-                    sheet_id = sheet["properties"]["sheetId"]
-                    break
-            sheet_link = (
-                f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-                if sheet_id
-                else ManageSheet.get_default(ctx)
-            )
-            return f"Current default sheet at [**{title}**]({sheet_link})."
         else:
             raise NoDefault()

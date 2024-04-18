@@ -682,11 +682,11 @@ def get_stat_range(values: List[List[str]], name: str) -> str:
     return None
 
 
-def get_section_range(values: List[List[str]], player_name: str) -> str:
+def get_section_range(values: List[List[str]], name: str) -> str:
     # Searches for the name and returns the range of the entire section for that name.
     for row_index, row in enumerate(values):
-        if player_name in row:
-            name_index = row.index(player_name) + 1
+        if name in row:
+            name_index = row.index(name) + 1
             start_col = chr(65 + name_index)
             end_col = chr(ord(start_col) + 3)
             start_row = row_index + 2
