@@ -6,7 +6,7 @@
     top: 0;
     z-index: 10;
     width: 120px;
-    height: 30px;
+    height: 25px;
     padding: 5px 5px;
     color: #fff;
     font-size: 14px;
@@ -17,7 +17,7 @@
     background-size: 20px 20px;
     background-color: #0090ff;
     background-repeat: no-repeat;
-    background-position: right 20px center;
+    background-position: right 15px center;
     text-align: center;
     text-indent: -10px;
 }
