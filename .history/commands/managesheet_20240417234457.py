@@ -187,8 +187,6 @@ class ManageSheet:
     def display_default(ctx: Context) -> bool:
         # Displays the current default link.
         if ManageSheet.has_default(ctx):
-            return (
-                f"Current default sheet is [**HERE**]({ManageSheet.get_default(ctx)})."
-            )
+            return f"Current default sheet is [**HERE**]({get_default(ctx)})."
         else:
             raise NoDefault()

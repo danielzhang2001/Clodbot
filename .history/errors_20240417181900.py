@@ -165,7 +165,7 @@ class NoDefault(Exception):
     # Exception raised when there is no existence of a default link.
     def __init__(self):
         super().__init__(
-            f"No default sheet link set. You can set it as follows:\n"
+            f"No default sheet link set. Please set include the link in the command or set it as follows:\n"
             "```\n"
             "Clodbot, sheet set (Google Sheets Link)\n"
             "```"
