@@ -2,7 +2,7 @@
     display: block;
     position: absolute;
     top: 0;
-    left: 160px;
+    right: 500px;
     z-index: 10;
     padding: 10px 10px;
     color: #fff;
