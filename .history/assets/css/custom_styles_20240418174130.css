@@ -12,22 +12,22 @@
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
     background-size: 20px 20px;
-    background-color: #0090ff;
+    background-color: ;
     background-repeat: no-repeat;
     background-position: right center;
 }
 
 .home {
     right: 540px;
-    background: url('../images/home.png')
+    background: url('../images/home.png') #0090ff no-repeat center;
 }
 
 .github {
     right: 350px;
-    background: url('../images/github.png')
+    background: url('../images/github.png') #0090ff no-repeat center;
 }
 
 .privacy {
     right: 160px;
-    background: url('../images/privacy.png')
+    background: url('../images/privacy.png') #0090ff no-repeat center;
 }
