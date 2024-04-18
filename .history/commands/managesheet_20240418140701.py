@@ -59,11 +59,6 @@ class ManageSheet:
             )
             sheet_id = sheet_response["replies"][0]["addSheet"]["properties"]["sheetId"]
             color_background(service, spreadsheet_id, sheet_id)
-        sheet_link = (
-            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-            if sheet_id
-            else sheet_link
-        )
         for player_data in formatted_stats:
             player_name = player_data[0]
             pokemon_data = player_data[1]
@@ -112,7 +107,6 @@ class ManageSheet:
                 break
         if sheet_id is None:
             raise NameDoesNotExist(player_name)
-        sheet_link = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
         result = (
             service.spreadsheets()
             .values()
@@ -120,13 +114,7 @@ class ManageSheet:
             .execute()
         )
         values = result.get("values", [])
-        players = [player[0] for player in get_players(values)]
-        if player_name.lower() in [player.lower() for player in players]:
-            player_name = next(
-                (name for name in players if name.lower() == player_name.lower()),
-                player_name,
-            )
-        else:
+        if player_name not in [player[0] for player in get_players(values)]:
             raise NameDoesNotExist(player_name)
         section_range = f"Stats!{get_section_range(values, player_name)}"
         delete_data(service, spreadsheet_id, sheet_id, section_range)
@@ -186,17 +174,6 @@ class ManageSheet:
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
         title = sheet_metadata["properties"]["title"]
-        sheets = sheet_metadata.get("sheets", "")
-        sheet_id = None
-        for sheet in sheets:
-            if sheet["properties"]["title"] == "Stats":
-                sheet_id = sheet["properties"]["sheetId"]
-                break
-        sheet_link = (
-            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-            if sheet_id
-            else sheet_link
-        )
         server_id = ctx.guild.id if ctx.guild else 0
         default_link[server_id] = sheet_link
         return f"Default sheet link set at [**{title}**]({sheet_link})."
@@ -223,17 +200,6 @@ class ManageSheet:
                 service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
             )
             title = sheet_metadata["properties"]["title"]
-            sheets = sheet_metadata.get("sheets", "")
-            sheet_id = None
-            for sheet in sheets:
-                if sheet["properties"]["title"] == "Stats":
-                    sheet_id = sheet["properties"]["sheetId"]
-                    break
-            sheet_link = (
-                f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-                if sheet_id
-                else ManageSheet.get_default(ctx)
-            )
-            return f"Current default sheet at [**{title}**]({sheet_link})."
+            return f"Current default sheet at [**{title}**]({ManageSheet.get_default(ctx)})."
         else:
             raise NoDefault()

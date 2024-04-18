@@ -121,7 +121,7 @@ class ManageSheet:
         )
         values = result.get("values", [])
         players = [player[0] for player in get_players(values)]
-        if player_name.lower() in [player.lower() for player in players]:
+        if player_name.lower() in [player.lower() for player in players]
             player_name = next(
                 (name for name in players if name.lower() == player_name.lower()),
                 player_name,

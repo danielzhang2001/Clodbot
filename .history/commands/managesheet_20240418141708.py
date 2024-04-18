@@ -120,13 +120,7 @@ class ManageSheet:
             .execute()
         )
         values = result.get("values", [])
-        players = [player[0] for player in get_players(values)]
-        if player_name.lower() in [player.lower() for player in players]:
-            player_name = next(
-                (name for name in players if name.lower() == player_name.lower()),
-                player_name,
-            )
-        else:
+        if player_name not in [player[0] for player in get_players(values)]:
             raise NameDoesNotExist(player_name)
         section_range = f"Stats!{get_section_range(values, player_name)}"
         delete_data(service, spreadsheet_id, sheet_id, section_range)
@@ -230,7 +224,7 @@ class ManageSheet:
                     sheet_id = sheet["properties"]["sheetId"]
                     break
             sheet_link = (
-                f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
+                f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={ManageSheet.get_default(ctx)}"
                 if sheet_id
                 else ManageSheet.get_default(ctx)
             )
