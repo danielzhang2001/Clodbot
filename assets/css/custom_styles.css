@@ -20,19 +20,18 @@
 
 .menu a {
     display: flex;
-    justify-content: flex_start;
+    justify-content: center;
     align-items: center;
-    padding: 0 25px;
-    padding-left: 10px;
+    padding: 0;
     color: white;
     text-decoration: none;
     position: relative;
-    width: calc(100% / 3);
+    flex: 1;
     height: 100%;
     box-sizing: border-box;
-    text-align: left;
     border-right: 4px solid rgb(0, 41, 102);
     transition: background-color 0.3s ease, border-radius 0.3s ease;
+    text-align: center;
 }
 
 .menu a:hover {
@@ -50,11 +49,12 @@
 .menu a::after {
     content: '';
     position: absolute;
-    right: 10px;
+    right: 30px;
     width: 20px;
     height: 20px;
     background-size: cover;
     background-repeat: no-repeat;
+    transform: translateX(50%);
 }
 
 .menu a:last-child {
