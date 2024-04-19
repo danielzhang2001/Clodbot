@@ -33,12 +33,6 @@
     text-align: left;
     border-right: 4px solid rgb(0, 41, 102);
     transition: background-color 0.3s ease;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-}
-
-.menu a:hover {
-    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .menu a::after {
