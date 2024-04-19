@@ -33,6 +33,9 @@
     text-align: left;
     border-right: 4px solid rgb(0, 41, 102);
     transition: background-color 0.3s ease;
+    background-color: transparent;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .menu a:hover {
