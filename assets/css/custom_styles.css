@@ -30,6 +30,7 @@
     height: 100%;
     box-sizing: border-box;
     text-align: left;
+    border-right: 4px solid rgb(0, 41, 102);
 }
 
 .menu a::after {
