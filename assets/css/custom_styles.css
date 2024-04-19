@@ -20,11 +20,12 @@
 
 .menu a {
     padding: 0 5px;
-    border-right: 2px solid rgba(8, 42, 136, 0.5);
+    border-right: 4px solid rgb(8, 42, 136);
     color: white;
     text-decoration: none;
     text-align: center;
     text-indent: -10px;
+    height: 100%;
 }
 
 .menu a:last-child {
