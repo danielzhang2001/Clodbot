@@ -49,18 +49,19 @@
     background-repeat: no-repeat;
 }
 
-.home::after {
-    border-bottom-left-radius: 20px;
+.menu a:last-child {
+    border-right: none;
+}
+
+.home {
     background-image: url('../images/home.png');
 }
 
-.github::after {
+.github {
     background-image: url('../images/github.png');
 }
 
-.privacy::after {
-    border-right: none;
-    border-bottom-right-radius: 20px;
+.privacy {
     background-image: url('../images/privacy.png');
 }
 
