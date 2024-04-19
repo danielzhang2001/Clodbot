@@ -1,0 +1,82 @@
+.menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 30%;
+    width: auto;
+    height: 40px;
+    background: linear-gradient(to right, navy, #005085);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-top: none;
+    border-left: 4px solid rgb(0, 41, 102);
+    border-right: 4px solid rgb(0, 41, 102);
+    border-bottom: 4px solid rgb(0, 41, 102);
+    border-radius: 0 0 20px 20px;
+    z-index: 1000;
+}
+
+.menu a {
+    display: flex;
+    justify-content: flex_start;
+    align-items: center;
+    padding: 0 25px;
+    padding-left: 10px;
+    color: white;
+    text-decoration: none;
+    position: relative;
+    width: calc(100% / 3);
+    height: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    border-right: 4px solid rgb(0, 41, 102);
+    transition: background-color 0.3s ease;
+}
+
+.menu a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.menu a::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.menu a:last-child {
+    border-right: none;
+}
+
+.home::after {
+    border-bottom-left-radius: 20px;
+    background-image: url('../images/home.png');
+}
+
+.github::after {
+    background-image: url('../images/github.png');
+}
+
+.privacy::after {
+    background-image: url('../images/privacy.png');
+}
+
+.banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 25px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 2px;
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px 20px;
+}
