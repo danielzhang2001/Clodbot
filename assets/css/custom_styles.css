@@ -32,7 +32,7 @@
     box-sizing: border-box;
     text-align: left;
     border-right: 4px solid rgb(0, 41, 102);
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, border-radius 0.3s ease;
 }
 
 .menu a:hover {
@@ -63,7 +63,6 @@
 
 .home {
     background-image: url('../images/home.png');
-    border-bottom-left-radius: 20px;
 }
 
 .github {
@@ -72,7 +71,6 @@
 
 .privacy {
     background-image: url('../images/privacy.png');
-    border-bottom-right-radius: 20px;
 }
 
 .banner {
