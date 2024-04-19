@@ -279,20 +279,27 @@ def testget_pokes(json_data: dict) -> dict:
     players_pokemon = {"p1": [], "p2": []}
     nickname_mapping = {}
     log = json_data.get("log", "")
-    switch_regex = re.compile(r"\|switch\|p(\d)a: (.+?)\|([^,|]+)")
+    switch_regex = re.compile(r"\|switch\|p(\d)a: (.+?)\|([^,]+),")
     for match in switch_regex.finditer(log):
         player, nickname, pokemon = match.groups()
-        formatted_pokemon = pokemon.strip()
-        nickname_mapping[f"p{player}:{formatted_pokemon}"] = nickname
-    pokemon_regex = re.compile(r"\|poke\|(p\d)\|([^,|]+)")
-    for match in pokemon_regex.finditer(log):
+        pokemon = pokemon.split(",")[0]
+        nickname_mapping[f"p{player}:{pokemon}"] = nickname
+    poke_regex = re.compile(r"\|poke\|(p\d)\|([^,]+)")
+    for match in poke_regex.finditer(log):
         player, pokemon = match.groups()
-        formatted_pokemon = pokemon.strip()
-        nickname_key = f"{player}:{formatted_pokemon}"
-        final_pokemon = nickname_mapping.get(nickname_key, formatted_pokemon)
+        pokemon = pokemon.split(",")[0]
+        nickname_key = f"{player}:{pokemon}"
+        final_pokemon = nickname_mapping.get(nickname_key, pokemon)
         players_pokemon[player].append(final_pokemon)
     print(f"TEST POKES: {players_pokemon}")
     return players_pokemon
+
+
+def testget_p1_count(raw_data: str) -> int:
+    # Retrieves the number of Pokemon player 1 has.
+    poke_lines = [line for line in raw_data.split("\n") if "|poke|" in line]
+    p1_count = sum(1 for line in poke_lines if "|poke|p1|" in line)
+    return p1_count
 
 
 def testget_nickname_mappings(raw_data: str) -> Tuple[Dict[str, str], Dict[str, str]]:

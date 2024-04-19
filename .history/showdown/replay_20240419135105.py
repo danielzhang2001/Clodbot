@@ -3,7 +3,6 @@ General functions in analyzing Pokemon Showdown replay links.
 """
 
 import re
-import json
 from typing import Dict, List, Tuple
 
 
@@ -28,7 +27,6 @@ def get_pokes(raw_data: str) -> List[str]:
     ]
     nicknamed_pokes = [nickname_mapping.get(pokemon, pokemon) for pokemon in pokes]
     nicknamed_pokes = [re.sub(r"-\*$", "", poke) for poke in nicknamed_pokes]
-    print(f"ACTUAL POKES: {nicknamed_pokes}")
     return nicknamed_pokes
 
 
@@ -263,36 +261,35 @@ def create_message(
     return message
 
 
-def testget_player_names(json_data: dict) -> dict:
+def testget_player_names(raw_data: str) -> Dict[str, str]:
     # Retrieves player names.
-    players_list = json_data.get("players", [])
-    players_dict = {}
-    if len(players_list) == 2:
-        players_dict["p1"] = players_list[0]
-        players_dict["p2"] = players_list[1]
-    print(f"TEST PLAYERS: {players_dict}")
-    return players_dict
+    player_info = re.findall(r"\|player\|(p\d)\|(.+?)\|", raw_data)
+    players = {player[0]: player[1] for player in player_info}
+    print(f"TEST PLAYERS: {players}")
+    return players
 
 
-def testget_pokes(json_data: dict) -> dict:
-    # Retrieves Pokemon names and groups them in terms of player. If a Pokemon has a nickname, gets their nickname instead.
-    players_pokemon = {"p1": [], "p2": []}
+def testget_pokes(raw_data: str) -> List[str]:
+    # Retrieves Pokemon names. If a Pokemon has a nickname, gets their nickname instead.
     nickname_mapping = {}
-    log = json_data.get("log", "")
-    switch_regex = re.compile(r"\|switch\|p(\d)a: (.+?)\|([^,|]+)")
-    for match in switch_regex.finditer(log):
-        player, nickname, pokemon = match.groups()
-        formatted_pokemon = pokemon.strip()
-        nickname_mapping[f"p{player}:{formatted_pokemon}"] = nickname
-    pokemon_regex = re.compile(r"\|poke\|(p\d)\|([^,|]+)")
-    for match in pokemon_regex.finditer(log):
-        player, pokemon = match.groups()
-        formatted_pokemon = pokemon.strip()
-        nickname_key = f"{player}:{formatted_pokemon}"
-        final_pokemon = nickname_mapping.get(nickname_key, formatted_pokemon)
-        players_pokemon[player].append(final_pokemon)
-    print(f"TEST POKES: {players_pokemon}")
-    return players_pokemon
+    switches = re.findall(r"\|switch\|.*?: (.*?)(?:\||, )(.+?)\|", raw_data)
+    for nickname, pokemon in switches:
+        actual_name = re.sub(r",.*$", "", pokemon.strip())
+        nickname_mapping[actual_name] = nickname.strip()
+    poke_lines = [line for line in raw_data.split("\n") if "|poke|" in line]
+    pokes = [
+        re.search(r"\|poke\|\w+\|([^,|\r\n]+)", line).group(1) for line in poke_lines
+    ]
+    nicknamed_pokes = [nickname_mapping.get(pokemon, pokemon) for pokemon in pokes]
+    nicknamed_pokes = [re.sub(r"-\*$", "", poke) for poke in nicknamed_pokes]
+    return nicknamed_pokes
+
+
+def testget_p1_count(raw_data: str) -> int:
+    # Retrieves the number of Pokemon player 1 has.
+    poke_lines = [line for line in raw_data.split("\n") if "|poke|" in line]
+    p1_count = sum(1 for line in poke_lines if "|poke|p1|" in line)
+    return p1_count
 
 
 def testget_nickname_mappings(raw_data: str) -> Tuple[Dict[str, str], Dict[str, str]]:
@@ -321,8 +318,8 @@ def testget_winner(raw_data: str) -> str:
 
 def testget_loser(raw_data: str) -> str:
     # Retrieves the losing player.
-    winner = testget_winner(raw_data)
-    players = testget_player_names(raw_data)
+    winner = get_winner(raw_data)
+    players = get_player_names(raw_data)
     for id, name in players.items():
         if name != winner:
             return name
@@ -332,7 +329,7 @@ def testget_difference(raw_data: str, players: Dict[str, str]) -> str:
     # Retrieves the point difference from winning player to losing player based on the opposing player's faints.
     player1_fainted = len(re.findall(r"\|faint\|p1", raw_data))
     player2_fainted = len(re.findall(r"\|faint\|p2", raw_data))
-    winner = testget_winner(raw_data)
+    winner = get_winner(raw_data)
     if winner == players["p1"]:
         difference = (
             f"({player2_fainted - player1_fainted}-{player1_fainted - player1_fainted})"
@@ -352,9 +349,9 @@ def testget_stats(
     nickname_mapping2: Dict[str, str],
 ) -> Dict[str, Dict[str, Dict[str, int]]]:
     # Processes and returns the final stats.
-    stats = testinitialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2)
-    stats = testprocess_faints(raw_data, stats, nickname_mapping1, nickname_mapping2)
-    stats = testprocess_kills(raw_data, stats, nickname_mapping1, nickname_mapping2)
+    stats = initialize_stats(pokes, p1_count, nickname_mapping1, nickname_mapping2)
+    stats = process_faints(raw_data, stats, nickname_mapping1, nickname_mapping2)
+    stats = process_kills(raw_data, stats, nickname_mapping1, nickname_mapping2)
     return stats
 
 
@@ -504,7 +501,7 @@ def testcreate_message(
     players: Dict[str, str],
 ) -> str:
     # Creates and returns final message.
-    formatted_stats = testformat_stats(players, stats)
+    formatted_stats = format_stats(players, stats)
     message = f"**Winner: ||{winner} {difference} {loser}||**\n\n"
     for player_data in formatted_stats:
         player_name = player_data[0]

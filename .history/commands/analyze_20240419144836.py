@@ -47,8 +47,8 @@ class Analyze:
             json_data = json.loads(response.text)
         except requests.exceptions.RequestException:
             raise InvalidReplay(replay_link)
-        players = testget_player_names(json_data)
-        pokes = testget_pokes(json_data)
+        players = testget_player_names(raw_data)
+        pokes = testget_pokes(raw_data)
         p1_count = testget_p1_count(raw_data)
         nickname_mapping1, nickname_mapping2 = testget_nickname_mappings(raw_data)
         stats = testget_stats(

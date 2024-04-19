@@ -295,6 +295,13 @@ def testget_pokes(json_data: dict) -> dict:
     return players_pokemon
 
 
+def testget_p1_count(raw_data: str) -> int:
+    # Retrieves the number of Pokemon player 1 has.
+    poke_lines = [line for line in raw_data.split("\n") if "|poke|" in line]
+    p1_count = sum(1 for line in poke_lines if "|poke|p1|" in line)
+    return p1_count
+
+
 def testget_nickname_mappings(raw_data: str) -> Tuple[Dict[str, str], Dict[str, str]]:
     # Retrieves the mappings from nickname/form name to actual Pokemon name for each player.
     nickname_mapping1 = {}
