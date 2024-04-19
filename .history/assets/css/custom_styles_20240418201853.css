@@ -10,22 +10,18 @@
     height: 40px;
     background: linear-gradient(to right, navy, #005085);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 2px solid rgba(8, 42, 136, 0.5);
+    border: 2px solid rgb(8, 42, 136);
     border-radius: 20px;
     z-index: 1000;
 }
 
 .menu a {
     padding: 0 5px;
-    border-right: 2px solid rgba(8, 42, 136, 0.5);
+    border-right: 1px solid #ffffff;
     color: white;
     text-decoration: none;
     text-align: center;
     text-indent: -10px;
-}
-
-.menu a:last-child {
-    border-right: none;
 }
 
 .banner {

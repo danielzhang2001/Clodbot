@@ -24,10 +24,6 @@
     text-indent: -10px;
 }
 
-.menu a:last-child {
-    border-right: none;
-}
-
 .banner {
     display: flex;
     align-items: center;
