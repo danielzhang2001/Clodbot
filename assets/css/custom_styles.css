@@ -11,16 +11,16 @@
     background: linear-gradient(to right, navy, #005085);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-top: none;
-    border-left: 4px solid rgb(0, 95, 107);
-    border-right: 4px solid rgb(0, 95, 107);
-    border-bottom: 4px solid rgb(0, 95, 107);
+    border-left: 4px solid rgb(0, 35, 190);
+    border-right: 4px solid rgb(0, 35, 190);
+    border-bottom: 4px solid rgb(0, 35, 190);
     border-radius: 0 0 20px 20px;
     z-index: 1000;
 }
 
 .menu a {
     padding: 0 5px;
-    border-right: 4px solid rgb(0, 95, 107);
+    border-right: 4px solid rgb(0, 35, 190);
     color: white;
     text-decoration: none;
     text-align: center;
