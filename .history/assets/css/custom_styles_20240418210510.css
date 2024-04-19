@@ -26,9 +26,8 @@
     text-decoration: none;
     display: flex;
     justify-content: space-between;
-    text-align: center;
-    align-items: center;
-    width: 100%;
+    text-indent: -10px;
+    height: 100%;
 }
 
 .menu a:last-child {
