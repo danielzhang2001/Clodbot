@@ -34,6 +34,20 @@
     text-align: center;
 }
 
+.menu a::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin-left: 10px;
+}
+
+.menu a:last-child {
+    border-right: none;
+}
+
 .menu a:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
@@ -44,19 +58,6 @@
 
 .menu .privacy:hover {
     border-bottom-right-radius: 20px;
-}
-
-.menu a::after {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background-size: cover;
-    background-repeat: no-repeat;
-}
-
-.menu a:last-child {
-    border-right: none;
 }
 
 .home,
