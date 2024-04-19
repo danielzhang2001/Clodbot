@@ -49,27 +49,33 @@
 .menu a::after {
     content: '';
     position: absolute;
-    right: 30px;
     width: 20px;
     height: 20px;
     background-size: cover;
     background-repeat: no-repeat;
-    transform: translateX(50%);
 }
 
 .menu a:last-child {
     border-right: none;
 }
 
-.home {
+.home,
+.github,
+.privacy {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.home::after {
     background-image: url('../images/home.png');
 }
 
-.github {
+.github::after {
     background-image: url('../images/github.png');
 }
 
-.privacy {
+.privacy::after {
     background-image: url('../images/privacy.png');
 }
 
