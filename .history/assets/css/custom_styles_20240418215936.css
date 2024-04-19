@@ -23,7 +23,6 @@
     justify-content: flex_start;
     align-items: center;
     padding: 0 25px;
-    padding-left: 10px;
     color: white;
     text-decoration: none;
     position: relative;
@@ -31,14 +30,6 @@
     height: 100%;
     box-sizing: border-box;
     text-align: left;
-    border-right: 4px solid rgb(0, 41, 102);
-    transition: background-color 0.3s ease;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-}
-
-.menu a:hover {
-    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .menu a::after {
@@ -80,4 +71,16 @@
     background-repeat: no-repeat;
     background-position: right 15px center;
     background-size: 20px 20px;
+}
+
+.home {
+    background-image: url('../images/home.png');
+}
+
+.github {
+    background-image: url('../images/github.png');
+}
+
+.privacy {
+    background-image: url('../images/privacy.png');
 }
