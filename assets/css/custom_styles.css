@@ -55,6 +55,7 @@
 
 .home {
     background-image: url('../images/home.png');
+    border-bottom-left-radius: 20px;
 }
 
 .github {
@@ -63,6 +64,7 @@
 
 .privacy {
     background-image: url('../images/privacy.png');
+    border-bottom-right-radius: 20px;
 }
 
 .banner {
