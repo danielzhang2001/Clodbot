@@ -5,14 +5,15 @@ title: Privacy Policy
 
 # Privacy Policy
 
-**Last updated: April 18, 2024**
+**Last updated: April 19, 2024**
 
 This Privacy Policy describes the policies and procedures on the collection, use and disclosure of your information when
 you use the Service and tells you about your privacy rights and how the law protects you.
 
 We use your data from Pokemon Showdown to provide and improve the service. By using the service, you agree to the
-collection and use of information in accordance with this Privacy Policy. This Privacy Policy has been created with the
-help of the [Privacy Policy Generator](https://www.termsfeed.com/privacy-policy-generator/).
+collection and use of information in accordance with this Privacy Policy. This Privacy Policy has been created with the 
+help of the [Privacy Policy Generator](https://www.termsfeed.com/privacy-policy-generator/){:target="_blank"}.
+
 
 ## Interpretation and Definitions
 
@@ -51,19 +52,18 @@ such individual is accessing or using the service, as applicable.
 
 #### Personal Data
 
-While using the service, you may be asked to provide certain personally identifiable information that can be used to
-contact or identify you.
+While using the service, your Pokemon Showdown username, along with the scores (kills and deaths) of your Pokemon and
+the outcome of the match that you choose to use will be recorded.
 
 #### Usage Data
 
 Usage Data is collected automatically when using the service.
 
-Usage Data may include information such as your Device's Internet Protocol address (e.g. IP address), browser type,
-browser version, the pages of the service that you visit, the time and date of your visit, the time spent on those
-pages, unique device identifiers and other diagnostic data.
+Usage Data includes information about the pages of the service that you visit, the date and time of your visit, 
+the time spent on those pages, unique device identifiers and other diagnostic data.
 
 When you access the service by or through a mobile device, we may collect certain information automatically, including,
-but not limited to, the type of mobile device you use, your mobile device unique ID, the IP address of Your mobile
+but not limited to, the type of mobile device you use, your mobile device unique ID, the IP address of your mobile
 device, your mobile operating system, the type of mobile Internet browser You use, unique device identifiers and other
 diagnostic data.
 
@@ -109,10 +109,9 @@ or we are legally obligated to retain this data for longer time periods.
 
 ### Transfer Of Your Personal Data
 
-Your information, including personal data, is processed at the Company's operating offices and in any other places where
-the parties involved in the processing are located. It means that this information may be transferred to — and
-maintained on — computers located outside of your state, province, country or other governmental jurisdiction where the
-data protection laws may differ than those from your jurisdiction.
+Your information, including personal data, is processed in any place where the developer can access that information. 
+That this information may be transferred to — and maintained on — computers located outside of your state, province, 
+country or other governmental jurisdiction where the data protection laws may differ than those from your jurisdiction.
 
 Your consent to this Privacy Policy followed by your submission of such information represents your agreement to that
 transfer.
