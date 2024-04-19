@@ -8,23 +8,19 @@
     left: 10%;
     width: auto;
     height: 40px;
-    background-color: navy;
+    background: linear-gradient(to right, navy, #007bff);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-left: 1px solid #ffffff;
     z-index: 1000;
 }
 
 .menu a {
-    padding: 0 20px;
+    padding: 0 5px;
     border-right: 1px solid #ffffff;
     color: white;
     text-decoration: none;
     text-align: center;
     text-indent: -10px;
-}
-
-.menu a:last-child {
-    border-right: none;
 }
 
 .banner {
