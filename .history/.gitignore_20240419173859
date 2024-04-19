@@ -4,4 +4,4 @@ __pycache__/
 *.pyd
 .env
 virtualenv/
-sheets/credentials.json
+credentials.json
