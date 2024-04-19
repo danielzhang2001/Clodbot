@@ -27,7 +27,8 @@
     display: flex;
     justify-content: space-between;
     text-align: center;
-    align-items: center;
+    text-indent: -10px;
+    height: 100%;
     width: 100%;
 }
 
