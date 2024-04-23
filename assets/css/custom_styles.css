@@ -109,7 +109,7 @@ Small Device Styles
 
 @media screen and (max-width: 992px) {
     .menu {
-        left: 10%;
+        left: 0%;
     }
 
     .menu a {
@@ -119,7 +119,7 @@ Small Device Styles
 
 @media screen and (max-width: 480px) {
     .menu {
-        left: 5%;
+        left: 0%;
     }
 
     .menu a {
