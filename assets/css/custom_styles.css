@@ -13,7 +13,7 @@ Full-Width Styles
     position: absolute;
     top: 0;
     right: 0;
-    left: 30%;
+    left: 20%;
     width: auto;
     height: 40px;
     background: linear-gradient(to right, navy, #005085);
@@ -109,12 +109,12 @@ Small Device Styles
 
 @media screen and (max-width: 992px) {
     .menu a {
-        font-size: 10px;
+        font-size: 12px;
     }
 }
 
 @media screen and (max-width: 480px) {
     .menu a {
-        font-size: 8px;
+        font-size: 10px;
     }
 }
