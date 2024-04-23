@@ -109,12 +109,12 @@ Small Device Styles
 
 @media screen and (max-width: 992px) {
     .menu a {
-        font-size: 12px;
+        font-size: 10px;
     }
 }
 
 @media screen and (max-width: 480px) {
     .menu a {
-        font-size: 10px;
+        font-size: 8px;
     }
 }
