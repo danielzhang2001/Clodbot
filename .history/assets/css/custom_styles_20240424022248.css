@@ -13,8 +13,6 @@ Main Content
 #main_content_wrap h3,
 #main_content_wrap h4 {
     color: #ffffff;
-    border-bottom: none;
-    text-decoration: none;
 }
 
 #main_content_wrap::before,
