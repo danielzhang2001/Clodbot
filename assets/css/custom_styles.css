@@ -21,22 +21,22 @@ Main Content
     position: absolute;
     left: 0;
     right: 0;
-    height: 12px;
+    height: 24px;
     z-index: 0;
     background: linear-gradient(to bottom,
             #00000000 0%,
-            #02162e 30%,
+            #02162e 20%,
             #0c5392 50%,
-            #02162e 70%,
+            #02162e 80%,
             #00000000 100%);
 }
 
 #main_content_wrap::before {
-    top: -12px;
+    top: -24px;
 }
 
 #main_content_wrap::after {
-    bottom: -12px;
+    bottom: -24px;
 }
 
 #header_wrap {
