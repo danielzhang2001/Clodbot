@@ -4,8 +4,8 @@ Main Content
 #main_content_wrap {
     background: linear-gradient(to bottom, #021429 0%, #073b66 50%, #052844 100%);
     /* Adjust the colors to suit your preference */
-    border-top: 6px solid #111;
-    border-bottom: 6px solid #111;
+    border-top: 10px solid #111;
+    border-bottom: 10px solid #111;
     color: #ffffff;
 }
 
@@ -14,6 +14,11 @@ Main Content
 #main_content_wrap h3,
 #main_content_wrap h4 {
     color: #ffffff;
+}
+
+#header_wrap,
+#footer_wrap {
+    background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
 .home,
