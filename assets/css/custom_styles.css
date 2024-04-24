@@ -33,13 +33,13 @@ Main Content
             #02162e 20%,
             #084070 50%,
             #072c5a 80%,
-            #031d3d 100%);
+            #02162e 100%);
 }
 
 #main_content_wrap::after {
     bottom: -18px;
     background: linear-gradient(to bottom,
-            #031d3d 0%,
+            #02162e 0%,
             #072c5a 20%,
             #084070 50%,
             #02162e 80%,
