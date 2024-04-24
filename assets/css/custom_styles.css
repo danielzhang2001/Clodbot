@@ -23,26 +23,20 @@ Main Content
     right: 0;
     height: 20px;
     z-index: 0;
+    background: linear-gradient(to bottom,
+            #00000000 0%,
+            #02162e 20%,
+            #084070 50%,
+            #072c5a 80%,
+            #ffffff 100%);
 }
 
 #main_content_wrap::before {
     top: -20px;
-    background: linear-gradient(to bottom,
-            #00000000 0%,
-            #02162e 25%,
-            #084070 50%,
-            #02162e 75%,
-            #00000000 100%);
 }
 
 #main_content_wrap::after {
     bottom: -20px;
-    background: linear-gradient(to bottom,
-            #02162e 0%,
-            #084070 25%,
-            #072c5a 50%,
-            #084070 75%,
-            #02162e 100%);
 }
 
 #header_wrap {
