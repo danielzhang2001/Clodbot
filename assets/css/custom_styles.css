@@ -2,10 +2,10 @@
 Main Content
 *******************************************************************************/
 #main_content_wrap {
-    background: linear-gradient(to bottom, #0d4483 0%, #05345a 50%, #02213b 100%);
+    background: linear-gradient(to bottom, #021429 0%, #0c4f86 50%, #052844 100%);
     /* Adjust the colors to suit your preference */
-    border-top: 2px solid #111;
-    border-bottom: 2px solid #111;
+    border-top: 4px solid #111;
+    border-bottom: 4px solid #111;
     color: #ffffff;
 }
 
