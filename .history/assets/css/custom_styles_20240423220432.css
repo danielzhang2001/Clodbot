@@ -47,10 +47,6 @@ Main Objects
 Full-Width Styles
 *******************************************************************************/
 
-.inner {
-    max-width: 50%;
-}
-
 .menu {
     display: flex;
     align-items: center;

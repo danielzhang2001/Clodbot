@@ -1,49 +1,4 @@
 /*******************************************************************************
-Main Objects
-*******************************************************************************/
-#main_content_wrap {
-    background: linear-gradient(to bottom, #1e5799 0%, #2989d8 50%, #207cca 100%);
-    /* Adjust the colors to suit your preference */
-    border-top: 1px solid #111;
-    border-bottom: 1px solid #111;
-}
-
-.home,
-.github,
-.privacy {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.home::after {
-    background-image: url('../images/home.png');
-}
-
-.github::after {
-    background-image: url('../images/github.png');
-}
-
-.privacy::after {
-    background-image: url('../images/privacy.png');
-}
-
-.banner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 120px;
-    height: 25px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    border-radius: 2px;
-    background-repeat: no-repeat;
-    background-position: right 15px center;
-    background-size: 20px 20px;
-}
-
-/*******************************************************************************
 Full-Width Styles
 *******************************************************************************/
 
@@ -111,6 +66,41 @@ Full-Width Styles
 
 .menu .privacy:hover {
     border-bottom-right-radius: 20px;
+}
+
+.home,
+.github,
+.privacy {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.home::after {
+    background-image: url('../images/home.png');
+}
+
+.github::after {
+    background-image: url('../images/github.png');
+}
+
+.privacy::after {
+    background-image: url('../images/privacy.png');
+}
+
+.banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 25px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 2px;
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px 20px;
 }
 
 /*******************************************************************************
