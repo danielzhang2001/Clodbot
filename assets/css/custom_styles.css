@@ -9,6 +9,13 @@ Main Content
     color: #ffffff;
 }
 
+#main_content_wrap h1,
+#main_content_wrap h2,
+#main_content_wrap h3,
+#main_content_wrap h4 {
+    color: #ffffff;
+}
+
 .home,
 .github,
 .privacy {
