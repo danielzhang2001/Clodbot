@@ -1,5 +1,7 @@
 # Your Pokemon Utility Bot
----------------------------------------------------------------------------------------------------
+
+<hr class="line">
+
 ## About:
 
 A Pokemon bot to keep track of stats from Showdown, update those stats into Google Sheets and give sets from Smogon.

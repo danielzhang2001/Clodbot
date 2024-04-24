@@ -91,6 +91,15 @@ Main Content
     background-size: 20px 20px;
 }
 
+.line {
+    border: 0;
+    height: 2px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+    box-shadow: 0px 0px 8px 2px #ffffff;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 /*******************************************************************************
 Full-Width Styles
 *******************************************************************************/
