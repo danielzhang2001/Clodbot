@@ -26,9 +26,9 @@ Main Content
     background: linear-gradient(to bottom,
             #00000000 0%,
             #02162e 20%,
-            #0c5392 50%,
-            #02162e 80%,
-            #00000000 100%);
+            #084070 50%,
+            #072c5a 80%,
+            #042042 100%);
 }
 
 #main_content_wrap::before {
