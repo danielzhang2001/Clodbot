@@ -2,9 +2,9 @@
 Main Content
 *******************************************************************************/
 #main_content_wrap {
-    background: linear-gradient(to bottom, #031d3a 0%, #073b66 50%, #031d3a 0%);
-    border-top: 12px linear-gradient(to bottom, #031d3a 0%, #073b66 50%, #031d3a 0%);
-    border-bottom: 12px linear-gradient(to bottom, #031d3a 0%, #073b66 50%, #031d3a 0%);
+    background: linear-gradient(to bottom, #031d3a 0%, #073b66 50%, #031d3a 100%);
+    border-top: 12px solid #111;
+    border-bottom: 12px solid #111;
     color: #ffffff;
 }
 
