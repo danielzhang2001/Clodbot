@@ -2,10 +2,9 @@
 Main Content
 *******************************************************************************/
 #main_content_wrap {
-    background: linear-gradient(to bottom, #021429 0%, #073b66 50%, #052844 100%);
-    /* Adjust the colors to suit your preference */
-    border-top: 10px solid #111;
-    border-bottom: 10px solid #111;
+    background: linear-gradient(to bottom, #031d3a 0%, #073b66 50%, #031d3a 0%);
+    border-top: 12px linear-gradient(to bottom, #031d3a 0%, #073b66 50%, #031d3a 0%);
+    border-bottom: 12px linear-gradient(to bottom, #031d3a 0%, #073b66 50%, #031d3a 0%);
     color: #ffffff;
 }
 
@@ -16,9 +15,12 @@ Main Content
     color: #ffffff;
 }
 
-#header_wrap,
-#footer_wrap {
+#header_wrap {
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
+}
+
+#footer_wrap {
+    background: linear-gradient(to bottom, #333333 0%, #000000 100%);
 }
 
 .home,
