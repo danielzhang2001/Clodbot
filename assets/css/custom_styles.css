@@ -5,6 +5,7 @@ Main Content
     position: relative;
     background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
     color: #ffffff;
+    z-index: 1;
 }
 
 #main_content_wrap h1,
@@ -22,6 +23,7 @@ Main Content
     right: 0;
     height: 12px;
     z-index: 10;
+    z-index: -1;
 }
 
 #main_content_wrap::before {
@@ -36,10 +38,12 @@ Main Content
 
 #header_wrap {
     background: linear-gradient(to bottom, #333333 0%, #000000 100%);
+    z-index: 2;
 }
 
 #footer_wrap {
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
+    z-index: 2;
 }
 
 .home,
