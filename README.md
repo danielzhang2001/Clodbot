@@ -6,6 +6,8 @@
 
 A Pokemon bot to keep track of stats from Showdown, update those stats into Google Sheets and give sets from Smogon.
 
+<hr class="line">
+
 ## Bot Usage:
 
 - **Clodbot, analyze (Pokemon Showdown Replay Link)** to display the stats from the replay on Discord.
