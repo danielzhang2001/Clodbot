@@ -5,7 +5,6 @@ Main Content
     position: relative;
     background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
     color: #ffffff;
-    z-index: 1;
 }
 
 #main_content_wrap h1,
@@ -13,8 +12,6 @@ Main Content
 #main_content_wrap h3,
 #main_content_wrap h4 {
     color: #ffffff;
-    border-bottom: none;
-    text-decoration: none;
 }
 
 #main_content_wrap::before,
@@ -23,39 +20,26 @@ Main Content
     position: absolute;
     left: 0;
     right: 0;
-    height: 18px;
-    z-index: 0;
-
+    height: 12px;
+    z-index: 10;
 }
 
 #main_content_wrap::before {
-    top: -18px;
-    background: linear-gradient(to bottom,
-            #00000000 0%,
-            #02162e 20%,
-            #084070 50%,
-            #072c5a 80%,
-            #02162e 100%);
+    top: -12px;
+    background: linear-gradient(to bottom, #333333 0%, #02162e 100%);
 }
 
 #main_content_wrap::after {
-    bottom: -18px;
-    background: linear-gradient(to bottom,
-            #02162e 0%,
-            #072c5a 20%,
-            #084070 50%,
-            #02162e 80%,
-            #00000000 100%);
+    bottom: -12px;
+    background: linear-gradient(to bottom, #02162e 0%, #333333 100%);
 }
 
 #header_wrap {
     background: linear-gradient(to bottom, #333333 0%, #000000 100%);
-    z-index: 1;
 }
 
 #footer_wrap {
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
-    z-index: 1;
 }
 
 .home,
@@ -91,15 +75,6 @@ Main Content
     background-repeat: no-repeat;
     background-position: right 15px center;
     background-size: 20px 20px;
-}
-
-.line {
-    border: 0;
-    height: 1px;
-    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
-    box-shadow: 0px 0px 8px 2px #ffffff;
-    margin-top: 20px;
-    margin-bottom: 20px;
 }
 
 /*******************************************************************************
