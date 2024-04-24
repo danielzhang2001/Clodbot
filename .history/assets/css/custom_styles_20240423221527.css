@@ -1,12 +1,11 @@
 /*******************************************************************************
-Main Content
+Main Objects
 *******************************************************************************/
 #main_content_wrap {
     background: linear-gradient(to bottom, #032750 0%, #1569ad 50%, #0c5392 100%);
     /* Adjust the colors to suit your preference */
     border-top: 2px solid #111;
     border-bottom: 2px solid #111;
-    color: #ffffff;
 }
 
 .home,
