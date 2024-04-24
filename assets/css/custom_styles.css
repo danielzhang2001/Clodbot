@@ -2,9 +2,8 @@
 Main Content
 *******************************************************************************/
 #main_content_wrap {
-    background: linear-gradient(to bottom, #031d3a 0%, #073b66 50%, #031d3a 100%);
-    border-top: 12px linear-gradient(to bottom, #000000 0% #031d3a 100%);
-    border-bottom: 12px linear-gradient(to bottom, #031d3a 0%, #000000 100%);
+    position: relative;
+    background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
     color: #ffffff;
 }
 
@@ -13,6 +12,26 @@ Main Content
 #main_content_wrap h3,
 #main_content_wrap h4 {
     color: #ffffff;
+}
+
+#main_content_wrap::before,
+#main_content_wrap::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 12px;
+    z-index: 10;
+}
+
+#main_content_wrap::before {
+    top: -12px;
+    background: linear-gradient(to bottom, #333333 0%, #02162e 100%);
+}
+
+#main_content_wrap::after {
+    bottom: -12px;
+    background: linear-gradient(to bottom, #02162e 0%, #333333 100%);
 }
 
 #header_wrap {
