@@ -93,13 +93,7 @@ Main Content
 }
 
 #downloads {
-    position: absolute;
-    width: 210px;
-    z-index: 10;
-    bottom: -40px;
-    right: 0;
-    height: 70px;
-    background: url('../images/download.png') no-repeat 0% 90%;
+    top: 50px;
 }
 
 .line {
@@ -192,13 +186,6 @@ Small Device Styles
 
     .menu a {
         font-size: 12px;
-    }
-
-    #downloads {
-        width: 100px;
-        height: 30px;
-        bottom: 10px;
-        background-size: contain;
     }
 }
 
