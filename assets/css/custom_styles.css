@@ -192,15 +192,23 @@ Small Device Styles
     .tar_download_link {
         width: 45px;
         height: 35px;
-        background-size: 180px 70px;
+        background-size: 90px 70px;
     }
 
     .zip_download_link {
-        background-position: 0% 100%;
+        background-position: 0% 0%;
     }
 
     .tar_download_link {
-        background-position: 50% 100%;
+        background-position: -45px 0%;
+    }
+
+    .zip_download_link:hover {
+        background-position: 0% -35px;
+    }
+
+    .tar_download_link:hover {
+        background-position: -45px -35px;
     }
 }
 
