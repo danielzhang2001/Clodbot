@@ -96,7 +96,7 @@ Main Content
     position: absolute;
     width: 210px;
     z-index: 10;
-    bottom: -40px;
+    bottom: -80px;
     right: 0;
     height: 70px;
     background: url('../images/icon_download.png') no-repeat 0% 90%;
@@ -221,30 +221,6 @@ Small Device Styles
 
     .menu a {
         font-size: 12px;
-    }
-
-    .zip_download_link,
-    .tar_download_link {
-        width: 45px;
-        height: 35px;
-        background-size: 180px 140px;
-    }
-
-    .zip_download_link {
-        background-position: 0 100%;
-    }
-
-    .tar_download_link {
-        background-position: -45px 100%;
-    }
-
-    .zip_download_link:hover {
-        background-position: 0 0;
-    }
-
-    .tar_download_link:hover {
-        background-position: -45px 0;
-        /* Top right quarter of the sprite sheet */
     }
 }
 
