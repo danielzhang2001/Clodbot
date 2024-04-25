@@ -6,6 +6,7 @@ Main Content
     background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
     color: #ffffff;
     z-index: 1;
+    overflow: hidden;
 }
 
 #main_content_wrap h1,
@@ -103,24 +104,6 @@ Main Content
     box-shadow: 0px 0px 8px 2px rgba(0, 255, 255, 0.6);
     margin-top: 20px;
     margin-bottom: 20px;
-}
-
-.background {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 200px;
-    background: url('../images/background.png') repeat-y;
-    z-index: -1;
-}
-
-.left {
-    left: 0;
-    transform: scaleX(-1);
-}
-
-.right {
-    right: 0;
 }
 
 /*******************************************************************************
