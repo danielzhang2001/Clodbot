@@ -192,6 +192,7 @@ Small Device Styles
     .tar_download_link {
         width: 45px;
         height: 35px;
+        background-size: 180px 70px
     }
 }
 
