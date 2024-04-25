@@ -6,6 +6,7 @@ Main Content
     background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
     color: #ffffff;
     z-index: 1;
+    overflow: hidden;
 }
 
 #main_content_wrap h1,
@@ -103,21 +104,22 @@ Main Content
     margin-bottom: 20px;
 }
 
-.backgrounda {
+.background {
+    content: '';
     position: absolute;
     top: 0;
     bottom: 0;
     width: 200px;
     background: url('../images/background.png') repeat-y;
-    z-index: 0;
+    z-index: 1;
 }
 
-.lefta {
+.left {
     left: 0;
     transform: scaleX(-1);
 }
 
-.righta {
+.right {
     right: 0;
 }
 
@@ -126,7 +128,12 @@ Full-Width Styles
 *******************************************************************************/
 
 .inner {
+    width: 100%;
     max-width: 50%;
+    padding: 20px 10px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
 }
 
 .menu {
