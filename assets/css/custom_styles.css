@@ -188,11 +188,6 @@ Small Device Styles
         font-size: 12px;
     }
 
-    #downloads {
-        width: 105px;
-        height: 35px;
-    }
-
     .zip_download_link,
     .tar_download_link {
         width: 45px;
