@@ -88,8 +88,8 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         raise NoSheet()
     command = args[0].lower()
     remaining = args[1:]
-    server_id = ctx.guild.id
-    creds = await authenticate_sheet(server_id)
+    server_id = ctx.
+    creds = authenticate_sheet(server_id)
     if command not in ["set", "default", "update", "delete", "list"]:
         raise NoSheet()
     if command == "default":
@@ -97,7 +97,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
     elif command == "set":
         if len(remaining) != 1:
             raise NoSet()
-        message = await ManageSheet.set_default(ctx, server_id, creds, remaining[0])
+        message = ManageSheet.set_default(ctx, creds, remaining[0])
     else:
         if len(remaining) == 1:
             if ManageSheet.has_default(ctx):
@@ -116,13 +116,11 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
                 raise NoList()
             return
         if command == "update":
-            message = await ManageSheet.update_sheet(server_id, creds, sheet_link, data)
+            message = await ManageSheet.update_sheet(creds, sheet_link, data)
         elif command == "delete":
-            message = await ManageSheet.delete_player(
-                server_id, creds, sheet_link, data
-            )
+            message = await ManageSheet.delete_player(creds, sheet_link, data)
         elif command == "list":
-            message = await ManageSheet.list_data(server_id, creds, sheet_link, data)
+            message = await ManageSheet.list_data(creds, sheet_link, data)
     await ctx.send(message)
 
 
