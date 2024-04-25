@@ -196,11 +196,11 @@ Small Device Styles
     }
 
     .zip_download_link {
-        background-position: 0px 0px;
+        background-position: 0px -35px;
     }
 
     .tar_download_link {
-        background-position: -45px 0px;
+        background-position: -45px -35px;
     }
 }
 
