@@ -96,7 +96,7 @@ Main Content
     position: absolute;
     width: 210px;
     z-index: 10;
-    bottom: -40px;
+    bottom: 30px;
     right: 0;
     height: 70px;
     background: url('../images/download.png') no-repeat 0% 90%;
