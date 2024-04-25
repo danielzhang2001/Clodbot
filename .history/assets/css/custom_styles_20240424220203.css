@@ -196,10 +196,15 @@ Small Device Styles
 
     #downloads {
         width: 160px;
+        /* Smaller width */
         height: 50px;
+        /* Smaller height */
         bottom: 10px;
+        /* Adjusted position, lower down */
         right: 10px;
+        /* Adjusted position from the right */
         background-size: contain;
+        /* Ensure the background image fits the new size */
     }
 }
 
