@@ -191,24 +191,31 @@ Small Device Styles
     .zip_download_link,
     .tar_download_link {
         width: 45px;
+        /* Half the width of one sprite */
         height: 35px;
-        background-size: 90px 70px;
+        /* Half the height of one sprite */
+        background-size: 180px 140px;
+        /* The full size of your sprite sheet */
     }
 
     .zip_download_link {
-        background-position: 0px -35px;
+        background-position: 0 100%;
+        /* Bottom left quarter of the sprite sheet */
     }
 
     .tar_download_link {
-        background-position: -45px -35px;
+        background-position: -45px 100%;
+        /* Bottom right quarter of the sprite sheet */
     }
 
     .zip_download_link:hover {
-        background-position: 0px -35px;
+        background-position: 0 0;
+        /* Top left quarter of the sprite sheet */
     }
 
     .tar_download_link:hover {
-        background-position: -45px -35px;
+        background-position: -45px 0;
+        /* Top right quarter of the sprite sheet */
     }
 }
 
