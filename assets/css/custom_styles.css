@@ -23,8 +23,6 @@ Main Content
     left: 0;
     right: 0;
     height: 18px;
-    z-index: 0;
-
 }
 
 #main_content_wrap::before {
@@ -105,21 +103,21 @@ Main Content
     margin-bottom: 20px;
 }
 
-.background {
+.backgrounda {
     position: absolute;
     top: 0;
     bottom: 0;
     width: 200px;
     background: url('../images/background.png') repeat-y;
-    z-index: 3;
+    z-index: 0;
 }
 
-.left {
+.lefta {
     left: 0;
     transform: scaleX(-1);
 }
 
-.right {
+.righta {
     right: 0;
 }
 
