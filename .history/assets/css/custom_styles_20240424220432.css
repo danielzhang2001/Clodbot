@@ -93,34 +93,22 @@ Main Content
 }
 
 #downloads {
-    top: 86px;
+    position: absolute;
+    width: 210px;
+    z-index: 10;
+    bottom: -40px;
+    right: 0;
+    height: 70px;
+    background: url('../images/download.png') no-repeat 0% 90%;
 }
 
 .line {
     border: 0;
     height: 0.5px;
-    background-image: linear-gradient(to right, rgba(0, 255, 255, 0), rgba(0, 255, 255, 0.6), rgba(0, 255, 255, 0));
-    box-shadow: 0px 0px 8px 2px rgba(0, 255, 255, 0.6);
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+    box-shadow: 0px 0px 8px 2px #ffffff;
     margin-top: 20px;
     margin-bottom: 20px;
-}
-
-.background {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 200px;
-    background: url('../images/background.png') repeat-y;
-    z-index: -1;
-}
-
-.left {
-    left: 0;
-    transform: scaleX(-1);
-}
-
-.right {
-    right: 0;
 }
 
 /*******************************************************************************
@@ -207,7 +195,10 @@ Small Device Styles
     }
 
     #downloads {
-        display: none;
+        width: 100px;
+        height: 30px;
+        bottom: 10px;
+        background-size: contain;
     }
 }
 
