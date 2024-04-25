@@ -213,8 +213,6 @@ class ManageSheet:
     def has_default(ctx: Context) -> bool:
         # Checks if a default sheet link is set.
         server_id = ctx.guild.id if ctx.guild else 0
-        print(f"default link: {default_link}")
-        print(f"server id: {server_id}")
         return server_id in default_link
 
     @staticmethod

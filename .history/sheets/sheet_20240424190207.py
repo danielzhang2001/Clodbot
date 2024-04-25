@@ -15,7 +15,7 @@ from typing import Optional, List, Dict, Tuple
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
-async def authenticate_sheet(server_id: int, force_login: bool = False) -> Credentials:
+def authenticate_sheet(server_id: int, force_login: bool = False) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
     creds_directory = "sheets"
     if not os.path.exists(creds_directory):
@@ -32,7 +32,8 @@ async def authenticate_sheet(server_id: int, force_login: bool = False) -> Crede
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
-            creds = await asyncio.to_thread(flow.run_local_server, port=0)
+            creds = await asyncio.to_thread(
+                flow.run_local_server, port=0)
         with open(token_path, "wb") as token:
             pickle.dump(creds, token)
     return creds

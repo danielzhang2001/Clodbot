@@ -1,5 +1,5 @@
 """
-The functions to manage Google Sheets in association with Pokemon Showdown replay data. 
+The function to manage Google Sheets in association with Pokemon Showdown replay data. 
 """
 
 import requests
@@ -10,20 +10,19 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from showdown.replay import *
 from sheets.sheet import *
-from sheets.utils import *
 from errors import *
 
-default_link = load_links()
+default_link = {}
 
 
 class ManageSheet:
     @staticmethod
     async def update_sheet(
-        server_id: int, creds: Credentials, sheet_link: str, replay_link: str
+        server_idcreds: Credentials, sheet_link: str, replay_link: str
     ) -> str:
         # Updates sheets with replay data.
         if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(server_id, force_login=True)
+            creds = authenticate_sheet(force_login=True)
             if not is_valid_sheet(creds, sheet_link):
                 raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
@@ -89,11 +88,11 @@ class ManageSheet:
 
     @staticmethod
     async def delete_player(
-        server_id: int, creds: Credentials, sheet_link: str, player_name: str
+        creds: Credentials, sheet_link: str, player_name: str
     ) -> str:
         # Deletes player section from the sheet.
         if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(server_id, force_login=True)
+            creds = authenticate_sheet(force_login=True)
             if not is_valid_sheet(creds, sheet_link):
                 raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
@@ -131,12 +130,10 @@ class ManageSheet:
         return f"**{player_name}** removed at [**{title}**]({sheet_link})."
 
     @staticmethod
-    async def list_data(
-        server_id: int, creds: Credentials, sheet_link: str, data: str
-    ) -> str:
+    async def list_data(creds: Credentials, sheet_link: str, data: str) -> str:
         # Lists all player names from the sheet.
         if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(server_id, force_login=True)
+            creds = authenticate_sheet(force_login=True)
             if not is_valid_sheet(creds, sheet_link):
                 raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
@@ -174,12 +171,10 @@ class ManageSheet:
             return create_pokemon_message(values)
 
     @staticmethod
-    async def set_default(
-        ctx: Context, server_id: int, creds: Credentials, sheet_link: str
-    ) -> str:
+    def set_default(ctx: Context, creds: Credentials, sheet_link: str) -> str:
         # Sets the default sheet link.
         if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(server_id, force_login=True)
+            creds = authenticate_sheet(force_login=True)
             if not is_valid_sheet(creds, sheet_link):
                 raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
@@ -199,8 +194,8 @@ class ManageSheet:
             if sheet_id
             else sheet_link
         )
+        server_id = ctx.guild.id if ctx.guild else 0
         default_link[server_id] = sheet_link
-        save_links(default_link)
         return f"Default sheet link set at [**{title}**]({sheet_link})."
 
     @staticmethod
@@ -213,15 +208,12 @@ class ManageSheet:
     def has_default(ctx: Context) -> bool:
         # Checks if a default sheet link is set.
         server_id = ctx.guild.id if ctx.guild else 0
-        print(f"default link: {default_link}")
-        print(f"server id: {server_id}")
         return server_id in default_link
 
     @staticmethod
     def display_default(ctx: Context, creds: Credentials) -> bool:
         # Displays the current default link.
         if ManageSheet.has_default(ctx):
-            server_id = ctx.guild.id if ctx.guild else 0
             service = build("sheets", "v4", credentials=creds)
             spreadsheet_id = ManageSheet.get_default(ctx).split("/d/")[1].split("/")[0]
             sheet_metadata = (

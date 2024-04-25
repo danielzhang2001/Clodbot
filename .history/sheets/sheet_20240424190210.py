@@ -15,7 +15,7 @@ from typing import Optional, List, Dict, Tuple
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
-async def authenticate_sheet(server_id: int, force_login: bool = False) -> Credentials:
+def authenticate_sheet(server_id: int, force_login: bool = False) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
     creds_directory = "sheets"
     if not os.path.exists(creds_directory):

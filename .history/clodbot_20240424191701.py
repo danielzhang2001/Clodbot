@@ -89,7 +89,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
     command = args[0].lower()
     remaining = args[1:]
     server_id = ctx.guild.id
-    creds = await authenticate_sheet(server_id)
+    creds = authenticate_sheet(server_id)
     if command not in ["set", "default", "update", "delete", "list"]:
         raise NoSheet()
     if command == "default":
