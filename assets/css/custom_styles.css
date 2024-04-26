@@ -186,6 +186,7 @@ Full-Width Styles
     background: url('../images/icon.png') no-repeat center;
     background-size: contain;
     width: 100px;
+    justify-content: center;
 }
 
 .left {
