@@ -52,10 +52,10 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
-.header {
+/*.header {
     display: flex;
     align-items: center;
-}
+}*/
 
 .main {
     display: flex;
@@ -182,13 +182,13 @@ Full-Width Styles
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.icon {
+/*.icon {
     background-size: cover;
     width: 50px;
     height: 50px;
     margin-right: 20px;
     background: url('/assets/images/icon.png') no-repeat center center;
-}
+}*/
 
 .background {
     flex-grow: 1;
