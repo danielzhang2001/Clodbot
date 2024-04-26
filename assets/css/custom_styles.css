@@ -52,6 +52,10 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
+#header_wrap .inner {
+    grid-column: 2;
+}
+
 .header {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -123,9 +127,7 @@ Main Content
 /*******************************************************************************
 Full-Width Styles
 *******************************************************************************/
-
 .inner {
-    grid-column: 2;
     max-width: 50%;
     flex: 0 0 auto;
 }
