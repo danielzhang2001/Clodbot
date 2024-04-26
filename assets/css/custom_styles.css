@@ -2,8 +2,8 @@
 Main Content
 *******************************************************************************/
 #main_content_wrap {
-    position: relative;
     background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
+    position: relative;
     color: #ffffff;
 }
 
@@ -25,27 +25,30 @@ Main Content
 }
 
 #main_content_wrap::before {
-    top: -18px;
     background: linear-gradient(to bottom,
             #00000000 0%,
             #02162e 20%,
             #084070 50%,
             #072c5a 80%,
             #02162e 100%);
+    top: -18px;
 }
 
 #main_content_wrap::after {
-    bottom: -18px;
     background: linear-gradient(to bottom,
             #02162e 0%,
             #072c5a 20%,
             #084070 50%,
             #02162e 80%,
             #00000000 100%);
+    bottom: -18px;
 }
 
 #header_wrap {
     background: linear-gradient(to bottom, #333333 0%, #000000 100%);
+    display: flex;
+    align-items: center;
+    position: relative;
 }
 
 #footer_wrap {
@@ -180,9 +183,12 @@ Full-Width Styles
 .icon {
     background: url('../images/icon.png') no-repeat center center;
     background-size: contain;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
     width: 100px;
     height: 100px;
-    flex-shrink: 0;
 }
 
 .background {
