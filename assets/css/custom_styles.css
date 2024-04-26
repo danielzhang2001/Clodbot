@@ -52,7 +52,13 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
-.flex {
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.main {
     display: flex;
     justify-content: space-between;
     align-items: stretch;
@@ -175,6 +181,15 @@ Full-Width Styles
 
 .menu a:hover {
     background-color: rgba(255, 255, 255, 0.2);
+}
+
+.icon {
+    background-size: 50px 50px;
+    width: 50px;
+    height: 50px;
+    margin-right: 20px;
+    margin-left: 20px;
+    background: url('../images/icon.png') no-repeat center center;
 }
 
 .background {
