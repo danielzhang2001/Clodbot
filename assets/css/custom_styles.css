@@ -120,7 +120,6 @@ Full-Width Styles
 
 .inner {
     max-width: 50%;
-    flex: 0 0 auto;
 }
 
 .menu {
