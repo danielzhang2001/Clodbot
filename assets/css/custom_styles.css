@@ -181,7 +181,7 @@ Full-Width Styles
     background: url('../images/icon.png') no-repeat center center;
     background-size: contain;
     position: absolute;
-    left: 0;
+    left: 50px;
     top: 50%;
     transform: translateY(-50%);
     width: 100px;
