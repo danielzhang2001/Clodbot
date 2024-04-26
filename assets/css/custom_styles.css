@@ -54,10 +54,11 @@ Main Content
 
 .header {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    align-items: stretch;
 }
 
-.flex {
+.main {
     display: flex;
     justify-content: space-between;
     align-items: stretch;
@@ -128,12 +129,6 @@ Full-Width Styles
     flex: 0 0 auto;
 }
 
-.icon {
-    height: auto;
-    width: auto;
-    margin-right: 100px;
-}
-
 .menu {
     display: flex;
     align-items: center;
@@ -188,13 +183,11 @@ Full-Width Styles
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-
 .icon {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
     background: url('/assets/images/icon.png') no-repeat center center;
-    background-size: contain;
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
 }
 
 .background {
