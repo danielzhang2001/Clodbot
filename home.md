@@ -10,7 +10,7 @@ permalink: /
 
 ## About:
 
-A Discord Pokemon Bot to keep track of stats from Showdown, update those stats into Google Sheets and give sets from Smogon. Useful for all levels of play, from hardcore battlers in Draft Leagues to more casual players who need a jumpstart in recommended Pokemon sets!
+A Discord Pokemon Bot to keep track of stats from Pokemon Showdown, update those stats into Google Sheets and give sets from Smogon. Useful for all levels of play, from hardcore battlers in Draft Leagues to more casual players who need a jumpstart in recommended Pokemon sets!
 
 <hr class="line">
 
