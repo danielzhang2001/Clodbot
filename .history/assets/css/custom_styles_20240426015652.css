@@ -1,0 +1,250 @@
+/*******************************************************************************
+Main Content
+*******************************************************************************/
+#main_content_wrap {
+    background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
+    position: relative;
+    color: #ffffff;
+}
+
+#main_content_wrap h1,
+#main_content_wrap h2,
+#main_content_wrap h3,
+#main_content_wrap h4 {
+    color: #ffffff;
+    background: none;
+}
+
+#main_content_wrap::before,
+#main_content_wrap::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 18px;
+}
+
+#main_content_wrap::before {
+    background: linear-gradient(to bottom,
+            #00000000 0%,
+            #02162e 20%,
+            #084070 50%,
+            #072c5a 80%,
+            #02162e 100%);
+    top: -18px;
+}
+
+#main_content_wrap::after {
+    background: linear-gradient(to bottom,
+            #02162e 0%,
+            #072c5a 20%,
+            #084070 50%,
+            #02162e 80%,
+            #00000000 100%);
+    bottom: -18px;
+}
+
+#header_wrap {
+    background: linear-gradient(to bottom, #333333 0%, #000000 100%);
+}
+
+#footer_wrap {
+    background: linear-gradient(to bottom, #000000 0%, #333333 100%);
+}
+
+#header_wrap .inner {
+    grid-column: 2;
+}
+
+.header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+}
+
+.main {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+.home,
+.github,
+.privacy {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.home::after {
+    background-image: url('../images/home.png');
+}
+
+.github::after {
+    background-image: url('../images/github.png');
+}
+
+.privacy::after {
+    background-image: url('../images/privacy.png');
+}
+
+.banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 25px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 2px;
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px 20px;
+}
+
+#downloads {
+    top: 86px;
+}
+
+.line {
+    border: 0;
+    height: 0.5px;
+    background-image: linear-gradient(to right, rgba(0, 255, 255, 0), rgba(0, 255, 255, 0.6), rgba(0, 255, 255, 0));
+    box-shadow: 0px 0px 8px 2px rgba(0, 255, 255, 0.6);
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.home:hover {
+    border-bottom-left-radius: 20px;
+}
+
+.privacy:hover {
+    border-bottom-right-radius: 20px;
+}
+
+/*******************************************************************************
+Full-Width Styles
+*******************************************************************************/
+.inner {
+    max-width: 50%;
+    flex: 0 0 auto;
+}
+
+.menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 20%;
+    width: auto;
+    height: 40px;
+    background: linear-gradient(to right, navy, #005085);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-top: none;
+    border-left: 4px solid rgb(18, 0, 179);
+    border-right: 4px solid rgb(18, 0, 179);
+    border-bottom: 4px solid rgb(18, 0, 179);
+    border-radius: 0 0 20px 20px;
+    z-index: 1000;
+}
+
+.menu a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    color: white;
+    text-decoration: none;
+    position: relative;
+    flex: 1;
+    height: 100%;
+    box-sizing: border-box;
+    border-right: 4px solid rgb(18, 0, 179);
+    transition: background-color 0.3s ease, border-radius 0.3s ease;
+    text-align: center;
+}
+
+.menu a::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin-left: 10px;
+}
+
+.menu a:last-child {
+    border-right: none;
+}
+
+.menu a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.icon {
+    background: url('../images/icon.png') no-repeat center center;
+    grid-column: 1;
+    background-size: contain;
+    width: 100px;
+    height: 100px;
+}
+
+.background {
+    background: url('../images/background.png') center repeat-y;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.left {
+    width: 200px;
+}
+
+.right {
+    width: 200px;
+    transform: scaleX(-1);
+}
+
+/*******************************************************************************
+Small Device Styles
+*******************************************************************************/
+
+@media screen and (max-width: 992px) {
+    .inner {
+        padding-left: 50px;
+        padding-right: 50px;
+    }
+
+    .menu {
+        left: 0%;
+    }
+
+    .menu a {
+        font-size: 12px;
+    }
+
+    #downloads {
+        display: none;
+    }
+
+    .left,
+    .right {
+        background-position: right center;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .menu a {
+        font-size: 10px;
+    }
+}
+
+@media screen and (max-width: 320px) {
+    .menu a {
+        font-size: 8px;
+    }
+}
