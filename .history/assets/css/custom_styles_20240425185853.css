@@ -115,11 +115,11 @@ Main Content
 
 .left {
     left: 0;
+    transform: scaleX(-1);
 }
 
 .right {
     right: 0;
-    transform: scaleX(-1);
 }
 
 /*******************************************************************************

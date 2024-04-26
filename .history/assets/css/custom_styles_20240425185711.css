@@ -6,6 +6,7 @@ Main Content
     background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
     color: #ffffff;
     z-index: 1;
+    overflow: hidden;
 }
 
 #main_content_wrap h1,
@@ -115,11 +116,11 @@ Main Content
 
 .left {
     left: 0;
+    transform: scaleX(-1);
 }
 
 .right {
     right: 0;
-    transform: scaleX(-1);
 }
 
 /*******************************************************************************

@@ -104,22 +104,21 @@ Main Content
 }
 
 .background {
-    content: '';
     position: absolute;
     top: 0;
     bottom: 0;
     width: 200px;
     background: url('../images/background.png') repeat-y;
-    z-index: 1;
+    z-index: 3;
 }
 
 .left {
     left: 0;
+    transform: scaleX(-1);
 }
 
 .right {
     right: 0;
-    transform: scaleX(-1);
 }
 
 /*******************************************************************************
@@ -127,12 +126,7 @@ Full-Width Styles
 *******************************************************************************/
 
 .inner {
-    width: 100%;
     max-width: 50%;
-    padding: 20px 10px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 2;
 }
 
 .menu {
