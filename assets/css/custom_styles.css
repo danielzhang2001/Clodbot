@@ -55,6 +55,7 @@ Main Content
 
 .test {
     display: flex;
+    justify-content: space-between;
 }
 
 .main {
