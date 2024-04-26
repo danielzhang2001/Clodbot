@@ -54,8 +54,7 @@ Main Content
 
 .header {
     display: flex;
-    justify-content: space-between;
-    align-items: stretch;
+    align-items: center;
 }
 
 .main {
@@ -184,9 +183,10 @@ Full-Width Styles
 }
 
 .icon {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
+    background-size: contain;
+    width: 50px;
+    height: 50px;
+    margin-right: 20px;
     background: url('/assets/images/icon.png') no-repeat center center;
 }
 
