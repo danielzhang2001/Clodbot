@@ -16,7 +16,7 @@ A Pokemon bot to keep track of stats from Showdown, update those stats into Goog
 
 ## Bot Usage:
 
-- **Clodbot, analyze (Pokemon Showdown Replay Link)**
+- **Clodbot, analyze (Pokemon Showdown Replay Link)** wepfowajofpwajfpoewajopwajfwaopfjewopfajwofpeawjfwaopfjawepofjaewopfjwopef
 
 - **Clodbot, sheet set (Google Sheets Link)**
 
