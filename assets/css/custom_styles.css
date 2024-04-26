@@ -5,7 +5,6 @@ Main Content
     position: relative;
     background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
     color: #ffffff;
-    z-index: 1;
 }
 
 #main_content_wrap h1,
@@ -47,12 +46,10 @@ Main Content
 
 #header_wrap {
     background: linear-gradient(to bottom, #333333 0%, #000000 100%);
-    z-index: 1;
 }
 
 #footer_wrap {
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
-    z-index: 1;
 }
 
 .home,
@@ -110,15 +107,14 @@ Main Content
     bottom: 0;
     width: 200px;
     background: url('../images/background.png') repeat-y;
-    z-index: 1;
 }
 
 .left {
-    left: 0;
+    left: 40px;
 }
 
 .right {
-    right: 0;
+    right: 40px;
     transform: scaleX(-1);
 }
 
@@ -127,12 +123,8 @@ Full-Width Styles
 *******************************************************************************/
 
 .inner {
-    width: 100%;
     max-width: 50%;
-    padding: 20px 10px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 2;
+    padding: 0 50 px;
 }
 
 .menu {
