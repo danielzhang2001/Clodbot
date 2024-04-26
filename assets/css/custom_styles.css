@@ -52,10 +52,6 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
-.header {
-    display: flex;
-}
-
 .main {
     display: flex;
     justify-content: space-between;
@@ -192,7 +188,6 @@ Full-Width Styles
 .background {
     background: url('../images/background.png') center repeat-y;
     flex-grow: 1;
-    display: flex;
     justify-content: center;
 }
 
