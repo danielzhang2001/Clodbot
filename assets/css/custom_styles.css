@@ -124,7 +124,7 @@ Main Content
 Full-Width Styles
 *******************************************************************************/
 .inner {
-    width: 50%;
+    width: 80%;
 }
 
 .menu {
@@ -183,13 +183,8 @@ Full-Width Styles
 
 .icon {
     background: url('../images/icon.png') no-repeat center center;
-    background-size: contain;
-    position: absolute;
-    top: 50%;
-    left: calc(25% - 50px - (100px / 2));
-    width: 160px;
-    height: 160px;
-    transform: translateY(-50%);
+    flex-grow: 1;
+    justify-content: center;
 }
 
 .left {
