@@ -113,12 +113,12 @@ Main Content
 }
 
 .left {
-    width: 200 px;
+    width: 200px;
     background-position: left top;
 }
 
 .right {
-    width: 200 px;
+    width: 200px;
     background-position: right top;
     transform: scaleX(-1);
 }
