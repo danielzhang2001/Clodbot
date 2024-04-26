@@ -114,12 +114,12 @@ Main Content
 
 .left {
     width: 200px;
-    background-position: right top;
+    background-position: right center;
 }
 
 .right {
     width: 200px;
-    background-position: right top;
+    background-position: right center;
     transform: scaleX(-1);
 }
 
