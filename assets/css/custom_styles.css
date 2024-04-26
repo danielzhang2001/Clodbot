@@ -46,20 +46,11 @@ Main Content
 
 #header_wrap {
     background: linear-gradient(to bottom, #333333 0%, #000000 100%);
+    position: relative;
 }
 
 #footer_wrap {
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
-}
-
-#header_wrap .inner {
-    grid-column: 2;
-}
-
-.header {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
 }
 
 .main {
@@ -188,7 +179,6 @@ Full-Width Styles
 
 .icon {
     background: url('../images/icon.png') no-repeat center center;
-    grid-column: 1;
     background-size: contain;
     width: 100px;
     height: 100px;
