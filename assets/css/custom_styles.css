@@ -52,13 +52,6 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
-.inner {
-    max-width: 50%;
-    padding-left: 50px;
-    padding-right: 50px;
-    flex: 0 0 auto;
-}
-
 .flex {
     display: flex;
     justify-content: space-between;
@@ -124,6 +117,12 @@ Main Content
 /*******************************************************************************
 Full-Width Styles
 *******************************************************************************/
+
+.inner {
+    max-width: 50%;
+    flex: 0 0 auto;
+}
+
 .menu {
     display: flex;
     align-items: center;
@@ -199,6 +198,11 @@ Small Device Styles
 *******************************************************************************/
 
 @media screen and (max-width: 992px) {
+    .inner {
+        padding-left: 50px;
+        padding-right: 50px;
+    }
+
     .menu {
         left: 0%;
     }
