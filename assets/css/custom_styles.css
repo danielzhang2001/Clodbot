@@ -54,8 +54,7 @@ Main Content
 
 .flex {
     display: flex;
-    justify-content: space-between;
-    align-items: stretch;
+    justify-content: center;
 }
 
 .home,
@@ -107,18 +106,19 @@ Main Content
 }
 
 .background {
-    flex-grow: 1;
+    flex: 0 0 200 px;
     display: flex;
-    justify-content: center;
+    align-items: center;
     background: url('../images/background.png') center repeat-y;
+    overflow: hidden;
 }
 
-.left,
-.right {
-    width: 200px;
+.left {
+    justify-content: flex-start;
 }
 
 .right {
+    justify-content: flex-end;
     transform: scaleX(-1);
 }
 
