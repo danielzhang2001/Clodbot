@@ -115,12 +115,12 @@ Main Content
 
 .left {
     width: 200 px;
-    justify-content: flex-start;
+    background-position: left top;
 }
 
 .right {
     width: 200 px;
-    justify-content: flex-end;
+    background-position: right top;
     transform: scaleX(-1);
 }
 
