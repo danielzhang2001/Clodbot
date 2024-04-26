@@ -108,6 +108,8 @@ Main Content
 
 .background {
     flex-grow: 1;
+    display: flex;
+    position: relative;
     background: url('../images/background.png') center repeat-y;
     background-size: 200px auto;
 }
