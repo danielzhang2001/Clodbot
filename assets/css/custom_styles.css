@@ -123,6 +123,12 @@ Full-Width Styles
     flex: 0 0 auto;
 }
 
+.icon {
+    height: auto;
+    width: auto;
+    margin-right: 20px;
+}
+
 .menu {
     display: flex;
     align-items: center;
