@@ -52,6 +52,12 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
+.header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+}
+
 .main {
     display: flex;
     justify-content: space-between;
@@ -119,6 +125,7 @@ Full-Width Styles
 *******************************************************************************/
 
 .inner {
+    grid-column: 2;
     max-width: 50%;
     flex: 0 0 auto;
 }
@@ -179,11 +186,8 @@ Full-Width Styles
 
 .icon {
     background: url('../images/icon.png') no-repeat center center;
+    grid-column: 1;
     background-size: contain;
-    position: absolute;
-    left: 50px;
-    top: 50%;
-    transform: translateY(-50%);
     width: 100px;
     height: 100px;
 }
