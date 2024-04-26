@@ -109,6 +109,7 @@ Main Content
 .background {
     flex-grow: 1;
     display: flex;
+    justify-content: center;
     background: url('../images/background.png') center repeat-y;
 }
 
