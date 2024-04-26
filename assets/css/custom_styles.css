@@ -52,15 +52,6 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
-#header_wrap .inner {
-    padding-left: 0;
-}
-
-.header {
-    display: flex;
-    align-items: center;
-}
-
 .main {
     display: flex;
     justify-content: space-between;
@@ -189,9 +180,10 @@ Full-Width Styles
 .icon {
     background: url('../images/icon.png') no-repeat center center;
     background-size: contain;
+    flex-grow: 1;
     width: 50px;
     height: 50px;
-    margin-right: 150px;
+    justify-content: center;
 }
 
 .background {
