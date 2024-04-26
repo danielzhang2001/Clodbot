@@ -182,7 +182,7 @@ Full-Width Styles
     background-size: contain;
     position: absolute;
     top: 50%;
-    left: 10%;
+    left: calc(25% - 50px - (100px / 2));
     width: 160px;
     height: 160px;
     transform: translateY(-50%);
@@ -214,7 +214,7 @@ Small Device Styles
     }
 
     .icon {
-        left: calc(25% - 50px - 50px);
+        left: calc(25% - (100px / 2));
     }
 
     .menu {
@@ -239,10 +239,18 @@ Small Device Styles
     .menu a {
         font-size: 10px;
     }
+
+    .icon {
+        left: calc(5% - (100px / 2));
+    }
 }
 
 @media screen and (max-width: 320px) {
     .menu a {
         font-size: 8px;
+    }
+
+    .icon {
+        left: -50px;
     }
 }
