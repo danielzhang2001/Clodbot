@@ -182,10 +182,10 @@ Full-Width Styles
     background-size: contain;
     position: absolute;
     top: 50%;
-    left: 12.5%;
+    left: 25%;
     width: 100px;
     height: 100px;
-    transform: translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
 }
 
 .background {
