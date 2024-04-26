@@ -50,9 +50,8 @@ Main Content
 
 .flex {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: stretch;
-    overflow: hidden;
 }
 
 .home,
@@ -119,8 +118,11 @@ Main Content
 
 .icon {
     background: url('../images/icon.png') no-repeat center;
-    flex-grow: 1;
-    width: 200px;
+    background-size: contain;
+    flex-shrink: 0;
+    width: 150px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /*******************************************************************************
@@ -201,10 +203,10 @@ Small Device Styles
 
 @media screen and (max-width: 992px) {
 
-    #header_wrap .inner,
+    #header_wrap.inner,
     .inner {
-        padding-left: 55px;
-        padding-right: 55px;
+        padding-left: 50px;
+        padding-right: 50px;
     }
 
     .menu {
