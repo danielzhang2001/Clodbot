@@ -46,7 +46,6 @@ Main Content
 
 #header_wrap {
     background: linear-gradient(to bottom, #333333 0%, #000000 100%);
-    padding: 0;
 }
 
 #footer_wrap {
@@ -126,7 +125,6 @@ Full-Width Styles
 *******************************************************************************/
 .inner {
     max-width: 50%;
-    flex: 0 0 auto;
 }
 
 .menu {
