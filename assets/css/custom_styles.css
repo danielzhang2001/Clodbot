@@ -110,11 +110,11 @@ Main Content
 }
 
 .left {
-    left: 40px;
+    left: 60px;
 }
 
 .right {
-    right: 40px;
+    right: 60px;
     transform: scaleX(-1);
 }
 
@@ -194,6 +194,10 @@ Small Device Styles
 *******************************************************************************/
 
 @media screen and (max-width: 992px) {
+    .inner {
+        padding: 0 30px;
+    }
+
     .menu {
         left: 0%;
     }
@@ -208,6 +212,10 @@ Small Device Styles
 }
 
 @media screen and (max-width: 480px) {
+    .inner {
+        padding: 0 20px;
+    }
+
     .menu {
         left: 0%;
     }
@@ -218,6 +226,10 @@ Small Device Styles
 }
 
 @media screen and (max-width: 320px) {
+    .inner {
+        padding: 0 10px;
+    }
+
     .menu {
         left: 0%;
     }
