@@ -50,7 +50,7 @@ Main Content
 
 .flex {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: stretch;
 }
 
@@ -205,8 +205,8 @@ Small Device Styles
 
     #header_wrap .inner,
     .inner {
-        padding-left: 50px;
-        padding-right: 50px;
+        padding-left: 55px;
+        padding-right: 55px;
     }
 
     .menu {
