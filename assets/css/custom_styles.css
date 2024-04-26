@@ -107,18 +107,19 @@ Main Content
 }
 
 .background {
-    flex: 0 0 200 px;
+    flex-grow: 1;
     display: flex;
-    align-items: center;
+    justify-content: center;
     background: url('../images/background.png') center repeat-y;
-    overflow: hidden;
 }
 
 .left {
+    width: 200 px;
     justify-content: flex-start;
 }
 
 .right {
+    width: 200 px;
     justify-content: flex-end;
     transform: scaleX(-1);
 }
