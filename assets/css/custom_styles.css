@@ -46,8 +46,6 @@ Main Content
 
 #header_wrap {
     background: linear-gradient(to bottom, #333333 0%, #000000 100%);
-    display: flex;
-    position: relative;
 }
 
 #footer_wrap {
