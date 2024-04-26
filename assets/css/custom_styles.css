@@ -188,14 +188,14 @@ Full-Width Styles
     background-size: contain;
     width: 50px;
     height: 50px;
-    margin-right: 20px;
+    margin-right: 50px;
 }
 
 .background {
+    background: url('../images/background.png') center repeat-y;
     flex-grow: 1;
     display: flex;
     justify-content: center;
-    background: url('../images/background.png') center repeat-y;
 }
 
 .left {
