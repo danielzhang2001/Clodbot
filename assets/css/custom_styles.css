@@ -192,7 +192,7 @@ Full-Width Styles
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.reflect {
+.right {
     transform: scaleX(-1);
 }
 
@@ -218,7 +218,8 @@ Small Device Styles
         display: none;
     }
 
-    .reflect {
+    .left,
+    right {
         background-position: right center;
     }
 }
