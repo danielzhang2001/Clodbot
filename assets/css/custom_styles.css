@@ -52,6 +52,12 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
 .main {
     display: flex;
     justify-content: space-between;
