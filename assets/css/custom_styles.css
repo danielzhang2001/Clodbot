@@ -108,20 +108,20 @@ Main Content
 
 .background {
     flex-grow: 1;
-    display: flex;
-    justify-content: center;
     background: url('../images/background.png') center repeat-y;
+    background-size: 200px auto;
 }
 
 .left {
-    width: 200px;
+    left: 50%;
+    transform: translateX(-100%);
     background-position: right center;
 }
 
 .right {
-    width: 200px;
+    right: 50%;
+    transform: translateX(100%) scaleX(-1);
     background-position: right center;
-    transform: scaleX(-1);
 }
 
 /*******************************************************************************
