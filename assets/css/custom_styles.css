@@ -182,7 +182,7 @@ Full-Width Styles
     background-size: contain;
     position: absolute;
     top: 50%;
-    left: 12%;
+    left: 10%;
     width: 160px;
     height: 160px;
     transform: translateY(-50%);
@@ -211,6 +211,10 @@ Small Device Styles
     .inner {
         padding-left: 50px;
         padding-right: 50px;
+    }
+
+    .icon {
+        left: calc(25% - 50px - 50px);
     }
 
     .menu {
