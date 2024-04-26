@@ -53,6 +53,10 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
+.test {
+    display: flex;
+}
+
 .main {
     display: flex;
     justify-content: space-between;
@@ -213,10 +217,6 @@ Small Device Styles
         padding-right: 50px;
     }
 
-    .icon {
-        left: calc(25% - (100px / 2));
-    }
-
     .menu {
         left: 0%;
     }
@@ -239,18 +239,10 @@ Small Device Styles
     .menu a {
         font-size: 10px;
     }
-
-    .icon {
-        left: calc(5% - (100px / 2));
-    }
 }
 
 @media screen and (max-width: 320px) {
     .menu a {
         font-size: 8px;
-    }
-
-    .icon {
-        left: -50px;
     }
 }
