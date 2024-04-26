@@ -185,18 +185,10 @@ Full-Width Styles
 .icon {
     background: url('../images/icon.png') no-repeat center center;
     background-size: contain;
-    flex: 0 0 auto;
     width: 50px;
     height: 50px;
     margin-right: auto;
-}
-
-.title {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
+    margin-left: 50px;
 }
 
 .background {
