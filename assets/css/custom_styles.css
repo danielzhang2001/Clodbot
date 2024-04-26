@@ -117,7 +117,15 @@ Main Content
 .background {
     background: url('../images/background.png') center repeat-y;
     flex-grow: 1;
-    justify-content: center;
+    width: 200px;
+}
+
+.icon {
+    background: url('../images/icon.png') no-repeat center;
+    background-size: contain;
+    width: 150px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /*******************************************************************************
@@ -125,7 +133,8 @@ Full-Width Styles
 *******************************************************************************/
 .inner {
     width: 50%;
-    max-width: 50%
+    max-width: 50%;
+    margin: 0;
 }
 
 .menu {
@@ -182,19 +191,7 @@ Full-Width Styles
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.icon {
-    background: url('../images/icon.png') no-repeat center;
-    background-size: contain;
-    width: 100px;
-    justify-content: center;
-}
-
-.left {
-    width: 200px;
-}
-
-.right {
-    width: 200px;
+.reflect {
     transform: scaleX(-1);
 }
 
@@ -220,8 +217,7 @@ Small Device Styles
         display: none;
     }
 
-    .left,
-    .right {
+    .reflect {
         background-position: right center;
     }
 }
