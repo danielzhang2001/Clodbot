@@ -52,6 +52,12 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
+.flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
 .home,
 .github,
 .privacy {
@@ -101,20 +107,18 @@ Main Content
 }
 
 .background {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 200px;
-    background: url('../images/background.png') repeat-y;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    background: url('../images/background.png') center repeat-y;
 }
 
-.left {
-    left: 60px;
+.left,
+.right {
+    width: 200px;
 }
 
 .right {
-    right: 60px;
     transform: scaleX(-1);
 }
 
@@ -124,7 +128,7 @@ Full-Width Styles
 
 .inner {
     max-width: 50%;
-    padding: 0 50 px;
+    flex: 0 0 auto;
 }
 
 .menu {
@@ -194,10 +198,6 @@ Small Device Styles
 *******************************************************************************/
 
 @media screen and (max-width: 992px) {
-    .inner {
-        padding: 0 30px;
-    }
-
     .menu {
         left: 0%;
     }
@@ -212,10 +212,6 @@ Small Device Styles
 }
 
 @media screen and (max-width: 480px) {
-    .inner {
-        padding: 0 20px;
-    }
-
     .menu {
         left: 0%;
     }
@@ -226,10 +222,6 @@ Small Device Styles
 }
 
 @media screen and (max-width: 320px) {
-    .inner {
-        padding: 0 10px;
-    }
-
     .menu {
         left: 0%;
     }
