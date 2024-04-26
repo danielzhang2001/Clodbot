@@ -52,13 +52,7 @@ Main Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
-.test {
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-}
-
-.main {
+.flex {
     display: flex;
     justify-content: space-between;
     align-items: stretch;
@@ -120,12 +114,17 @@ Main Content
     border-bottom-right-radius: 20px;
 }
 
+.background {
+    background: url('../images/background.png') center repeat-y;
+    flex-grow: 1;
+    justify-content: center;
+}
+
 /*******************************************************************************
 Full-Width Styles
 *******************************************************************************/
 .inner {
-    max-width: 50%;
-    position: static;
+    width: 50%;
 }
 
 .menu {
@@ -191,12 +190,6 @@ Full-Width Styles
     width: 160px;
     height: 160px;
     transform: translateY(-50%);
-}
-
-.background {
-    background: url('../images/background.png') center repeat-y;
-    flex-grow: 1;
-    justify-content: center;
 }
 
 .left {
