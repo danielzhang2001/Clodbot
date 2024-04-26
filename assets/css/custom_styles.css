@@ -44,10 +44,6 @@ Main Content
     bottom: -18px;
 }
 
-#header_wrap {
-    background: linear-gradient(to bottom, #333333 0%, #000000 100%);
-}
-
 #footer_wrap {
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
@@ -118,12 +114,12 @@ Main Content
     background: url('../images/background.png') center repeat-y;
     flex-grow: 1;
     width: 200px;
-    justify-content: center;
 }
 
 .icon {
     background: url('../images/icon.png') no-repeat center;
     background-size: contain;
+    flex-shrink: 0;
     width: 150px;
     margin-left: auto;
     margin-right: auto;
@@ -132,6 +128,11 @@ Main Content
 /*******************************************************************************
 Full-Width Styles
 *******************************************************************************/
+
+#header_wrap {
+    background: linear-gradient(to bottom, #333333 0%, #000000 100%);
+}
+
 .inner {
     width: 50%;
     max-width: 50%;
@@ -201,6 +202,8 @@ Small Device Styles
 *******************************************************************************/
 
 @media screen and (max-width: 992px) {
+
+    #header_wrap.inner,
     .inner {
         padding-left: 50px;
         padding-right: 50px;
