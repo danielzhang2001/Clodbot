@@ -18,18 +18,20 @@
 
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
-        <div class="test">
-            <div class="icon"></div>
-            <header class="inner">
-                {% if site.github.is_project_page %}
-                <div class="menu">
-                    <a class="banner home" href="https://clodbot.com">Home</a>
-                    <a class="banner github" href="{{ site.github.repository_url }}" target="_blank">GitHub</a>
-                    <a class="banner privacy" href="https://clodbot.com/privacy-policy">Privacy Policy</a>
+        <header class="inner">
+            {% if site.github.is_project_page %}
+            <div class="menu">
+                <a class="banner home" href="https://clodbot.com">Home</a>
+                <a class="banner github" href="{{ site.github.repository_url }}" target="_blank">GitHub</a>
+                <a class="banner privacy" href="https://clodbot.com/privacy-policy">Privacy Policy</a>
+            </div>
+            {% endif %}
+            <div class="header">
+                <div class="icon"></div>
+                <div>
+                    <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
+                    <h2 id="project_tagline">{{ site.description | default: site.github.project_tagline }}</h2>
                 </div>
-                {% endif %}
-                <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
-                <h2 id="project_tagline">{{ site.description | default: site.github.project_tagline }}</h2>
                 {% if site.show_downloads %}
                 <section id="downloads">
                     <a class="zip_download_link" href="{{ site.github.zip_url }}">Download this project as a .zip
@@ -38,13 +40,12 @@
                         file</a>
                 </section>
                 {% endif %}
-            </header>
-        </div>
+        </header>
     </div>
 
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
-        <div class="main">
+        <div class="flex">
             <div class="background left"></div>
             <section id="main_content" class="inner">{{ content }}</section>
             <div class="background right"></div>
