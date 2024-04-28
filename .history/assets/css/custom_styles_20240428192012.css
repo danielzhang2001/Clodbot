@@ -255,9 +255,7 @@ Small Device Styles
     }
 
     .command {
-        margin: 0 5px;
-        padding: 5px 10px;
-        font-size: 12px;
+        margin: 0 25px;
     }
 
     .left,

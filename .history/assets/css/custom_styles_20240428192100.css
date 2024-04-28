@@ -255,9 +255,7 @@ Small Device Styles
     }
 
     .command {
-        margin: 0 5px;
-        padding: 5px 10px;
-        font-size: 12px;
+        margin: 0 10px;
     }
 
     .left,
@@ -269,6 +267,10 @@ Small Device Styles
 @media screen and (max-width: 480px) {
     .menu a {
         font-size: 10px;
+    }
+
+    .command {
+        margin: 0 5px;
     }
 }
 

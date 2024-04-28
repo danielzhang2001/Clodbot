@@ -156,6 +156,31 @@ Main Content
     margin: 0 auto;
 }
 
+.command {
+    background: #333;
+    color: white;
+    padding: 10px 20px;
+    margin: 0 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    flex-grow: 1;
+    text-align: center;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+.command:first-child {
+    margin-left: 0;
+}
+
+.command:last-child {
+    margin-right: 0;
+}
+
+.command:hover {
+    background: #555;
+}
+
 /*******************************************************************************
 Full-Width Styles
 *******************************************************************************/
@@ -203,33 +228,6 @@ Full-Width Styles
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-
-.command {
-    background: #333;
-    color: white;
-    padding: 10px 20px;
-    margin: 0 10px;
-    text-decoration: none;
-    border-radius: 5px;
-    flex-grow: 1;
-    text-align: center;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s;
-    margin: 0 25px;
-}
-
-.command:first-child {
-    margin-left: 0;
-}
-
-.command:last-child {
-    margin-right: 0;
-}
-
-.command:hover {
-    background: #555;
-}
-
 .right {
     transform: scaleX(-1);
 }
@@ -252,12 +250,6 @@ Small Device Styles
 
     #downloads {
         display: none;
-    }
-
-    .command {
-        margin: 0 5px;
-        padding: 5px 10px;
-        font-size: 12px;
     }
 
     .left,
