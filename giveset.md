@@ -9,13 +9,13 @@ The Giveset Command displays data about various Pokemon sets based on certain cr
 
 <hr class="line">
 
-## Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format)
+### Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format)
 
 Takes in a Pokemon, Generation (optional, assumes latest eligible Generation if not provided) and Format (optional, assumes first eligible Format if not provided) and outputs a prompt of all available sets in Smogon. These sets appear as buttons and can be clicked to display/remove said sets, which can then in turn be copied onto Pokemon Showdown for easy access. Multiple sets can be prompted and generated at the same time by putting a comma between your entries.
 
 <hr class="line">
 
-## Clodbot, giveset random (Optional Number)
+### Clodbot, giveset random (Optional Number)
 
 Takes in a number (optional, assumes 1 if not provided) and outputs a completely random set (random Pokemon, random Generation, random Format, random set) for that number of Pokemon, which can then in turn be copied onto Pokemon Showdown for easy access.
 
