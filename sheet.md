@@ -36,15 +36,6 @@ Takes in a Google Sheets link (optional if default set) and a Pokemon Showdown r
 
 <hr class="line">
 
-### Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)
-
-Takes in a Google Sheets link (optional if default set) and the username of the Pokemon Showdown player and deletes the entire player section on the Google Sheets Link under the "Stats" sheet if it exists.
-
-<video src="assets/videos/Sheet_Delete_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
-<video src="assets/videos/Sheet_Delete_Default.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
-
-<hr class="line">
-
 ### Clodbot, sheet list (Optional Google Sheets Link) Players
 
 Takes in a Google Sheets link (optional if default set) and outputs all the players in the "Stats" sheet of the link, in descending order of kills. If multiple players have an equal number of kills, it sorts in ascending order of deaths.
@@ -60,3 +51,12 @@ Takes in a Google Sheets link (optional if default set) and outputs all the Poke
 
 <video src="assets/videos/Sheet_List_Pokemon_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
 <video src="assets/videos/Sheet_List_Pokemon_Default.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
+
+### Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)
+
+Takes in a Google Sheets link (optional if default set) and the username of the Pokemon Showdown player and deletes the entire player section on the Google Sheets Link under the "Stats" sheet if it exists.
+
+<video src="assets/videos/Sheet_Delete_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
+<video src="assets/videos/Sheet_Delete_Default.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
+
+<hr class="line">
