@@ -1,6 +1,10 @@
 /*******************************************************************************
 Main Content
 *******************************************************************************/
+#main_content {
+    padding-top: 0;
+}
+
 #main_content_wrap {
     background: linear-gradient(to bottom, #02162e 0%, #06355c 50%, #02162e 100%);
     position: relative;
@@ -142,6 +146,21 @@ Main Content
     border-bottom: 4px solid rgb(18, 0, 179);
     border-radius: 0 0 20px 20px;
     z-index: 1000;
+}
+
+.command {
+    padding: 10px 15px;
+    background-color: #1a1a1a;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+    margin: 5px 0;
+    transition: background-color 0.3s;
+}
+
+.command:hover {
+    background-color: #333;
 }
 
 /*******************************************************************************
