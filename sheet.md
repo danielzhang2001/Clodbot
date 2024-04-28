@@ -15,7 +15,7 @@ The Sheet Command manipulates information on Google Sheets using a sheets link p
 
 Takes in a Google Sheets link and sets it as the default link for any subsequent sheet commands that use a Google Sheets link besides this one (limited to server) so that the Google Sheets link argument could be skipped. Sends a message with the set sheet name and link after.
 
-<video src="assets/videos/Sheet_Set.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
+<video src="assets/videos/Sheet_Set.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
 
 <hr class="line">
 
@@ -23,7 +23,7 @@ Takes in a Google Sheets link and sets it as the default link for any subsequent
 
 Outputs the current server's default sheet name and link.
 
-<video src="assets/videos/Sheet_Default.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
+<video src="assets/videos/Sheet_Default.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
 
 <hr class="line">
 
@@ -31,8 +31,8 @@ Outputs the current server's default sheet name and link.
 
 Takes in a Google Sheets link (optional if default set) and a Pokemon Showdown replay link and first checks to see if a sheet exists called "Stats" on the Google Sheets link. If not, it creates it. It then updates that sheet with information about both players and the Pokemon used with their games played, kills and deaths. If the player section with their Pokemon Showdown username exists, it updates their section with any new Pokemon and their stats, alongside with adding stats to existing Pokemon from the replay. If the player section does not exist, it creates a new one with the associated information.
 
-<video src="assets/videos/Sheet_Update_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
-<video src="assets/videos/Sheet_Update_Default.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
+<video src="assets/videos/Sheet_Update_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
+<video src="assets/videos/Sheet_Update_Default.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
 
 <hr class="line">
 
@@ -40,8 +40,8 @@ Takes in a Google Sheets link (optional if default set) and a Pokemon Showdown r
 
 Takes in a Google Sheets link (optional if default set) and the username of the Pokemon Showdown player and deletes the entire player section on the Google Sheets Link under the "Stats" sheet if it exists.
 
-<video src="assets/videos/Sheet_Delete_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
-<video src="assets/videos/Sheet_Delete_Default.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
+<video src="assets/videos/Sheet_Delete_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
+<video src="assets/videos/Sheet_Delete_Default.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
 
 <hr class="line">
 
@@ -49,8 +49,8 @@ Takes in a Google Sheets link (optional if default set) and the username of the 
 
 Takes in a Google Sheets link (optional if default set) and outputs all the players in the "Stats" sheet of the link, in descending order of kills. If multiple players have an equal number of kills, it sorts in ascending order of deaths.
 
-<video src="assets/videos/Sheet_List_Players_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
-<video src="assets/videos/Sheet_List_Players_Default.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
+<video src="assets/videos/Sheet_List_Players_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
+<video src="assets/videos/Sheet_List_Players_Default.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
 
 <hr class="line">
 
@@ -58,5 +58,5 @@ Takes in a Google Sheets link (optional if default set) and outputs all the play
 
 Takes in a Google Sheets link (optional if default set) and outputs all the Pokemon along with the player they belong to in the "Stats" sheet of the link, in descending order of kills. If multiple Pokemon have an equal number of kills, it sorts in ascending order of deaths.
 
-<video src="assets/videos/Sheet_List_Pokemon_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
-<video src="assets/videos/Sheet_List_Pokemon_Default.mp4" style="width:100%; height:auto;" autoplay loop muted></video>
+<video src="assets/videos/Sheet_List_Pokemon_NoDefault.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
+<video src="assets/videos/Sheet_List_Pokemon_Default.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
