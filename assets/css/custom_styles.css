@@ -228,6 +228,7 @@ Full-Width Styles
 
 .command:hover {
     background: #555;
+    text-decoration: none;
 }
 
 .right {
