@@ -17,7 +17,7 @@ A Discord Pokemon Bot to keep track of stats from Pokemon Showdown, update those
 ### Bot Commands
 
 <div class="commands">
-  <a href="analyze.md" class="command">ANALYZE</a>
-  <a href="sheet.md" class="command">SHEET</a>
-  <a href="giveset.md" class="command">GIVESET</a>
+  <a href="https://clodbot.com/analyze" class="command">ANALYZE</a>
+  <a href="https://clodbot.com/sheet" class="command">SHEET</a>
+  <a href="https://clodbot.com/giveset" class="command">GIVESET</a>
 </div>
