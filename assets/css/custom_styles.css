@@ -148,19 +148,29 @@ Main Content
     z-index: 1000;
 }
 
+.commands {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin: 0 auto;
+}
+
 .command {
-    padding: 10px 15px;
-    background-color: #1a1a1a;
-    color: #fff;
+    background: #333;
+    color: white;
+    padding: 10px 20px;
+    margin: 0 10px;
     text-decoration: none;
     border-radius: 5px;
-    display: inline-block;
-    margin: 5px 0;
+    flex-grow: 1;
+    text-align: center;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s;
 }
 
 .command:hover {
-    background-color: #333;
+    background: #555;
 }
 
 /*******************************************************************************
