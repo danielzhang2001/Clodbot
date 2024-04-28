@@ -2,7 +2,7 @@
 Main Content
 *******************************************************************************/
 #main_content {
-    padding-top: 0;
+    padding-top: 10px;
 }
 
 #main_content_wrap {
@@ -150,7 +150,7 @@ Main Content
 
 .commands {
     display: flex;
-    justify-content: center;
+    justify-content: space_between;
     align-items: center;
     text-align: center;
     margin: 0 auto;
@@ -167,6 +167,14 @@ Main Content
     text-align: center;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s;
+}
+
+.command:first-child {
+    margin-left: 0;
+}
+
+.command:last-child {
+    margin-right: 0;
 }
 
 .command:hover {
