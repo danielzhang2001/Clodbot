@@ -16,14 +16,14 @@ help of the [Privacy Policy Generator](https://www.termsfeed.com/privacy-policy-
 
 <hr class="line">
 
-## Interpretation and Definitions
+### Interpretation and Definitions
 
-### Interpretation
+#### Interpretation
 
 The words of which the initial letter is capitalized have meanings defined under the following conditions. The following
 definitions shall have the same meaning regardless of whether they appear in singular or in plural.
 
-### Definitions
+#### Definitions
 
 For the purposes of this Privacy Policy:
 
@@ -44,16 +44,16 @@ such individual is accessing or using the service, as applicable.
 
 <hr class="line">
 
-## Collecting and Using Your Personal Data
+### Collecting and Using Your Personal Data
 
-### Types of Data Collected
+#### Types of Data Collected
 
-#### Personal Data
+##### Personal Data
 
 While using the service, your Pokemon Showdown username, along with the scores (kills and deaths) of your Pokemon and
 the outcome of the match that you choose to use will be recorded.
 
-#### Usage Data
+##### Usage Data
 
 Usage Data is collected automatically when using the service.
 
@@ -68,7 +68,7 @@ diagnostic data.
 We may also collect information that your browser sends whenever you visit our service or when you access the service by
 or through a mobile device.
 
-### Use Of Your Personal Data
+#### Use Of Your Personal Data
 
 The company may use Personal Data for the following purposes:
 
@@ -94,7 +94,7 @@ services or promotions.
 such information may be viewed by all users and may be publicly distributed outside.
 - **With Your Consent:** We may disclose your personal information for any other purpose with your consent.
 
-### Retention Of Your Personal Data
+#### Retention Of Your Personal Data
 
 The company will retain your personal data only for as long as is necessary for the purposes set out in this Privacy
 Policy. We will retain and use your personal data to the extent necessary to comply with our legal obligations (for
@@ -105,7 +105,7 @@ The company will also retain Usage Data for internal analysis purposes. Usage da
 period of time, except when this data is used to strengthen the security or to improve the functionality of our service,
 or we are legally obligated to retain this data for longer time periods.
 
-### Transfer Of Your Personal Data
+#### Transfer Of Your Personal Data
 
 Your information, including personal data, is processed in any place where the developer can access that information. 
 That this information may be transferred to — and maintained on — computers located outside of your state, province, 
@@ -118,7 +118,7 @@ The company will take all steps reasonably necessary to ensure that your data is
 this Privacy Policy and no transfer of Your personal Data will take place to an organization or a country unless there
 are adequate controls in place including the security of your data and other personal information.
 
-### Delete Your Personal Data
+#### Delete Your Personal Data
 
 You have the right to delete or request that we assist in deleting the personal data that we have collected about you.
 
@@ -130,19 +130,19 @@ delete any personal information that you have provided to us.
 Please note, however, that we may need to retain certain information when we have a legal obligation or lawful basis to
 do so.
 
-### Disclosure of Your Personal Data
+#### Disclosure of Your Personal Data
 
-#### Business Transactions
+##### Business Transactions
 
 If the company is involved in a merger, acquisition, or asset sale, your personal data may be transferred. We will
 provide notice before your personal data is transferred and becomes subject to a different Privacy Policy.
 
-#### Law Enforcement
+##### Law Enforcement
 
 Under certain circumstances, the company may be required to disclose your personal data if required to do so by law or
 in response to valid requests by public authorities (e.g., a court or a government agency).
 
-#### Other Legal Requirements
+##### Other Legal Requirements
 
 The Company may disclose your personal data in the good faith belief that such action is necessary to:
 
@@ -152,13 +152,13 @@ The Company may disclose your personal data in the good faith belief that such a
 - Protect the personal safety of users of the service or the public
 - Protect against legal liability
 
-### Security Of Your Personal Data
+#### Security Of Your Personal Data
 
 The security of your personal data is important to us, but remember that no method of transmission over the Internet,
 or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your
 personal data, we cannot guarantee its absolute security.
 
-#### Children's Privacy
+##### Children's Privacy
 
 The service does not address anyone under the age of 13. We do not knowingly collect personally identifiable
 information from anyone under the age of 13. If you are a parent or guardian and you are aware that Your child has
@@ -168,7 +168,7 @@ under the age of 13 without verification of parental consent, we take steps to r
 If we need to rely on consent as a legal basis for processing your information and your country requires consent from
 a parent, we may require your parent's consent before we collect and use that information.
 
-#### Links To Other Websites
+##### Links To Other Websites
 
 Our Service may contain links to other websites that are not operated by us. If You click on a third party link, You
 will be directed to that third party's site. We strongly advise you to review the Privacy Policy of every site you
@@ -177,7 +177,7 @@ visit.
 We have no control over and assume no responsibility for the content, privacy policies or practices of any third
 party sites or services.
 
-#### Changes to this Privacy Policy
+##### Changes to this Privacy Policy
 
 We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy
 Policy on this page.
@@ -187,7 +187,7 @@ effective when they are posted on this page.
 
 <hr class="line">
 
-## Contact Us
+### Contact Us
 
 If you have any questions about this Privacy Policy, you can contact us:
 

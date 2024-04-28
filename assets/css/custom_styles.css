@@ -10,7 +10,8 @@ Main Content
 #main_content_wrap h1,
 #main_content_wrap h2,
 #main_content_wrap h3,
-#main_content_wrap h4 {
+#main_content_wrap h4,
+#main_content_wrap h5 {
     color: #ffffff;
     background: none;
 }
