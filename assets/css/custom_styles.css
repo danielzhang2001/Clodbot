@@ -97,8 +97,6 @@ Main Content
 
 .header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
 }
 
 .header-text {
@@ -114,7 +112,7 @@ Main Content
     width: 90px;
     height: 70px;
     overflow: hidden;
-    margin-top: 34px;
+    margin-top: 36px;
 }
 
 .tar {
@@ -122,8 +120,8 @@ Main Content
     width: 90px;
     height: 70px;
     overflow: hidden;
-    margin-top: 34px;
-    margin-left: 10px;
+    margin-top: 36px;
+    margin-left: 20px;
 }
 
 .zip:hover {
