@@ -3,7 +3,13 @@ layout: default
 title: Analyze Command
 ---
 
-# Analyze Command
+<div class="other-commands">
+  <h1>Analyze Command</h1>
+  <div>
+    <a href="https://clodbot.com/sheet" target="_blank" class="command">Sheet</a>
+    <a href="https://clodbot.com/giveset" target="_blank" class="command">GiveSet</a>
+  </div>
+</div>
 
 The Analyze Command displays various stats of a Pokemon Showdown battle using a battle replay link provided. Particularly useful for the need to quickly assess data from a replay without actually going through it, such as in Draft League environments.
 
