@@ -13,11 +13,11 @@ The Giveset Command displays data about various Pokemon sets based on certain cr
 
 Takes in a Pokemon, Generation (optional, assumes latest eligible Generation if not provided) and Format (optional, assumes first eligible Format if not provided) and outputs a prompt of all available sets in Smogon. These sets appear as buttons and can be clicked to display/remove said sets, which can then in turn be copied onto Pokemon Showdown for easy access. Multiple sets can be prompted and generated at the same time by putting a comma between your entries.
 
-<video src="assets/videos/Giveset_Pokemon.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
-<video src="assets/videos/Giveset_Pokemon_Generation_Numbers.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
-<video src="assets/videos/Giveset_Pokemon_Generation_Letters.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
-<video src="assets/videos/Giveset_Pokemon_Generation_Format.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
-<video src="assets/videos/Giveset_Multiple.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
+<video src="assets/videos/Giveset_Pokemon.mp4" style="width:100%; height:auto; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);" autoplay loop muted playsinline></video>
+<video src="assets/videos/Giveset_Pokemon_Generation_Numbers.mp4" style="width:100%; height:auto; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);" autoplay loop muted playsinline></video>
+<video src="assets/videos/Giveset_Pokemon_Generation_Letters.mp4" style="width:100%; height:auto; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);" autoplay loop muted playsinline></video>
+<video src="assets/videos/Giveset_Pokemon_Generation_Format.mp4" style="width:100%; height:auto; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);" autoplay loop muted playsinline></video>
+<video src="assets/videos/Giveset_Multiple.mp4" style="width:100%; height:auto; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);" autoplay loop muted playsinline></video>
 
 <hr class="line">
 
@@ -25,6 +25,6 @@ Takes in a Pokemon, Generation (optional, assumes latest eligible Generation if 
 
 Takes in a number (optional, assumes 1 if not provided) and outputs a completely random set (random Pokemon, random Generation, random Format, random set) for that number of Pokemon, which can then in turn be copied onto Pokemon Showdown for easy access.
 
-<video src="assets/videos/Giveset_Random.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
-<video src="assets/videos/Giveset_Random_Multiple.mp4" style="width:100%; height:auto;" autoplay loop muted playsinline></video>
+<video src="assets/videos/Giveset_Random.mp4" style="width:100%; height:auto; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);" autoplay loop muted playsinline></video>
+<video src="assets/videos/Giveset_Random_Multiple.mp4" style="width:100%; height:auto; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);" autoplay loop muted playsinline></video>
 
