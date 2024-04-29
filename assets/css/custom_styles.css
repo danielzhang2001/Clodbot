@@ -173,7 +173,7 @@ Main Content
     }
 
     100% {
-        background-position: center 80vh;
+        background-position: center 70vh;
     }
 }
 
@@ -183,7 +183,7 @@ Main Content
     }
 
     100% {
-        background-position: right 80vh;
+        background-position: right 70vh;
     }
 }
 
@@ -193,7 +193,7 @@ Main Content
     }
 
     100% {
-        background-position: left 80vh;
+        background-position: left 70vh;
     }
 }
 
