@@ -31,10 +31,14 @@
                 {% endif %}
                 <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
                 <h2 id="project_tagline">{{ site.description | default: site.github.project_tagline }}</h2>
+                {% if site.show_downloads %}
                 <div class="downloads">
-                    <a class="zip" href="{{ site.github.zip_url }}">Download ZIP</a>
-                    <a class="tar" href="{{ site.github.tar_url }}">Download TAR</a>
+                    <a class="zip" href="{{ site.github.zip_url }}">Download this project as a .zip
+                        file</a>
+                    <a class="tar" href="{{ site.github.tar_url }}">Download this project as a tar.gz
+                        file</a>
                 </div>
+                {% endif %}
             </header>
             <div class="icon right"></div>
         </div>
