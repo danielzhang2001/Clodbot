@@ -150,10 +150,14 @@ Main Content
 
 .commands {
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-wrap: wrap;
     gap: 25px;
+}
+
+.other-commands {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 /*******************************************************************************
@@ -219,14 +223,6 @@ Full-Width Styles
     transition: background-color 0.3s;
     margin-left: 0px;
     margin-right: 0px;
-}
-
-.command:first-child {
-    margin-left: 0;
-}
-
-.command:last-child {
-    margin-right: 0;
 }
 
 .command:hover {
