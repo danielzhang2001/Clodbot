@@ -137,7 +137,7 @@ Main Content
 }
 
 .background {
-    background: url('../images/background.png') center repeat-y;
+    background: url('../images/background.png') repeat-y;
     flex-grow: 1;
     width: 200px;
     animation: move 10s linear infinite;
@@ -168,12 +168,12 @@ Main Content
 }
 
 @keyframes move {
-    from {
-        background-position: center top;
+    0% {
+        background-position: 0 0;
     }
 
-    to {
-        background-position: center bottom;
+    100% {
+        background-position: 0 100%;
     }
 }
 
