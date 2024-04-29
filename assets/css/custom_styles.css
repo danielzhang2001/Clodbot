@@ -208,6 +208,7 @@ Full-Width Styles
     background: linear-gradient(to right, #150241 0%, #040252 100%);
     color: white;
     font-family: 'Press Start 2P';
+    font-size: 15px;
     padding: 10px 20px;
     margin: 0 10px;
     text-decoration: none;
@@ -216,7 +217,7 @@ Full-Width Styles
     text-align: center;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s;
-    margin: 0 25px;
+    margin: 0 30px;
 }
 
 .command:first-child {
@@ -259,7 +260,7 @@ Small Device Styles
     .command {
         margin: 0 5px;
         padding: 5px 10px;
-        font-size: 12px;
+        font-size: 10px;
     }
 
     .left,
@@ -274,7 +275,7 @@ Small Device Styles
     }
 
     .command {
-        font-size: 8px;
+        font-size: 5px;
     }
 }
 
