@@ -150,10 +150,10 @@ Main Content
 
 .commands {
     display: flex;
-    justify-content: space_between;
+    justify-content: center;
     align-items: center;
-    text-align: center;
-    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 /*******************************************************************************
