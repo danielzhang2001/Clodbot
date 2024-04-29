@@ -137,14 +137,14 @@ Main Content
 }
 
 .background {
-    background: url('../images/background.png') repeat-y;
+    background: url('../images/background.png') repeat-y center top;
     flex-grow: 1;
     width: 200px;
     animation: move 10s linear infinite;
 }
 
 .icon {
-    background: url('../images/icon.png') no-repeat center;
+    background: url('../images/icon.png') no-repeat;
     flex-grow: 1;
     width: 200px;
 }
@@ -169,11 +169,11 @@ Main Content
 
 @keyframes move {
     0% {
-        background-position: 0 0;
+        background-position: center 0;
     }
 
     100% {
-        background-position: 0 100%;
+        background-position: center -100vh;
     }
 }
 
