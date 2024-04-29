@@ -167,16 +167,6 @@ Main Content
     gap: 25px;
 }
 
-@keyframes move {
-    0% {
-        background-position: center 0;
-    }
-
-    100% {
-        background-position: center -100vh;
-    }
-}
-
 /*******************************************************************************
 Full-Width Styles
 *******************************************************************************/
@@ -248,8 +238,39 @@ Full-Width Styles
     text-decoration: none;
 }
 
-.right {
+.right,
+right-animation {
     transform: scaleX(-1);
+}
+
+@keyframes move {
+    0% {
+        background-position: center 0;
+    }
+
+    100% {
+        background-position: center 100vh;
+    }
+}
+
+@keyframes moveLeft {
+    0% {
+        background-position: right 0;
+    }
+
+    100% {
+        background-position: right 100vh;
+    }
+}
+
+@keyframes moveRight {
+    0% {
+        background-position: left 0;
+    }
+
+    100% {
+        background-position: left 100vh;
+    }
 }
 
 /*******************************************************************************
@@ -279,6 +300,14 @@ Small Device Styles
     .left,
     .right {
         background-position: right center;
+    }
+
+    .left-animation {
+        animation: moveLeft 10s linear infinite;
+    }
+
+    .right-animation {
+        animation: moveRight 10s linear infinite;
     }
 }
 
