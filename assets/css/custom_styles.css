@@ -153,7 +153,7 @@ Main Content
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 25px;
 }
 
 /*******************************************************************************
@@ -217,7 +217,8 @@ Full-Width Styles
     text-align: center;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s;
-    margin: 0 25px;
+    margin-left: 0px;
+    margin-right: 0px;
 }
 
 .command:first-child {
