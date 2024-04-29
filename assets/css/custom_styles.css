@@ -156,8 +156,14 @@ Main Content
 
 .other-commands {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+}
+
+.command-links {
+    display: flex;
+    gap: 10px;
 }
 
 /*******************************************************************************
