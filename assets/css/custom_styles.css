@@ -163,7 +163,7 @@ Main Content
 
 .command-links {
     display: flex;
-    gap: 10px;
+    gap: 25px;
 }
 
 /*******************************************************************************
@@ -218,7 +218,7 @@ Full-Width Styles
     background: linear-gradient(to right, #150241 0%, #040252 100%);
     color: white;
     font-family: 'Press Start 2P';
-    font-size: 13px;
+    font-size: 14px;
     padding: 10px 20px;
     text-decoration: none;
     border: 3px solid #28218d;
