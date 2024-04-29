@@ -3,7 +3,13 @@ layout: default
 title: Giveset Command
 ---
 
-# Giveset Command
+<div class="other-commands">
+  <h1>GiveSet Command</h1>
+  <div class = "command-links">
+    <a href="https://clodbot.com/analyze" class="command">ANALYZE</a>
+    <a href="https://clodbot.com/sheet"  class="command">SHEET</a>
+  </div>
+</div>
 
 The Giveset Command displays data about various Pokemon sets based on certain criteria (Pokemon, Generation, Format, Random) provided. Provides prompts on clarification of which set the user would want when given a command (except Random). The Generation provided could either be in letter form (RB, GS, RS, DP, BW, XY, SM, SS, SV) or number form (Gen1, Gen2, Gen3, Gen4, Gen5, Gen6, Gen7, Gen8, Gen9). Particularly useful for understanding Pokemon sets for beginners and generating quick, viable sets for players of all skill levels. Could even generate random sets for some fun minigames!
 
