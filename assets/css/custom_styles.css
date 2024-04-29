@@ -327,7 +327,8 @@ Small Device Styles
         font-size: 12px;
     }
 
-    #downloads {
+    .zip,
+    .tar {
         display: none;
     }
 
