@@ -168,32 +168,32 @@ Main Content
 }
 
 @keyframes move {
-    0% {
-        background-position: center 0;
+    from {
+        background-position: center 0%;
     }
 
-    100% {
-        background-position: center 100vh;
+    to {
+        background-position: center -100%;
     }
 }
 
 @keyframes moveLeft {
-    0% {
-        background-position: right 0;
+    from {
+        background-position: right 0%;
     }
 
-    100% {
-        background-position: right 100vh;
+    to {
+        background-position: center -100%;
     }
 }
 
 @keyframes moveRight {
-    0% {
-        background-position: left 0;
+    from {
+        background-position: left 0%;
     }
 
-    100% {
-        background-position: left 100vh;
+    to {
+        background-position: left -100%;
     }
 }
 
