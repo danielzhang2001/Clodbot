@@ -115,6 +115,7 @@ Content
 
 .header-links {
     display: flex;
+    align-self: flex-end;
 }
 
 .zip {
