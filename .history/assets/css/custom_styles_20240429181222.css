@@ -97,17 +97,8 @@ Main Content
 
 .header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.header-text {
-    flex-grow: 1;
-}
-
-.header-links {
-    display: flex;
-    gap: 10px;
+    justify-content: flex-end;
+    width: 100%;
 }
 
 .zip {
@@ -115,6 +106,7 @@ Main Content
     float: right;
     width: 90px;
     height: 70px;
+    text-indent: -5000px;
     overflow: hidden;
     background: url('../images/zip.png');
 }
@@ -124,6 +116,7 @@ Main Content
     float: right;
     width: 90px;
     height: 70px;
+    text-indent: -5000px;
     overflow: hidden;
     background: url('../images/tar.png');
     margin-left: 10px;
