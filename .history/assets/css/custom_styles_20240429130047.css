@@ -140,7 +140,6 @@ Main Content
     background: url('../images/background.png') center repeat-y;
     flex-grow: 1;
     width: 200px;
-    animation: moveBackground 10s linear infinite;
 }
 
 .icon {

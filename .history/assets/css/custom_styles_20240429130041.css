@@ -140,7 +140,6 @@ Main Content
     background: url('../images/background.png') center repeat-y;
     flex-grow: 1;
     width: 200px;
-    animation: moveBackground 10s linear infinite;
 }
 
 .icon {
@@ -167,7 +166,7 @@ Main Content
     gap: 25px;
 }
 
-@keyframes move {
+@keyframes moveBackground {
     from {
         background-position: center top;
     }
