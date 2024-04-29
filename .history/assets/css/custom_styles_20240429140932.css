@@ -99,35 +99,6 @@ Main Content
     top: 86px;
 }
 
-.zip {
-    display: block;
-    float: right;
-    width: 90px;
-    height: 70px;
-    text-indent: -5000px;
-    overflow: hidden;
-    background: url(../images/zip.png) no-repeat bottom left;
-}
-
-.tar {
-    display: block;
-    float: right;
-    width: 90px;
-    height: 70px;
-    text-indent: -5000px;
-    overflow: hidden;
-    background: url(../images/tar.png) no-repeat bottom right;
-    margin-left: 10px;
-}
-
-.zip:hover {
-    background: url(../images/zip_hoverpng) no-repeat top left;
-}
-
-.tar:hover {
-    background: url(../images/tar_hover.png) no-repeat top right;
-}
-
 .line {
     border: 0;
     height: 0.5px;
@@ -166,14 +137,14 @@ Main Content
 }
 
 .background {
-    background: url('../images/background.png') repeat-y top;
+    background: url('../images/background.png') repeat-y center top;
     flex-grow: 1;
     width: 200px;
     animation: move 10s linear infinite;
 }
 
 .icon {
-    background: url('../images/icon.png') no-repeat center;
+    background: url('../images/icon.png') no-repeat;
     flex-grow: 1;
     width: 200px;
 }
@@ -202,27 +173,7 @@ Main Content
     }
 
     100% {
-        background-position: center 622px;
-    }
-}
-
-@keyframes moveLeft {
-    0% {
-        background-position: right 0;
-    }
-
-    100% {
-        background-position: right 622px;
-    }
-}
-
-@keyframes moveRight {
-    0% {
-        background-position: left 0;
-    }
-
-    100% {
-        background-position: left 622px;
+        background-position: center 100vh;
     }
 }
 
@@ -337,6 +288,7 @@ Small Device Styles
 
     .right-animation {
         animation: moveRight 10s linear infinite;
+        /* This assumes a mirrored image for the right */
     }
 }
 
