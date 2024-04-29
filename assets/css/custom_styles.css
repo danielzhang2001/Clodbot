@@ -254,7 +254,7 @@ Small Device Styles
     }
 
     .menu a {
-        font-size: 12px;
+        font-size: 10px;
     }
 
     #downloads {
@@ -274,10 +274,6 @@ Small Device Styles
 @media screen and (max-width: 480px) {
     .menu a {
         font-size: 10px;
-    }
-
-    .command {
-        font-size: 8px;
     }
 }
 
