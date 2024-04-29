@@ -106,7 +106,7 @@ Main Content
     height: 70px;
     text-indent: -5000px;
     overflow: hidden;
-    background: url(../images/zip.png) no-repeat bottom left;
+    background: url(../images/zip.png);
 }
 
 .tar {
@@ -116,16 +116,16 @@ Main Content
     height: 70px;
     text-indent: -5000px;
     overflow: hidden;
-    background: url(../images/tar.png) no-repeat bottom right;
+    background: url('../images/tar.png');
     margin-left: 10px;
 }
 
 .zip:hover {
-    background: url(../images/zip_hover.png) no-repeat top left;
+    background: url('../images/zip_hover.png');
 }
 
 .tar:hover {
-    background: url(../images/tar_hover.png) no-repeat top right;
+    background: url('../images/tar_hover.png');
 }
 
 .line {
