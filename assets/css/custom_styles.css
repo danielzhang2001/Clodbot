@@ -210,8 +210,8 @@ Full-Width Styles
     font-family: 'Press Start 2P';
     font-size: 13px;
     padding: 10px 20px;
-    margin: 0 10px;
     text-decoration: none;
+    border: 2px solid #28218d;
     border-radius: 5px;
     flex-grow: 1;
     text-align: center;
