@@ -260,7 +260,7 @@ Small Device Styles
     .command {
         margin: 0 5px;
         padding: 5px 10px;
-        font-size: 8px;
+        font-size: 12px;
     }
 
     .left,
@@ -276,7 +276,7 @@ Small Device Styles
 
     .command {
         margin: 0 2px;
-        font-size: 4px;
+        font-size: 8px;
     }
 }
 
