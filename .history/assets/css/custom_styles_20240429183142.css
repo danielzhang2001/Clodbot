@@ -110,19 +110,21 @@ Main Content
 }
 
 .zip {
-    background: url('../images/zip.png');
+    display: block;
+    float: right;
     width: 90px;
     height: 70px;
     overflow: hidden;
-    margin-top: 12px;
+    background: url('../images/zip.png');
 }
 
 .tar {
-    background: url('../images/tar.png');
+    display: block;
+    float: right;
     width: 90px;
     height: 70px;
     overflow: hidden;
-    margin-top: 12px;
+    background: url('../images/tar.png');
 }
 
 .zip:hover {
