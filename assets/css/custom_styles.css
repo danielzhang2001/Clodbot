@@ -336,8 +336,8 @@ Small Device Styles
 
     .zip,
     .tar {
-        width: 45px;
-        height: 35px;
+        width: 54px;
+        height: 42px;
     }
 
     .command {
@@ -361,6 +361,11 @@ Small Device Styles
 @media screen and (max-width: 480px) {
     .menu a {
         font-size: 10px;
+    }
+
+    .zip,
+    .tar {
+        display: none;
     }
 }
 
