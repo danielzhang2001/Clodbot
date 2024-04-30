@@ -177,7 +177,6 @@ Content
     display: flex;
     flex-wrap: wrap;
     gap: 25px;
-    margin-bottom: 25px;
 }
 
 .other-commands {
@@ -190,10 +189,6 @@ Content
 .command-links {
     display: flex;
     gap: 25px;
-}
-
-.footer.inner {
-    padding-top: 30px;
 }
 
 @keyframes move {
