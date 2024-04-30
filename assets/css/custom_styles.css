@@ -63,6 +63,10 @@ Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
+#footer_wrap .inner {
+    padding-top: 30px;
+}
+
 .flex {
     display: flex;
     justify-content: center;
@@ -190,10 +194,6 @@ Content
 .command-links {
     display: flex;
     gap: 25px;
-}
-
-.footer.inner {
-    padding-top: 30px;
 }
 
 @keyframes move {
