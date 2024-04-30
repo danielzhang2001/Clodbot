@@ -118,30 +118,6 @@ Content
     align-self: flex-end;
 }
 
-.zip {
-    background: url('../images/zip.png');
-    width: 90px;
-    height: 70px;
-    overflow: hidden;
-    margin: 10px 0;
-}
-
-.tar {
-    background: url('../images/tar.png');
-    width: 90px;
-    height: 70px;
-    overflow: hidden;
-    margin: 10px 0 10px 20px;
-}
-
-.zip:hover {
-    background: url('../images/zip_hover.png');
-}
-
-.tar:hover {
-    background: url('../images/tar_hover.png');
-}
-
 .line {
     border: 0;
     height: 0.5px;
@@ -287,6 +263,32 @@ Full-Width Styles
     background-color: rgba(255, 255, 255, 0.2);
 }
 
+.zip {
+    background: url('../images/zip.png');
+    background-size: contain;
+    width: 90px;
+    height: 70px;
+    overflow: hidden;
+    margin: 10px 0;
+
+}
+
+.tar {
+    background: url('../images/tar.png');
+    background-size: contain;
+    width: 90px;
+    height: 70px;
+    overflow: hidden;
+    margin: 10px 0 10px 20px;
+}
+
+.zip:hover {
+    background: url('../images/zip_hover.png');
+}
+
+.tar:hover {
+    background: url('../images/tar_hover.png');
+}
 
 .command {
     background: linear-gradient(to right, #150241 0%, #040252 100%);
@@ -334,7 +336,8 @@ Small Device Styles
 
     .zip,
     .tar {
-        display: none;
+        width: 45px;
+        height: 35px;
     }
 
     .command {
