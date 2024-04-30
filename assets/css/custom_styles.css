@@ -135,6 +135,7 @@ Content
     display: flex;
     flex-wrap: wrap;
     gap: 25px;
+    justify-content: flex-end;
     margin-left: auto;
 }
 
@@ -375,6 +376,11 @@ Small Device Styles
 
     #project_tagline {
         font-size: 20px;
+    }
+
+    .invite {
+        width: 56px;
+        height: 21px;
     }
 
     .command {
