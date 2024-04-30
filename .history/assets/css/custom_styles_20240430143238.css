@@ -63,10 +63,6 @@ Content
     background: linear-gradient(to bottom, #000000 0%, #333333 100%);
 }
 
-#footer_wrap .inner {
-    padding-top: 30px;
-}
-
 .flex {
     display: flex;
     justify-content: center;
@@ -92,14 +88,6 @@ Content
 
 .privacy::after {
     background-image: url('../images/privacy.png');
-}
-
-.home:hover {
-    border-bottom-left-radius: 20px;
-}
-
-.privacy:hover {
-    border-bottom-right-radius: 20px;
 }
 
 .banner {
@@ -135,21 +123,6 @@ Content
     width: 35%;
 }
 
-.invite {
-    display: block;
-    background-color: #7289DA;
-    color: white;
-    text-align: center;
-    padding: 10px 20px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    text-decoration: none;
-}
-
-.invite:hover {
-    background-color: #5b6dad;
-}
-
 .line {
     border: 0;
     height: 0.5px;
@@ -157,6 +130,14 @@ Content
     box-shadow: 0px 0px 8px 2px rgba(0, 255, 255, 0.6);
     margin-top: 20px;
     margin-bottom: 20px;
+}
+
+.home:hover {
+    border-bottom-left-radius: 20px;
+}
+
+.privacy:hover {
+    border-bottom-right-radius: 20px;
 }
 
 .menu {
@@ -209,6 +190,10 @@ Content
 .command-links {
     display: flex;
     gap: 25px;
+}
+
+#footer .inner {
+    padding-top: 30px;
 }
 
 @keyframes move {

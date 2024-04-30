@@ -146,10 +146,6 @@ Content
     text-decoration: none;
 }
 
-.invite:hover {
-    background-color: #5b6dad;
-}
-
 .line {
     border: 0;
     height: 0.5px;
