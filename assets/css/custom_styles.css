@@ -378,10 +378,14 @@ Small Device Styles
     }
 
     .zip,
-    .tar,
-    .invite {
+    .tar {
         width: 63px;
         height: 49px;
+    }
+
+    .invite {
+        width: 56px;
+        height: 21px;
     }
 
     .command {
