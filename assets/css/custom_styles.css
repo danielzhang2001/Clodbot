@@ -115,6 +115,7 @@ Content
 
 .header-links {
     display: flex;
+    flex-wrap: wrap;
     align-self: flex-end;
 }
 
@@ -279,7 +280,7 @@ Full-Width Styles
     width: 90px;
     height: 70px;
     overflow: hidden;
-    margin: 10px 0 10px 20px;
+    margin: 10px 0;
 }
 
 .zip:hover {
@@ -336,8 +337,8 @@ Small Device Styles
 
     .zip,
     .tar {
-        width: 54px;
-        height: 42px;
+        width: 63px;
+        height: 49px;
     }
 
     .command {
