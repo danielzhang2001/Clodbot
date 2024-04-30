@@ -136,12 +136,10 @@ Content
 }
 
 .invite {
-    display: block;
     background-color: #7289DA;
     color: white;
-    text-align: center;
     padding: 10px 20px;
-    margin-bottom: 10px;
+    margin-bottom: 50px;
     border-radius: 5px;
     text-decoration: none;
 }
