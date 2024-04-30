@@ -115,8 +115,11 @@ Content
 
 .header-links {
     display: flex;
+    justify-content: flex-end;
     flex-wrap: wrap;
     align-self: flex-end;
+    gap: 25px;
+    width: 35%;
 }
 
 .line {
@@ -285,10 +288,12 @@ Full-Width Styles
 
 .zip:hover {
     background: url('../images/zip_hover.png');
+    background-size: contain;
 }
 
 .tar:hover {
     background: url('../images/tar_hover.png');
+    background-size: contain;
 }
 
 .command {
