@@ -22,7 +22,6 @@ bot = commands.Bot(
     command_prefix=["clodbot, ", "Clodbot, "],
     intents=intents,
     case_insensitive=True,
-    help_command=None,
 )
 
 
@@ -73,21 +72,25 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError) 
 
 
 @bot.command(name="help")
-async def help(ctx: commands.Context) -> None:
-    # Displays all commands with a link to the website for help.
-    message = (
-        "**COMMANDS:**\n\n"
-        "**Clodbot, analyze (Pokemon Showdown Replay Link)** to display the stats from the replay on Discord.\n"
-        "**Clodbot, sheet set (Google Sheets Link)** to set the default Google Sheets link for future 'sheet' commands.\n"
-        "**Clodbot, sheet default** to display the default sheet link on Discord.\n"
-        "**Clodbot, sheet update (Optional Google Sheets Link) (Pokemon Showdown Replay Link)** to update the stats from the replay onto a 'Stats' sheet in the link.\n"
-        "**Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)** to delete the stats section with Player Name from the 'Stats' sheet in the link.\n"
-        "**Clodbot, sheet list (Optional Google Sheets Link) ['Players' OR 'Pokemon']** to display either all Player stats or all Pokemon stats from the 'Stats' sheet in the link on Discord.\n"
-        "**Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]** to display prompt(s) for set selection based on the provided parameters.\n"
-        "**Clodbot, giveset random (Optional Number)** to display random set(s) for the specified amount of random Pokemon.\n\n"
-        "For more information, please visit the official website for Clodbot [**HERE**](https://clodbot.com)."
-    )
-    await ctx.send(message)
+async def help_command(ctx: commands.Context) -> None:
+    help_message = """
+Clodbot, analyze (Pokemon Showdown Replay Link) to display the stats from the replay on Discord.
+
+Clodbot, sheet set (Google Sheets Link) to set the default Google Sheets link for future "sheet" commands.
+
+Clodbot, sheet default to display the default sheet link on Discord.
+
+Clodbot, sheet update (Optional Google Sheets Link) (Pokemon Showdown Replay Link) to update the stats from the replay onto a "Stats" sheet in the link. Uses default link if Google Sheets link not provided.
+
+Clodbot, sheet delete (Optional Google Sheets Link) (Player Name) to delete the stats section with Player Name from the "Stats" sheet in the link. Uses default link if Google Sheets link not provided.
+
+Clodbot, sheet list (Optional Google Sheets Link) ["Players" OR "Pokemon"] to display either all Player stats (if "Players") or all Pokemon stats (if "Pokemon") from the "Stats" sheet in the link on Discord. Uses default link if Google Sheets link not provided.
+
+Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas] to display prompt(s) for set selection based on the provided parameters. Uses first format found if format not provided and latest generation if generation not provided.
+
+Clodbot, giveset random (Optional Number) to display random set(s) for the specified amount of random Pokemon. Displays one if no number given.
+"""
+    await ctx.send(help_message)
 
 
 @bot.command(name="analyze")
