@@ -356,11 +356,6 @@ Small Device Styles
 *******************************************************************************/
 
 @media screen and (max-width: 992px) {
-    h1 {
-        font-size: 30px;
-    }
-
-    #header_wrap .inner,
     .inner {
         padding-left: 55px;
         padding-right: 55px;
