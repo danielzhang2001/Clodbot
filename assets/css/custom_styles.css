@@ -277,12 +277,15 @@ Full-Width Styles
 }
 
 .invite {
+    display: flex;
     background-color: #7289DA;
     color: white;
-    width: 90px;
-    height: 70px;
+    width: 80px;
+    height: 30px;
     padding: 10px 20px;
     border-radius: 5px;
+    align-items: center;
+    justify-content: center;
     text-decoration: none;
 }
 
