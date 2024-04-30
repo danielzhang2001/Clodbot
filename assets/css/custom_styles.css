@@ -130,7 +130,7 @@ Content
     display: flex;
     justify-content: flex-end;
     flex-wrap: wrap;
-    align-self: flex-end;
+    align-items: center;
     gap: 25px;
     width: 35%;
 }
@@ -139,7 +139,6 @@ Content
     background-color: #7289DA;
     color: white;
     padding: 10px 20px;
-    margin-bottom: 50px;
     border-radius: 5px;
     text-decoration: none;
 }
