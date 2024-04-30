@@ -123,7 +123,11 @@ Content
 }
 
 .header-text {
+    display: flex;
     flex-grow: 1;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 20px;
 }
 
 .header-download {
