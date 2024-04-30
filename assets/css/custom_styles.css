@@ -126,11 +126,11 @@ Content
     flex-grow: 1;
 }
 
-.header-links {
+.header-download {
     display: flex;
     justify-content: flex-end;
     flex-wrap: wrap;
-    align-items: center;
+    align-self: flex-end;
     gap: 25px;
     width: 35%;
 }
