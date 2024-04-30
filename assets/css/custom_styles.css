@@ -128,11 +128,9 @@ Content
 
 .header-download {
     display: flex;
-    justify-content: flex-end;
     flex-wrap: wrap;
-    align-self: flex-end;
     gap: 25px;
-    width: 35%;
+    margin-left: auto;
 }
 
 .invite {
