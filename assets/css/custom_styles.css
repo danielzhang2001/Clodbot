@@ -283,19 +283,20 @@ Full-Width Styles
 
 .invite {
     display: flex;
-    background-color: #7289DA;
+    background-color: #5670cc;
     color: white;
     width: 80px;
     height: 30px;
     padding: 10px 20px;
+    border: 3px solid #294483;
     border-radius: 5px;
     align-items: center;
     justify-content: center;
-    text-decoration: none;
 }
 
 .invite:hover {
     background-color: #5b6dad;
+    text-decoration: none;
 }
 
 .zip {
