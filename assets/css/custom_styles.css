@@ -128,7 +128,7 @@ Content
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    padding-right: 20px;
+    padding-right: 30px;
 }
 
 .header-download {
@@ -377,17 +377,6 @@ Small Device Styles
         font-size: 20px;
     }
 
-    .zip,
-    .tar {
-        width: 63px;
-        height: 49px;
-    }
-
-    .invite {
-        width: 56px;
-        height: 21px;
-    }
-
     .command {
         font-size: 8px;
     }
@@ -406,7 +395,7 @@ Small Device Styles
     }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 680px) {
     .menu a {
         font-size: 10px;
     }
