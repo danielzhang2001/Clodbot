@@ -192,10 +192,6 @@ Content
     gap: 25px;
 }
 
-.footer.inner {
-    padding-top: 30px;
-}
-
 @keyframes move {
     0% {
         background-position: center 0;
