@@ -340,10 +340,18 @@ Small Device Styles
         font-size: 12px;
     }
 
+    #project_title {
+        font-size: 30px;
+    }
+
+    #project_tagline {
+        font-size: 20px;
+    }
+
     .zip,
     .tar {
-        width: 45px;
-        height: 35px;
+        width: 63px;
+        height: 49px;
     }
 
     .command {
