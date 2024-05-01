@@ -100,7 +100,7 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
     # Analyzes replay and sends stats in a message to Discord.
     if not args:
         raise NoAnalyze()
-    replay_link = " ".join(args)a
+    replay_link = " ".join(args)
     message = await Analyze.analyze_replay(replay_link)
     await ctx.send(message)
 
