@@ -407,7 +407,7 @@ Small Device Styles
     }
 }
 
-@media screen and (max-width: 680px) {
+@media screen and (max-width: 780px) {
     .menu a {
         font-size: 10px;
     }
