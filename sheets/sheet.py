@@ -3,6 +3,7 @@ General functions in updating Google Sheets with Pokemon Showdown replay informa
 """
 
 import pickle
+import json
 import os.path
 import asyncio
 from google_auth_oauthlib.flow import InstalledAppFlow
