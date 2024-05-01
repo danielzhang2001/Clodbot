@@ -366,6 +366,12 @@ right-animation {
 Small Device Styles
 *******************************************************************************/
 
+@media screen and (max-width: 1407px) {
+    .header-download {
+        gap: 0;
+    }
+}
+
 @media screen and (max-width: 992px) {
 
     #header_wrap .inner,
