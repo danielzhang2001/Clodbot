@@ -367,6 +367,8 @@ Small Device Styles
 *******************************************************************************/
 
 @media screen and (max-width: 992px) {
+
+    #header_wrap .inner,
     .inner {
         padding-left: 55px;
         padding-right: 55px;
