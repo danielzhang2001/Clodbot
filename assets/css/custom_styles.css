@@ -301,7 +301,8 @@ Full-Width Styles
 }
 
 .invite:hover {
-    background-color: rgba(13, 134, 182, 0.7) text-decoration: none;
+    background-color: rgba(13, 134, 182, 0.7);
+    text-decoration: none;
 }
 
 .zip {
