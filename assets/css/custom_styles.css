@@ -408,12 +408,17 @@ Small Device Styles
 }
 
 @media screen and (max-width: 780px) {
-    .menu a {
-        font-size: 10px;
-    }
-
     .header-text {
         padding-right: 0;
+    }
+
+    .invite-group {
+        gap: 20px;
+    }
+
+    .invite {
+        width: 40px;
+        height: 15px;
     }
 
     .zip,
