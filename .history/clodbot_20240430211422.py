@@ -32,7 +32,7 @@ async def on_ready():
     print(f"{bot.user} has connected to Discord!")
     await bot.change_presence(
         activity=discord.Activity(
-            type=discord.ActivityType.listening, name="clodbot, help"
+            type=discord.ActivityType.listening, name="Clodbot, help"
         )
     )
 
