@@ -143,6 +143,11 @@ Content
     margin-left: auto;
 }
 
+.invite-group {
+    display: flex;
+    gap: 10px;
+}
+
 .line {
     border: 0;
     height: 0.5px;
