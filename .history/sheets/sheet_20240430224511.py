@@ -44,7 +44,7 @@ async def authenticate_sheet(server_id: int, force_login: bool = False) -> Crede
                     "redirect_uris": json.loads(os.getenv("REDIRECT_URIS")),
                 }
             }
-            flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
             creds = await asyncio.to_thread(flow.run_local_server, port=0)
         with open(token_path, "wb") as token:
             pickle.dump(creds, token)
