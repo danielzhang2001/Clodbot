@@ -40,6 +40,6 @@ wrapt==1.12.1
 yarl==1.8.2
 zope.event==4.5.0
 zope.interface==5.4.0
-google-auth
-google-auth-oauthlib
-google-api-python-client
+google-auth==1.8.0
+google-auth-oauthlib==0.4.1
+google-api-python-client==1.7.2
