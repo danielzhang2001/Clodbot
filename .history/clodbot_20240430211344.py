@@ -30,11 +30,7 @@ bot = commands.Bot(
 async def on_ready():
     # Print a message when the bot connects to Discord.
     print(f"{bot.user} has connected to Discord!")
-    await bot.change_presence(
-        activity=discord.Activity(
-            type=discord.ActivityType.listening, name="clodbot, help"
-        )
-    )
+    await bot.change_presence(activity=discord.Activity(name="a game"))
 
 
 @bot.event

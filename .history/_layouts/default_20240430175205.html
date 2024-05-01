@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: " en-US" }}">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,maximum-scale=2">
+    <link rel="icon" type="image/x-icon" href="{{ '/assets/images/favicon.ico' | relative_url }}">
+    <link rel="stylesheet" type="text/css" media="screen"
+        href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <link rel="stylesheet" type="text/css" media="screen"
+        href="{{ '/assets/css/custom_styles.css?v=' | append: site.github.build_revision | relative_url }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    {% seo %}
+    {% include head-custom.html %}
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <div class="flex">
+            <div class="icon left"></div>
+            <header class="inner">
+                {% if site.github.is_project_page %}
+                <div class="menu">
+                    <a class="banner home" href="https://clodbot.com">Home</a>
+                    <a class="banner github" href="{{ site.github.repository_url }}" target="_blank">GitHub</a>
+                    <a class="banner privacy" href="https://clodbot.com/privacy-policy">Privacy Policy</a>
+                </div>
+                {% endif %}
+                <div class="header">
+                    <div class="header-main">
+                        <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
+                        <h2 id="project_tagline">{{ site.description | default: site.github.project_tagline }}</h2>
+                    </div>
+                    <div class="header-download">
+                        <a class="invite"
+                            href="https://discord.com/oauth2/authorize?client_id=1090450927992975491&permissions=2048&scope=bot">Invite</a>
+                        <a class="zip" href="{{ site.github.zip_url }}"></a>
+                        <a class="tar" href="{{ site.github.tar_url }}"></a>
+                    </div>
+                </div>
+            </header>
+            <div class="icon right"></div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+        <div class="flex">
+            <div class="background left-animation"></div>
+            <section id="main_content" class="inner">{{ content }}</section>
+            <div class="background right-animation"></div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div id="footer_wrap" class="outer">
+        <footer class="inner">
+            {% if site.github.is_project_page %}
+            <p class="copyright">{{ site.title | default: site.github.repository_name }} maintained by <a
+                    href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
+            {% endif %}
+            <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+        </footer>
+    </div>
+</body>
+
+</html>
