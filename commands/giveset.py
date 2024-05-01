@@ -6,7 +6,8 @@ import asyncio
 import random
 import aiohttp
 import discord
-from discord.ui import Button, ButtonStyle, View
+from discord import ButtonStyle, Button
+from discord.ui import View
 from discord.ext import commands
 from typing import Optional, List, Dict, Tuple
 from uuid import uuid4
