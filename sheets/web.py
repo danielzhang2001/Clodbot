@@ -47,7 +47,7 @@ def callback():
     if not state or not server_id:
         return "Invalid state parameter or missing server_id", 400
     client_config = get_config()
-    flow = Flow.from_client_secrets_file(
+    flow = Flow.from_client_config(
         client_config, scopes=SCOPES, state=state, redirect_uri=FLASK_REDIRECT_URI
     )
     flow.fetch_token(authorization_response=request.url)
