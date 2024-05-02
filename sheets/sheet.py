@@ -19,46 +19,21 @@ from errors import *
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
-def get_google_client_config():
-    return {
-        "client_id": os.getenv("CLIENT_ID"),
-        "project_id": os.getenv("PROJECT_ID"),
-        "auth_uri": os.getenv("AUTH_URI"),
-        "token_uri": os.getenv("TOKEN_URI"),
-        "auth_provider_x509_cert_url": os.getenv("AUTH_PROVIDER_X509_CERT_URL"),
-        "client_secret": os.getenv("CLIENT_SECRET"),
-        "redirect_uris": json.loads(os.getenv("REDIRECT_URIS")),
-    }
-
-
 async def authenticate_sheet(
     ctx: commands.Context, server_id: int, force_login: bool = False
 ) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
     creds_directory = "sheets"
-    if not os.path.exists(creds_directory):
-        os.makedirs(creds_directory)
     token_filename = f"token_{server_id}.pickle"
     token_path = os.path.join(creds_directory, token_filename)
-    creds = None
     if os.path.exists(token_path) and not force_login:
         with open(token_path, "rb") as token:
             creds = pickle.load(token)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            client_config = get_google_client_config()
-            flow = Flow.from_client_config(
-                client_config,
-                scopes=SCOPES,
-                redirect_uri="https://clodbot.com/oauth2callback",
-            )
-            authorization_url, _ = flow.authorization_url(prompt="consent")
-            await ctx.send(
-                f"Please authenticate by visiting this URL: {authorization_url}"
-            )
-    return creds
+            if creds.valid:
+                return creds
+    auth_url = f"https://clodbot.com/authorize/{server_id}"
+    await ctx.send(f"Please authenticate by visiting this URL: {auth_url}")
+    return None
 
 
 def add_data(
