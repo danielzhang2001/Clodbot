@@ -5,19 +5,19 @@ import pickle
 import json
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY")
+app.secret_key = os.getenv("FLASK_KEY")
 
 
 def get_google_client_config():
     return {
         "web": {
-            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-            "project_id": os.getenv("GOOGLE_PROJECT_ID"),
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-            "redirect_uris": json.loads(os.getenv("GOOGLE_REDIRECT_URIS")),
+            "client_id": os.getenv("CLIENT_ID"),
+            "project_id": os.getenv("PROJECT_ID"),
+            "auth_uri": os.getenv("AUTH_URI"),
+            "token_uri": os.getenv("TOKEN_URI"),
+            "auth_provider_x509_cert_url": os.getenv("AUTH_PROVIDER_X509_CERT_URL"),
+            "client_secret": os.getenv("CLIENT_SECRET"),
+            "redirect_uris": json.loads(os.getenv("REDIRECT_URIS")),
         }
     }
 
