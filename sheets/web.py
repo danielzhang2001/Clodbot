@@ -13,7 +13,7 @@ app.secret_key = os.getenv("FLASK_KEY")
 def get_google_client_config():
     creds_json = json.loads(os.getenv("CREDENTIALS"))
     return {
-        "installed": {
+        "web": {
             "client_id": os.getenv("CLIENT_ID"),
             "project_id": os.getenv("PROJECT_ID"),
             "auth_uri": os.getenv("AUTH_URI"),
@@ -38,10 +38,9 @@ def authorize(server_id):
     client_config = get_google_client_config()
     credentials = client_config["credentials"]
     flow = Flow.from_client_config(
-        client_config["installed"],
+        client_config["web"],
         scopes=SCOPES,
         redirect_uri=FLASK_REDIRECT_URI,
-        credentials=credentials,
     )
     authorization_url, state = flow.authorization_url(
         access_type="offline", prompt="consent"
