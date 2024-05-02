@@ -90,7 +90,7 @@ def callback():
     server_id = session.pop("server_id", None)
     sheet_link = session.pop("sheet_link", None)
     if not state or not server_id or not sheet_link:
-        return "Invalid state parameter or missing server_id", 400
+        return "Invalid state parameter or missing server_id or sheet link", 400
     client_config = get_config()
     flow = Flow.from_client_config(
         client_config, scopes=SCOPES, state=state, redirect_uri=REDIRECT
