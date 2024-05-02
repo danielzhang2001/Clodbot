@@ -13,7 +13,7 @@ from sheets.sheet import *
 from sheets.utils import *
 from errors import *
 
-default_link = load_links()
+default_link = load_links()a
 
 
 class ManageSheet:
