@@ -32,22 +32,7 @@ async def authenticate_sheet(server_id: int, force_login: bool = False) -> Crede
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            client_config = {
-                "installed": {
-                    "client_id": os.getenv("CLIENT_ID"),
-                    "project_id": os.getenv("PROJECT_ID"),
-                    "auth_uri": os.getenv("AUTH_URI"),
-                    "token_uri": os.getenv("TOKEN_URI"),
-                    "auth_provider_x509_cert_url": os.getenv(
-                        "AUTH_PROVIDER_X509_CERT_URL"
-                    ),
-                    "client_secret": os.getenv("CLIENT_SECRET"),
-                }
-            }
-            flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-            creds = await asyncio.to_thread(flow.run_local_server)
-        with open(token_path, "wb") as token:
-            pickle.dump(creds, token)
+            return redirect(url_for("authorize"))
     return creds
 
 
