@@ -21,14 +21,9 @@ async def authenticate_sheet(
     ctx: commands.Context, server_id: int, force_login: bool = False
 ) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
-    creds_directory = "sheets"
-    token_filename = f"token_{server_id}.pickle"
-    token_path = os.path.join(creds_directory, token_filename)
-    if os.path.exists(token_path) and not force_login:
-        with open(token_path, "rb") as token:
-            creds = pickle.load(token)
-            if creds.valid:
-                return creds
+    creds = load_credentials(server_id)
+    if creds and creds.valid and not force_login:
+        return creds
     auth_url = f"https://clodbot.herokuapp.com/authorize/{server_id}"
     await ctx.send(f"Please authenticate by visiting this URL: {auth_url}")
     return None
