@@ -2,8 +2,6 @@ import os
 import json
 from flask import Flask, request, redirect, session
 from google_auth_oauthlib.flow import Flow
-from google.oauth2.credentials import Credentials
-from google.oauth2 import service_account
 import pickle
 
 app = Flask(__name__)
@@ -11,7 +9,7 @@ app.secret_key = os.getenv("FLASK_KEY")
 
 
 def get_google_client_config():
-    creds_json = json.loads(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+    # This function now returns only the necessary OAuth2 web client configuration.
     return {
         "web": {
             "client_id": os.getenv("CLIENT_ID"),
@@ -21,10 +19,7 @@ def get_google_client_config():
             "auth_provider_x509_cert_url": os.getenv("AUTH_PROVIDER_X509_CERT_URL"),
             "client_secret": os.getenv("CLIENT_SECRET"),
             "redirect_uris": json.loads(os.getenv("REDIRECT_URIS")),
-        },
-        "credentials": service_account.Credentials.from_service_account_info(
-            creds_json
-        ),
+        }
     }
 
 
@@ -37,10 +32,8 @@ def authorize(server_id):
     print("authorize started")
     client_config = get_google_client_config()
     print("client config gotten")
-    credentials = client_config["credentials"]
-    print("credentials gotten")
     flow = Flow.from_client_config(
-        client_config["web"],
+        client_config["web"],  # Use the web configuration for OAuth
         scopes=SCOPES,
         redirect_uri=FLASK_REDIRECT_URI,
     )
@@ -60,13 +53,11 @@ def callback():
     if not state or not server_id:
         return "Invalid state parameter or missing server_id", 400
     client_config = get_google_client_config()
-    credentials = client_config["credentials"]
     flow = Flow.from_client_config(
-        client_config["installed"],
+        client_config["web"],  # Again, only use the web config here
         scopes=SCOPES,
         state=state,
         redirect_uri=FLASK_REDIRECT_URI,
-        credentials=credentials,
     )
     flow.fetch_token(authorization_response=request.url)
     creds = flow.credentials
