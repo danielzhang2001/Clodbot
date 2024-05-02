@@ -31,7 +31,7 @@ async def authenticate_sheet(
             creds = pickle.load(token)
             if creds.valid:
                 return creds
-    auth_url = f"https://clodbot.com/authorize/{server_id}"
+    auth_url = f"https://clodbot.herokuapp.com/authorize/{server_id}"
     await ctx.send(f"Please authenticate by visiting this URL: {auth_url}")
     return None
 
