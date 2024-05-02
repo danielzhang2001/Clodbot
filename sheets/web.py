@@ -33,10 +33,12 @@ def get_config():
 
 
 def get_db_connection():
+    # Initial connection to the database.
     return psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 
 
 def store_credentials(server_id, creds):
+    # Stores credentials into a database.
     conn = get_db_connection()
     with conn:
         with conn.cursor() as cur:
@@ -53,6 +55,7 @@ def store_credentials(server_id, creds):
 
 
 def load_credentials(server_id):
+    # Loads existing credentials.
     conn = get_db_connection()
     with conn:
         with conn.cursor() as cur:
@@ -66,7 +69,7 @@ def load_credentials(server_id):
     return None
 
 
-@app.route("/authorize/<int:server_id>/<sheet_link>")
+@app.route("/authorize/<int:server_id>/<path:sheet_link>")
 def authorize(server_id, sheet_link):
     # Handles authorization endpoint.
     client_config = get_config()
