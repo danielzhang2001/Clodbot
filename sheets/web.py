@@ -29,7 +29,7 @@ FLASK_REDIRECT_URI = "https://clodbot.herokuapp.com/callback"
 @app.route("/authorize/<server_id>")
 def authorize(server_id):
     client_config = get_config()
-    flow = Flow.from_client_secrets_file(
+    flow = Flow.from_client_config(
         client_config, scopes=SCOPES, redirect_uri=FLASK_REDIRECT_URI
     )
     authorization_url, state = flow.authorization_url(
