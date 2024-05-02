@@ -42,7 +42,6 @@ async def authenticate_sheet(server_id: int, force_login: bool = False) -> Crede
                         "AUTH_PROVIDER_X509_CERT_URL"
                     ),
                     "client_secret": os.getenv("CLIENT_SECRET"),
-                    "redirect_uris": json.loads(os.getenv("REDIRECT_URIS")),
                 }
             }
             flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
