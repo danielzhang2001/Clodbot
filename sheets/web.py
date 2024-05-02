@@ -11,16 +11,14 @@ app.secret_key = os.getenv("FLASK_KEY")
 def get_google_client_config():
     # This function now returns only the necessary OAuth2 web client configuration.
     return {
-        {
-            "web": {
-                "client_id": "1071951272873-3ujfrb6sv2r2k0akrmlimt9fjmge43in.apps.googleusercontent.com",
-                "project_id": "clodbot-sheets",
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_secret": "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",
-                "redirect_uris": ["https://clodbot.herokuapp.com/callback"],
-            }
+        "web": {
+            "client_id": "1071951272873-3ujfrb6sv2r2k0akrmlimt9fjmge43in.apps.googleusercontent.com",
+            "project_id": "clodbot-sheets",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_secret": "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",
+            "redirect_uris": ["https://clodbot.herokuapp.com/callback"],
         }
     }
 
