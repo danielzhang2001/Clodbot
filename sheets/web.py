@@ -1,25 +1,16 @@
 import os
 from flask import Flask, request, redirect, session, url_for
 from google_auth_oauthlib.flow import Flow
+from sheets import *
 import pickle
 import json
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_KEY")
 
-
-def get_google_client_config():
-    return {
-        "web": {
-            "client_id": os.getenv("CLIENT_ID"),
-            "project_id": os.getenv("PROJECT_ID"),
-            "auth_uri": os.getenv("AUTH_URI"),
-            "token_uri": os.getenv("TOKEN_URI"),
-            "auth_provider_x509_cert_url": os.getenv("AUTH_PROVIDER_X509_CERT_URL"),
-            "client_secret": os.getenv("CLIENT_SECRET"),
-            "redirect_uris": json.loads(os.getenv("REDIRECT_URIS")),
-        }
-    }
+# Define the redirect URI used in your Flask application
+FLASK_REDIRECT_URI = url_for("oauth2callback", _external=True)
+print("Flask Redirect URI:", FLASK_REDIRECT_URI)
 
 
 @app.route("/authorize")
@@ -28,7 +19,7 @@ def authorize():
     flow = Flow.from_client_config(
         client_config,
         scopes=["https://www.googleapis.com/auth/spreadsheets"],
-        redirect_uri=url_for("oauth2callback", _external=True),
+        redirect_uri=FLASK_REDIRECT_URI,
     )
     authorization_url, state = flow.authorization_url(
         access_type="offline", include_granted_scopes="true", prompt="consent"
@@ -45,7 +36,7 @@ def oauth2callback():
         client_config,
         scopes=["https://www.googleapis.com/auth/spreadsheets"],
         state=state,
-        redirect_uri=url_for("oauth2callback", _external=True),
+        redirect_uri=FLASK_REDIRECT_URI,
     )
     flow.fetch_token(authorization_response=request.url)
     creds = flow.credentials
