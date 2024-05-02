@@ -5,7 +5,7 @@ title: Privacy Policy
 
 # Privacy Policy
 
-**Last updated: April 19, 2024**
+**Last updated: May 2, 2024**
 
 This Privacy Policy describes the policies and procedures on the collection, use and disclosure of your information when
 you use the Service and tells you about your privacy rights and how the law protects you.
@@ -51,7 +51,8 @@ such individual is accessing or using the service, as applicable.
 ##### Personal Data
 
 While using the service, your Pokemon Showdown username, along with the scores (kills and deaths) of your Pokemon and
-the outcome of the match that you choose to use will be recorded.
+the outcome of the match that you choose to use will be recorded. There is no Google user data that is accessed or collected 
+by the application. This application does not use Google user data.
 
 ##### Usage Data
 
@@ -59,11 +60,6 @@ Usage Data is collected automatically when using the service.
 
 Usage Data includes information about the pages of the service that you visit, the date and time of your visit, 
 the time spent on those pages, unique device identifiers and other diagnostic data.
-
-When you access the service by or through a mobile device, we may collect certain information automatically, including,
-but not limited to, the type of mobile device you use, your mobile device unique ID, the IP address of your mobile
-device, your mobile operating system, the type of mobile Internet browser You use, unique device identifiers and other
-diagnostic data.
 
 We may also collect information that your browser sends whenever you visit our service or when you access the service by
 or through a mobile device.
