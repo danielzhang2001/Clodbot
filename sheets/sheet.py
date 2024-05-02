@@ -22,10 +22,13 @@ async def authenticate_sheet(
     ctx: commands.Context, server_id: int, sheet_link: str, force_login: bool = False
 ) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
+    print("started authentication")
     creds = load_credentials(server_id)
     if creds and creds.valid and not force_login:
         return creds
+    print("before auth url")
     auth_url = f"https://clodbot.herokuapp.com/authorize/{server_id}/{sheet_link}"
+    print("after auth url")
     await ctx.send(f"Please authenticate by visiting this URL: {auth_url}")
     return None
 
