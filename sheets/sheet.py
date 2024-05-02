@@ -46,7 +46,7 @@ async def authenticate_sheet(server_id: int, force_login: bool = False) -> Crede
                 }
             }
             flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-            creds = await asyncio.to_thread(flow.run_console)
+            creds = await asyncio.to_thread(flow.run_local_server)
         with open(token_path, "wb") as token:
             pickle.dump(creds, token)
     return creds
