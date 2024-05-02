@@ -34,6 +34,7 @@ FLASK_REDIRECT_URI = "https://clodbot.herokuapp.com/callback"
 
 @app.route("/authorize/<server_id>")
 def authorize(server_id):
+    print(f"Starting authorization for server_id: {server_id}")
     client_config = get_google_client_config()
     credentials = client_config["credentials"]
     flow = Flow.from_client_config(
