@@ -29,28 +29,16 @@ FLASK_REDIRECT_URI = "https://clodbot.herokuapp.com/callback"
 
 @app.route("/authorize/<server_id>")
 def authorize(server_id):
-    print("authorize started")
     client_config = get_google_client_config()
-    print("client config gotten: ", client_config)  # Log the entire client config
-    try:
-        flow = Flow.from_client_config(
-            client_config["web"],
-            scopes=SCOPES,
-            redirect_uri=FLASK_REDIRECT_URI,
-        )
-        print("flow gotten")
-        authorization_url, state = flow.authorization_url(
-            access_type="offline", prompt="consent"
-        )
-        session["state"] = state
-        session["server_id"] = server_id
-        return redirect(authorization_url)
-    except Exception as e:
-        print("Error creating flow: ", str(e))
-        import traceback
-
-        traceback.print_exc()
-        return str(e), 500
+    flow = Flow.from_client_config(
+        client_config["web"], scopes=SCOPES, redirect_uri=FLASK_REDIRECT_URI
+    )
+    authorization_url, state = flow.authorization_url(
+        access_type="offline", prompt="consent"
+    )
+    session["state"] = state
+    session["server_id"] = server_id
+    return redirect(authorization_url)
 
 
 @app.route("/callback")
