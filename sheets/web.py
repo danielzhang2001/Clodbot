@@ -66,7 +66,7 @@ def load_credentials(server_id):
     return None
 
 
-@app.route("/authorize/<int:server_id>/<str:sheet_link>")
+@app.route("/authorize/<int:server_id>/<sheet_link>")
 def authorize(server_id, sheet_link):
     # Handles authorization endpoint.
     client_config = get_config()
