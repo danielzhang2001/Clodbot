@@ -29,7 +29,7 @@ def get_google_client_config():
 
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-FLASK_REDIRECT_URI = "https://clodbot.herokuapp.com/oauth2callback"
+FLASK_REDIRECT_URI = "https://clodbot.herokuapp.com/callback"
 
 
 @app.route("/authorize/<server_id>")
@@ -50,8 +50,8 @@ def authorize(server_id):
     return redirect(authorization_url)
 
 
-@app.route("/oauth2callback")
-def oauth2callback():
+@app.route("/callback")
+def callback():
     state = session.pop("state", None)
     server_id = session.pop("server_id", None)
     if not state or not server_id:
