@@ -47,7 +47,7 @@ def store_credentials(server_id, creds):
                 ON CONFLICT (server_id)
                 DO UPDATE SET data = EXCLUDED.data;
                 """,
-                (server_id, psycopg2.extras.Binary(pickle.dumps(creds))),
+                (server_id, psycopg2.Binary(pickle.dumps(creds))),
             )
     conn.close()
 
