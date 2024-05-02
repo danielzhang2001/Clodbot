@@ -46,9 +46,10 @@ def authorize(server_id):
         session["server_id"] = server_id
         return redirect(authorization_url)
     except Exception as e:
-        print(
-            "Error creating flow: ", str(e)
-        )  # Log any errors thrown during the flow creation
+        print("Error creating flow: ", str(e))
+        import traceback
+
+        traceback.print_exc()
         return str(e), 500
 
 
