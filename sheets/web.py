@@ -66,8 +66,8 @@ def load_credentials(server_id):
     return None
 
 
-@app.route("/authorize/<int:server_id>")
-def authorize(server_id):
+@app.route("/authorize/<int:server_id>/<str:sheet_link>")
+def authorize(server_id, sheet_link):
     # Handles authorization endpoint.
     client_config = get_config()
     flow = Flow.from_client_config(client_config, scopes=SCOPES, redirect_uri=REDIRECT)
@@ -76,6 +76,7 @@ def authorize(server_id):
     )
     session["state"] = state
     session["server_id"] = server_id
+    session["sheet_link"] = sheet_link
     return redirect(authorization_url)
 
 
@@ -84,7 +85,8 @@ def callback():
     # Handles callback endpoint.
     state = session.pop("state", None)
     server_id = session.pop("server_id", None)
-    if not state or not server_id:
+    sheet_link = session.pop("sheet_link", None)
+    if not state or not server_id or not sheet_link:
         return "Invalid state parameter or missing server_id", 400
     client_config = get_config()
     flow = Flow.from_client_config(
@@ -92,8 +94,11 @@ def callback():
     )
     flow.fetch_token(authorization_response=request.url)
     creds = flow.credentials
-    store_credentials(server_id, creds)
-    return "Authentication successful! You can now close this page."
+    if is_valid_sheet(creds, sheet_link):
+        store_credentials(server_id, creds)
+        return "Authentication successful! You can now close this page."
+    else:
+        return "You don't have permission to edit this sheet. Please use an account with permission."
 
 
 if __name__ == "__main__":
