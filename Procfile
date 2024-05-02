@@ -1,2 +1,2 @@
-web: python sheets/web.py
+web: gunicorn sheets.web:app
 worker: python clodbot.py
