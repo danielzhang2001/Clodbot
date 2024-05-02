@@ -1,2 +1,2 @@
-web: python web.py
+web: python sheets/web.py
 worker: python clodbot.py
