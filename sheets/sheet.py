@@ -16,8 +16,6 @@ from googleapiclient.errors import HttpError
 from typing import Optional, List, Dict, Tuple
 from errors import *
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-
 
 async def authenticate_sheet(
     ctx: commands.Context, server_id: int, force_login: bool = False

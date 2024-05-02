@@ -11,7 +11,7 @@ app.secret_key = os.getenv("FLASK_KEY")
 
 
 def get_google_client_config():
-    creds_json = json.loads(os.getenv("CREDENTIALS"))
+    creds_json = json.loads(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
     return {
         "web": {
             "client_id": os.getenv("CLIENT_ID"),
