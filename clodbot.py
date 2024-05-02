@@ -140,13 +140,17 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
                 raise NoList()
             return
         if command == "update":
-            message = await ManageSheet.update_sheet(server_id, creds, sheet_link, data)
+            message = await ManageSheet.update_sheet(
+                ctx, server_id, creds, sheet_link, data
+            )
         elif command == "delete":
             message = await ManageSheet.delete_player(
-                server_id, creds, sheet_link, data
+                ctx, server_id, creds, sheet_link, data
             )
         elif command == "list":
-            message = await ManageSheet.list_data(server_id, creds, sheet_link, data)
+            message = await ManageSheet.list_data(
+                ctx, server_id, creds, sheet_link, data
+            )
     await ctx.send(message)
 
 
