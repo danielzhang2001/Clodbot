@@ -34,14 +34,17 @@ FLASK_REDIRECT_URI = "https://clodbot.herokuapp.com/callback"
 
 @app.route("/authorize/<server_id>")
 def authorize(server_id):
-    print(f"Starting authorization for server_id: {server_id}")
+    print("authorize started")
     client_config = get_google_client_config()
+    print("client config gotten")
     credentials = client_config["credentials"]
+    print("credentials gotten")
     flow = Flow.from_client_config(
         client_config["web"],
         scopes=SCOPES,
         redirect_uri=FLASK_REDIRECT_URI,
     )
+    print("flow gotten")
     authorization_url, state = flow.authorization_url(
         access_type="offline", prompt="consent"
     )
@@ -56,7 +59,6 @@ def callback():
     server_id = session.pop("server_id", None)
     if not state or not server_id:
         return "Invalid state parameter or missing server_id", 400
-
     client_config = get_google_client_config()
     credentials = client_config["credentials"]
     flow = Flow.from_client_config(
@@ -68,7 +70,6 @@ def callback():
     )
     flow.fetch_token(authorization_response=request.url)
     creds = flow.credentials
-
     creds_directory = "sheets"
     if not os.path.exists(creds_directory):
         os.makedirs(creds_directory)
