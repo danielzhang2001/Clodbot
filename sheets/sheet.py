@@ -6,8 +6,9 @@ import pickle
 import json
 import os.path
 import asyncio
-from flask import redirect, url_for
+from discord.ext import commands
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import Resource, build
@@ -18,7 +19,21 @@ from errors import *
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
-async def authenticate_sheet(server_id: int, force_login: bool = False) -> Credentials:
+def get_google_client_config():
+    return {
+        "client_id": os.getenv("CLIENT_ID"),
+        "project_id": os.getenv("PROJECT_ID"),
+        "auth_uri": os.getenv("AUTH_URI"),
+        "token_uri": os.getenv("TOKEN_URI"),
+        "auth_provider_x509_cert_url": os.getenv("AUTH_PROVIDER_X509_CERT_URL"),
+        "client_secret": os.getenv("CLIENT_SECRET"),
+        "redirect_uris": json.loads(os.getenv("REDIRECT_URIS")),
+    }
+
+
+async def authenticate_sheet(
+    ctx: commands.Context, server_id: int, force_login: bool = False
+) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
     creds_directory = "sheets"
     if not os.path.exists(creds_directory):
@@ -33,7 +48,16 @@ async def authenticate_sheet(server_id: int, force_login: bool = False) -> Crede
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            return redirect(url_for("authorize"))
+            client_config = get_google_client_config()
+            flow = Flow.from_client_config(
+                client_config,
+                scopes=SCOPES,
+                redirect_uri="https://clodbot.com/oauth2callback",
+            )
+            authorization_url, _ = flow.authorization_url(prompt="consent")
+            await ctx.send(
+                f"Please authenticate by visiting this URL: {authorization_url}"
+            )
     return creds
 
 

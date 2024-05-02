@@ -19,11 +19,15 @@ default_link = load_links()
 class ManageSheet:
     @staticmethod
     async def update_sheet(
-        server_id: int, creds: Credentials, sheet_link: str, replay_link: str
+        ctx: Context,
+        server_id: int,
+        creds: Credentials,
+        sheet_link: str,
+        replay_link: str,
     ) -> str:
         # Updates sheets with replay data.
         if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(server_id, force_login=True)
+            creds = await authenticate_sheet(ctx, server_id, force_login=True)
             if not is_valid_sheet(creds, sheet_link):
                 raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
@@ -85,11 +89,15 @@ class ManageSheet:
 
     @staticmethod
     async def delete_player(
-        server_id: int, creds: Credentials, sheet_link: str, player_name: str
+        ctx: Context,
+        server_id: int,
+        creds: Credentials,
+        sheet_link: str,
+        player_name: str,
     ) -> str:
         # Deletes player section from the sheet.
         if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(server_id, force_login=True)
+            creds = await authenticate_sheet(ctx, server_id, force_login=True)
             if not is_valid_sheet(creds, sheet_link):
                 raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
@@ -122,11 +130,11 @@ class ManageSheet:
 
     @staticmethod
     async def list_data(
-        server_id: int, creds: Credentials, sheet_link: str, data: str
+        ctx: Context, server_id: int, creds: Credentials, sheet_link: str, data: str
     ) -> str:
         # Lists all player names from the sheet.
         if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(server_id, force_login=True)
+            creds = await authenticate_sheet(ctx, server_id, force_login=True)
             if not is_valid_sheet(creds, sheet_link):
                 raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
@@ -163,7 +171,7 @@ class ManageSheet:
     ) -> str:
         # Sets the default sheet link.
         if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(server_id, force_login=True)
+            creds = await authenticate_sheet(ctx, server_id, force_login=True)
             if not is_valid_sheet(creds, sheet_link):
                 raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
