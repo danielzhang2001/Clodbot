@@ -8,17 +8,16 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_KEY")
 
 
-def get_google_client_config():
-    # This function now returns only the necessary OAuth2 web client configuration.
+def get_config():
     return {
         "web": {
-            "client_id": "1071951272873-ltgfkiiqj456etgtgk6ha3ntjuchmbhn.apps.googleusercontent.com",
-            "project_id": "clodbot-sheets",
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-            "client_secret": "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",
-            "redirect_uris": ["https://clodbot.herokuapp.com/callback"],
+            "client_id": os.getenv("CLIENT_ID"),
+            "project_id": os.getenv("PROJECT_ID"),
+            "auth_uri": os.getenv("AUTH_URI"),
+            "token_uri": os.getenv("TOKEN_URI"),
+            "auth_provider_x509_cert_url": os.getenv("AUTH_PROVIDER_X509_CERT_URL"),
+            "client_secret": os.getenv("CLIENT_SECRET"),
+            "redirect_uris": json.loads(os.getenv("REDIRECT_URIS")),
         }
     }
 
@@ -29,9 +28,9 @@ FLASK_REDIRECT_URI = "https://clodbot.herokuapp.com/callback"
 
 @app.route("/authorize/<server_id>")
 def authorize(server_id):
-    client_config = get_google_client_config()
-    flow = Flow.from_client_config(
-        client_config["web"], scopes=SCOPES, redirect_uri=FLASK_REDIRECT_URI
+    client_config = get_config()
+    flow = Flow.from_client_secrets_file(
+        client_config, scopes=SCOPES, redirect_uri=FLASK_REDIRECT_URI
     )
     authorization_url, state = flow.authorization_url(
         access_type="offline", prompt="consent"
@@ -47,12 +46,9 @@ def callback():
     server_id = session.pop("server_id", None)
     if not state or not server_id:
         return "Invalid state parameter or missing server_id", 400
-    client_config = get_google_client_config()
-    flow = Flow.from_client_config(
-        client_config["web"],  # Again, only use the web config here
-        scopes=SCOPES,
-        state=state,
-        redirect_uri=FLASK_REDIRECT_URI,
+    client_config = get_config()
+    flow = Flow.from_client_secrets_file(
+        client_config, scopes=SCOPES, state=state, redirect_uri=FLASK_REDIRECT_URI
     )
     flow.fetch_token(authorization_response=request.url)
     creds = flow.credentials
@@ -63,7 +59,6 @@ def callback():
     token_path = os.path.join(creds_directory, token_filename)
     with open(token_path, "wb") as token:
         pickle.dump(creds, token)
-
     return "Authentication successful! You can now close this page."
 
 
