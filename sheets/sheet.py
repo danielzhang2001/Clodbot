@@ -14,7 +14,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
 from typing import Optional, List, Dict, Tuple
-from web import load_credentials
+from sheets.web import load_credentials
 from errors import *
 
 
