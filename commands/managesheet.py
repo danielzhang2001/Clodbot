@@ -177,8 +177,7 @@ class ManageSheet:
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
         title = sheet_metadata["properties"]["title"]
-
-    return f"Default sheet link set at [**{title}**]({sheet_link})."
+        return f"Default sheet link set at [**{title}**]({sheet_link})."
 
     @staticmethod
     async def get_default(server_id: int, creds: Credentials) -> str:
