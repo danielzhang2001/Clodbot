@@ -157,7 +157,7 @@ class ManageSheet:
     @staticmethod
     def set_default(server_id: int, creds: Credentials, sheet_link: str) -> str:
         # Sets the default link for the server.
-        conn = get_db_connection()
+        conn = await get_db_connection()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -180,7 +180,7 @@ class ManageSheet:
     @staticmethod
     def get_default(server_id: int, creds: Credentials) -> str:
         # Returns the server's current default link.
-        conn = get_db_connection()
+        conn = await get_db_connection()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -203,7 +203,7 @@ class ManageSheet:
     @staticmethod
     def has_default(server_id: int) -> bool:
         # Returns whether the default link for the server exists or not.
-        conn = get_db_connection()
+        conn = await get_db_connection()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -215,7 +215,7 @@ class ManageSheet:
 
     def use_default(server_id: int) -> str:
         # Returns the current default link.
-        conn = get_db_connection()
+        conn = await get_db_connection()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
