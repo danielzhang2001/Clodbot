@@ -10,6 +10,7 @@ from google_auth_oauthlib.flow import Flow
 from google.auth.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from typing import Optional, Dict
 import pickle
 
 app = Flask(__name__)
