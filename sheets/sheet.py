@@ -36,6 +36,7 @@ async def authenticate_sheet(
             await clear_sheets(sheet_link)
             return None
         creds = await load_credentials(server_id)
+        print("never getting here are you")
         if creds and creds.valid and is_valid_creds(creds, sheet_link):
             print("VALID!!")
             return creds
@@ -50,6 +51,7 @@ async def check_sheets(sheet_link):
                 "SELECT 1 FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
             )
             result = await cur.fetchone()
+            print(f"RESULT IS: {result}")
             return result is not None
 
 
