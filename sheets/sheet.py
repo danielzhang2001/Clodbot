@@ -53,7 +53,7 @@ async def check_sheets(sheet_link):
 async def clear_sheets(sheet_link):
     pool = await get_db_connection()
     async with pool.acquire() as conn:
-        async with conn.begin():
+        async with conn.transaction():
             async with conn.cursor() as cur:
                 await cur.execute(
                     "DELETE FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)

@@ -160,7 +160,7 @@ class ManageSheet:
         # Sets the default link for the server.
         pool = await get_db_connection()
         async with pool.acquire() as conn:
-            async with conn.begin():
+            async with conn.transaction():
                 async with conn.cursor() as cur:
                     await cur.execute(
                         """
