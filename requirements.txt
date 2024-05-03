@@ -15,7 +15,8 @@ future==0.18.3
 idna==2.10
 isort==5.8.0
 itsdangerous>=2.0
-Jinja2>=3.0
+Jinja2==3.0.3
+Quart==0.16.1
 lazy-object-proxy==1.6.0
 macholib==1.11
 MarkupSafe>=2.1.1
@@ -44,5 +45,4 @@ google-auth-oauthlib==0.4.1
 google-api-python-client==1.7.2
 psycopg2-binary==2.9.9
 aiopg==1.3.3
-Quart==0.16.1
-gunicorn
+hypercorn==0.13.2
