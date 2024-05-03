@@ -4,8 +4,8 @@ The functions to manage Google Sheets in association with Pokemon Showdown repla
 
 import requests
 import json
-from discord.ext import commands
 import requests
+from discord.ext import commands
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from showdown.replay import *

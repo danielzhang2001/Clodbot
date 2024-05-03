@@ -3,15 +3,15 @@ General Flask functions for the authorization process in accessing Google Sheets
 """
 
 import os
+import pickle
 import psycopg2
 import json
-from flask import Flask, request, redirect, session
+from flask import Flask, Response, request, redirect, session
 from google_auth_oauthlib.flow import Flow
 from google.auth.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from typing import Optional, Dict
-import pickle
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_KEY")
@@ -87,7 +87,7 @@ def load_credentials(server_id) -> Optional[Credentials]:
 
 
 @app.route("/authorize/<int:server_id>/<path:sheet_link>")
-def authorize(server_id, sheet_link) -> werkzeug.wrappers.response.Response:
+def authorize(server_id, sheet_link) -> Response:
     # Handles authorization endpoint.
     client_config = get_config()
     flow = Flow.from_client_config(client_config, scopes=SCOPES, redirect_uri=REDIRECT)
