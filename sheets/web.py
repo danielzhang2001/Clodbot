@@ -81,7 +81,7 @@ async def store_credentials(server_id, creds) -> None:
                 """,
                 (server_id, pickle.dumps(creds)),
             )
-            await conn.commit()
+            conn.commit()
 
 
 async def load_credentials(server_id) -> Optional[Credentials]:
@@ -136,7 +136,7 @@ async def callback() -> str:
                     "INSERT INTO invalid_sheets (sheet_link) VALUES (%s) ON CONFLICT DO NOTHING;",
                     (sheet_link,),
                 )
-                await conn.commit()
+                conn.commit()
         return (
             "You don't have permission to edit this sheet or the sheet doesn't exist."
         )
