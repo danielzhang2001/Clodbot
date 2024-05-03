@@ -116,8 +116,12 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
     if command not in ["set", "default", "update", "delete", "list"]:
         raise NoSheet()
     if command == "default":
-        creds = await authenticate_sheet(ctx, server_id, sheet_link)
-        message = ManageSheet.get_default(server_id, creds)
+        if ManageSheet.has_default(server_id):
+            sheet_link = ManageSheet.use_default(server_id)
+            creds = await authenticate_sheet(ctx, server_id, sheet_link)
+            message = ManageSheet.display_default(server_id, creds)
+        else:
+            raise NoDefault()
     elif command == "set":
         if len(remaining) != 1:
             raise NoSet()
