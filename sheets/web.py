@@ -4,11 +4,12 @@ General Flask functions for the authorization process in accessing Google Sheets
 
 import os
 import psycopg2
-import psycopg2.extras
 import json
 from flask import Flask, request, redirect, session
 from google_auth_oauthlib.flow import Flow
-from sheets.sheet import is_valid_sheet
+from google.auth.credentials import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 import pickle
 
 app = Flask(__name__)
@@ -16,6 +17,20 @@ app.secret_key = os.getenv("FLASK_KEY")
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 REDIRECT = "https://clodbot.herokuapp.com/callback"
+
+
+def is_valid_sheet(
+    creds: Credentials,
+    sheet_link: str,
+) -> bool:
+    # Checks if the sheet link is valid.
+    try:
+        spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
+        service = build("sheets", "v4", credentials=creds)
+        service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        return True
+    except (IndexError, HttpError):
+        return False
 
 
 def get_config():
