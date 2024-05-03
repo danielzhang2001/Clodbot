@@ -171,6 +171,8 @@ class ManageSheet:
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
         title = sheet_metadata["properties"]["title"]
+        print("title set!")
+        print(f"title is: {title}")
         return f"Default sheet link set at [**{title}**]({sheet_link})."
 
     @staticmethod
