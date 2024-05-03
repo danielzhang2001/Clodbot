@@ -22,13 +22,10 @@ async def authenticate_sheet(
     ctx: commands.Context, server_id: int, sheet_link: str, force_login: bool = False
 ) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
-    print("started authentication")
     creds = load_credentials(server_id)
     if creds and creds.valid and not force_login:
         return creds
-    print("before auth url")
     auth_url = f"https://clodbot.herokuapp.com/authorize/{server_id}/{sheet_link}"
-    print("after auth url")
     await ctx.send(f"Please authenticate by visiting this URL: {auth_url}")
     return None
 
@@ -795,17 +792,3 @@ def check_labels(values: List[List[str]], player_name: str) -> bool:
             ):
                 return True
     return False
-
-
-def is_valid_sheet(
-    creds: Credentials,
-    sheet_link: str,
-) -> bool:
-    # Checks if the sheet link is valid.
-    try:
-        spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
-        service = build("sheets", "v4", credentials=creds)
-        service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-        return True
-    except (IndexError, HttpError):
-        return False

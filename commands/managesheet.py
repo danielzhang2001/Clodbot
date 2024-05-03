@@ -26,12 +26,6 @@ class ManageSheet:
         replay_link: str,
     ) -> str:
         # Updates sheets with replay data.
-        if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(
-                ctx, server_id, sheet_link, force_login=True
-            )
-            if not is_valid_sheet(creds, sheet_link):
-                raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
@@ -98,12 +92,6 @@ class ManageSheet:
         player_name: str,
     ) -> str:
         # Deletes player section from the sheet.
-        if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(
-                ctx, server_id, sheet_link, force_login=True
-            )
-            if not is_valid_sheet(creds, sheet_link):
-                raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
@@ -137,12 +125,6 @@ class ManageSheet:
         ctx: Context, server_id: int, creds: Credentials, sheet_link: str, data: str
     ) -> str:
         # Lists all player names from the sheet.
-        if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(
-                ctx, server_id, sheet_link, force_login=True
-            )
-            if not is_valid_sheet(creds, sheet_link):
-                raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
@@ -176,12 +158,6 @@ class ManageSheet:
         ctx: Context, server_id: int, creds: Credentials, sheet_link: str
     ) -> str:
         # Sets the default sheet link.
-        if not is_valid_sheet(creds, sheet_link):
-            creds = await authenticate_sheet(
-                ctx, server_id, sheet_link, force_login=True
-            )
-            if not is_valid_sheet(creds, sheet_link):
-                raise InvalidSheet(sheet_link)
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
