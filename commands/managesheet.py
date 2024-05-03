@@ -80,7 +80,7 @@ class ManageSheet:
                     player_name,
                     pokemon_data,
                 )
-        return f"Sheet updated at [**{title}**]({sheet_link})."
+        return f"Sheet updated at [**{title}**]({sheet_link}) using **{sheet_name}**."
 
     @staticmethod
     async def delete_player(
