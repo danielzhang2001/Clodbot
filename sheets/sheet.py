@@ -49,7 +49,7 @@ async def check_sheets(sheet_link):
             result = await cur.fetchone()
             return result is not None
     finally:
-        await conn.release()
+        await conn.close()
 
 
 async def clear_sheets(sheet_link):
@@ -61,7 +61,7 @@ async def clear_sheets(sheet_link):
             )
             await conn.commit()
     finally:
-        await conn.release()
+        await conn.close()
 
 
 def add_data(
