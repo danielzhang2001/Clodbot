@@ -141,9 +141,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             elif command == "list":
                 raise NoList()
             return
-        while creds is None:
-            creds = await authenticate_sheet(ctx, server_id, sheet_link)
-        creds = load_credentials(server_id)
+        creds = await authenticate_sheet(ctx, server_id, sheet_link)
         if command == "update":
             message = await ManageSheet.update_sheet(
                 ctx, server_id, creds, sheet_link, data
