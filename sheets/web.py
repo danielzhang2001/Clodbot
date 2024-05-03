@@ -126,7 +126,7 @@ async def callback() -> str:
     flow.fetch_token(authorization_response=authorization_response)
     creds = flow.credentials
     if creds and creds.valid and is_valid_creds(creds, sheet_link):
-        store_credentials(server_id, creds)
+        await store_credentials(server_id, creds)
         return "Authentication successful! You can now close this page."
     else:
         pool = await get_db_connection()
