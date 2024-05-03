@@ -173,7 +173,7 @@ class ManageSheet:
                     await cur.execute(
                         """
                         INSERT INTO default_links (server_id, sheet_link, sheet_name)
-                        VALUES (%s, %s)
+                        VALUES (%s, %s, %s)
                         ON CONFLICT (server_id)
                         DO UPDATE SET sheet_link = EXCLUDED.sheet_link, sheet_name = EXCLUDED.sheet_name;
                         """,
