@@ -12,6 +12,7 @@ colorama==0.4.4
 discord==1.7.3
 py-cord==2.0.0b1
 Flask==2.2.5
+Flask[async]==2.2.0
 future==0.18.3
 idna==2.10
 isort==5.8.0
