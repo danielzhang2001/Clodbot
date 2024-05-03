@@ -39,6 +39,7 @@ async def authenticate_sheet(
                 )
                 conn.commit()
                 conn.close()
+                print("SHOULD BE NONE!!")
                 return None
         conn.close()
         creds = load_credentials(server_id)
