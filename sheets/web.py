@@ -16,6 +16,7 @@ from typing import Optional, Dict
 
 app = Quart(__name__)
 app.secret_key = os.getenv("QUART_KEY")
+app.config["PREFERRED_URL_SCHEME"] = "https"
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 REDIRECT = "https://clodbot.herokuapp.com/callback"
@@ -121,7 +122,8 @@ async def callback() -> str:
     flow = Flow.from_client_config(
         client_config, scopes=SCOPES, state=state, redirect_uri=REDIRECT
     )
-    flow.fetch_token(authorization_response=request.url)
+    authorization_response = request.url.replace("http://", "https://")
+    flow.fetch_token(authorization_response=authorization_response)
     creds = flow.credentials
     if creds and creds.valid and is_valid_creds(creds, sheet_link):
         store_credentials(server_id, creds)
