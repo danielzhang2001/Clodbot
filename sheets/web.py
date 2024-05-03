@@ -19,11 +19,11 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 REDIRECT = "https://clodbot.herokuapp.com/callback"
 
 
-def is_valid_sheet(
+def is_valid_creds(
     creds: Credentials,
     sheet_link: str,
 ) -> bool:
-    # Checks if the sheet link is valid.
+    # Checks if the creds is valid for the sheet.
     try:
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         service = build("sheets", "v4", credentials=creds)
