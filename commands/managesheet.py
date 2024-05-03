@@ -160,7 +160,7 @@ class ManageSheet:
         # Sets the default link for the server.
         pool = await get_db_connection()
         async with pool.acquire() as conn:
-            async with conn.transaction():
+            async with conn.begin():
                 async with conn.cursor() as cur:
                     await cur.execute(
                         """
@@ -177,7 +177,8 @@ class ManageSheet:
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
         title = sheet_metadata["properties"]["title"]
-        return f"Default sheet link set at [**{title}**]({sheet_link})."
+
+    return f"Default sheet link set at [**{title}**]({sheet_link})."
 
     @staticmethod
     async def get_default(server_id: int, creds: Credentials) -> str:
