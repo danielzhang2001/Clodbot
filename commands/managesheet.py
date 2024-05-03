@@ -165,14 +165,13 @@ class ManageSheet:
                     """,
                     (server_id, sheet_link),
                 )
+        print("TEST!")
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
         title = sheet_metadata["properties"]["title"]
-        print("title set!")
-        print(f"title is: {title}")
         return f"Default sheet link set at [**{title}**]({sheet_link})."
 
     @staticmethod
