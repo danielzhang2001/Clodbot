@@ -165,7 +165,6 @@ class ManageSheet:
                     """,
                     (server_id, sheet_link),
                 )
-        print("TEST!")
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
