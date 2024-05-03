@@ -38,6 +38,14 @@ async def initialize_pool():
     pool = await aiopg.create_pool(DSN)
 
 
+@app.before_request
+def before_request():
+    if "X-Forwarded-Proto" in request.headers:
+        if request.headers["X-Forwarded-Proto"] != "https":
+            return jsonify({"error": "HTTPS required"}), 400
+    return None
+
+
 def is_valid_creds(
     creds: Credentials,
     sheet_link: str,
