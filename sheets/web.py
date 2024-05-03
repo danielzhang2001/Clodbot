@@ -7,7 +7,7 @@ import pickle
 import json
 import aiopg
 import asyncio
-from quart import Quart, redirect, session, request
+from quart import Quart, Response, redirect, session, request
 from google_auth_oauthlib.flow import Flow
 from google.auth.credentials import Credentials
 from googleapiclient.discovery import build
