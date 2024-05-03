@@ -71,17 +71,17 @@ async def store_credentials(server_id, creds) -> None:
     # Stores credentials into a database.
     pool = await get_db_connection()
     async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(
-                """
-                INSERT INTO credentials (server_id, data)
-                VALUES (%s, %s)
-                ON CONFLICT (server_id)
-                DO UPDATE SET data = EXCLUDED.data;
-                """,
-                (server_id, pickle.dumps(creds)),
-            )
-        await conn.commit()
+        async with conn.begin():
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    """
+                    INSERT INTO credentials (server_id, data)
+                    VALUES (%s, %s)
+                    ON CONFLICT (server_id)
+                    DO UPDATE SET data = EXCLUDED.data;
+                    """,
+                    (server_id, pickle.dumps(creds)),
+                )
 
 
 async def load_credentials(server_id) -> Optional[Credentials]:
@@ -131,12 +131,12 @@ async def callback() -> str:
     else:
         pool = await get_db_connection()
         async with pool.acquire() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(
-                    "INSERT INTO invalid_sheets (sheet_link) VALUES (%s) ON CONFLICT DO NOTHING;",
-                    (sheet_link,),
-                )
-            await conn.commit()
+            async with conn.begin():
+                async with conn.cursor() as cur:
+                    await cur.execute(
+                        "INSERT INTO invalid_sheets (sheet_link) VALUES (%s) ON CONFLICT DO NOTHING;",
+                        (sheet_link,),
+                    )
         return (
             "You don't have permission to edit this sheet or the sheet doesn't exist."
         )

@@ -40,7 +40,6 @@ async def authenticate_sheet(
 
 
 async def check_sheets(sheet_link):
-    print("CHECKING SHEETS")
     pool = await get_db_connection()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
@@ -48,19 +47,17 @@ async def check_sheets(sheet_link):
                 "SELECT 1 FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
             )
             result = await cur.fetchone()
-            print(f"RESULT IS: {result}")
             return result is not None
 
 
 async def clear_sheets(sheet_link):
-    print("CLEARING SHEETS")
     pool = await get_db_connection()
     async with pool.acquire() as conn:
-        async with conn.cursor() as cur:
-            await cur.execute(
-                "DELETE FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
-            )
-        await conn.commit()
+        async with conn.begin():
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    "DELETE FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
+                )
 
 
 def add_data(
