@@ -4,7 +4,7 @@ The functions to manage Google Sheets in association with Pokemon Showdown repla
 
 import requests
 import json
-from discord.ext.commands import Context
+from discord.ext import commands
 import requests
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -16,7 +16,7 @@ from errors import *
 class ManageSheet:
     @staticmethod
     async def update_sheet(
-        ctx: Context,
+        ctx: commands.Context,
         server_id: int,
         creds: Credentials,
         sheet_link: str,
@@ -82,7 +82,7 @@ class ManageSheet:
 
     @staticmethod
     async def delete_player(
-        ctx: Context,
+        ctx: commands.Context,
         server_id: int,
         creds: Credentials,
         sheet_link: str,
@@ -119,7 +119,11 @@ class ManageSheet:
 
     @staticmethod
     async def list_data(
-        ctx: Context, server_id: int, creds: Credentials, sheet_link: str, data: str
+        ctx: commands.Context,
+        server_id: int,
+        creds: Credentials,
+        sheet_link: str,
+        data: str,
     ) -> str:
         # Lists all player names from the sheet.
         service = build("sheets", "v4", credentials=creds)
@@ -174,7 +178,7 @@ class ManageSheet:
         return f"Default sheet link set at [**{title}**]({sheet_link})."
 
     @staticmethod
-    def get_default(server_id, creds):
+    def get_default(server_id: int, creds: Credentials) -> str:
         # Returns the server's current default link.
         conn = get_db_connection()
         with conn:
@@ -197,7 +201,7 @@ class ManageSheet:
         return f"Current default sheet at [**{title}**]({sheet_link})."
 
     @staticmethod
-    def has_default(server_id):
+    def has_default(server_id: int) -> bool:
         # Returns whether the default link for the server exists or not.
         conn = get_db_connection()
         with conn:
@@ -209,7 +213,7 @@ class ManageSheet:
                 exists = cur.fetchone()[0]
         return exists
 
-    def use_default(server_id):
+    def use_default(server_id: int) -> str:
         # Returns the current default link.
         conn = get_db_connection()
         with conn:
