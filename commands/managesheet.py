@@ -152,13 +152,13 @@ class ManageSheet:
 
     @staticmethod
     def set_default(server_id: int, creds: Credentials, sheet_link: str) -> str:
-        # Sets the default sheet link.
+        # Sets the default link for the server.
         conn = get_db_connection()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
                     """
-                    INSERT INTO default (server_id, sheet_link)
+                    INSERT INTO default_links (server_id, sheet_link)
                     VALUES (%s, %s)
                     ON CONFLICT (server_id)
                     DO UPDATE SET sheet_link = EXCLUDED.sheet_link;
@@ -175,11 +175,12 @@ class ManageSheet:
 
     @staticmethod
     def get_default(server_id, creds):
+        # Returns the server's current default link.
         conn = get_db_connection()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT sheet_link FROM default WHERE server_id = %s",
+                    "SELECT sheet_link FROM default_links WHERE server_id = %s",
                     (server_id,),
                 )
                 row = cur.fetchone()
@@ -197,22 +198,24 @@ class ManageSheet:
 
     @staticmethod
     def has_default(server_id):
+        # Returns whether the default link for the server exists or not.
         conn = get_db_connection()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT EXISTS (SELECT 1 FROM default WHERE server_id = %s)",
+                    "SELECT EXISTS (SELECT 1 FROM default_links WHERE server_id = %s)",
                     (server_id,),
                 )
                 exists = cur.fetchone()[0]
         return exists
 
     def use_default(server_id):
+        # Returns the current default link.
         conn = get_db_connection()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT sheet_link FROM default WHERE server_id = %s",
+                    "SELECT sheet_link FROM default_links WHERE server_id = %s",
                     (server_id,),
                 )
                 row = cur.fetchone()
