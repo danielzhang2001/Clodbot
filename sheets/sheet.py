@@ -28,23 +28,38 @@ async def authenticate_sheet(
     auth_url = f"https://clodbot.herokuapp.com/authorize/{server_id}/{sheet_link}"
     await ctx.send(f"Please authenticate [**HERE**]({auth_url}).")
     while True:
-        conn = get_db_connection()
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT 1 FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
-            )
-            if cur.fetchone():
-                cur.execute(
-                    "DELETE FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
-                )
-                conn.commit()
-                conn.close()
-                print("SHOULD BE NONE!!")
-                return None
-        conn.close()
+        await asyncio.sleep(10)
+        is_invalid = await check_sheets(sheet_link)
+        if is_invalid:
+            await clear_sheets(sheet_link)
+            return None
         creds = load_credentials(server_id)
         if creds and creds.valid and is_valid_creds(creds, sheet_link):
             return creds
+
+
+async def check_sheets(sheet_link):
+    conn = get_db_connection()
+    try:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT 1 FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
+            )
+            return cur.fetchone() is not None
+    finally:
+        await conn.close()
+
+
+async def clear_sheets(sheet_link):
+    conn = get_db_connection()
+    try:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "DELETE FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
+            )
+            await conn.commit()
+    finally:
+        await conn.close()
 
 
 def add_data(
