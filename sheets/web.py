@@ -113,7 +113,7 @@ def callback():
     )
     flow.fetch_token(authorization_response=request.url)
     creds = flow.credentials
-    if is_valid_creds(creds, sheet_link):
+    if creds and creds.valid and is_valid_creds(creds, sheet_link):
         store_credentials(server_id, creds)
         return "Authentication successful! You can now close this page."
     else:

@@ -74,8 +74,7 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError) 
         except InvalidCommand as e:
             await ctx.send(str(e))
     else:
-        print(f"An error occurred: {error}")
-        # await ctx.send(f'{str(error).split(": ", 2)[-1]}')
+        await ctx.send(f'{str(error).split(": ", 2)[-1]}')
 
 
 @bot.command(name="help")
