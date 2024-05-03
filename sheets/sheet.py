@@ -53,11 +53,16 @@ async def check_sheets(sheet_link):
 async def clear_sheets(sheet_link):
     pool = await get_db_connection()
     async with pool.acquire() as conn:
-        async with conn.begin():
-            async with conn.cursor() as cur:
+        async with conn.cursor() as cur:
+            await cur.execute("BEGIN;")
+            try:
                 await cur.execute(
                     "DELETE FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
                 )
+                await cur.execute("COMMIT;")
+            except Exception as e:
+                await cur.execute("ROLLBACK;")
+                raise e
 
 
 def add_data(

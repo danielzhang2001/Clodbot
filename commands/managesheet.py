@@ -160,8 +160,9 @@ class ManageSheet:
         # Sets the default link for the server.
         pool = await get_db_connection()
         async with pool.acquire() as conn:
-            async with conn.begin():
-                async with conn.cursor() as cur:
+            async with conn.cursor() as cur:
+                await cur.execute("BEGIN;")
+                try:
                     await cur.execute(
                         """
                         INSERT INTO default_links (server_id, sheet_link)
@@ -171,6 +172,10 @@ class ManageSheet:
                         """,
                         (server_id, sheet_link),
                     )
+                    await cur.execute("COMMIT;")
+                except Exception as e:
+                    await cur.execute("ROLLBACK;")
+                    raise e
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
