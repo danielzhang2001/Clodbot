@@ -23,13 +23,13 @@ async def authenticate_sheet(
 ) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
     creds = load_credentials(server_id)
-    if is_valid_creds(creds, sheet_link):
+    if creds and creds.valid and is_valid_creds(creds, sheet_link):
         return creds
     auth_url = f"https://clodbot.herokuapp.com/authorize/{server_id}/{sheet_link}"
     await ctx.send(f"Please authenticate **[HERE]**.({auth_url})")
     while True:
         creds = load_credentials(server_id)
-        if is_valid_creds(creds, sheet_link):
+        if creds and creds.valid and is_valid_creds(creds, sheet_link):
             return creds
 
 
