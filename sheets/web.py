@@ -25,7 +25,8 @@ DSN = os.getenv("DATABASE_URL")
 pool = None
 
 
-async def get_db_connection():
+async def get_db_connection() -> aiopg.Pool:
+    # Establishes database connection.
     global pool
     if pool is None:
         pool = await aiopg.create_pool(DSN)
@@ -33,7 +34,8 @@ async def get_db_connection():
 
 
 @app.before_serving
-async def initialize_pool():
+async def initialize_pool() -> None:
+    # Initializes pool.
     global pool
     pool = await aiopg.create_pool(DSN)
 
@@ -69,7 +71,7 @@ def get_config() -> Dict[str, Dict[str, object]]:
     }
 
 
-async def store_credentials(server_id, creds) -> None:
+async def store_credentials(server_id: int, creds: Credentials) -> None:
     # Stores credentials into a database.
     pool = await get_db_connection()
     async with pool.acquire() as conn:
@@ -91,7 +93,7 @@ async def store_credentials(server_id, creds) -> None:
                 raise e
 
 
-async def load_credentials(server_id) -> Optional[Credentials]:
+async def load_credentials(server_id: int) -> Optional[Credentials]:
     # Loads existing credentials.
     pool = await get_db_connection()
     async with pool.acquire() as conn:
@@ -106,7 +108,7 @@ async def load_credentials(server_id) -> Optional[Credentials]:
 
 
 @app.route("/authorize/<int:server_id>/<path:sheet_link>")
-async def authorize(server_id, sheet_link) -> Response:
+async def authorize(server_id: int, sheet_link: str) -> Response:
     # Handles authorization endpoint.
     client_config = get_config()
     flow = Flow.from_client_config(client_config, scopes=SCOPES, redirect_uri=REDIRECT)
