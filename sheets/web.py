@@ -113,18 +113,25 @@ async def authorize(server_id, sheet_link) -> Response:
     authorization_url, state = flow.authorization_url(
         access_type="offline", prompt="consent"
     )
-    session["state"] = state
-    session["server_id"] = server_id
-    session["sheet_link"] = sheet_link
+    auth_info = {"state": state, "server_id": server_id, "sheet_link": sheet_link}
+    if "auth_flows" not in session:
+        session["auth_flows"] = []
+    session["auth_flows"].append(auth_info)
+    session.modified = True
     return redirect(authorization_url)
 
 
 @app.route("/callback")
 async def callback() -> str:
     # Handles callback endpoint.
-    state = session.pop("state", None)
-    server_id = session.pop("server_id", None)
-    sheet_link = session.pop("sheet_link", None)
+    state = request.args.get("state", None)
+    auth_info = next(
+        (item for item in session.get("auth_flows", []) if item["state"] == state), None
+    )
+    session["auth_flows"].remove(auth_info)
+    session.modified = True
+    server_id = auth_info["server_id"]
+    sheet_link = auth_info["sheet_link"]
     client_config = get_config()
     flow = Flow.from_client_config(
         client_config, scopes=SCOPES, state=state, redirect_uri=REDIRECT
