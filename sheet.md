@@ -11,7 +11,7 @@ title: Sheet Command
   </div>
 </div>
 
-The Sheet Command manipulates information on Google Sheets using a sheets link provided. This includes adding, updating, deleting and listing Pokemon Showdown replay data. Particularly useful for mass tracking of data across different battles in Draft League environments. Keep in mind you would need to have edit permissions on the sheet to be able to use the commands, and would need to undergo an authorization process with an email that has edit permissions (no need for authorization if previous command in the same server was used by the same account) to do so. Make sure that players continuously use the same Pokemon Showdown username for updating information accurately.
+The Sheet Command manipulates information on Google Sheets using a sheets link provided. This includes adding, updating, deleting and listing Pokemon Showdown replay data. Particularly useful for mass tracking of data across different battles in Draft League environments. Keep in mind you would need to have edit permissions on the sheet to be able to use the commands, and would need to undergo an authorization process with an email that has edit permissions (no need for authorization for any commands with the most recent authorized account) to do so. Make sure that players continuously use the same Pokemon Showdown username for updating information accurately.
 
 <img src="assets/images/sheet.png" style="width:100%; height:auto; max-width:none; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); margin-bottom: 10px;">
 
