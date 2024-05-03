@@ -21,6 +21,7 @@ class ManageSheet:
         server_id: int,
         creds: Credentials,
         sheet_link: str,
+        sheet_name: str,
         replay_link: str,
     ) -> str:
         # Updates sheets with replay data.
@@ -63,14 +64,14 @@ class ManageSheet:
                 (pokemon, [data["kills"], data["deaths"]])
                 for pokemon, data in pokemon_data.items()
             ]
-            values = get_values(service, spreadsheet_id, "Stats!B2:T285")
+            values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
             if check_labels(values, player_name):
-                stat_range = f"Stats!{get_stat_range(values, player_name)}"
+                stat_range = f"{sheet_name}!{get_stat_range(values, player_name)}"
                 update_data(
                     service, spreadsheet_id, stat_range, player_name, pokemon_data
                 )
             else:
-                start_cell = f"Stats!{next_cell(values)}"
+                start_cell = f"{sheet_name}!{next_cell(values)}"
                 add_data(
                     service,
                     spreadsheet_id,
@@ -87,6 +88,7 @@ class ManageSheet:
         server_id: int,
         creds: Credentials,
         sheet_link: str,
+        sheet_name: str,
         player_name: str,
     ) -> str:
         # Deletes player section from the sheet.
@@ -105,7 +107,7 @@ class ManageSheet:
         if sheet_id is None:
             raise NameDoesNotExist(player_name)
         sheet_link = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-        values = get_values(service, spreadsheet_id, "Stats!B2:T285")
+        values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
         players = [player[0] for player in get_sheet_players(values)]
         if player_name.lower() in [player.lower() for player in players]:
             player_name = next(
@@ -114,7 +116,7 @@ class ManageSheet:
             )
         else:
             raise NameDoesNotExist(player_name)
-        section_range = f"Stats!{get_section_range(values, player_name)}"
+        section_range = f"{sheet_name}!{get_section_range(values, player_name)}"
         delete_data(service, spreadsheet_id, sheet_id, section_range)
         return f"**{player_name}** removed at [**{title}**]({sheet_link})."
 
@@ -124,6 +126,7 @@ class ManageSheet:
         server_id: int,
         creds: Credentials,
         sheet_link: str,
+        sheet_name: str,
         data: str,
     ) -> str:
         # Lists all player names from the sheet.
@@ -145,7 +148,7 @@ class ManageSheet:
                 raise NoPlayers()
             elif data.lower() == "pokemon":
                 raise NoPokemon()
-        values = get_values(service, spreadsheet_id, "Stats!B2:T285")
+        values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
         if data.lower() == "players":
             if not get_sheet_players(values):
                 raise NoPlayers()
@@ -156,8 +159,12 @@ class ManageSheet:
             return create_pokemon_message(values)
 
     @staticmethod
-    async def set_default(server_id: int, creds: Credentials, sheet_link: str) -> str:
+    async def set_default(
+        server_id: int, creds: Credentials, sheet_link: str, sheet_name: str
+    ) -> str:
         # Sets the default link for the server.
+        if not sheet_name:
+            sheet_name = "Stats"
         pool = await get_db_connection()
         async with pool.acquire() as conn:
             async with conn.cursor() as cur:
@@ -165,12 +172,12 @@ class ManageSheet:
                 try:
                     await cur.execute(
                         """
-                        INSERT INTO default_links (server_id, sheet_link)
+                        INSERT INTO default_links (server_id, sheet_link, sheet_name)
                         VALUES (%s, %s)
                         ON CONFLICT (server_id)
-                        DO UPDATE SET sheet_link = EXCLUDED.sheet_link;
+                        DO UPDATE SET sheet_link = EXCLUDED.sheet_link, sheet_name = EXCLUDED.sheet_name;
                         """,
-                        (server_id, sheet_link),
+                        (server_id, sheet_link, sheet_name),
                     )
                     await cur.execute("COMMIT;")
                 except Exception as e:
@@ -182,7 +189,7 @@ class ManageSheet:
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
         title = sheet_metadata["properties"]["title"]
-        return f"Default sheet link set at [**{title}**]({sheet_link})."
+        return f"Default sheet link set at [**{title}**]({sheet_link}) using **{sheet_name}**."
 
     @staticmethod
     async def get_default(server_id: int, creds: Credentials) -> str:
@@ -191,18 +198,18 @@ class ManageSheet:
         async with pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(
-                    "SELECT sheet_link FROM default_links WHERE server_id = %s",
+                    "SELECT sheet_link, sheet_name FROM default_links WHERE server_id = %s",
                     (server_id,),
                 )
                 row = await cur.fetchone()
-                sheet_link = row[0]
+                sheet_link, sheet_name = row
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
         title = sheet_metadata["properties"]["title"]
-        return f"Current default sheet at [**{title}**]({sheet_link})."
+        return f"Current default sheet at [**{title}**]({sheet_link}) using **{sheet_name}**."
 
     @staticmethod
     async def has_default(server_id: int) -> bool:
@@ -219,13 +226,13 @@ class ManageSheet:
 
     @staticmethod
     async def use_default(server_id: int) -> str:
-        # Returns the current default link.
+        # Returns the current default link and sheet name.
         pool = await get_db_connection()
         async with pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(
-                    "SELECT sheet_link FROM default_links WHERE server_id = %s",
+                    "SELECT sheet_link, sheet_name FROM default_links WHERE server_id = %s",
                     (server_id,),
                 )
                 row = await cur.fetchone()
-                return row[0]
+                return (row[0], row[1])
