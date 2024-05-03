@@ -106,8 +106,6 @@ def callback() -> str:
     state = session.pop("state", None)
     server_id = session.pop("server_id", None)
     sheet_link = session.pop("sheet_link", None)
-    if not state or not server_id or not sheet_link:
-        return "Invalid state parameter or missing server_id or sheet link", 400
     client_config = get_config()
     flow = Flow.from_client_config(
         client_config, scopes=SCOPES, state=state, redirect_uri=REDIRECT
@@ -118,6 +116,14 @@ def callback() -> str:
         store_credentials(server_id, creds)
         return "Authentication successful! You can now close this page."
     else:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO invalid_sheets (sheet_link) VALUES (%s) ON CONFLICT DO NOTHING;",
+                (sheet_link,),
+            )
+        conn.commit()
+        conn.close()
         return (
             "You don't have permission to edit this sheet or the sheet doesn't exist."
         )

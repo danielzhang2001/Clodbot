@@ -28,6 +28,19 @@ async def authenticate_sheet(
     auth_url = f"https://clodbot.herokuapp.com/authorize/{server_id}/{sheet_link}"
     await ctx.send(f"Please authenticate [**HERE**]({auth_url}).")
     while True:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT 1 FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
+            )
+            if cur.fetchone():
+                cur.execute(
+                    "DELETE FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
+                )
+                conn.commit()
+                conn.close()
+                return None
+        conn.close()
         creds = load_credentials(server_id)
         if creds and creds.valid and is_valid_creds(creds, sheet_link):
             return creds
