@@ -8,6 +8,7 @@ import psycopg2.extras
 import json
 from flask import Flask, request, redirect, session
 from google_auth_oauthlib.flow import Flow
+from sheets.sheet import is_valid_sheet
 import pickle
 
 app = Flask(__name__)
