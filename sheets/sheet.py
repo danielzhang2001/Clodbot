@@ -40,28 +40,24 @@ async def authenticate_sheet(
 
 
 async def check_sheets(sheet_link):
-    conn = await get_db_connection()
-    try:
+    pool = await get_db_connection()
+    async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 "SELECT 1 FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
             )
             result = await cur.fetchone()
             return result is not None
-    finally:
-        await conn.close()
 
 
 async def clear_sheets(sheet_link):
-    conn = await get_db_connection()
-    try:
+    pool = await get_db_connection()
+    async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 "DELETE FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
             )
             await conn.commit()
-    finally:
-        await conn.close()
 
 
 def add_data(
