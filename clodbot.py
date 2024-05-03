@@ -144,7 +144,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
                 data = remaining[0]
             else:
                 raise NoDefault()
-        elif len(remaining == 2):
+        elif len(remaining) == 2:
             sheet_link, data = remaining
             sheet_name = "Stats"
         elif len(remaining) == 3:
