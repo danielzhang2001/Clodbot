@@ -10,6 +10,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from showdown.replay import *
 from sheets.sheet import *
+from sheets.web import *
 from errors import *
 
 
@@ -155,12 +156,12 @@ class ManageSheet:
             return create_pokemon_message(values)
 
     @staticmethod
-    def set_default(server_id: int, creds: Credentials, sheet_link: str) -> str:
+    async def set_default(server_id: int, creds: Credentials, sheet_link: str) -> str:
         # Sets the default link for the server.
-        conn = await get_db_connection()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(
+        pool = await get_db_connection()
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
                     """
                     INSERT INTO default_links (server_id, sheet_link)
                     VALUES (%s, %s)
@@ -169,6 +170,7 @@ class ManageSheet:
                     """,
                     (server_id, sheet_link),
                 )
+            await conn.commit()
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
@@ -180,18 +182,15 @@ class ManageSheet:
     @staticmethod
     def get_default(server_id: int, creds: Credentials) -> str:
         # Returns the server's current default link.
-        conn = await get_db_connection()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(
+        pool = await get_db_connection()
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
                     "SELECT sheet_link FROM default_links WHERE server_id = %s",
                     (server_id,),
                 )
-                row = cur.fetchone()
-                if row:
-                    sheet_link = row[0]
-                else:
-                    raise NoDefault()
+                row = await cur.fetchone()
+                sheet_link = row[0]
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
@@ -203,24 +202,24 @@ class ManageSheet:
     @staticmethod
     def has_default(server_id: int) -> bool:
         # Returns whether the default link for the server exists or not.
-        conn = await get_db_connection()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(
+        pool = await get_db_connection()
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
                     "SELECT EXISTS (SELECT 1 FROM default_links WHERE server_id = %s)",
                     (server_id,),
                 )
-                exists = cur.fetchone()[0]
-        return exists
+                exists = await cur.fetchone()
+        return bool(exists[0])
 
     def use_default(server_id: int) -> str:
         # Returns the current default link.
-        conn = await get_db_connection()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(
+        pool = await get_db_connection()
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
                     "SELECT sheet_link FROM default_links WHERE server_id = %s",
                     (server_id,),
                 )
-                row = cur.fetchone()
+                row = await cur.fetchone()
                 return row[0]
