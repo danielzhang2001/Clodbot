@@ -119,6 +119,8 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         if await ManageSheet.has_default(server_id):
             sheet_link = await ManageSheet.use_default(server_id)
             creds = await authenticate_sheet(ctx, server_id, sheet_link)
+            if isinstance(creds, AuthFailure):
+                return
             message = await ManageSheet.get_default(server_id, creds)
         else:
             raise NoDefault()
@@ -127,6 +129,8 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             raise NoSet()
         sheet_link = remaining[0]
         creds = await authenticate_sheet(ctx, server_id, sheet_link)
+        if isinstance(creds, AuthFailure):
+            return
         message = await ManageSheet.set_default(server_id, creds, remaining[0])
     else:
         if len(remaining) == 1:
@@ -146,6 +150,8 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
                 raise NoList()
             return
         creds = await authenticate_sheet(ctx, server_id, sheet_link)
+        if isinstance(creds, AuthFailure):
+            return
         if command == "update":
             message = await ManageSheet.update_sheet(
                 ctx, server_id, creds, sheet_link, data

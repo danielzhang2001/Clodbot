@@ -33,13 +33,14 @@ async def authenticate_sheet(
         is_invalid = await check_sheets(sheet_link)
         if is_invalid:
             await clear_sheets(sheet_link)
-            return None
+            return AuthFailure()
         creds = await load_credentials(server_id)
         if creds and creds.valid and is_valid_creds(creds, sheet_link):
             return creds
 
 
 async def check_sheets(sheet_link):
+    # Checks invalid_sheets database if there exists an entry.
     pool = await get_db_connection()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
@@ -51,6 +52,7 @@ async def check_sheets(sheet_link):
 
 
 async def clear_sheets(sheet_link):
+    # Clears invalid_sheets database.
     pool = await get_db_connection()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
