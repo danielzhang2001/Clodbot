@@ -43,6 +43,8 @@ def is_valid_creds(
     sheet_link: str,
 ) -> bool:
     # Checks if the creds is valid for the sheet.
+    if not sheet_link:
+        return False
     try:
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         service = build("sheets", "v4", credentials=creds)
