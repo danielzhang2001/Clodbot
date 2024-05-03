@@ -74,7 +74,8 @@ async def on_command_error(ctx: commands.Context, error: commands.CommandError) 
         except InvalidCommand as e:
             await ctx.send(str(e))
     else:
-        await ctx.send(f'{str(error).split(": ", 2)[-1]}')
+        print(f"An error occurred: {error}")
+        # await ctx.send(f'{str(error).split(": ", 2)[-1]}')
 
 
 @bot.command(name="help")
@@ -122,9 +123,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         if len(remaining) != 1:
             raise NoSet()
         sheet_link = remaining[0]
-        print(f"SHEET LINK: {sheet_link}")
         creds = await authenticate_sheet(ctx, server_id, sheet_link)
-        print(f"AUTHENTICATED!")
         message = ManageSheet.set_default(server_id, creds, remaining[0])
     else:
         if len(remaining) == 1:
