@@ -10,10 +10,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from showdown.replay import *
 from sheets.sheet import *
-from sheets.utils import *
 from errors import *
-
-default_link = load_links()
 
 
 class ManageSheet:
@@ -154,65 +151,69 @@ class ManageSheet:
             return create_pokemon_message(values)
 
     @staticmethod
-    async def set_default(
-        ctx: Context, server_id: int, creds: Credentials, sheet_link: str
-    ) -> str:
+    def set_default(server_id: int, creds: Credentials, sheet_link: str) -> str:
         # Sets the default sheet link.
+        conn = get_db_connection()
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO default (server_id, sheet_link)
+                    VALUES (%s, %s)
+                    ON CONFLICT (server_id)
+                    DO UPDATE SET sheet_link = EXCLUDED.sheet_link;
+                    """,
+                    (server_id, sheet_link),
+                )
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
         title = sheet_metadata["properties"]["title"]
-        sheets = sheet_metadata.get("sheets", "")
-        sheet_id = None
-        for sheet in sheets:
-            if sheet["properties"]["title"] == "Stats":
-                sheet_id = sheet["properties"]["sheetId"]
-                break
-        sheet_link = (
-            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-            if sheet_id
-            else sheet_link
-        )
-        default_link[server_id] = sheet_link
-        save_links(default_link)
         return f"Default sheet link set at [**{title}**]({sheet_link})."
 
     @staticmethod
-    def get_default(ctx: Context) -> str:
-        # Retrieves the default sheet link.
-        server_id = ctx.guild.id if ctx.guild else 0
-        return default_link.get(server_id)
+    def get_default(server_id, creds):
+        conn = get_db_connection()
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT sheet_link FROM default WHERE server_id = %s",
+                    (server_id,),
+                )
+                row = cur.fetchone()
+                if row:
+                    sheet_link = row[0]
+                else:
+                    raise NoDefault()
+        service = build("sheets", "v4", credentials=creds)
+        spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
+        sheet_metadata = (
+            service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        )
+        title = sheet_metadata["properties"]["title"]
+        return f"Current default sheet at [**{title}**]({sheet_link})."
 
     @staticmethod
-    def has_default(ctx: Context) -> bool:
-        # Checks if a default sheet link is set.
-        server_id = ctx.guild.id if ctx.guild else 0
-        return server_id in default_link
+    def has_default(server_id):
+        conn = get_db_connection()
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT EXISTS (SELECT 1 FROM default WHERE server_id = %s)",
+                    (server_id,),
+                )
+                exists = cur.fetchone()[0]
+        return exists
 
-    @staticmethod
-    def display_default(ctx: Context, creds: Credentials) -> bool:
-        # Displays the current default link.
-        if ManageSheet.has_default(ctx):
-            server_id = ctx.guild.id if ctx.guild else 0
-            service = build("sheets", "v4", credentials=creds)
-            spreadsheet_id = ManageSheet.get_default(ctx).split("/d/")[1].split("/")[0]
-            sheet_metadata = (
-                service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-            )
-            title = sheet_metadata["properties"]["title"]
-            sheets = sheet_metadata.get("sheets", "")
-            sheet_id = None
-            for sheet in sheets:
-                if sheet["properties"]["title"] == "Stats":
-                    sheet_id = sheet["properties"]["sheetId"]
-                    break
-            sheet_link = (
-                f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-                if sheet_id
-                else ManageSheet.get_default(ctx)
-            )
-            return f"Current default sheet at [**{title}**]({sheet_link})."
-        else:
-            raise NoDefault()
+    def use_default(server_id):
+        conn = get_db_connection()
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT sheet_link FROM default WHERE server_id = %s",
+                    (server_id,),
+                )
+                row = cur.fetchone()
+                return row[0]
