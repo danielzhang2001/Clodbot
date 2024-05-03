@@ -28,7 +28,7 @@ async def get_db_connection():
     global pool
     if pool is None:
         pool = await aiopg.create_pool(DSN)
-    return await pool.acquire()
+    return pool
 
 
 @app.before_first_request
@@ -69,30 +69,30 @@ def get_config() -> Dict[str, Dict[str, object]]:
 
 async def store_credentials(server_id, creds) -> None:
     # Stores credentials into a database.
-    conn = await get_db_connection()
-    async with conn.cursor() as cur:
-        await cur.execute(
-            """
-            INSERT INTO credentials (server_id, data)
-            VALUES (%s, %s)
-            ON CONFLICT (server_id)
-            DO UPDATE SET data = EXCLUDED.data;
-            """,
-            (server_id, pickle.dumps(creds)),
-        )
-        await conn.commit()
-    await conn.release()
+    pool = await get_db_connection()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO credentials (server_id, data)
+                VALUES (%s, %s)
+                ON CONFLICT (server_id)
+                DO UPDATE SET data = EXCLUDED.data;
+                """,
+                (server_id, pickle.dumps(creds)),
+            )
+            await conn.commit()
 
 
 async def load_credentials(server_id) -> Optional[Credentials]:
     # Loads existing credentials.
-    conn = await get_db_connection()
-    async with conn.cursor() as cur:
-        await cur.execute(
-            "SELECT data FROM credentials WHERE server_id = %s", (server_id,)
-        )
-        row = await cur.fetchone()
-    await conn.release()
+    pool = await get_db_connection()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT data FROM credentials WHERE server_id = %s", (server_id,)
+            )
+            row = await cur.fetchone()
     if row:
         return pickle.loads(row[0])
     return None
