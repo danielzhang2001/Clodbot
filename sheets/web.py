@@ -71,7 +71,7 @@ async def store_credentials(server_id, creds) -> None:
     # Stores credentials into a database.
     pool = await get_db_connection()
     async with pool.acquire() as conn:
-        async with conn.begin():
+        async with conn.transaction():
             async with conn.cursor() as cur:
                 await cur.execute(
                     """
@@ -131,7 +131,7 @@ async def callback() -> str:
     else:
         pool = await get_db_connection()
         async with pool.acquire() as conn:
-            async with conn.begin():
+            async with conn.transaction():
                 async with conn.cursor() as cur:
                     await cur.execute(
                         "INSERT INTO invalid_sheets (sheet_link) VALUES (%s) ON CONFLICT DO NOTHING;",
