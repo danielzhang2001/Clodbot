@@ -41,11 +41,11 @@ class ManageSheet:
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
         for sheet in sheets:
-            if sheet["properties"]["title"] == "Stats":
+            if sheet["properties"]["title"] == sheet_name:
                 sheet_id = sheet["properties"]["sheetId"]
                 break
         if sheet_id is None:
-            body = {"requests": [{"addSheet": {"properties": {"title": "Stats"}}}]}
+            body = {"requests": [{"addSheet": {"properties": {"title": sheet_name}}}]}
             sheet_response = (
                 service.spreadsheets()
                 .batchUpdate(spreadsheetId=spreadsheet_id, body=body)
@@ -101,7 +101,7 @@ class ManageSheet:
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
         for sheet in sheets:
-            if sheet["properties"]["title"] == "Stats":
+            if sheet["properties"]["title"] == sheet_name:
                 sheet_id = sheet["properties"]["sheetId"]
                 break
         if sheet_id is None:
@@ -140,7 +140,7 @@ class ManageSheet:
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
         for sheet in sheets:
-            if sheet["properties"]["title"] == "Stats":
+            if sheet["properties"]["title"] == sheet_name:
                 sheet_id = sheet["properties"]["sheetId"]
                 break
         if sheet_id is None:
