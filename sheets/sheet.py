@@ -36,7 +36,9 @@ async def authenticate_sheet(
             print("INVALID!!")
             return None
         creds = await load_credentials(server_id)
-        print("never getting here are you")
+        print(f"creds?: {creds}")
+        print(f"creds.valid?: {creds.valid}")
+        print(f"is valid creds?: {is_valid_creds(creds, sheet_link)}")
         if creds and creds.valid and is_valid_creds(creds, sheet_link):
             print("VALID!!")
             return creds
