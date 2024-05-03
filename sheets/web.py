@@ -1,5 +1,5 @@
 """
-General Flask functions for the authorization process in accessing Google Sheets.
+General Quart functions for the authorization process in accessing Google Sheets.
 """
 
 import os
@@ -7,15 +7,15 @@ import pickle
 import json
 import aiopg
 import asyncio
-from flask import Flask, Response, request, redirect, session
+from quart import Quart, redirect, session, request
 from google_auth_oauthlib.flow import Flow
 from google.auth.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from typing import Optional, Dict
 
-app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_KEY")
+app = Quart(__name__)
+app.secret_key = os.getenv("QUART_KEY")
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 REDIRECT = "https://clodbot.herokuapp.com/callback"
@@ -31,11 +31,10 @@ async def get_db_connection():
     return pool
 
 
-@app.before_first_request
-def initialize_pool():
+@app.before_serving
+async def initialize_pool():
     global pool
-    loop = asyncio.get_event_loop()
-    pool = loop.run_until_complete(aiopg.create_pool(DSN))
+    pool = await aiopg.create_pool(DSN)
 
 
 def is_valid_creds(
@@ -128,14 +127,14 @@ async def callback() -> str:
         store_credentials(server_id, creds)
         return "Authentication successful! You can now close this page."
     else:
-        conn = await get_db_connection()
-        async with conn.cursor() as cur:
-            await cur.execute(
-                "INSERT INTO invalid_sheets (sheet_link) VALUES (%s) ON CONFLICT DO NOTHING;",
-                (sheet_link,),
-            )
-            await conn.commit()
-        await conn.release()
+        pool = await get_db_connection()
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(
+                    "INSERT INTO invalid_sheets (sheet_link) VALUES (%s) ON CONFLICT DO NOTHING;",
+                    (sheet_link,),
+                )
+                await conn.commit()
         return (
             "You don't have permission to edit this sheet or the sheet doesn't exist."
         )
