@@ -169,3 +169,8 @@ class FullSection(Exception):
     # Exception raised when a player's section is full of Pokemon.
     def __init__(self, player, pokemon):
         super().__init__(f"**{player}**'s section is full: Cannot add **{pokemon}**")
+
+
+class AuthFailure:
+    # Indicates authentication failure.
+    pass
