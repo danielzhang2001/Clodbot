@@ -64,7 +64,7 @@ async def clear_sheets(sheet_link):
             await cur.execute(
                 "DELETE FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
             )
-            conn.commit()
+            await conn.commit()
 
 
 def add_data(
