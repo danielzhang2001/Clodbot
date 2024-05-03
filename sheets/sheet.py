@@ -29,7 +29,7 @@ async def authenticate_sheet(
     await ctx.send(f"Please authenticate [**HERE**]({auth_url}).")
     while True:
         creds = load_credentials(server_id)
-        if creds and creds.valid:
+        if creds and creds.valid and is_valid_creds(creds, sheet_link):
             return creds
 
 
