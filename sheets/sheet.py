@@ -32,10 +32,12 @@ async def authenticate_sheet(
         await asyncio.sleep(10)
         is_invalid = await check_sheets(sheet_link)
         if is_invalid:
+            print("INVALID!!")
             await clear_sheets(sheet_link)
             return None
         creds = await load_credentials(server_id)
         if creds and creds.valid and is_valid_creds(creds, sheet_link):
+            print("VALID!!")
             return creds
 
 
