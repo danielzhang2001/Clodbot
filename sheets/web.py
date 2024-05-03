@@ -33,7 +33,7 @@ def is_valid_creds(
         return False
 
 
-def get_config():
+def get_config() -> Dict[str, Dict[str, object]]:
     # Returns the config settings.
     return {
         "web": {
@@ -48,12 +48,12 @@ def get_config():
     }
 
 
-def get_db_connection():
+def get_db_connection() -> psycopg2.extensions.connection:
     # Initial connection to the database.
     return psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 
 
-def store_credentials(server_id, creds):
+def store_credentials(server_id, creds) -> None:
     # Stores credentials into a database.
     conn = get_db_connection()
     with conn:
@@ -70,7 +70,7 @@ def store_credentials(server_id, creds):
     conn.close()
 
 
-def load_credentials(server_id):
+def load_credentials(server_id) -> Optional[Credentials]:
     # Loads existing credentials.
     conn = get_db_connection()
     with conn:
@@ -86,7 +86,7 @@ def load_credentials(server_id):
 
 
 @app.route("/authorize/<int:server_id>/<path:sheet_link>")
-def authorize(server_id, sheet_link):
+def authorize(server_id, sheet_link) -> werkzeug.wrappers.response.Response:
     # Handles authorization endpoint.
     client_config = get_config()
     flow = Flow.from_client_config(client_config, scopes=SCOPES, redirect_uri=REDIRECT)
@@ -100,7 +100,7 @@ def authorize(server_id, sheet_link):
 
 
 @app.route("/callback")
-def callback():
+def callback() -> str:
     # Handles callback endpoint.
     state = session.pop("state", None)
     server_id = session.pop("server_id", None)
