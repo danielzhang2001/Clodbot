@@ -180,7 +180,7 @@ class ManageSheet:
         return f"Default sheet link set at [**{title}**]({sheet_link})."
 
     @staticmethod
-    def get_default(server_id: int, creds: Credentials) -> str:
+    async def get_default(server_id: int, creds: Credentials) -> str:
         # Returns the server's current default link.
         pool = await get_db_connection()
         async with pool.acquire() as conn:
@@ -200,7 +200,7 @@ class ManageSheet:
         return f"Current default sheet at [**{title}**]({sheet_link})."
 
     @staticmethod
-    def has_default(server_id: int) -> bool:
+    async def has_default(server_id: int) -> bool:
         # Returns whether the default link for the server exists or not.
         pool = await get_db_connection()
         async with pool.acquire() as conn:
@@ -212,7 +212,8 @@ class ManageSheet:
                 exists = await cur.fetchone()
         return bool(exists[0])
 
-    def use_default(server_id: int) -> str:
+    @staticmethod
+    async def use_default(server_id: int) -> str:
         # Returns the current default link.
         pool = await get_db_connection()
         async with pool.acquire() as conn:
