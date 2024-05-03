@@ -118,6 +118,7 @@ def update_data(
 ) -> None:
     # Updates the Pokemon, Games, Kills and Deaths data into the sheet.
     values = get_values(service, spreadsheet_id, cell_range)
+    sheet_name = cell_range.split("!")[0]
     start_cell = cell_range.split("!")[1].split(":")[0]
     end_cell = cell_range.split("!")[1].split(":")[1]
     start_col = "".join(filter(str.isalpha, start_cell))
@@ -132,7 +133,7 @@ def update_data(
     for pokemon_name, stats in pokemon_data:
         if pokemon_name in pokemon_indices:
             row_index = pokemon_indices[pokemon_name]
-            row_range = f"Stats!{start_col}{row_index}:{end_col}{row_index}"
+            row_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"
             update_pokemon(
                 service,
                 spreadsheet_id,
@@ -157,7 +158,7 @@ def update_data(
                     else:
                         raise FullSection(player_name, pokemon_name)
             empty_row_range = (
-                f"Stats!{start_col}{empty_row_index}:{end_col}{empty_row_index}"
+                f"{sheet_name}!{start_col}{empty_row_index}:{end_col}{empty_row_index}"
             )
             add_pokemon(
                 service,

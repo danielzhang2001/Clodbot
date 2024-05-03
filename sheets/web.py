@@ -130,8 +130,9 @@ async def callback() -> str:
     auth_info = next(
         (item for item in session.get("auth_flows", []) if item["state"] == state), None
     )
-    session["auth_flows"].remove(auth_info)
-    session.modified = True
+    if auth_info and auth_info in session.get("auth_flows", []):
+        session["auth_flows"].remove(auth_info)
+        session.modified = True
     server_id = auth_info["server_id"]
     sheet_link = auth_info["sheet_link"]
     client_config = get_config()

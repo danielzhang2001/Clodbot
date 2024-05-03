@@ -117,7 +117,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         raise NoSheet()
     if command == "default":
         if await ManageSheet.has_default(server_id):
-            sheet_link = await ManageSheet.use_default(server_id)
+            sheet_link, _ = await ManageSheet.use_default(server_id)
             creds = await authenticate_sheet(ctx, server_id, sheet_link)
             if isinstance(creds, AuthFailure):
                 return
@@ -125,22 +125,30 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         else:
             raise NoDefault()
     elif command == "set":
-        if len(remaining) != 1:
+        if len(remaining) not in (1, 2):
             raise NoSet()
         sheet_link = remaining[0]
+        sheet_name = None
+        if len(remaining) == 2:
+            sheet_name = remaining[1]
         creds = await authenticate_sheet(ctx, server_id, sheet_link)
         if isinstance(creds, AuthFailure):
             return
-        message = await ManageSheet.set_default(server_id, creds, remaining[0])
+        message = await ManageSheet.set_default(
+            server_id, creds, remaining[0], sheet_name
+        )
     else:
         if len(remaining) == 1:
             if await ManageSheet.has_default(server_id):
-                sheet_link = await ManageSheet.use_default(server_id)
+                sheet_link, sheet_name = await ManageSheet.use_default(server_id)
                 data = remaining[0]
             else:
                 raise NoDefault()
-        elif len(remaining) == 2:
+        elif len(remaining == 2):
             sheet_link, data = remaining
+            sheet_name = "Stats"
+        elif len(remaining) == 3:
+            sheet_link, sheet_name, data = remaining
         else:
             if command == "update":
                 raise NoUpdate()
@@ -154,15 +162,15 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             return
         if command == "update":
             message = await ManageSheet.update_sheet(
-                ctx, server_id, creds, sheet_link, data
+                ctx, server_id, creds, sheet_link, sheet_name, data
             )
         elif command == "delete":
             message = await ManageSheet.delete_player(
-                ctx, server_id, creds, sheet_link, data
+                ctx, server_id, creds, sheet_link, sheet_name, data
             )
         elif command == "list":
             message = await ManageSheet.list_data(
-                ctx, server_id, creds, sheet_link, data
+                ctx, server_id, creds, sheet_link, sheet_name, data
             )
     await ctx.send(message)
 
