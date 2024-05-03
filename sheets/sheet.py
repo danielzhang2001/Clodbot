@@ -27,7 +27,7 @@ async def authenticate_sheet(
         return creds
     auth_url = f"https://clodbot.herokuapp.com/authorize/{server_id}/{sheet_link}"
     await ctx.send(f"Please authenticate by visiting this URL: {auth_url}")
-    return creds
+    return None
 
 
 def add_data(
