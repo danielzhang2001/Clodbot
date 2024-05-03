@@ -22,6 +22,7 @@ async def authenticate_sheet(
     ctx: commands.Context, server_id: int, sheet_link: str, force_login: bool = False
 ) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
+    print("AUTHENTICATE CALLED!")
     creds = load_credentials(server_id)
     if creds and creds.valid and not force_login:
         return creds

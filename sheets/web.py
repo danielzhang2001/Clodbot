@@ -117,7 +117,9 @@ def callback():
         store_credentials(server_id, creds)
         return "Authentication successful! You can now close this page."
     else:
-        return "You don't have permission to edit this sheet. Please use an account with permission."
+        return (
+            "You don't have permission to edit this sheet or the sheet doesn't exist."
+        )
 
 
 if __name__ == "__main__":
