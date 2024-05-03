@@ -4,8 +4,9 @@ General Flask functions for the authorization process in accessing Google Sheets
 
 import os
 import pickle
-import psycopg2
 import json
+import aiopg
+import asyncio
 from flask import Flask, Response, request, redirect, session
 from google_auth_oauthlib.flow import Flow
 from google.auth.credentials import Credentials
@@ -18,6 +19,23 @@ app.secret_key = os.getenv("FLASK_KEY")
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 REDIRECT = "https://clodbot.herokuapp.com/callback"
+DSN = os.getenv("DATABASE_URL")
+
+pool = None
+
+
+async def get_db_connection():
+    global pool
+    if pool is None:
+        pool = await aiopg.create_pool(DSN)
+    return await pool.acquire()
+
+
+@app.before_first_request
+def initialize_pool():
+    global pool
+    loop = asyncio.get_event_loop()
+    pool = loop.run_until_complete(aiopg.create_pool(DSN))
 
 
 def is_valid_creds(
@@ -49,45 +67,39 @@ def get_config() -> Dict[str, Dict[str, object]]:
     }
 
 
-def get_db_connection() -> psycopg2.extensions.connection:
-    # Initial connection to the database.
-    return psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
-
-
-def store_credentials(server_id, creds) -> None:
+async def store_credentials(server_id, creds) -> None:
     # Stores credentials into a database.
-    conn = get_db_connection()
-    with conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO credentials (server_id, data)
-                VALUES (%s, %s)
-                ON CONFLICT (server_id)
-                DO UPDATE SET data = EXCLUDED.data;
-                """,
-                (server_id, psycopg2.Binary(pickle.dumps(creds))),
-            )
-    conn.close()
+    conn = await get_db_connection()
+    async with conn.cursor() as cur:
+        await cur.execute(
+            """
+            INSERT INTO credentials (server_id, data)
+            VALUES (%s, %s)
+            ON CONFLICT (server_id)
+            DO UPDATE SET data = EXCLUDED.data;
+            """,
+            (server_id, pickle.dumps(creds)),
+        )
+        await conn.commit()
+    await conn.release()
 
 
-def load_credentials(server_id) -> Optional[Credentials]:
+async def load_credentials(server_id) -> Optional[Credentials]:
     # Loads existing credentials.
-    conn = get_db_connection()
-    with conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT data FROM credentials WHERE server_id = %s", (server_id,)
-            )
-            row = cur.fetchone()
-    conn.close()
+    conn = await get_db_connection()
+    async with conn.cursor() as cur:
+        await cur.execute(
+            "SELECT data FROM credentials WHERE server_id = %s", (server_id,)
+        )
+        row = await cur.fetchone()
+    await conn.release()
     if row:
         return pickle.loads(row[0])
     return None
 
 
 @app.route("/authorize/<int:server_id>/<path:sheet_link>")
-def authorize(server_id, sheet_link) -> Response:
+async def authorize(server_id, sheet_link) -> Response:
     # Handles authorization endpoint.
     client_config = get_config()
     flow = Flow.from_client_config(client_config, scopes=SCOPES, redirect_uri=REDIRECT)
@@ -101,7 +113,7 @@ def authorize(server_id, sheet_link) -> Response:
 
 
 @app.route("/callback")
-def callback() -> str:
+async def callback() -> str:
     # Handles callback endpoint.
     state = session.pop("state", None)
     server_id = session.pop("server_id", None)
@@ -116,14 +128,14 @@ def callback() -> str:
         store_credentials(server_id, creds)
         return "Authentication successful! You can now close this page."
     else:
-        conn = get_db_connection()
-        with conn.cursor() as cur:
-            cur.execute(
+        conn = await get_db_connection()
+        async with conn.cursor() as cur:
+            await cur.execute(
                 "INSERT INTO invalid_sheets (sheet_link) VALUES (%s) ON CONFLICT DO NOTHING;",
                 (sheet_link,),
             )
-        conn.commit()
-        conn.close()
+            await conn.commit()
+        await conn.release()
         return (
             "You don't have permission to edit this sheet or the sheet doesn't exist."
         )
