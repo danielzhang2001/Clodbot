@@ -4,8 +4,9 @@ General functions in updating Google Sheets with Pokemon Showdown replay informa
 
 import pickle
 import json
-import os.path
 import asyncio
+import aiopg
+import os.path
 from discord.ext import commands
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google_auth_oauthlib.flow import Flow
@@ -22,7 +23,7 @@ async def authenticate_sheet(
     ctx: commands.Context, server_id: int, sheet_link: str
 ) -> Credentials:
     # Authenticates sheet functionality with appropriate credentials.
-    creds = load_credentials(server_id)
+    creds = await load_credentials(server_id)
     if creds and creds.valid and is_valid_creds(creds, sheet_link):
         return creds
     auth_url = f"https://clodbot.herokuapp.com/authorize/{server_id}/{sheet_link}"
@@ -33,25 +34,26 @@ async def authenticate_sheet(
         if is_invalid:
             await clear_sheets(sheet_link)
             return None
-        creds = load_credentials(server_id)
+        creds = await load_credentials(server_id)
         if creds and creds.valid and is_valid_creds(creds, sheet_link):
             return creds
 
 
 async def check_sheets(sheet_link):
-    conn = get_db_connection()
+    conn = await get_db_connection()
     try:
         async with conn.cursor() as cur:
             await cur.execute(
                 "SELECT 1 FROM invalid_sheets WHERE sheet_link = %s", (sheet_link,)
             )
-            return cur.fetchone() is not None
+            result = await cur.fetchone()
+            return result is not None
     finally:
-        await conn.close()
+        await conn.release()
 
 
 async def clear_sheets(sheet_link):
-    conn = get_db_connection()
+    conn = await get_db_connection()
     try:
         async with conn.cursor() as cur:
             await cur.execute(
@@ -59,7 +61,7 @@ async def clear_sheets(sheet_link):
             )
             await conn.commit()
     finally:
-        await conn.close()
+        await conn.release()
 
 
 def add_data(
