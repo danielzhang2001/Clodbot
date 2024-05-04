@@ -31,7 +31,7 @@ class ManageSheet:
         sheet_metadata = (
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
-        title = sheet_metadata["properties"]["title"]
+        sheet_title = sheet_metadata["properties"]["title"]
         try:
             response = requests.get(replay_link + ".json")
             response.raise_for_status()
@@ -81,7 +81,7 @@ class ManageSheet:
                     player_name,
                     pokemon_data,
                 )
-        return f"Sheet updated at [**{title}**]({sheet_link}) using **{sheet_name}**."
+        return f"Sheet updated at [**{sheet_title}**]({sheet_link}) using **{sheet_name}**."
 
     @staticmethod
     async def delete_player(
@@ -98,7 +98,7 @@ class ManageSheet:
         sheet_metadata = (
             service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
-        title = sheet_metadata["properties"]["title"]
+        sheet_title = sheet_metadata["properties"]["title"]
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
         for sheet in sheets:
@@ -106,7 +106,7 @@ class ManageSheet:
                 sheet_id = sheet["properties"]["sheetId"]
                 break
         if sheet_id is None:
-            raise NameDoesNotExist(player_name)
+            raise NameDoesNotExist(player_name, sheet_title, sheet_name)
         sheet_link = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
         values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
         players = [player[0] for player in get_sheet_players(values)]
@@ -116,10 +116,10 @@ class ManageSheet:
                 player_name,
             )
         else:
-            raise NameDoesNotExist(player_name)
+            raise NameDoesNotExist(player_name, sheet_title, sheet_name)
         section_range = f"{sheet_name}!{get_section_range(values, player_name)}"
         delete_data(service, spreadsheet_id, sheet_id, section_range)
-        return f"**{player_name}** removed at [**{title}**]({sheet_link}) using **{sheet_name}**."
+        return f"**{player_name}** removed at [**{sheet_title}**]({sheet_link}) using **{sheet_name}**."
 
     @staticmethod
     async def list_data(

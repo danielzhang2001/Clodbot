@@ -56,8 +56,10 @@ class InvalidParts(Exception):
 
 class NameDoesNotExist(Exception):
     # Exception raised when the name does not exist in the sheet when calling delete.
-    def __init__(self, name):
-        super().__init__(f"**{name}** does not exist in the Google Sheets.")
+    def __init__(self, player_name, sheet_title, sheet_name):
+        super().__init__(
+            f"**{name}** does not exist at **{sheet_title}** using **{sheet_name}**."
+        )
 
 
 class NoAnalyze(Exception):
