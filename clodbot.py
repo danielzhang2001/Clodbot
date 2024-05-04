@@ -117,7 +117,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         raise NoSheet()
     if command == "default":
         if await ManageSheet.has_default(server_id):
-            message = await ManageSheet.get_default(server_id, creds)
+            message = await ManageSheet.get_default(server_id)
         else:
             raise NoDefault()
     elif command == "set":
