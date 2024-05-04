@@ -12,9 +12,9 @@ class InvalidCommand(Exception):
             "Clodbot, analyze (Replay Link)\n"
             "Clodbot, sheet set (Optional Google Sheets Link) (Optional Sheet Name)\n"
             "Clodbot, sheet default\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link)\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional 'New']\n"
             "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
-            'Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ["Players" OR "Pokemon"]\n'
+            "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']\n"
             "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
             "Clodbot, giveset random (Optional Number)\n"
             "```"
@@ -79,9 +79,9 @@ class NoSheet(Exception):
             "```\n"
             "Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)\n"
             "Clodbot, sheet default\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link)\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional 'New']\n"
             "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
-            "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon]\n"
+            "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']\n"
             "```"
         )
 
@@ -115,7 +115,7 @@ class NoUpdate(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link)\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional 'New']\n"
             "```"
         )
 
