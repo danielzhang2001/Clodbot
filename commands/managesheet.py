@@ -118,7 +118,7 @@ class ManageSheet:
             raise NameDoesNotExist(player_name)
         section_range = f"{sheet_name}!{get_section_range(values, player_name)}"
         delete_data(service, spreadsheet_id, sheet_id, section_range)
-        return f"**{player_name}** removed at [**{title}**]({sheet_link})."
+        return f"**{player_name}** removed at [**{title}**]({sheet_link}) using **{sheet_name}**."
 
     @staticmethod
     async def list_data(
