@@ -82,14 +82,16 @@ async def help(ctx: commands.Context) -> None:
     # Displays all commands with a link to the website for help.
     message = (
         "**COMMANDS:**\n\n"
-        "**Clodbot, analyze (Pokemon Showdown Replay Link)** to display the stats from the replay on Discord.\n"
-        "**Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)** to set the default Google Sheets link and sheet name for future sheet commands. If not provided, sheet name defaults to 'Stats'.\n"
-        "**Clodbot, sheet default** to display the default sheet link and sheet name on Discord.\n"
-        "**Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Pokemon Showdown Replay Link)** to update the stats from the replay onto the sheet name in the link. If not provided, sheet name defaults to 'Stats'.\n"
-        "**Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)** to delete the stats section with Player Name from the sheet name in the link. If not provided, sheet name defaults to 'Stats'.\n"
-        "**Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']** to display either all Player stats or all Pokemon stats from the sheet name in the link on Discord. If not provided, sheet name defaults to 'Stats'.\n"
-        "**Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]** to display prompt(s) for set selection based on the provided parameters.\n"
+        "--------------------------------------------------\n\n"
+        "**Clodbot, analyze (Pokemon Showdown Replay Link)** to display the stats from the replay on Discord.\n\n"
+        "**Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)** to set the default Google Sheets link and sheet name for future sheet commands. If not provided, sheet name defaults to 'Stats'.\n\n"
+        "**Clodbot, sheet default** to display the default sheet link and sheet name on Discord.\n\n"
+        "**Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Pokemon Showdown Replay Link) [Optional 'New']** to update the stats from the replay onto the sheet name in the link. If not provided, sheet name defaults to 'Stats'. If 'New' is specified, a new section will always be made.\n\n"
+        "**Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)** to delete the stats section with Player Name from the sheet name in the link. If not provided, sheet name defaults to 'Stats'.\n\n"
+        "**Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']** to display either all Player stats or all Pokemon stats from the sheet name in the link on Discord. If not provided, sheet name defaults to 'Stats'.\n\n"
+        "**Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]** to display prompt(s) for set selection based on the provided parameters.\n\n"
         "**Clodbot, giveset random (Optional Number)** to display random set(s) for the specified amount of random Pokemon.\n\n"
+        "--------------------------------------------------\n\n"
         "For more information, please visit the official website for Clodbot [**HERE**](https://clodbot.com)."
     )
     await ctx.send(message)
@@ -134,26 +136,27 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             server_id, creds, remaining[0], sheet_name
         )
     else:
+        remaining_lower = [item.lower() for item in remaining]
         if len(remaining) == 1 or (
-            command == "update" and len(remaining) == 2 and remaining[1] == "new"
+            command == "update" and len(remaining) == 2 and remaining_lower[1] == "new"
         ):
-            new = len(remaining) == 2 and remaining[1] == "new"
+            new = len(remaining) == 2 and remaining_lower[1] == "new"
             if await ManageSheet.has_default(server_id):
                 sheet_link, sheet_name = await ManageSheet.use_default(server_id)
                 data = remaining[0]
             else:
                 raise NoDefault()
         elif len(remaining) == 2 or (
-            command == "update" and len(remaining) == 3 and remaining[2] == "new"
+            command == "update" and len(remaining) == 3 and remaining_lower[2] == "new"
         ):
-            new = len(remaining) == 3 and remaining[2] == "new"
+            new = len(remaining) == 3 and remaining_lower[2] == "new"
             sheet_link = remaining[0]
             data = remaining[1]
             sheet_name = "Stats"
         elif len(remaining) == 3 or (
-            command == "update" and len(remaining) == 4 and remaining[3] == "new"
+            command == "update" and len(remaining) == 4 and remaining_lower[3] == "new"
         ):
-            new = len(remaining) == 4 and remaining[3] == "new"
+            new = len(remaining) == 4 and remaining_lower[3] == "new"
             sheet_link = remaining[0]
             sheet_name = remaining[1]
             data = remaining[2]
