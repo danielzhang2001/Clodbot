@@ -10,11 +10,11 @@ class InvalidCommand(Exception):
             "Invalid command. Please enter one of the following:\n"
             "```\n"
             "Clodbot, analyze (Replay Link)\n"
-            "Clodbot, sheet set (Optional Google Sheets Link)\n"
+            "Clodbot, sheet set (Optional Google Sheets Link) (Optional Sheet Name)\n"
             "Clodbot, sheet default\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Replay Link)\n"
-            "Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)\n"
-            'Clodbot, sheet list (Optional Google Sheets Link) ["Players" OR "Pokemon"]\n'
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link)\n"
+            "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
+            'Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ["Players" OR "Pokemon"]\n'
             "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
             "Clodbot, giveset random (Optional Number)\n"
             "```"
@@ -77,11 +77,11 @@ class NoSheet(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet set (Google Sheets Link)\n"
+            "Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)\n"
             "Clodbot, sheet default\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Replay Link)\n"
-            "Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)\n"
-            "Clodbot, sheet list (Optional Google Sheets Link) ['Players' OR 'Pokemon]\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link)\n"
+            "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
+            "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon]\n"
             "```"
         )
 
@@ -104,7 +104,7 @@ class NoSet(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet set (Google Sheets Link)\n"
+            "Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)\n"
             "```"
         )
 
@@ -115,7 +115,7 @@ class NoUpdate(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Replay Link)\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link)\n"
             "```"
         )
 
@@ -126,7 +126,7 @@ class NoDelete(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet delete (Optional Google Sheets Link) (Player Name)\n"
+            "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
             "```"
         )
 
@@ -137,7 +137,7 @@ class NoList(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet list (Optional Google Sheets Link) ['Player' OR 'Pokemon']\n"
+            "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Player' OR 'Pokemon']\n"
             "```"
         )
 
@@ -160,7 +160,7 @@ class NoDefault(Exception):
         super().__init__(
             f"No default sheet link set. You can set it as follows:\n"
             "```\n"
-            "Clodbot, sheet set (Google Sheets Link)\n"
+            "Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)\n"
             "```"
         )
 
