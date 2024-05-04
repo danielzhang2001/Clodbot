@@ -23,6 +23,7 @@ class ManageSheet:
         sheet_link: str,
         sheet_name: str,
         replay_link: str,
+        new=bool,
     ) -> str:
         # Updates sheets with replay data.
         service = build("sheets", "v4", credentials=creds)
@@ -65,7 +66,7 @@ class ManageSheet:
                 for pokemon, data in pokemon_data.items()
             ]
             values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
-            if check_labels(values, player_name):
+            if not new and check_labels(values, player_name):
                 stat_range = f"{sheet_name}!{get_stat_range(values, player_name)}"
                 update_data(
                     service, spreadsheet_id, stat_range, player_name, pokemon_data

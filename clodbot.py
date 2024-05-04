@@ -134,17 +134,29 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             server_id, creds, remaining[0], sheet_name
         )
     else:
-        if len(remaining) == 1:
+        if len(remaining) == 1 or (
+            command == "update" and len(remaining) == 2 and remaining[1] == "new"
+        ):
+            new = len(remaining) == 2 and remaining[1] == "new"
             if await ManageSheet.has_default(server_id):
                 sheet_link, sheet_name = await ManageSheet.use_default(server_id)
                 data = remaining[0]
             else:
                 raise NoDefault()
-        elif len(remaining) == 2:
-            sheet_link, data = remaining
+        elif len(remaining) == 2 or (
+            command == "update" and len(remaining) == 3 and remaining[2] == "new"
+        ):
+            new = len(remaining) == 3 and remaining[2] == "new"
+            sheet_link = remaining[0]
+            data = remaining[1]
             sheet_name = "Stats"
-        elif len(remaining) == 3:
-            sheet_link, sheet_name, data = remaining
+        elif len(remaining) == 3 or (
+            command == "update" and len(remaining) == 4 and remaining[3] == "new"
+        ):
+            new = len(remaining) == 4 and remaining[3] == "new"
+            sheet_link = remaining[0]
+            sheet_name = remaining[1]
+            data = remaining[2]
         else:
             if command == "update":
                 raise NoUpdate()
@@ -158,7 +170,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             return
         if command == "update":
             message = await ManageSheet.update_sheet(
-                ctx, server_id, creds, sheet_link, sheet_name, data
+                ctx, server_id, creds, sheet_link, sheet_name, data, new
             )
         elif command == "delete":
             message = await ManageSheet.delete_player(
