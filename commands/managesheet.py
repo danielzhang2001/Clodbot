@@ -165,6 +165,12 @@ class ManageSheet:
         # Sets the default link for the server.
         if not sheet_name:
             sheet_name = "Stats"
+        service = build("sheets", "v4", credentials=creds)
+        spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
+        sheet_metadata = (
+            service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        )
+        sheet_title = sheet_metadata["properties"]["title"]
         pool = await get_db_connection()
         async with pool.acquire() as conn:
             async with conn.cursor() as cur:
@@ -172,44 +178,32 @@ class ManageSheet:
                 try:
                     await cur.execute(
                         """
-                        INSERT INTO default_links (server_id, sheet_link, sheet_name)
-                        VALUES (%s, %s, %s)
+                        INSERT INTO default_links (server_id, sheet_link, sheet_title, sheet_name)
+                        VALUES (%s, %s, %s, %s)
                         ON CONFLICT (server_id)
-                        DO UPDATE SET sheet_link = EXCLUDED.sheet_link, sheet_name = EXCLUDED.sheet_name;
+                        DO UPDATE SET sheet_link = EXCLUDED.sheet_link, sheet_title = EXCLUDED.sheet_title, sheet_name = EXCLUDED.sheet_name;
                         """,
-                        (server_id, sheet_link, sheet_name),
+                        (server_id, sheet_link, sheet_title, sheet_name),
                     )
                     await cur.execute("COMMIT;")
                 except Exception as e:
                     await cur.execute("ROLLBACK;")
                     raise e
-        service = build("sheets", "v4", credentials=creds)
-        spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
-        sheet_metadata = (
-            service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-        )
-        title = sheet_metadata["properties"]["title"]
-        return f"Default sheet link set at [**{title}**]({sheet_link}) using **{sheet_name}**."
+        return f"Default sheet link set at [**{sheet_title}**]({sheet_link}) using **{sheet_name}**."
 
     @staticmethod
-    async def get_default(server_id: int, creds: Credentials) -> str:
+    async def get_default(server_id: int) -> str:
         # Returns the server's current default link.
         pool = await get_db_connection()
         async with pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(
-                    "SELECT sheet_link, sheet_name FROM default_links WHERE server_id = %s",
+                    "SELECT sheet_link, sheet_title, sheet_name FROM default_links WHERE server_id = %s",
                     (server_id,),
                 )
                 row = await cur.fetchone()
-                sheet_link, sheet_name = row
-        service = build("sheets", "v4", credentials=creds)
-        spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
-        sheet_metadata = (
-            service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-        )
-        title = sheet_metadata["properties"]["title"]
-        return f"Current default sheet at [**{title}**]({sheet_link}) using **{sheet_name}**."
+                sheet_link, sheet_title, sheet_name = row
+        return f"Current default sheet at [**{sheet_title}**]({sheet_link}) using **{sheet_name}**."
 
     @staticmethod
     async def has_default(server_id: int) -> bool:
