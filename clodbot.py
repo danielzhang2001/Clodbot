@@ -96,7 +96,7 @@ async def help(ctx: commands.Context) -> None:
         "> \n"
         "> **Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]** to display prompt(s) for set selection based on the provided parameters.\n"
         "> \n"
-        "> **Clodbot, giveset random (Optional Number)** to display random set(s) for the specified amount of random Pokemon.\n"
+        "> **Clodbot, giveset random (Optional Number)** to display random set(s) for the specified amount of random Pokemon.\n\n"
         "For more information, please visit the official website for Clodbot [**HERE**](https://clodbot.com)."
     )
     await ctx.send(message)
