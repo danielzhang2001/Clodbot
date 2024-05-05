@@ -29,7 +29,7 @@ def clear_tables() -> None:
 
 def restart_heroku() -> None:
     # Redeploys the app in Heroku.
-    app_name = os.environ["HEROKU_APP_NAME"]
+    app_name = os.environ["HEROKU_APP_NAME"].strip("'")
     subprocess.run(["heroku", "ps:restart", "--app", app_name], check=True)
 
 
