@@ -22,18 +22,30 @@ def get_replay_pokemon(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, s
     # Retrieves Pokemon names and groups them in terms of player. Each entry is a mapping from nickname to actual name.
     log = json_data.get("log", "")
     all_pokemon = {"p1": {}, "p2": {}}
-    nickname_mapping = {}
     if "|poke|" in log:
         pokemon_regex = re.compile(r"\|poke\|(p\d)\|([^,|]+)")
         for match in pokemon_regex.finditer(log):
             player, pokemon = match.groups()
-            pokemon = pokemon.strip().replace('-*', '')
+            pokemon = pokemon.strip().replace("-*", "")
             all_pokemon[player][pokemon] = pokemon
     event_regex = re.compile(r"\|(switch|replace)\|(p\d)a: (.+?)\|([^,|]+)")
     for match in event_regex.finditer(log):
         event_type, player, nickname, pokemon = match.groups()
         pokemon = pokemon.strip()
+        nickname = nickname.strip()
         all_pokemon[player][pokemon] = nickname
+    transform_regex = re.compile(
+        r"\|detailschange\|(p\d)a: (.+?)\|([^,|]+)-(Mega|Terastal),"
+    )
+    for match in transform_regex.finditer(log):
+        player, nickname, base_pokemon, form = match.groups()
+        transform_pokemon = base_pokemon + "-" + form
+        if (
+            base_pokemon in all_pokemon[player]
+            and all_pokemon[player][base_pokemon] == nickname
+        ):
+            del all_pokemon[player][base_pokemon]
+        all_pokemon[player][transform_pokemon] = nickname
     return all_pokemon
 
 
