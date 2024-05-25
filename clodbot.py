@@ -124,7 +124,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
     remaining = []
     name_dict = {}
     found_arrow = True
-    for arg in args[1:]:
+    for arg in reversed(args[1:]):
         if "->" in arg and found_arrow:
             parts = arg.split("->")
             if len(parts) == 2:
@@ -133,9 +133,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
                 name_dict[key] = value
         else:
             found_arrow = False
-            remaining.append(arg)
-    print(f"NAME DICT: {name_dict}")
-    print(f"REMAINING: {remaining}")
+            remaining.insert(0, arg)
     if command == "default":
         if await ManageSheet.has_default(server_id):
             message = await ManageSheet.get_default(server_id)
