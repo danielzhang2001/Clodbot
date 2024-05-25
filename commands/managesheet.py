@@ -23,7 +23,8 @@ class ManageSheet:
         sheet_link: str,
         sheet_name: str,
         replay_link: str,
-        new=bool,
+        name_dict: Dict[str, str],
+        new=False,
     ) -> str:
         # Updates sheets with replay data.
         service = build("sheets", "v4", credentials=creds)
@@ -61,6 +62,8 @@ class ManageSheet:
         )
         for player_name, pokemon_data in stats.items():
             player_name = get_replay_players(json_data)[player_name]
+            if player_name in name_dict:
+                player_name = name_dict[player_name]
             pokemon_data = [
                 (pokemon, [data["kills"], data["deaths"]])
                 for pokemon, data in pokemon_data.items()

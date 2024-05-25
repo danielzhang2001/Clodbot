@@ -118,10 +118,22 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
     if not args:
         raise NoSheet()
     command = args[0].lower()
-    remaining = args[1:]
     server_id = ctx.guild.id
     if command not in ["set", "default", "update", "delete", "list"]:
         raise NoSheet()
+    remaining = []
+    name_dict = {}
+    for arg in reversed(args[1:]):
+        if "->" in arg:
+            parts = arg.split("->")
+            if len(parts) == 2:
+                key = parts[0].strip()
+                value = parts[1].strip()
+                name_dict[key] = value
+        else:
+            remaining.insert(0, arg)
+            break
+    remaining = args[1 : len(args) - len(name_dict)]
     if command == "default":
         if await ManageSheet.has_default(server_id):
             message = await ManageSheet.get_default(server_id)
@@ -141,7 +153,6 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             server_id, creds, remaining[0], sheet_name
         )
     else:
-        remaining_lower = [item.lower() for item in remaining]
         if len(remaining) == 1 or (
             command == "update" and len(remaining) == 2 and remaining_lower[1] == "new"
         ):
@@ -178,7 +189,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             return
         if command == "update":
             message = await ManageSheet.update_sheet(
-                ctx, server_id, creds, sheet_link, sheet_name, data, new
+                ctx, server_id, creds, sheet_link, sheet_name, data, name_dict, new
             )
         elif command == "delete":
             message = await ManageSheet.delete_player(
