@@ -134,8 +134,6 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         else:
             found_arrow = False
             remaining.append(arg)
-    print(f"NAME DICT: {name_dict}")
-    print(f"REMAINING: {remaining}")
     if command == "default":
         if await ManageSheet.has_default(server_id):
             message = await ManageSheet.get_default(server_id)
@@ -155,6 +153,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             server_id, creds, remaining[0], sheet_name
         )
     else:
+        remaining_lower = [item.lower() for item in remaining]
         if len(remaining) == 1 or (
             command == "update" and len(remaining) == 2 and remaining_lower[1] == "new"
         ):
