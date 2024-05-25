@@ -134,6 +134,8 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         else:
             found_arrow = False
             remaining.append(arg)
+    print(f"NAME DICT: {name_dict}")
+    print(f"REMAINING: {remaining}")
     if command == "default":
         if await ManageSheet.has_default(server_id):
             message = await ManageSheet.get_default(server_id)
