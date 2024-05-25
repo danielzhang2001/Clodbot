@@ -123,16 +123,17 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         raise NoSheet()
     remaining = []
     name_dict = {}
-    for arg in reversed(args[1:]):
-        if "->" in arg:
+    found_arrow = True
+    for arg in args[1:]:
+        if "->" in arg and found_arrow:
             parts = arg.split("->")
             if len(parts) == 2:
                 key = parts[0].strip()
                 value = parts[1].strip()
                 name_dict[key] = value
         else:
-            remaining.insert(0, arg)
-            break
+            found_arrow = False
+            remaining.append(arg)
     remaining = args[1 : len(args) - len(name_dict)]
     if command == "default":
         if await ManageSheet.has_default(server_id):
