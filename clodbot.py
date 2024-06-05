@@ -155,25 +155,34 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
     else:
         remaining_lower = [item.lower() for item in remaining]
         if len(remaining) == 1 or (
-            command == "update" and len(remaining) == 2 and remaining_lower[1] == "new"
+            command == "update"
+            and len(remaining) == 2
+            and remaining_lower[1].startswith("week")
         ):
-            new = len(remaining) == 2 and remaining_lower[1] == "new"
+            if remaining_lower[1].startswith("week"):
+                week = int(remaining_lower[1][4:])
             if await ManageSheet.has_default(server_id):
                 sheet_link, sheet_name = await ManageSheet.use_default(server_id)
                 data = remaining[0]
             else:
                 raise NoDefault()
         elif len(remaining) == 2 or (
-            command == "update" and len(remaining) == 3 and remaining_lower[2] == "new"
+            command == "update"
+            and len(remaining) == 3
+            and remaining_lower[2].startswith("week")
         ):
-            new = len(remaining) == 3 and remaining_lower[2] == "new"
+            if remaining_lower[2].startswith("week"):
+                week = int(remaining_lower[2][4:])
             sheet_link = remaining[0]
             data = remaining[1]
             sheet_name = "Stats"
         elif len(remaining) == 3 or (
-            command == "update" and len(remaining) == 4 and remaining_lower[3] == "new"
+            command == "update"
+            and len(remaining) == 4
+            and remaining_lower[3].startswith("week")
         ):
-            new = len(remaining) == 4 and remaining_lower[3] == "new"
+            if remaining_lower[3].startswith("week"):
+                week = int(remaining_lower[3][4:])
             sheet_link = remaining[0]
             sheet_name = remaining[1]
             data = remaining[2]
@@ -190,7 +199,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             return
         if command == "update":
             message = await ManageSheet.update_sheet(
-                ctx, server_id, creds, sheet_link, sheet_name, data, name_dict, new
+                ctx, server_id, creds, sheet_link, sheet_name, data, name_dict, week
             )
         elif command == "delete":
             message = await ManageSheet.delete_player(
