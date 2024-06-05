@@ -67,6 +67,24 @@ async def clear_sheets(sheet_link):
                 raise e
 
 
+def add_week(
+    service: Resource, spreadsheet_id: str, sheet_id: int, sheet_name: str, week: int
+) -> None:
+    # Adds the week into the sheet on the specific cell, as well as does cell formatting.
+    cell_range = f"{sheet_name}!{next_week_range(week)}"
+    data = f"Week {week}"
+    body = {"values": [[data]]}
+    service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id,
+        range=cell_range,
+        valueInputOption="USER_ENTERED",
+        body=body,
+    ).execute()
+    widen_columns(service, spreadsheet_id, sheet_id)
+    clear_cells(service, spreadsheet_id, sheet_id, cell_range)
+    format_week(service, spreadsheet_id, sheet_id, cell_range)
+
+
 def add_data(
     service: Resource,
     spreadsheet_id: str,
@@ -74,6 +92,7 @@ def add_data(
     cell: str,
     player_name: str,
     pokemon: List[Tuple[str, List[int]]],
+    week: Optional[int] = None,
 ) -> None:
     # Adds the Player Name, Pokemon, Games, Kills and Deaths data into the sheet on the specific cell, as well as does cell formatting.
     sheet_name, start_cell = cell.split("!")
@@ -96,8 +115,7 @@ def add_data(
     ).execute()
     widen_columns(service, spreadsheet_id, sheet_id)
     clear_cells(service, spreadsheet_id, sheet_id, cell_range)
-    format_cells(service, spreadsheet_id, sheet_id, cell_range)
-    format_text(service, spreadsheet_id, sheet_id, cell_range)
+    format_data(service, spreadsheet_id, sheet_id, cell_range)
 
 
 def delete_data(
@@ -241,6 +259,30 @@ def create_pokemon_message(values: List[List[str]]) -> str:
     return message
 
 
+def format_week(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Formats all of the cells and text for the week section.
+    merge_cells(service, spreadsheet_id, sheet_id, cell_range)
+    outline_cells(service, spreadsheet_id, sheet_id, cell_range)
+    color_week(service, spreadsheet_id, sheet_id, cell_range)
+    style_week(service, spreadsheet_id, sheet_id, cell_range)
+    center_text(service, spreadsheet_id, sheet_id, cell_range)
+
+
+def format_data(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Formats all of the cells and text for the player data section.
+    name_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{cell_range.split('!')[1].split(':')[0][1:]}"
+    header_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{int(cell_range.split('!')[1].split(':')[0][1:]) + 1}"
+    merge_cells(service, spreadsheet_id, sheet_id, name_range)
+    outline_cells(service, spreadsheet_id, sheet_id, cell_range)
+    color_data(service, spreadsheet_id, sheet_id, cell_range)
+    style_data(service, spreadsheet_id, sheet_id, cell_range)
+    center_text(service, spreadsheet_id, sheet_id, header_range)
+
+
 def widen_columns(service: Resource, spreadsheet_id: str, sheet_id: int) -> None:
     # Widens certain columns on the sheet.
     columns = [
@@ -263,25 +305,6 @@ def widen_columns(service: Resource, spreadsheet_id: str, sheet_id: int) -> None
     service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id, body=body
     ).execute()
-
-
-def format_cells(
-    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
-) -> None:
-    # Formats all of the cells for the player section.
-    name_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{cell_range.split('!')[1].split(':')[0][1:]}"
-    merge_cells(service, spreadsheet_id, sheet_id, name_range)
-    outline_cells(service, spreadsheet_id, sheet_id, cell_range)
-    color_cells(service, spreadsheet_id, sheet_id, cell_range)
-
-
-def format_text(
-    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
-) -> None:
-    # Formats all of the text for the player section.
-    header_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{int(cell_range.split('!')[1].split(':')[0][1:]) + 1}"
-    style_text(service, spreadsheet_id, sheet_id, cell_range)
-    center_text(service, spreadsheet_id, sheet_id, header_range)
 
 
 def merge_cells(
@@ -375,10 +398,46 @@ def outline_cells(
     ).execute()
 
 
-def color_cells(
+def color_week(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
-    # Colors all the cells in the range.
+    # Colors all the cells in the range for week.
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    if (start_row - 2) // 15 % 2 == 0:
+        color = {"red": 0, "green": 0, "blue": 0}
+    else:
+        color = {"red": 0, "green": 0.23, "blue": 0.47}
+    body = {
+        "requests": [
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startRowIndex": start_row,
+                        "endRowIndex": end_row,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
+                    },
+                    "cell": {"userEnteredFormat": {"backgroundColor": color}},
+                    "fields": "userEnteredFormat.backgroundColor",
+                }
+            }
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
+def color_data(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Colors all the cells in the range for player data.
     _, cell_range = cell_range.split("!")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
@@ -542,10 +601,54 @@ def clear_text(service: Resource, spreadsheet_id: str, sheet_id: int, cell_range
     ).execute()
 
 
-def style_text(
+def style_week(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
-    # Colors all the text in the range and sets the font and font size.
+    # Colors all the text in the range for week and sets the font and font size.
+    _, cell_range = cell_range.split("!")
+    start_cell, end_cell = cell_range.split(":")
+    start_row = int("".join(filter(str.isdigit, start_cell))) - 1
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    start_col = ord(start_cell[0]) - ord("A")
+    end_col = ord(end_cell[0]) - ord("A") + 1
+    body = {
+        "requests": [
+            {
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startRowIndex": start_row,
+                        "endRowIndex": end_row,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
+                    },
+                    "cell": {
+                        "userEnteredFormat": {
+                            "textFormat": {
+                                "fontFamily": "Acme",
+                                "fontSize": 24,
+                                "foregroundColor": {
+                                    "red": 1.0,
+                                    "green": 1.0,
+                                    "blue": 1.0,
+                                },
+                            }
+                        }
+                    },
+                    "fields": "userEnteredFormat.textFormat",
+                }
+            }
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body=body
+    ).execute()
+
+
+def style_data(
+    service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
+) -> None:
+    # Colors all the text in the range for player data and sets the font and font size.
     _, cell_range = cell_range.split("!")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
@@ -765,8 +868,44 @@ def get_values(
     return result.get("values", [])
 
 
-def next_cell(values: List[List[str]]) -> str:
-    # Returns the row and column indices for the top of the next available section.
+def next_week_range(week: int) -> str:
+    # Returns the range for the specified section for week.
+    start_row = (week - 1) * 15 + 2
+    end_row = start_row + 13
+    return f"B{start_row}:B{end_row}"
+
+
+def next_week_cell(values: List[List[str]], week: int) -> str:
+    # Returns the row and column indices for the top of the next available section for player data for the specified week.
+    start_row = (week - 1) * 15
+    for row in range(start_row, start_row + 15):
+        column_index = 3
+        while True:
+            if row >= len(values):
+                column = ""
+                temp_index = column_index
+                while temp_index >= 0:
+                    column = chr(temp_index % 26 + 65) + column
+                    temp_index = temp_index // 26 - 1
+                return f"{column}{row + 1}"
+            if len(values[row]) <= column_index or values[row][column_index] == "":
+                column = ""
+                temp_index = column_index
+                while temp_index >= 0:
+                    column = chr(temp_index % 26 + 65) + column
+                    temp_index = temp_index // 26 - 1
+                return f"{column}{row + 1}"
+            column_index += 5
+    column = ""
+    temp_index = 3
+    while temp_index >= 0:
+        column = chr(temp_index % 26 + 65) + column
+        temp_index = temp_index // 26 - 1
+    return f"{column}{start_row + 2}"
+
+
+def next_data_cell(values: List[List[str]]) -> str:
+    # Returns the row and column indices for the top of the next available section for player data.
     letters = ["B", "G", "L", "Q"]
     last_index = 3
     for section in range(0, len(values), 15):

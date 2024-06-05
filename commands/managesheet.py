@@ -24,7 +24,7 @@ class ManageSheet:
         sheet_name: str,
         replay_link: str,
         name_dict: Dict[str, str],
-        new=False,
+        week: Optional[int] = None,
     ) -> str:
         # Updates sheets with replay data.
         service = build("sheets", "v4", credentials=creds)
@@ -69,13 +69,9 @@ class ManageSheet:
                 for pokemon, data in pokemon_data.items()
             ]
             values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
-            if not new and check_labels(values, player_name):
-                stat_range = f"{sheet_name}!{get_stat_range(values, player_name)}"
-                update_data(
-                    service, spreadsheet_id, stat_range, player_name, pokemon_data
-                )
-            else:
-                start_cell = f"{sheet_name}!{next_cell(values)}"
+            if week is not None:
+                add_week(service, spreadsheet_id, sheet_id, sheet_name, week)
+                start_cell = f"{sheet_name}!{next_week_cell(values, week)}"
                 add_data(
                     service,
                     spreadsheet_id,
@@ -83,7 +79,25 @@ class ManageSheet:
                     start_cell,
                     player_name,
                     pokemon_data,
+                    week,
                 )
+            else:
+                if check_labels(values, player_name):
+                    stat_range = f"{sheet_name}!{get_stat_range(values, player_name)}"
+                    update_data(
+                        service, spreadsheet_id, stat_range, player_name, pokemon_data
+                    )
+                else:
+                    start_cell = f"{sheet_name}!{next_data_cell(values)}"
+                    add_data(
+                        service,
+                        spreadsheet_id,
+                        sheet_id,
+                        start_cell,
+                        player_name,
+                        pokemon_data,
+                        week,
+                    )
         return f"Sheet updated at [**{sheet_title}**]({sheet_link}) using **{sheet_name}**."
 
     @staticmethod
