@@ -901,7 +901,6 @@ def next_week_cell(values: List[List[str]], week: int) -> str:
     while temp_index >= 0:
         column = chr(temp_index % 26 + 65) + column
         temp_index = temp_index // 26 - 1
-    print(f"start row: {start_row}")
     return f"{column}{start_row + 2}"
 
 
