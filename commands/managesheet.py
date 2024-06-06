@@ -89,6 +89,7 @@ class ManageSheet:
                     )
                 else:
                     start_cell = f"{sheet_name}!{next_data_cell(values)}"
+                    print(f"start cell: {start_cell}")
                     add_data(
                         service,
                         spreadsheet_id,
