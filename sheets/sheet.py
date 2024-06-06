@@ -877,7 +877,7 @@ def next_week_range(week: int) -> str:
 
 def next_week_cell(values: List[List[str]], week: int) -> str:
     # Returns the row and column indices for the top of the next available section for player data for the specified week.
-    start_row = (week - 1) * 15 + 2
+    start_row = (week - 1) * 15 + 1
     for row in range(start_row, start_row + 15):
         column_index = 3
         while True:
