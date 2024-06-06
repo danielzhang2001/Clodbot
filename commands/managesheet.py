@@ -72,6 +72,7 @@ class ManageSheet:
             if week is not None:
                 add_week(service, spreadsheet_id, sheet_id, sheet_name, week)
                 start_cell = f"{sheet_name}!{next_week_cell(values, week)}"
+                print(f"start cell: {start_cell}")
                 add_data(
                     service,
                     spreadsheet_id,
@@ -89,7 +90,6 @@ class ManageSheet:
                     )
                 else:
                     start_cell = f"{sheet_name}!{next_data_cell(values)}"
-                    print(f"start cell: {start_cell}")
                     add_data(
                         service,
                         spreadsheet_id,
