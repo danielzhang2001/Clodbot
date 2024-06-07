@@ -60,6 +60,8 @@ class ManageSheet:
             if sheet_id
             else sheet_link
         )
+        if week is not None:
+            add_week(service, spreadsheet_id, sheet_id, sheet_name, week)
         for player_name, pokemon_data in stats.items():
             player_name = get_replay_players(json_data)[player_name]
             if player_name in name_dict:
@@ -70,9 +72,7 @@ class ManageSheet:
             ]
             values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
             if week is not None:
-                add_week(service, spreadsheet_id, sheet_id, sheet_name, week)
                 start_cell = f"{sheet_name}!{next_week_cell(values, week)}"
-                print(f"start cell: {start_cell}")
                 add_data(
                     service,
                     spreadsheet_id,
