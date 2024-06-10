@@ -67,6 +67,23 @@ async def clear_sheets(sheet_link):
                 raise e
 
 
+def week_exists(
+    service: Resource, spreadsheet_id: str, sheet_id: int, sheet_name: str, week: int
+) -> bool:
+    # Checks to see if the week section is empty or not.
+    cell_range = f"{sheet_name}!{next_week_range(week)}"
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=spreadsheet_id, range=cell_range, majorDimension="ROWS")
+        .execute()
+    )
+    values = result.get("values", [])
+    if values and values[0] and values[0][0] == f"Week {week}":
+        return True
+    return False
+
+
 def add_week(
     service: Resource, spreadsheet_id: str, sheet_id: int, sheet_name: str, week: int
 ) -> None:
