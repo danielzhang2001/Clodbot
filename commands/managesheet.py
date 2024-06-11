@@ -60,7 +60,9 @@ class ManageSheet:
             if sheet_id
             else sheet_link
         )
-        if week is not None:
+        if week is not None and not week_exists(
+            service, spreadsheet_id, sheet_name, week
+        ):
             add_week(service, spreadsheet_id, sheet_id, sheet_name, week)
         for player_name, pokemon_data in stats.items():
             player_name = get_replay_players(json_data)[player_name]

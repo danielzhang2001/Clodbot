@@ -68,7 +68,7 @@ async def clear_sheets(sheet_link):
 
 
 def week_exists(
-    service: Resource, spreadsheet_id: str, sheet_id: int, sheet_name: str, week: int
+    service: Resource, spreadsheet_id: str, sheet_name: str, week: int
 ) -> bool:
     # Checks to see if the week section is empty or not.
     cell_range = f"{sheet_name}!{next_week_range(week)}"
