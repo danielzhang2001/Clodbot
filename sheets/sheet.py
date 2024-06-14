@@ -303,24 +303,30 @@ def add_columns(
     service: Resource,
     spreadsheet_id: str,
     sheet_id: int,
-    start_col: str,
-    col_num: int,
+    week: int,
+    values: List[List[str]],
 ) -> None:
     # Adds the specified number of columns needed if the end of the sheet is reached.
-    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    total_col = len(alphabet) + 26
-    if len(start_col) == 1:
-        start_index = alphabet.index(start_col) + 1
-    else:
-        start_index = 26 + alphabet.index(start_col[1])
-    end_index = start_index + col_num - 1
-    if end_index > total_col:
+    range_str = next_week_range(week)
+    start_row = int(range_str.split("B")[1].split(":")[0])
+    end_row = int(range_str.split(":B")[1])
+    rightmost_col = len(values[0]) - 1
+    filled_col = -1
+    for col in range(rightmost_col, -1, -1):
+        for row in range(start_row - 1, end_row):
+            if col < len(values[row]) and values[row][col] != "":
+                filled_col = col
+                break
+        if filled_col != -1:
+            break
+    new_col = 5 - (rightmost_col - filled_col)
+    if new_col > 0:
         requests = [
             {
                 "appendDimension": {
                     "sheetId": sheet_id,
                     "dimension": "COLUMNS",
-                    "length": end_index - total_col,
+                    "length": new_col,
                 }
             }
         ]
@@ -944,14 +950,6 @@ def next_week_cell(values: List[List[str]], week: int) -> str:
                     temp_index = temp_index // 26 - 1
                 return f"{column}{row + 1}"
             column_index += 5
-            if column_index >= max_columns:
-                column = ""
-                temp_index = max_columns - 1
-                while temp_index >= 0:
-                    column = chr(temp_index % 26 + 65) + column
-                    temp_index = temp_index // 26 - 1
-                add_columns(service, spreadsheet_id, sheet_id, column, 5)
-                max_columns += 5
     column = ""
     temp_index = 3
     while temp_index >= 0:
