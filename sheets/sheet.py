@@ -140,6 +140,7 @@ def add_data(
     ).execute()
     print(f"CELL RANGE: {cell_range}")
     widen_columns(service, spreadsheet_id, sheet_id)
+    print(f"WIDEN COLUMNS SUCCEEDED!")
     clear_cells(service, spreadsheet_id, sheet_id, cell_range)
     format_data(service, spreadsheet_id, sheet_id, cell_range)
 
