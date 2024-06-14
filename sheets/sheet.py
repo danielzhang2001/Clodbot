@@ -595,8 +595,14 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = ord(start_cell[0]) - ord("A")
-    end_col = ord(end_cell[0]) - ord("A") + 1
+    start_col = 0
+    for char in "".join(filter(str.isalpha, start_cell)):
+        start_col = start_col * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_col -= 1
+    end_col = 0
+    for char in "".join(filter(str.isalpha, end_cell)):
+        end_col = end_col * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_col -= 1
     requests = [
         {
             "repeatCell": {
