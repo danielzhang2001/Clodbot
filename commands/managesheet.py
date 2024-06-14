@@ -82,7 +82,6 @@ class ManageSheet:
                     start_cell,
                     player_name,
                     pokemon_data,
-                    week,
                 )
             else:
                 if check_labels(values, player_name):

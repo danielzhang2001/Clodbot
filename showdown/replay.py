@@ -117,6 +117,9 @@ def process_stats(json_data: Dict[str, List[str]]) -> None:
     # Updates the kill and death values for each Pokemon.
     log = json_data.get("log", "")
     faint_regex = re.compile(r"\|faint\|p(\d)a: ([^\|\n]+)")
+    sandstorm_regex = re.compile(
+        r"\|Sandstorm\|[from] ability: ([^\|]+)\|[of] (p\d)a: ([^\|]+)"
+    )
     for match in faint_regex.finditer(log):
         fainted_player, fainted_pokemon = match.groups()
         fainted_pokemon = fainted_pokemon.strip()
@@ -127,20 +130,46 @@ def process_stats(json_data: Dict[str, List[str]]) -> None:
                 data["deaths"] += 1
                 break
         actions = log[:event].split("\n")[::-1]
-        for action in actions:
-            killer = re.search(r"\|p(\d)a: ([^\|\n]+)\|", action)
-            if killer and killer.group(1) != fainted_player:
-                killer_player, killer_pokemon = killer.groups()
-                killer_pokemon = killer_pokemon.strip()
-                player_key = f"p{killer_player}"
-                kill_found = False
-                for pokemon, data in stats[player_key].items():
-                    if data["nickname"] == killer_pokemon:
-                        data["kills"] += 1
-                        kill_found = True
-                        break
-                if kill_found:
+        sandstorm_death = False
+        sandstorm_owner = None
+        if "|[from] Sandstorm\n|faint" in log[event - 30 : event]:
+            sandstorm_death = True
+            print("Sandstorm death detected!")
+            for action in actions:
+                sandstorm_match = sandstorm_regex.search(action)
+                if sandstorm_match:
+                    ability, sandstorm_player, sandstorm_pokemon = (
+                        sandstorm_match.groups()
+                    )
+                    sandstorm_owner = sandstorm_pokemon.strip()
+                    print(
+                        f"Sandstorm set by: {sandstorm_owner} from player {sandstorm_player}"
+                    )
                     break
+            if sandstorm_owner:
+                for pokemon, data in stats[sandstorm_player].items():
+                    if data["nickname"] == sandstorm_owner:
+                        data["kills"] += 1
+                        print(
+                            f"Incremented kills for {sandstorm_owner} from player {sandstorm_player}"
+                        )
+                        break
+        else:
+            print("In Else!")
+            for action in actions:
+                killer = re.search(r"\|p(\d)a: ([^\|\n]+)\|", action)
+                if killer and killer.group(1) != fainted_player:
+                    killer_player, killer_pokemon = killer.groups()
+                    killer_pokemon = killer_pokemon.strip()
+                    player_key = f"p{killer_player}"
+                    kill_found = False
+                    for pokemon, data in stats[player_key].items():
+                        if data["nickname"] == killer_pokemon:
+                            data["kills"] += 1
+                            kill_found = True
+                            break
+                    if kill_found:
+                        break
 
 
 def get_stats(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, Dict[str, int]]]:

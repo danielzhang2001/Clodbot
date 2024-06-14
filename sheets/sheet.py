@@ -109,7 +109,6 @@ def add_data(
     cell: str,
     player_name: str,
     pokemon: List[Tuple[str, List[int]]],
-    week: Optional[int] = None,
 ) -> None:
     # Adds the Player Name, Pokemon, Games, Kills and Deaths data into the sheet on the specific cell, as well as does cell formatting.
     sheet_name, start_cell = cell.split("!")
@@ -123,6 +122,7 @@ def add_data(
         + [[poke[0], 1] + poke[1] for poke in pokemon]
         + [[" "] * 4] * max(0, 12 - len(pokemon))
     )
+    add_columns(service, spreadsheet_id, sheet_id, col, 4)
     body = {"values": data}
     service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id,
@@ -298,6 +298,38 @@ def format_data(
     color_data(service, spreadsheet_id, sheet_id, cell_range)
     style_data(service, spreadsheet_id, sheet_id, cell_range)
     center_text(service, spreadsheet_id, sheet_id, header_range)
+
+
+def add_columns(
+    service: Resource,
+    spreadsheet_id: str,
+    sheet_id: int,
+    start_col: str,
+    col_num: int,
+) -> None:
+    # Adds the specified number of columns needed if the end of the sheet is reached.
+    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    total_col = len(alphabet) + 26
+    start_index = (
+        alphabet.index(start_col) + 1
+        if start_col in alphabet
+        else 26 + alphabet.index(start_col[1])
+    )
+    end_index = start_index + col_num - 1
+    if end_index > total_col:
+        requests = [
+            {
+                "appendDimension": {
+                    "sheetId": sheet_id,
+                    "dimension": "COLUMNS",
+                    "length": end_index - total_col,
+                }
+            }
+        ]
+        body = {"requests": requests}
+        service.spreadsheets().batchUpdate(
+            spreadsheetId=spreadsheet_id, body=body
+        ).execute()
 
 
 def widen_columns(service: Resource, spreadsheet_id: str, sheet_id: int) -> None:
