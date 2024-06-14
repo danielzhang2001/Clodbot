@@ -412,8 +412,16 @@ def merge_cells(
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = ord(start_cell[0]) - ord("A")
-    end_col = ord(end_cell[0]) - ord("A") + 1
+    start_col = "".join(filter(str.isalpha, start_cell))
+    end_col = "".join(filter(str.isalpha, end_cell))
+    start_index = 0
+    for char in start_col:
+        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_index = 0
+    for char in end_col:
+        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_index -= 1
+    end_index -= 1
     body = {
         "requests": [
             {
@@ -422,8 +430,8 @@ def merge_cells(
                         "sheetId": sheet_id,
                         "startRowIndex": start_row,
                         "endRowIndex": end_row,
-                        "startColumnIndex": start_col,
-                        "endColumnIndex": end_col,
+                        "startColumnIndex": start_index,
+                        "endColumnIndex": end_index,
                     },
                     "mergeType": "MERGE_ALL",
                 }
@@ -443,8 +451,16 @@ def outline_cells(
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = ord(start_cell[0]) - ord("A")
-    end_col = ord(end_cell[0]) - ord("A") + 1
+    start_col = "".join(filter(str.isalpha, start_cell))
+    end_col = "".join(filter(str.isalpha, end_cell))
+    start_index = 0
+    for char in start_col:
+        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_index = 0
+    for char in end_col:
+        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_index -= 1
+    end_index -= 1
     body = {
         "requests": [
             {
@@ -453,8 +469,8 @@ def outline_cells(
                         "sheetId": sheet_id,
                         "startRowIndex": start_row,
                         "endRowIndex": end_row,
-                        "startColumnIndex": start_col,
-                        "endColumnIndex": end_col,
+                        "startColumnIndex": start_index,
+                        "endColumnIndex": end_index,
                     },
                     "top": {
                         "style": "SOLID",
@@ -539,8 +555,16 @@ def color_data(
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = ord(start_cell[0]) - ord("A")
-    end_col = ord(end_cell[0]) - ord("A") + 1
+    start_col = "".join(filter(str.isalpha, start_cell))
+    end_col = "".join(filter(str.isalpha, end_cell))
+    start_index = 0
+    for char in start_col:
+        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_index = 0
+    for char in end_col:
+        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_index -= 1
+    end_index -= 1
     body = {
         "requests": [
             {
@@ -550,8 +574,8 @@ def color_data(
                             "sheetId": sheet_id,
                             "startRowIndex": start_row,
                             "endRowIndex": end_row,
-                            "startColumnIndex": start_col,
-                            "endColumnIndex": end_col,
+                            "startColumnIndex": start_index,
+                            "endColumnIndex": end_index,
                         },
                         "rowProperties": {
                             "headerColor": {
@@ -756,8 +780,16 @@ def style_data(
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = ord(start_cell[0]) - ord("A")
-    end_col = ord(end_cell[0]) - ord("A") + 1
+    start_col = "".join(filter(str.isalpha, start_cell))
+    end_col = "".join(filter(str.isalpha, end_cell))
+    start_index = 0
+    for char in start_col:
+        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_index = 0
+    for char in end_col:
+        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_index -= 1
+    end_index -= 1
     body = {
         "requests": [
             {
@@ -766,8 +798,8 @@ def style_data(
                         "sheetId": sheet_id,
                         "startRowIndex": start_row,
                         "endRowIndex": end_row,
-                        "startColumnIndex": start_col,
-                        "endColumnIndex": end_col,
+                        "startColumnIndex": start_index,
+                        "endColumnIndex": end_index,
                     },
                     "cell": {
                         "userEnteredFormat": {
@@ -800,8 +832,16 @@ def center_text(
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = ord(start_cell[0]) - ord("A")
-    end_col = ord(end_cell[0]) - ord("A") + 1
+    start_col = "".join(filter(str.isalpha, start_cell))
+    end_col = "".join(filter(str.isalpha, end_cell))
+    start_index = 0
+    for char in start_col:
+        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_index = 0
+    for char in end_col:
+        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_index -= 1
+    end_index -= 1
     body = {
         "requests": [
             {
@@ -810,8 +850,8 @@ def center_text(
                         "sheetId": sheet_id,
                         "startRowIndex": start_row,
                         "endRowIndex": end_row,
-                        "startColumnIndex": start_col,
-                        "endColumnIndex": end_col,
+                        "startColumnIndex": start_index,
+                        "endColumnIndex": end_index,
                     },
                     "cell": {
                         "userEnteredFormat": {
@@ -837,8 +877,16 @@ def get_bandings(
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = ord(start_cell[0]) - ord("A")
-    end_col = ord(end_cell[0]) - ord("A") + 1
+    start_col = "".join(filter(str.isalpha, start_cell))
+    end_col = "".join(filter(str.isalpha, end_cell))
+    start_index = 0
+    for char in start_col:
+        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_col_index = 0
+    for char in end_col:
+        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_index -= 1
+    end_index -= 1
     result = (
         service.spreadsheets()
         .get(spreadsheetId=spreadsheet_id, includeGridData=False)
@@ -867,8 +915,8 @@ def get_bandings(
             and not (
                 brange.get("endRowIndex", 0) <= start_row
                 or brange.get("startRowIndex", float("inf")) >= end_row
-                or brange.get("endColumnIndex", 0) <= start_col
-                or brange.get("startColumnIndex", float("inf")) >= end_col
+                or brange.get("endColumnIndex", 0) <= start_index
+                or brange.get("startColumnIndex", float("inf")) >= end_index
             )
         ):
             overlapping_ids.append(banded_range["bandedRangeId"])
