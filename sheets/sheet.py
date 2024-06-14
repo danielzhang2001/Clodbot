@@ -122,7 +122,6 @@ def add_data(
         + [[poke[0], 1] + poke[1] for poke in pokemon]
         + [[" "] * 4] * max(0, 12 - len(pokemon))
     )
-    add_columns(service, spreadsheet_id, sheet_id, col, 4)
     body = {"values": data}
     service.spreadsheets().values().update(
         spreadsheetId=spreadsheet_id,
@@ -310,11 +309,10 @@ def add_columns(
     # Adds the specified number of columns needed if the end of the sheet is reached.
     alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     total_col = len(alphabet) + 26
-    start_index = (
-        alphabet.index(start_col) + 1
-        if start_col in alphabet
-        else 26 + alphabet.index(start_col[1])
-    )
+    if len(start_col) == 1:
+        start_index = alphabet.index(start_col) + 1
+    else:
+        start_index = 26 + alphabet.index(start_col[1])
     end_index = start_index + col_num - 1
     if end_index > total_col:
         requests = [
@@ -927,6 +925,7 @@ def next_week_range(week: int) -> str:
 def next_week_cell(values: List[List[str]], week: int) -> str:
     # Returns the row and column indices for the top of the next available section for player data for the specified week.
     start_row = (week - 1) * 15 + 1
+    max_columns = len(values[0]) if values else 0
     for row in range(start_row, start_row + 15):
         column_index = 3
         while True:
@@ -945,6 +944,14 @@ def next_week_cell(values: List[List[str]], week: int) -> str:
                     temp_index = temp_index // 26 - 1
                 return f"{column}{row + 1}"
             column_index += 5
+            if column_index >= max_columns:
+                column = ""
+                temp_index = max_columns - 1
+                while temp_index >= 0:
+                    column = chr(temp_index % 26 + 65) + column
+                    temp_index = temp_index // 26 - 1
+                add_columns(service, spreadsheet_id, sheet_id, column, 5)
+                max_columns += 5
     column = ""
     temp_index = 3
     while temp_index >= 0:
