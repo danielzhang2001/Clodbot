@@ -915,23 +915,10 @@ def get_values(
     service: Resource, spreadsheet_id: str, sheet_name: str
 ) -> List[List[str]]:
     # Returns the values of the sheet.
-    sheet_metadata = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-    sheets = sheet_metadata.get("sheets", [])
-    for sheet in sheets:
-        if sheet["properties"]["title"] == sheet_name:
-            rows = sheet["properties"]["gridProperties"]["rowCount"]
-            cols = sheet["properties"]["gridProperties"]["columnCount"]
-            end_col = (
-                chr(64 + (cols - 1) // 26 + 65) + chr((cols - 1) % 26 + 65)
-                if cols > 26
-                else chr(64 + cols)
-            )
-            cell_range = f"{sheet_name}!A1:{end_col}{rows}"
-            break
     result = (
         service.spreadsheets()
         .values()
-        .get(spreadsheetId=spreadsheet_id, range=cell_range)
+        .get(spreadsheetId=spreadsheet_id, range=sheet_name)
         .execute()
     )
     return result.get("values", [])
