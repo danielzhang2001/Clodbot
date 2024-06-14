@@ -308,7 +308,7 @@ def format_data(
     start_index = 0
     for char in start_col:
         start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
-    end_col_index = 0
+    end_index = 0
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_letter = ""
@@ -326,11 +326,9 @@ def format_data(
     sheet_name = cell_range.split("!")[0]
     start_row = int("".join(filter(str.isdigit, start_cell)))
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    name_range = (
-        f"{sheet_name}!{start_col_letter}{start_row}:{end_col_letter}{start_row}"
-    )
+    name_range = f"{sheet_name}!{start_letter}{start_row}:{end_letter}{start_row}"
     print(f"name range: {name_range}")
-    header_range = f"{sheet_name}!{start_col_letter}{start_row}:{end_col_letter}{start_row + 1}"
+    header_range = f"{sheet_name}!{start_letter}{start_row}:{end_letter}{start_row + 1}"
     print(f"header range: {header_range}")
     merge_cells(service, spreadsheet_id, sheet_id, name_range)
     outline_cells(service, spreadsheet_id, sheet_id, cell_range)
