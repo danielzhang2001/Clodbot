@@ -116,7 +116,16 @@ def add_data(
         "".join(filter(str.isdigit, start_cell))
     )
     num_rows = max(12, len(pokemon))
-    cell_range = f"{sheet_name}!{col}{row}:{chr(ord(col) + 3)}{row + num_rows + 1}"
+    col_index = 0
+    for char in col:
+        col_index = col_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_col_index = col_index + 3
+    end_col = ""
+    while end_col_index > 0:
+        end_col_index -= 1
+        end_col = chr(end_col_index % 26 + ord("A")) + end_col
+        end_col_index //= 26
+    cell_range = f"{sheet_name}!{col}{row}:{end_col}{row + num_rows + 1}"
     data = (
         [[player_name], ["POKEMON", "GAMES", "KILLS", "DEATHS"]]
         + [[poke[0], 1] + poke[1] for poke in pokemon]
@@ -312,12 +321,15 @@ def add_columns(
     end_row = int(range_str.split(":B")[1])
     rightmost_col = len(values[0]) - 1
     filled_col = -1
+    print(f"Checking rows from {start_row} to {end_row}")
     for col in range(rightmost_col, -1, -1):
+        has_value = False
         for row in range(start_row - 1, end_row):
-            if col < len(values[row]) and values[row][col] != "":
+            if row < len(values) and col < len(values[row]) and values[row][col] != "":
                 filled_col = col
+                has_value = True
                 break
-        if filled_col != -1:
+        if has_value:
             break
     new_col = 5 - (rightmost_col - filled_col)
     print(f"NEW COL = {new_col}")
