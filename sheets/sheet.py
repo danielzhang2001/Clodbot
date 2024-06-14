@@ -320,6 +320,9 @@ def add_columns(
         if filled_col != -1:
             break
     new_col = 5 - (rightmost_col - filled_col)
+    print(f"NEW COL = {new_col}")
+    print(f"RIGHTMOST COL = {rightmost_col}")
+    print(f"FILLED COL = {filled_col}")
     if new_col > 0:
         requests = [
             {
