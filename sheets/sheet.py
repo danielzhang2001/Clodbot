@@ -911,10 +911,17 @@ def get_section_range(values: List[List[str]], player_name: str) -> str:
     return None
 
 
-def get_values(
-    service: Resource, spreadsheet_id: str, cell_range: str
-) -> List[List[str]]:
+def get_values(service: Resource, spreadsheet_id: str, sheet_name: str) -> List[List[str]]:
     # Returns the values of the sheet.
+    sheet_metadata = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+    sheets = sheet_metadata.get("sheets", [])
+    for sheet in sheets:
+        if sheet["properties"]["title"] == sheet_name:
+            sheet_range = sheet["properties"]["gridProperties"]
+            rows = sheet_range["rowCount"]
+            cols = sheet_range["columnCount"]
+            cell_range = f"{sheet_name}!A1:{chr(64+cols)}{rows}"
+            break
     result = (
         service.spreadsheets()
         .values()

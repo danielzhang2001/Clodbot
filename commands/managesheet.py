@@ -72,9 +72,10 @@ class ManageSheet:
                 (pokemon, [data["kills"], data["deaths"]])
                 for pokemon, data in pokemon_data.items()
             ]
-            values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
+            values = get_values(service, spreadsheet_id, sheet_name)
             if week is not None:
                 add_columns(service, spreadsheet_id, sheet_id, week, values)
+                values = get_values(service, spreadsheet_id, sheet_name)
                 start_cell = f"{sheet_name}!{next_week_cell(values, week)}"
                 print(f"NEXT WEEK CELL FOR {player_name} IS: {start_cell}")
                 add_data(
@@ -129,7 +130,7 @@ class ManageSheet:
         if sheet_id is None:
             raise NameDoesNotExist(player_name, sheet_title, sheet_name)
         sheet_link = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
-        values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
+        values = get_values(service, spreadsheet_id, sheet_name)
         players = [player[0] for player in get_sheet_players(values)]
         if player_name.lower() in [player.lower() for player in players]:
             player_name = next(
@@ -170,7 +171,7 @@ class ManageSheet:
                 raise NoPlayers()
             elif data.lower() == "pokemon":
                 raise NoPokemon()
-        values = get_values(service, spreadsheet_id, f"{sheet_name}!B2:T285")
+        values = get_values(service, spreadsheet_id, sheet_name)
         if data.lower() == "players":
             if not get_sheet_players(values):
                 raise NoPlayers()
