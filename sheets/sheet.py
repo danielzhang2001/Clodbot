@@ -142,6 +142,7 @@ def add_data(
     widen_columns(service, spreadsheet_id, sheet_id)
     print(f"WIDEN COLUMNS SUCCEEDED!")
     clear_cells(service, spreadsheet_id, sheet_id, cell_range)
+    print(f"CLEAR CELLS SUCCEEDED!")
     format_data(service, spreadsheet_id, sheet_id, cell_range)
 
 
