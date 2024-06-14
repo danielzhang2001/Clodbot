@@ -302,9 +302,35 @@ def format_data(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> None:
     # Formats all of the cells and text for the player data section.
-    name_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{cell_range.split('!')[1].split(':')[0][1:]}"
+    start_cell, end_cell = cell_range.split("!")[1].split(":")
+    start_col = "".join(filter(str.isalpha, start_cell))
+    end_col = "".join(filter(str.isalpha, end_cell))
+    start_index = 0
+    for char in start_col:
+        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_col_index = 0
+    for char in end_col:
+        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_letter = ""
+    temp_index = start_index
+    while temp_index > 0:
+        temp_index -= 1
+        start_letter = chr(temp_index % 26 + ord("A")) + start_letter
+        temp_index //= 26
+    end_letter = ""
+    temp_index = end_index
+    while temp_index > 0:
+        temp_index -= 1
+        end_letter = chr(temp_index % 26 + ord("A")) + end_letter
+        temp_index //= 26
+    sheet_name = cell_range.split("!")[0]
+    start_row = int("".join(filter(str.isdigit, start_cell)))
+    end_row = int("".join(filter(str.isdigit, end_cell)))
+    name_range = (
+        f"{sheet_name}!{start_col_letter}{start_row}:{end_col_letter}{start_row}"
+    )
     print(f"name range: {name_range}")
-    header_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{int(cell_range.split('!')[1].split(':')[0][1:]) + 1}"
+    header_range = f"{sheet_name}!{start_col_letter}{start_row}:{end_col_letter}{start_row + 1}"
     print(f"header range: {header_range}")
     merge_cells(service, spreadsheet_id, sheet_id, name_range)
     outline_cells(service, spreadsheet_id, sheet_id, cell_range)
