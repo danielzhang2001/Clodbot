@@ -882,7 +882,7 @@ def get_bandings(
     start_index = 0
     for char in start_col:
         start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
-    end_col_index = 0
+    end_index = 0
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
