@@ -421,7 +421,6 @@ def merge_cells(
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
-    end_index -= 1
     body = {
         "requests": [
             {
@@ -460,7 +459,6 @@ def outline_cells(
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
-    end_index -= 1
     body = {
         "requests": [
             {
@@ -564,7 +562,6 @@ def color_data(
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
-    end_index -= 1
     body = {
         "requests": [
             {
@@ -650,7 +647,6 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     end_col = 0
     for char in "".join(filter(str.isalpha, end_cell)):
         end_col = end_col * 26 + (ord(char.upper()) - ord("A")) + 1
-    end_col -= 1
     requests = [
         {
             "repeatCell": {
@@ -696,8 +692,15 @@ def clear_text(service: Resource, spreadsheet_id: str, sheet_id: int, cell_range
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = ord(start_cell[0]) - ord("A")
-    end_col = ord(end_cell[0]) - ord("A") + 1
+    start_col = "".join(filter(str.isalpha, start_cell))
+    end_col = "".join(filter(str.isalpha, end_cell))
+    start_index = 0
+    for char in start_col:
+        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_index -= 1
+    end_index = 0
+    for char in end_col:
+        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     body = {
         "requests": [
             {
@@ -706,15 +709,15 @@ def clear_text(service: Resource, spreadsheet_id: str, sheet_id: int, cell_range
                         "sheetId": sheet_id,
                         "startRowIndex": start_row,
                         "endRowIndex": end_row,
-                        "startColumnIndex": start_col,
-                        "endColumnIndex": end_col,
+                        "startColumnIndex": start_index,
+                        "endColumnIndex": end_index,
                     },
                     "fields": "userEnteredValue",
                     "rows": [
                         {
                             "values": [
                                 {"userEnteredValue": {}}
-                                for _ in range(start_col, end_col)
+                                for _ in range(start_index, end_index)
                             ]
                         }
                         for _ in range(start_row, end_row)
@@ -789,7 +792,6 @@ def style_data(
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
-    end_index -= 1
     body = {
         "requests": [
             {
@@ -841,7 +843,6 @@ def center_text(
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
-    end_index -= 1
     body = {
         "requests": [
             {
@@ -886,7 +887,6 @@ def get_bandings(
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
-    end_index -= 1
     result = (
         service.spreadsheets()
         .get(spreadsheetId=spreadsheet_id, includeGridData=False)
