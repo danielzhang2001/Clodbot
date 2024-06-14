@@ -301,7 +301,9 @@ def format_data(
 ) -> None:
     # Formats all of the cells and text for the player data section.
     name_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{cell_range.split('!')[1].split(':')[0][1:]}"
+    print(f"name range: {name_range}")
     header_range = f"{cell_range.split('!')[0]}!{cell_range.split('!')[1].split(':')[0]}:{cell_range.split(':')[1][0]}{int(cell_range.split('!')[1].split(':')[0][1:]) + 1}"
+    print(f"header range: {header_range}")
     merge_cells(service, spreadsheet_id, sheet_id, name_range)
     outline_cells(service, spreadsheet_id, sheet_id, cell_range)
     color_data(service, spreadsheet_id, sheet_id, cell_range)
