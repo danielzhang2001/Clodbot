@@ -1015,14 +1015,20 @@ def get_values(
         if sheet["properties"]["title"] == sheet_name
     )
     grid_data = sheet["data"][0]["rowData"]
+    max_cols = 0
+    for row in grid_data:
+        if "values" in row:
+            max_cols = max(max_cols, len(row["values"]))
     values = []
     for row in grid_data:
-        values.append(
-            [
-                cell.get("userEnteredValue", {}).get("stringValue", "")
-                for cell in row.get("values", [])
-            ]
-        )
+        row_values = []
+        if "values" in row:
+            for i in range(max_cols):
+                cell = row["values"][i] if i < len(row["values"]) else {}
+                row_values.append(
+                    cell.get("userEnteredValue", {}).get("stringValue", "")
+                )
+        values.append(row_values)
     return values
 
 
