@@ -1004,35 +1004,41 @@ def get_values(
     service: Resource, spreadsheet_id: str, sheet_name: str
 ) -> List[List[str]]:
     # Returns the values of the sheet.
-    sheet_metadata = (
-        service.spreadsheets()
-        .get(spreadsheetId=spreadsheet_id, includeGridData=True)
-        .execute()
-    )
+    sheet_metadata = service.spreadsheets().get(
+        spreadsheetId=spreadsheet_id, includeGridData=True
+    ).execute()
+
+    # Find the specific sheet by name
     sheet = next(
         sheet
         for sheet in sheet_metadata["sheets"]
         if sheet["properties"]["title"] == sheet_name
     )
+
+    # Determine the actual number of rows with data
     grid_data = sheet["data"][0]["rowData"]
     num_rows_with_data = len(grid_data)
-    result = (
-        service.spreadsheets()
-        .values()
-        .get(
-            spreadsheetId=spreadsheet_id, range=f"{sheet_name}!A1:Z{num_rows_with_data}"
-        )
-        .execute()
-    )
+
+    # Fetch the values up to the last row with data
+    result = service.spreadsheets().values().get(
+        spreadsheetId=spreadsheet_id,
+        range=f"{sheet_name}!A1:Z{num_rows_with_data}"
+    ).execute()
+
     values = result.get("values", [])
     max_cols = 0
     for row in values:
         max_cols = max(max_cols, len(row))
+
+    # Fill empty cells up to the maximum number of columns with data
     for row in values:
         while len(row) < max_cols:
             row.append("")
-    for _ in range(num_rows_with_data - len(values)):
-        values.append([""] * max_cols)
+
+    # Remove empty rows at the end
+    while values and all(cell == "" for cell in values[-1]):
+        values.pop()
+
     return values
 
 
