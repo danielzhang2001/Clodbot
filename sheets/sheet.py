@@ -1015,20 +1015,24 @@ def get_values(
         if sheet["properties"]["title"] == sheet_name
     )
     grid_data = sheet["data"][0]["rowData"]
+    num_rows_with_data = len(grid_data)
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(
+            spreadsheetId=spreadsheet_id, range=f"{sheet_name}!A1:Z{num_rows_with_data}"
+        )
+        .execute()
+    )
+    values = result.get("values", [])
     max_cols = 0
-    for row in grid_data:
-        if "values" in row:
-            max_cols = max(max_cols, len(row["values"]))
-    values = []
-    for row in grid_data:
-        row_values = []
-        if "values" in row:
-            for i in range(max_cols):
-                cell = row["values"][i] if i < len(row["values"]) else {}
-                row_values.append(
-                    cell.get("userEnteredValue", {}).get("stringValue", "")
-                )
-        values.append(row_values)
+    for row in values:
+        max_cols = max(max_cols, len(row))
+    for row in values:
+        while len(row) < max_cols:
+            row.append("")
+    for _ in range(num_rows_with_data - len(values)):
+        values.append([""] * max_cols)
     return values
 
 
