@@ -138,11 +138,8 @@ def add_data(
         valueInputOption="USER_ENTERED",
         body=body,
     ).execute()
-    print(f"CELL RANGE: {cell_range}")
     widen_columns(service, spreadsheet_id, sheet_id)
-    print(f"WIDEN COLUMNS SUCCEEDED!")
     clear_cells(service, spreadsheet_id, sheet_id, cell_range)
-    print(f"CLEAR CELLS SUCCEEDED!")
     format_data(service, spreadsheet_id, sheet_id, cell_range)
 
 
@@ -327,9 +324,7 @@ def format_data(
     start_row = int("".join(filter(str.isdigit, start_cell)))
     end_row = int("".join(filter(str.isdigit, end_cell)))
     name_range = f"{sheet_name}!{start_letter}{start_row}:{end_letter}{start_row}"
-    print(f"name range: {name_range}")
     header_range = f"{sheet_name}!{start_letter}{start_row}:{end_letter}{start_row + 1}"
-    print(f"header range: {header_range}")
     merge_cells(service, spreadsheet_id, sheet_id, name_range)
     outline_cells(service, spreadsheet_id, sheet_id, cell_range)
     color_data(service, spreadsheet_id, sheet_id, cell_range)
@@ -350,7 +345,6 @@ def add_columns(
     end_row = int(range_str.split(":B")[1])
     rightmost_col = len(values[0]) - 1
     filled_col = -1
-    print(f"Checking rows from {start_row} to {end_row}")
     for col in range(rightmost_col, -1, -1):
         has_value = False
         for row in range(start_row - 1, end_row):
@@ -1010,13 +1004,26 @@ def get_values(
     service: Resource, spreadsheet_id: str, sheet_name: str
 ) -> List[List[str]]:
     # Returns the values of the sheet.
-    result = (
+    sheet_metadata = (
         service.spreadsheets()
-        .values()
-        .get(spreadsheetId=spreadsheet_id, range=sheet_name)
+        .get(spreadsheetId=spreadsheet_id, includeGridData=True)
         .execute()
     )
-    return result.get("values", [])
+    sheet = next(
+        sheet
+        for sheet in sheet_metadata["sheets"]
+        if sheet["properties"]["title"] == sheet_name
+    )
+    grid_data = sheet["data"][0]["rowData"]
+    values = []
+    for row in grid_data:
+        values.append(
+            [
+                cell.get("userEnteredValue", {}).get("stringValue", "")
+                for cell in row.get("values", [])
+            ]
+        )
+    return values
 
 
 def next_week_range(week: int) -> str:
