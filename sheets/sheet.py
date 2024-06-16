@@ -119,13 +119,14 @@ def add_data(
     col_index = 0
     for char in col:
         col_index = col_index * 26 + (ord(char.upper()) - ord("A")) + 1
-    end_col_index = col_index + 3
+    end_index = col_index + 3
     end_col = ""
-    while end_col_index > 0:
-        end_col_index -= 1
-        end_col = chr(end_col_index % 26 + ord("A")) + end_col
-        end_col_index //= 26
+    while end_index > 0:
+        end_index -= 1
+        end_col = chr(end_index % 26 + ord("A")) + end_col
+        end_index //= 26
     cell_range = f"{sheet_name}!{col}{row}:{end_col}{row + num_rows + 1}"
+    print(f"CELL RANGE FOR {player}: {cell_range}")
     data = (
         [[player_name], ["POKEMON", "GAMES", "KILLS", "DEATHS"]]
         + [[poke[0], 1] + poke[1] for poke in pokemon]
@@ -1010,12 +1011,11 @@ def get_values(
         .execute()
     )
     sheet = next(
-        sheet for sheet in sheet_metadata["sheets"]
+        sheet
+        for sheet in sheet_metadata["sheets"]
         if sheet["properties"]["title"] == sheet_name
     )
     max_cols = sheet["properties"]["gridProperties"]["columnCount"]
-
-    # Get the actual values in the sheet.
     result = (
         service.spreadsheets()
         .values()
@@ -1023,8 +1023,6 @@ def get_values(
         .execute()
     )
     values = result.get("values", [])
-
-    # Ensure each row has values up to max_cols.
     for row in values:
         while len(row) < max_cols:
             row.append("")
