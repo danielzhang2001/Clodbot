@@ -126,7 +126,7 @@ def add_data(
         end_col = chr(end_index % 26 + ord("A")) + end_col
         end_index //= 26
     cell_range = f"{sheet_name}!{col}{row}:{end_col}{row + num_rows + 1}"
-    print(f"CELL RANGE FOR {player}: {cell_range}")
+    print(f"CELL RANGE FOR {player_name}: {cell_range}")
     data = (
         [[player_name], ["POKEMON", "GAMES", "KILLS", "DEATHS"]]
         + [[poke[0], 1] + poke[1] for poke in pokemon]
