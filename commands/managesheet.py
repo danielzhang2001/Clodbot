@@ -73,12 +73,10 @@ class ManageSheet:
                 for pokemon, data in pokemon_data.items()
             ]
             values = get_values(service, spreadsheet_id, sheet_name)
-            print(f"values: {values}")
             if week is not None:
                 add_columns(service, spreadsheet_id, sheet_id, week, values)
                 values = get_values(service, spreadsheet_id, sheet_name)
                 start_cell = f"{sheet_name}!{next_week_cell(values, week)}"
-                print(f"NEXT WEEK CELL FOR {player_name} IS: {start_cell}")
                 add_data(
                     service,
                     spreadsheet_id,
