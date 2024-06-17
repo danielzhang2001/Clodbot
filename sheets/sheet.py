@@ -545,6 +545,7 @@ def color_data(
 ) -> None:
     # Colors all the cells in the range for player data.
     _, cell_range = cell_range.split("!")
+    print(f"COLORED CELL RANGE: {cell_range}")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
@@ -557,6 +558,10 @@ def color_data(
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
+    print(f"COLORED CELL START ROW: {start_row}")
+    print(f"COLORED CELL END ROW: {end_row}")
+    print(f"COLORED CELL START COL: {start_index}")
+    print(f"COLORED CELL END COL: {end_index}")
     body = {
         "requests": [
             {
