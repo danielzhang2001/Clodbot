@@ -139,9 +139,9 @@ def add_data(
         valueInputOption="USER_ENTERED",
         body=body,
     ).execute()
-    widen_columns(service, spreadsheet_id, sheet_id)
-    clear_cells(service, spreadsheet_id, sheet_id, cell_range)
-    format_data(service, spreadsheet_id, sheet_id, cell_range)
+    # widen_columns(service, spreadsheet_id, sheet_id)
+    # clear_cells(service, spreadsheet_id, sheet_id, cell_range)
+    # format_data(service, spreadsheet_id, sheet_id, cell_range)
 
 
 def delete_data(
