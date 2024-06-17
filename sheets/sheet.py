@@ -632,6 +632,7 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     # Clears all formatting in the range.
     banding_ids = get_bandings(service, spreadsheet_id, sheet_id, cell_range)
     _, cell_range = cell_range.split("!")
+    print(f"CLEAR CELL RANGE: {cell_range}")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
@@ -642,6 +643,8 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     end_col = 0
     for char in "".join(filter(str.isalpha, end_cell)):
         end_col = end_col * 26 + (ord(char.upper()) - ord("A")) + 1
+    print(f"START TO END COL: {start_col} to {end_col}")
+    print(f"START TO END ROW: {start_row} to {end_row}")
     requests = [
         {
             "repeatCell": {
