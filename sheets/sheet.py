@@ -628,6 +628,7 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     # Clears all formatting in the range.
     banding_ids = get_bandings(service, spreadsheet_id, sheet_id, cell_range)
     _, cell_range = cell_range.split("!")
+    print(f"Banding IDs to be deleted: {banding_ids}")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
@@ -673,6 +674,7 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
         }
     )
     body = {"requests": requests}
+    print(f"Clear cells request body: {body}")
     service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id, body=body
     ).execute()
@@ -896,16 +898,28 @@ def get_bandings(
     )
     if not sheet:
         return []
+
     banded_ranges = sheet.get("bandedRanges", [])
     strictly_within_ids = []
     for banded_range in banded_ranges:
         brange = banded_range.get("range", {})
+        if brange.get("sheetId") != sheet_id:
+            continue
+        brange_start_row = brange.get("startRowIndex", float("inf"))
+        brange_end_row = brange.get("endRowIndex", 0)
+        brange_start_col = brange.get("startColumnIndex", float("inf"))
+        brange_end_col = brange.get("endColumnIndex", 0)
+        print(f"Banded Range ID: {banded_range['bandedRangeId']}")
+        print(f"Banded Range Start Row: {brange_start_row}, End Row: {brange_end_row}")
+        print(f"Banded Range Start Col: {brange_start_col}, End Col: {brange_end_col}")
+        print(f"Specified Range Start Row: {start_row}, End Row: {end_row}")
+        print(f"Specified Range Start Col: {start_col}, End Col: {end_col}")
+
         if (
-            brange.get("sheetId") == sheet_id
-            and brange.get("startRowIndex") == start_row
-            and brange.get("endRowIndex") == end_row
-            and brange.get("startColumnIndex") == start_col
-            and brange.get("endColumnIndex") == end_col
+            brange_start_row >= start_row
+            and brange_end_row <= end_row
+            and brange_start_col >= start_col
+            and brange_end_col <= end_col
         ):
             strictly_within_ids.append(banded_range["bandedRangeId"])
             print(f"Strictly Within Range ID: {banded_range['bandedRangeId']}")
