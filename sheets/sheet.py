@@ -140,7 +140,7 @@ def add_data(
         body=body,
     ).execute()
     widen_columns(service, spreadsheet_id, sheet_id)
-    # clear_cells(service, spreadsheet_id, sheet_id, cell_range)
+    clear_cells(service, spreadsheet_id, sheet_id, cell_range)
     # format_data(service, spreadsheet_id, sheet_id, cell_range)
 
 
