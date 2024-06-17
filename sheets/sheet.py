@@ -126,7 +126,6 @@ def add_data(
         end_col = chr(end_index % 26 + ord("A")) + end_col
         end_index //= 26
     cell_range = f"{sheet_name}!{col}{row}:{end_col}{row + num_rows + 1}"
-    print(f"CELL RANGE FOR {player_name}: {cell_range}")
     data = (
         [[player_name], ["POKEMON", "GAMES", "KILLS", "DEATHS"]]
         + [[poke[0], 1] + poke[1] for poke in pokemon]
@@ -141,7 +140,7 @@ def add_data(
     ).execute()
     widen_columns(service, spreadsheet_id, sheet_id)
     clear_cells(service, spreadsheet_id, sheet_id, cell_range)
-    # format_data(service, spreadsheet_id, sheet_id, cell_range)
+    format_data(service, spreadsheet_id, sheet_id, cell_range)
 
 
 def delete_data(
@@ -356,9 +355,6 @@ def add_columns(
         if has_value:
             break
     new_col = 5 - (rightmost_col - filled_col)
-    print(f"NEW COL = {new_col}")
-    print(f"RIGHTMOST COL = {rightmost_col}")
-    print(f"FILLED COL = {filled_col}")
     if new_col > 0:
         requests = [
             {
@@ -545,7 +541,6 @@ def color_data(
 ) -> None:
     # Colors all the cells in the range for player data.
     _, cell_range = cell_range.split("!")
-    print(f"COLORED CELL RANGE: {cell_range}")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
@@ -558,10 +553,6 @@ def color_data(
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
-    print(f"COLORED CELL START ROW: {start_row}")
-    print(f"COLORED CELL END ROW: {end_row}")
-    print(f"COLORED CELL START COL: {start_index}")
-    print(f"COLORED CELL END COL: {end_index}")
     body = {
         "requests": [
             {
@@ -637,7 +628,6 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     # Clears all formatting in the range.
     banding_ids = get_bandings(service, spreadsheet_id, sheet_id, cell_range)
     _, cell_range = cell_range.split("!")
-    print(f"CLEAR CELL RANGE: {cell_range}")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
@@ -679,9 +669,21 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
             }
         }
     ]
-
-    # for banding_id in banding_ids:
-    #    requests.append({"deleteBanding": {"bandedRangeId": banding_id}})
+    for banding_id in banding_ids:
+        requests.append(
+            {
+                "deleteBanding": {
+                    "bandedRangeId": banding_id,
+                    "range": {
+                        "sheetId": sheet_id,
+                        "startRowIndex": start_row,
+                        "endRowIndex": end_row,
+                        "startColumnIndex": start_col,
+                        "endColumnIndex": end_col,
+                    },
+                }
+            }
+        )
     body = {"requests": requests}
     service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id, body=body
