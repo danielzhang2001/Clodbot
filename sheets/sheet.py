@@ -904,14 +904,30 @@ def get_bandings(
     overlapping_ids = []
     for banded_range in banded_ranges:
         brange = banded_range.get("range", {})
+        if brange.get("sheetId") != sheet_id:
+            continue
+
+        brange_start_row = brange.get("startRowIndex", float("inf"))
+        brange_end_row = brange.get("endRowIndex", 0)
+        brange_start_col = brange.get("startColumnIndex", float("inf"))
+        brange_end_col = brange.get("endColumnIndex", 0)
+
+        # Debugging statements
+        print(f"Banded Range ID: {banded_range['bandedRangeId']}")
+        print(f"Banded Range Start Row: {brange_start_row}, End Row: {brange_end_row}")
+        print(f"Banded Range Start Col: {brange_start_col}, End Col: {brange_end_col}")
+        print(f"Specified Range Start Row: {start_row}, End Row: {end_row}")
+        print(f"Specified Range Start Col: {start_col}, End Col: {end_col}")
+
         if (
-            brange.get("sheetId") == sheet_id
-            and brange.get("endRowIndex", 0) > start_row
-            and brange.get("startRowIndex", float("inf")) < end_row
-            and brange.get("endColumnIndex", 0) > start_col
-            and brange.get("startColumnIndex", float("inf")) < end_col
+            brange_end_row > start_row
+            and brange_start_row < end_row
+            and brange_end_col > start_col
+            and brange_start_col < end_col
         ):
             overlapping_ids.append(banded_range["bandedRangeId"])
+            print(f"Overlapping Range ID: {banded_range['bandedRangeId']}")
+
     return overlapping_ids
 
 
