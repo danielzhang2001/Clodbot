@@ -648,8 +648,6 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     end_col = 0
     for char in "".join(filter(str.isalpha, end_cell)):
         end_col = end_col * 26 + (ord(char.upper()) - ord("A")) + 1
-    print(f"START TO END COL: {start_col} to {end_col}")
-    print(f"START TO END ROW: {start_row} to {end_row}")
     requests = [
         {
             "repeatCell": {
@@ -681,8 +679,9 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
             }
         }
     ]
-    for banding_id in banding_ids:
-        requests.append({"deleteBanding": {"bandedRangeId": banding_id}})
+
+    # for banding_id in banding_ids:
+    #    requests.append({"deleteBanding": {"bandedRangeId": banding_id}})
     body = {"requests": requests}
     service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id, body=body
