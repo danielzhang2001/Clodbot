@@ -674,13 +674,6 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
             {
                 "deleteBanding": {
                     "bandedRangeId": banding_id,
-                    "range": {
-                        "sheetId": sheet_id,
-                        "startRowIndex": start_row,
-                        "endRowIndex": end_row,
-                        "startColumnIndex": start_col,
-                        "endColumnIndex": end_col,
-                    },
                 }
             }
         )
@@ -882,15 +875,13 @@ def get_bandings(
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = "".join(filter(str.isalpha, start_cell))
-    end_col = "".join(filter(str.isalpha, end_cell))
-    start_index = 0
-    for char in start_col:
-        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
-    end_index = 0
-    for char in end_col:
-        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
-    start_index -= 1
+    start_col = 0
+    for char in "".join(filter(str.isalpha, start_cell)):
+        start_col = start_col * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_col -= 1
+    end_col = 0
+    for char in "".join(filter(str.isalpha, end_cell)):
+        end_col = end_col * 26 + (ord(char.upper()) - ord("A")) + 1
     result = (
         service.spreadsheets()
         .get(spreadsheetId=spreadsheet_id, includeGridData=False)
@@ -915,13 +906,10 @@ def get_bandings(
         brange = banded_range.get("range", {})
         if (
             brange.get("sheetId") == sheet_id
-            and "sheetId" in brange
-            and not (
-                brange.get("endRowIndex", 0) <= start_row
-                or brange.get("startRowIndex", float("inf")) >= end_row
-                or brange.get("endColumnIndex", 0) <= start_index
-                or brange.get("startColumnIndex", float("inf")) >= end_index
-            )
+            and brange.get("endRowIndex", 0) > start_row
+            and brange.get("startRowIndex", float("inf")) < end_row
+            and brange.get("endColumnIndex", 0) > start_col
+            and brange.get("startColumnIndex", float("inf")) < end_col
         ):
             overlapping_ids.append(banded_range["bandedRangeId"])
     return overlapping_ids
