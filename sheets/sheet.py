@@ -126,6 +126,7 @@ def add_data(
         end_col = chr(end_index % 26 + ord("A")) + end_col
         end_index //= 26
     cell_range = f"{sheet_name}!{col}{row}:{end_col}{row + num_rows + 1}"
+    print(f"CELL RANGE FOR {player_name}: {cell_range}")
     data = (
         [[player_name], ["POKEMON", "GAMES", "KILLS", "DEATHS"]]
         + [[poke[0], 1] + poke[1] for poke in pokemon]
@@ -355,6 +356,9 @@ def add_columns(
         if has_value:
             break
     new_col = 5 - (rightmost_col - filled_col)
+    print(f"NEW COL = {new_col}")
+    print(f"RIGHTMOST COL = {rightmost_col}")
+    print(f"FILLED COL = {filled_col}")
     if new_col > 0:
         requests = [
             {
@@ -628,7 +632,7 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     # Clears all formatting in the range.
     banding_ids = get_bandings(service, spreadsheet_id, sheet_id, cell_range)
     _, cell_range = cell_range.split("!")
-    print(f"Banding IDs to be deleted: {banding_ids}")
+    print(f"CLEAR CELL RANGE: {cell_range}")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
@@ -639,10 +643,9 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
     end_col = 0
     for char in "".join(filter(str.isalpha, end_cell)):
         end_col = end_col * 26 + (ord(char.upper()) - ord("A")) + 1
+    print(f"START TO END COL: {start_col} to {end_col}")
+    print(f"START TO END ROW: {start_row} to {end_row}")
     requests = [
-        {"deleteBanding": {"bandedRangeId": banding_id}} for banding_id in banding_ids
-    ]
-    requests.append(
         {
             "repeatCell": {
                 "range": {
@@ -672,9 +675,10 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
                 "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment,wrapStrategy,borders)",
             }
         }
-    )
+    ]
+    for banding_id in banding_ids:
+        requests.append({"deleteBanding": {"bandedRangeId": banding_id}})
     body = {"requests": requests}
-    print(f"Clear cells request body: {body}")
     service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id, body=body
     ).execute()
@@ -867,18 +871,21 @@ def center_text(
 def get_bandings(
     service: Resource, spreadsheet_id: str, sheet_id: int, cell_range: str
 ) -> List[int]:
-    # Returns the IDs of bandings in the cell range.
+    # Returns the IDs of overlapping bandings.
     _, cell_range = cell_range.split("!")
     start_cell, end_cell = cell_range.split(":")
     start_row = int("".join(filter(str.isdigit, start_cell))) - 1
     end_row = int("".join(filter(str.isdigit, end_cell)))
-    start_col = 0
-    for char in "".join(filter(str.isalpha, start_cell)):
-        start_col = start_col * 26 + (ord(char.upper()) - ord("A")) + 1
-    start_col -= 1
-    end_col = 0
-    for char in "".join(filter(str.isalpha, end_cell)):
-        end_col = end_col * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_col = "".join(filter(str.isalpha, start_cell))
+    end_col = "".join(filter(str.isalpha, end_cell))
+    start_index = 0
+    for char in start_col:
+        start_index = start_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    end_index = 0
+    for char in end_col:
+        end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
+    start_index -= 1
+    end_index -= 1
 
     result = (
         service.spreadsheets()
@@ -898,28 +905,21 @@ def get_bandings(
     )
     if not sheet:
         return []
-
     banded_ranges = sheet.get("bandedRanges", [])
     strictly_within_ids = []
     for banded_range in banded_ranges:
         brange = banded_range.get("range", {})
-        if brange.get("sheetId") != sheet_id:
-            continue
         brange_start_row = brange.get("startRowIndex", float("inf"))
         brange_end_row = brange.get("endRowIndex", 0)
         brange_start_col = brange.get("startColumnIndex", float("inf"))
         brange_end_col = brange.get("endColumnIndex", 0)
-        print(f"Banded Range ID: {banded_range['bandedRangeId']}")
-        print(f"Banded Range Start Row: {brange_start_row}, End Row: {brange_end_row}")
-        print(f"Banded Range Start Col: {brange_start_col}, End Col: {brange_end_col}")
-        print(f"Specified Range Start Row: {start_row}, End Row: {end_row}")
-        print(f"Specified Range Start Col: {start_col}, End Col: {end_col}")
 
         if (
-            brange_start_row >= start_row
-            and brange_end_row <= end_row
-            and brange_start_col >= start_col
-            and brange_end_col <= end_col
+            brange.get("sheetId") == sheet_id
+            and start_row <= brange_start_row < end_row
+            and start_row < brange_end_row <= end_row
+            and start_index <= brange_start_col < end_index
+            and start_index < brange_end_col <= end_index
         ):
             strictly_within_ids.append(banded_range["bandedRangeId"])
             print(f"Strictly Within Range ID: {banded_range['bandedRangeId']}")
