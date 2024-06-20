@@ -676,8 +676,130 @@ def clear_cells(service: Resource, spreadsheet_id: str, sheet_id: int, cell_rang
             }
         }
     ]
+    result = (
+        service.spreadsheets()
+        .get(spreadsheetId=spreadsheet_id, includeGridData=False)
+        .execute()
+    )
+    sheets = result.get("sheets", [])
+    sheet = next(
+        (
+            s
+            for s in sheets
+            if "properties" in s
+            and "sheetId" in s["properties"]
+            and s["properties"]["sheetId"] == sheet_id
+        ),
+        None,
+    )
+    if not sheet:
+        return
+    banded_ranges = sheet.get("bandedRanges", [])
     for banding_id in banding_ids:
-        requests.append({"deleteBanding": {"bandedRangeId": banding_id}})
+        banding = next(br for br in banded_ranges if br["bandedRangeId"] == banding_id)
+        brange = banding.get("range", {})
+        brange_start_row = brange.get("startRowIndex", float("inf"))
+        brange_end_row = brange.get("endRowIndex", 0)
+        brange_start_col = brange.get("startColumnIndex", float("inf"))
+        brange_end_col = brange.get("endColumnIndex", 0)
+        if (
+            start_row == brange_start_row
+            and end_row == brange_end_row
+            and start_col == brange_start_col
+            and end_col == brange_end_col
+        ):
+            requests.append({"deleteBanding": {"bandedRangeId": banding_id}})
+        else:
+            if start_row > brange_start_row:
+                requests.append(
+                    {
+                        "updateBanding": {
+                            "bandedRange": {
+                                "bandedRangeId": banding_id,
+                                "range": {
+                                    "sheetId": sheet_id,
+                                    "startRowIndex": brange_start_row,
+                                    "endRowIndex": start_row,
+                                    "startColumnIndex": brange_start_col,
+                                    "endColumnIndex": brange_end_col,
+                                },
+                            },
+                            "fields": "range",
+                        }
+                    }
+                )
+            if end_row < brange_end_row:
+                requests.append(
+                    {
+                        "updateBanding": {
+                            "bandedRange": {
+                                "bandedRangeId": banding_id,
+                                "range": {
+                                    "sheetId": sheet_id,
+                                    "startRowIndex": end_row,
+                                    "endRowIndex": brange_end_row,
+                                    "startColumnIndex": brange_start_col,
+                                    "endColumnIndex": brange_end_col,
+                                },
+                            },
+                            "fields": "range",
+                        }
+                    }
+                )
+            if start_col > brange_start_col:
+                requests.append(
+                    {
+                        "updateBanding": {
+                            "bandedRange": {
+                                "bandedRangeId": banding_id,
+                                "range": {
+                                    "sheetId": sheet_id,
+                                    "startRowIndex": brange_start_row,
+                                    "endRowIndex": brange_end_row,
+                                    "startColumnIndex": brange_start_col,
+                                    "endColumnIndex": start_col,
+                                },
+                            },
+                            "fields": "range",
+                        }
+                    }
+                )
+            if end_col < brange_end_col:
+                requests.append(
+                    {
+                        "updateBanding": {
+                            "bandedRange": {
+                                "bandedRangeId": banding_id,
+                                "range": {
+                                    "sheetId": sheet_id,
+                                    "startRowIndex": brange_start_row,
+                                    "endRowIndex": brange_end_row,
+                                    "startColumnIndex": end_col + 1,
+                                    "endColumnIndex": brange_end_col,
+                                },
+                            },
+                            "fields": "range",
+                        }
+                    }
+                )
+            if brange_start_col < start_col:
+                requests.append(
+                    {
+                        "updateBanding": {
+                            "bandedRange": {
+                                "bandedRangeId": banding_id,
+                                "range": {
+                                    "sheetId": sheet_id,
+                                    "startRowIndex": brange_start_row,
+                                    "endRowIndex": brange_end_row,
+                                    "startColumnIndex": brange_start_col,
+                                    "endColumnIndex": start_col - 1,
+                                },
+                            },
+                            "fields": "range",
+                        }
+                    }
+                )
     body = {"requests": requests}
     service.spreadsheets().batchUpdate(
         spreadsheetId=spreadsheet_id, body=body
@@ -885,8 +1007,6 @@ def get_bandings(
     for char in end_col:
         end_index = end_index * 26 + (ord(char.upper()) - ord("A")) + 1
     start_index -= 1
-    end_index -= 1
-
     result = (
         service.spreadsheets()
         .get(spreadsheetId=spreadsheet_id, includeGridData=False)
@@ -906,25 +1026,21 @@ def get_bandings(
     if not sheet:
         return []
     banded_ranges = sheet.get("bandedRanges", [])
-    strictly_within_ids = []
+    overlapping_ids = []
     for banded_range in banded_ranges:
         brange = banded_range.get("range", {})
-        brange_start_row = brange.get("startRowIndex", float("inf"))
-        brange_end_row = brange.get("endRowIndex", 0)
-        brange_start_col = brange.get("startColumnIndex", float("inf"))
-        brange_end_col = brange.get("endColumnIndex", 0)
-
         if (
             brange.get("sheetId") == sheet_id
-            and start_row <= brange_start_row < end_row
-            and start_row < brange_end_row <= end_row
-            and start_index <= brange_start_col < end_index
-            and start_index < brange_end_col <= end_index
+            and "sheetId" in brange
+            and not (
+                brange.get("endRowIndex", 0) <= start_row
+                or brange.get("startRowIndex", float("inf")) >= end_row
+                or brange.get("endColumnIndex", 0) <= start_index
+                or brange.get("startColumnIndex", float("inf")) >= end_index
+            )
         ):
-            strictly_within_ids.append(banded_range["bandedRangeId"])
-            print(f"Strictly Within Range ID: {banded_range['bandedRangeId']}")
-
-    return strictly_within_ids
+            overlapping_ids.append(banded_range["bandedRangeId"])
+    return overlapping_ids
 
 
 def get_sheet_players(values: List[List[str]]) -> List[List[str]]:
