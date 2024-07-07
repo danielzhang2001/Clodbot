@@ -35,7 +35,7 @@ def get_replay_pokemon(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, s
         nickname = nickname.strip()
         all_pokemon[player][pokemon] = nickname
     transform_regex = re.compile(
-        r"\|detailschange\|(p\d)a: (.+?)\|([^,|]+)-(Mega|Terastal),"
+        r"\|detailschange\|(p\d)a: (.+?)\|([^,|]+)-(Mega|Terastal|Hero)"
     )
     for match in transform_regex.finditer(log):
         player, nickname, base_pokemon, form = match.groups()
@@ -113,13 +113,171 @@ def initialize_stats(pokemon_data: Dict[str, Dict[str, str]]) -> None:
             }
 
 
+def process_sandstorm(actions: List[str], stats: Dict[str, Dict[str, Dict[str, int]]]):
+    # Processes kills from sandstorm.
+    sandstorm_starter = None
+    sandstorm_player = None
+    for action in actions:
+        sandstorm_match = re.search(
+            r"\|-weather\|Sandstorm\|\[from\] ability: ([^\|]+)\|\[of\] (p\d)a: ([^\|]+)",
+            action,
+        )
+        if sandstorm_match:
+            _, sandstorm_player, sandstorm_pokemon = sandstorm_match.groups()
+            sandstorm_starter = sandstorm_pokemon.strip()
+            break
+
+    if sandstorm_starter:
+        for pokemon, data in stats[sandstorm_player].items():
+            if data["nickname"] == sandstorm_starter:
+                data["kills"] += 1
+                break
+
+
+def process_poison(
+    fainted_pokemon: str,
+    actions: List[str],
+    stats: Dict[str, Dict[str, Dict[str, int]]],
+):
+    # Processes kills from toxic or poison.
+    poison_starter = None
+    poison_player = None
+    toxic_found = False
+    for action in actions:
+        if re.search(
+            r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: " + re.escape(fainted_pokemon),
+            action,
+        ):
+            if "|-status|" in actions[actions.index(action) - 1]:
+                poison_match = re.search(
+                    r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: ([^\|\n]+)", action
+                )
+                if poison_match:
+                    poison_player, poison_pokemon, _, poisoned_pokemon = (
+                        poison_match.groups()
+                    )
+                    if poisoned_pokemon.strip() == fainted_pokemon:
+                        poison_starter = poison_pokemon.strip()
+                        poison_player = f"p{poison_player}"
+                        toxic_found = True
+                        break
+            elif "|-fail|" in actions[actions.index(action) + 1]:
+                continue
+
+    if toxic_found and poison_starter:
+        for pokemon, data in stats[poison_player].items():
+            if data["nickname"] == poison_starter:
+                data["kills"] += 1
+                break
+
+
+def process_spikes(
+    fainted_pokemon: str,
+    actions: List[str],
+    stats: Dict[str, Dict[str, Dict[str, int]]],
+):
+    # Processes kills from spikes.
+    spikes_starter = None
+    spikes_player = None
+    spikes_found = False
+    for action in actions:
+        spikes_match = re.search(r"\|p(\d)a: ([^\|\n]+)\|Spikes\|", action)
+        if spikes_match:
+            spikes_player, spikes_pokemon = spikes_match.groups()
+            spikes_starter = spikes_pokemon.strip()
+            spikes_player = f"p{spikes_player}"
+            spikes_found = True
+            break
+
+    if spikes_found and spikes_starter:
+        for pokemon, data in stats[spikes_player].items():
+            if data["nickname"] == spikes_starter:
+                data["kills"] += 1
+                break
+
+
+def process_rocks(
+    fainted_pokemon: str,
+    actions: List[str],
+    stats: Dict[str, Dict[str, Dict[str, int]]],
+):
+    # Processes kills from Stealth Rocks.
+    rocks_starter = None
+    rocks_player = None
+    rocks_found = False
+    for action in actions:
+        rocks_match = re.search(r"\|p(\d)a: ([^\|\n]+)\|Stealth Rock\|", action)
+        if rocks_match:
+            rocks_player, rocks_pokemon = rocks_match.groups()
+            rocks_starter = rocks_pokemon.strip()
+            rocks_player = f"p{rocks_player}"
+            rocks_found = True
+            break
+
+    if rocks_found and rocks_starter:
+        for pokemon, data in stats[rocks_player].items():
+            if data["nickname"] == rocks_starter:
+                data["kills"] += 1
+                break
+
+
+def process_seed(
+    fainted_pokemon: str,
+    actions: List[str],
+    stats: Dict[str, Dict[str, Dict[str, int]]],
+):
+    leech_starter = None
+    leech_player = None
+    for action in actions:
+        leech_match = re.search(
+            r"\|[^\|]+\|\[from\] Leech Seed\|\[of\] (p\d)a: ([^\|\n]+)",
+            action,
+        )
+        if leech_match:
+            leech_player, leech_pokemon = leech_match.groups()
+            leech_starter = leech_pokemon.strip()
+            leech_player = f"p{leech_player}"
+            break
+
+    if leech_starter and leech_player:
+        for pokemon, data in stats[leech_player].items():
+            if data["nickname"] == leech_starter:
+                data["kills"] += 1
+                break
+
+
+def process_direct(
+    fainted_player: str,
+    fainted_pokemon: str,
+    actions: List[str],
+    stats: Dict[str, Dict[str, Dict[str, int]]],
+):
+    # Processes normal kills that result in one Pokemon directly killing another.
+    for action in actions:
+        killer = re.search(r"\|p(\d)a: ([^\|\n]+)\|", action)
+        if killer and killer.group(1) != fainted_player:
+            killer_player, killer_pokemon = killer.groups()
+            killer_pokemon = killer_pokemon.strip()
+            player_key = f"p{killer_player}"
+            kill_found = False
+            for pokemon, data in stats[player_key].items():
+                if data["nickname"] == killer_pokemon:
+                    data["kills"] += 1
+                    kill_found = True
+                    break
+            if kill_found:
+                break
+
+
 def process_stats(json_data: Dict[str, List[str]]) -> None:
     # Updates the kill and death values for each Pokemon.
     log = json_data.get("log", "")
     faint_regex = re.compile(r"\|faint\|p(\d)a: ([^\|\n]+)")
-    sandstorm_regex = re.compile(
-        r"\|Sandstorm\|[from] ability: ([^\|]+)\|[of] (p\d)a: ([^\|]+)"
-    )
+    sandstorm_regex = re.compile(r"\[from\] Sandstorm\n\|faint\|")
+    poison_regex = re.compile(r"\[from\] psn\n\|faint\|")
+    spikes_regex = re.compile(r"\[from\] Spikes\n\|faint\|")
+    rocks_regex = re.compile(r"\[from\] Stealth Rock\n\|faint\|")
+    seed_regex = re.compile(r"\[from\] Leech Seed\|\[of\]")
     for match in faint_regex.finditer(log):
         fainted_player, fainted_pokemon = match.groups()
         fainted_pokemon = fainted_pokemon.strip()
@@ -130,46 +288,19 @@ def process_stats(json_data: Dict[str, List[str]]) -> None:
                 data["deaths"] += 1
                 break
         actions = log[:event].split("\n")[::-1]
-        sandstorm_death = False
-        sandstorm_owner = None
-        if "|[from] Sandstorm\n|faint" in log[event - 30 : event]:
-            sandstorm_death = True
-            print("Sandstorm death detected!")
-            for action in actions:
-                sandstorm_match = sandstorm_regex.search(action)
-                if sandstorm_match:
-                    ability, sandstorm_player, sandstorm_pokemon = (
-                        sandstorm_match.groups()
-                    )
-                    sandstorm_owner = sandstorm_pokemon.strip()
-                    print(
-                        f"Sandstorm set by: {sandstorm_owner} from player {sandstorm_player}"
-                    )
-                    break
-            if sandstorm_owner:
-                for pokemon, data in stats[sandstorm_player].items():
-                    if data["nickname"] == sandstorm_owner:
-                        data["kills"] += 1
-                        print(
-                            f"Incremented kills for {sandstorm_owner} from player {sandstorm_player}"
-                        )
-                        break
+        segment = log[event - 80 : event + 30]
+        if sandstorm_regex.search(segment):
+            process_sandstorm(actions, stats)
+        elif poison_regex.search(segment):
+            process_poison(fainted_pokemon, actions, stats)
+        elif spikes_regex.search(segment):
+            process_spikes(fainted_pokemon, actions, stats)
+        elif rocks_regex.search(segment):
+            process_rocks(fainted_pokemon, actions, stats)
+        elif seed_regex.search(segment):
+            process_seed(fainted_pokemon, actions, stats)
         else:
-            print("In Else!")
-            for action in actions:
-                killer = re.search(r"\|p(\d)a: ([^\|\n]+)\|", action)
-                if killer and killer.group(1) != fainted_player:
-                    killer_player, killer_pokemon = killer.groups()
-                    killer_pokemon = killer_pokemon.strip()
-                    player_key = f"p{killer_player}"
-                    kill_found = False
-                    for pokemon, data in stats[player_key].items():
-                        if data["nickname"] == killer_pokemon:
-                            data["kills"] += 1
-                            kill_found = True
-                            break
-                    if kill_found:
-                        break
+            process_direct(fainted_player, fainted_pokemon, actions, stats)
 
 
 def get_stats(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, Dict[str, int]]]:
