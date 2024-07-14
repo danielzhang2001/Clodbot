@@ -163,7 +163,27 @@ def process_poison(
                         break
             elif "|-fail|" in actions[actions.index(action) + 1]:
                 continue
-
+        elif re.search(
+            r"\|p(\d)a: ([^\|\n]+)\|Malignant Chain\|p(\d)a: "
+            + re.escape(fainted_pokemon),
+            action,
+        ):
+            if (
+                "-status" in actions[actions.index(action) - 2]
+                and "tox" in actions[actions.index(action) - 2]
+            ):
+                malignant_match = re.search(
+                    r"\|p(\d)a: ([^\|\n]+)\|Malignant Chain\|p(\d)a: ([^\|\n]+)", action
+                )
+                if malignant_match:
+                    malignant_player, malignant_pokemon, _, target_pokemon = (
+                        malignant_match.groups()
+                    )
+                    if target_pokemon.strip() == fainted_pokemon:
+                        poison_starter = malignant_pokemon.strip()
+                        poison_player = f"p{malignant_player}"
+                        toxic_found = True
+                        break
     if toxic_found and poison_starter:
         for pokemon, data in stats[poison_player].items():
             if data["nickname"] == poison_starter:
