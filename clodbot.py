@@ -51,7 +51,7 @@ async def on_interaction(interaction: discord.Interaction) -> None:
         format = parts[5] if parts[5] != "none" else None
         set_name = parts[6]
         request_count = int(parts[7])
-        await interaction.response.defer()
+        # await interaction.response.defer()
         await GiveSet.set_selection(
             interaction,
             prompt_key,
@@ -88,7 +88,7 @@ async def help(ctx: commands.Context) -> None:
         "> \n"
         "> **Clodbot, sheet default** to display the default sheet link and sheet name on Discord.\n"
         "> \n"
-        "> **Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Pokemon Showdown Replay Link) [Optional 'New']** to update the stats from the replay onto the sheet name in the link. If not provided, sheet name defaults to 'Stats'. If 'New' is specified, a new section will always be made.\n"
+        "> **Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Pokemon Showdown Replay Link) [Optional Week#]** to update the stats from the replay onto the sheet name in the link. If not provided, sheet name defaults to 'Stats'. If a week number is specified, the replay will go into a week section.\n"
         "> \n"
         "> **Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)** to delete the stats section with Player Name from the sheet name in the link. If not provided, sheet name defaults to 'Stats'.\n"
         "> \n"
@@ -124,6 +124,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
     remaining = []
     name_dict = {}
     found_arrow = True
+    week = None
     for arg in reversed(args[1:]):
         if "->" in arg and found_arrow:
             parts = arg.split("->")
