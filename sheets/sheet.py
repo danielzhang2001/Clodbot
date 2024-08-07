@@ -1187,10 +1187,9 @@ def next_week_cell(values: List[List[str]], week: int) -> str:
 
 def next_data_cell(values: List[List[str]]) -> str:
     # Returns the row and column indices for the top of the next available section for player data.
-    print(f"{values}")
     letters = ["B", "G", "L", "Q"]
     last_index = 3
-    for section in range(1, len(values), 14):
+    for section in range(1, len(values), 15):
         names_row = values[section]
         details_row = values[section + 1]
         for index, letter in enumerate(letters):
@@ -1235,6 +1234,7 @@ def next_data_cell(values: List[List[str]]) -> str:
                 ),
             ]
             if any(cell == "Invalid" for cell in group_cells):
+                print("invalid!")
                 return f"{letter}{section + 1}"
             last_index = index
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
