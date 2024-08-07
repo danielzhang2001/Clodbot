@@ -31,32 +31,17 @@ def get_gen_dict() -> Dict[str, str]:
     }
 
 
-def get_gen(generation: str) -> Optional[str]:
-    # Returns the generation value from the dictionary with the given Generation.
-    if generation is None:
-        return None
-    gen_dict = get_gen_dict()
-    if generation.lower() in gen_dict:
-        return gen_dict[generation.lower()]
-    if generation.lower() in gen_dict.values():
-        return generation.lower()
-    return None
-
-
 async def get_latest_gen(pokemon: str) -> Optional[str]:
     # Returns the latest eligible generation for the given Pokemon.
     gen_dict = get_gen_dict()
-    generations = list(gen_dict.values())[::-1]
-    url = "https://smogonapi.herokuapp.com/GetSmogonData/{}/{}"
+    generations = list(gen_dict.keys())[::-1]
     async with aiohttp.ClientSession() as session:
-        for gen_value in generations:
-            async with session.get(url.format(gen_value, pokemon.lower())) as response:
+        for gen_key in generations:
+            url = f"https://pkmn.github.io/smogon/data/sets/{gen_key}.json"
+            async with session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
-                    if data.get("strategies"):
-                        gen_key = [
-                            key for key, value in gen_dict.items() if value == gen_value
-                        ][0]
+                    if pokemon.lower() in (p.lower() for p in data):
                         return gen_key
     return None
 
@@ -64,52 +49,47 @@ async def get_latest_gen(pokemon: str) -> Optional[str]:
 async def get_random_gen(pokemon: str) -> Optional[str]:
     # Returns a random eligible gen using the Smogon API given a Pokemon.
     gen_dict = get_gen_dict()
-    generations = list(gen_dict.values())
-    url = "https://smogonapi.herokuapp.com/GetSmogonData/{}/{}"
+    generations = list(gen_dict.keys())
     random.shuffle(generations)
     async with aiohttp.ClientSession() as session:
-        for gen_code in generations:
-            async with session.get(url.format(gen_code, pokemon.lower())) as response:
+        for gen_key in generations:
+            url = f"https://pkmn.github.io/smogon/data/sets/{gen_key}.json"
+            async with session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
-                    if data.get("strategies"):
-                        gen_key = [
-                            key for key, value in gen_dict.items() if value == gen_code
-                        ][0]
+                    if pokemon.lower() in (p.lower() for p in data):
                         return gen_key
     return None
 
 
 async def get_first_format(pokemon: str, generation: str) -> Optional[str]:
     # Returns the first format given the Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
+    url = f"https://pkmn.github.io/smogon/data/sets/{generation}.json"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
-                strategies = data.get("strategies", [])
-                if strategies:
-                    return strategies[0]["format"]
+                if pokemon.lower() in (p.lower() for p in data):
+                    pokemon_key = next(p for p in data if p.lower() == pokemon.lower())
+                    pokemon_data = data[pokemon_key]
+                    first_format = next(iter(pokemon_data), None)
+                    return first_format
     return None
 
 
 async def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+    url = f"https://pkmn.github.io/smogon/data/sets/{generation}.json"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
-                strategies = data.get("strategies", [])
-                formats = [
-                    strategy["format"]
-                    for strategy in strategies
-                    if strategy.get("movesets")
-                ]
-                if formats:
-                    return random.choice(formats)
+                if pokemon.lower() in (p.lower() for p in data):
+                    pokemon_key = next(p for p in data if p.lower() == pokemon.lower())
+                    pokemon_data = data[pokemon_key]
+                    formats = list(pokemon_data.keys())
+                    if formats:
+                        return random.choice(formats)
     return None
 
 
@@ -117,46 +97,42 @@ async def get_set_names(
     pokemon: str, generation: Optional[str] = None, format: Optional[str] = None
 ) -> Optional[List[str]]:
     # Returns all set names associated with the Pokemon, Generation and Format provided. If no Generation, assumed to be latest one, and if no Format, assumed to be first one.
+    pokemon = format_pokemon(pokemon)
     if not generation:
         generation = await get_latest_gen(pokemon)
         if generation is None:
             return None
-    gen_value = get_gen(generation)
-    if gen_value is None:
-        return None
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon.lower()}"
+    url = f"https://pkmn.github.io/smogon/data/sets/{generation}.json"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
-                set_names = []
-                if not format:
-                    format = await get_first_format(pokemon, generation)
-                for strategy in data.get("strategies", []):
-                    if (
-                        strategy["format"].replace(" ", "-").lower()
-                        == format.replace(" ", "-").lower()
-                    ):
-                        for moveset in strategy.get("movesets", []):
-                            set_names.append(moveset["name"])
-                return set_names
+                if pokemon.lower() in (p.lower() for p in data):
+                    pokemon_key = next(p for p in data if p.lower() == pokemon.lower())
+                    pokemon_data = data[pokemon_key]
+                    if not format:
+                        format = await get_first_format(pokemon, generation)
+                    if format and format in pokemon_data:
+                        format_data = pokemon_data[format]
+                        set_names = list(format_data.keys())
+                        return set_names
     return None
 
 
 async def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
-    # Returns a random eligible set name using the Smogon API given a Pokemon, Generation and Format.
-    gen_value = get_gen(generation)
-    url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+    # Returns a random eligible set name given a Pokemon, Generation, and Format.
+    url = f"https://pkmn.github.io/smogon/data/sets/{generation}.json"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
-                for strategy in data.get("strategies", []):
-                    if strategy.get("format") == format:
-                        if strategy.get("movesets"):
-                            set_names = [
-                                moveset["name"] for moveset in strategy["movesets"]
-                            ]
+                if pokemon.lower() in (p.lower() for p in data):
+                    pokemon_key = next(p for p in data if p.lower() == pokemon.lower())
+                    pokemon_data = data[pokemon_key]
+                    if format in pokemon_data:
+                        format_data = pokemon_data[format]
+                        set_names = list(format_data.keys())
+                        if set_names:
                             return random.choice(set_names)
     return None
 
@@ -168,10 +144,12 @@ def get_prompt(requests: List[Dict[str, Optional[str]]]) -> str:
         prompt += "the following Pokemon"
     else:
         request = requests[0]
-        pokemon = request["pokemon"]
-        generation = (get_gen(request.get("generation")) or "none").upper()
-        format = (request.get("format") or "none").upper()
-        prompt += f"**{pokemon.upper()}{f' {generation}' if generation != 'NONE' else ''}{f' {format}' if format != 'NONE' else ''}**"
+        pokemon = request["pokemon"].upper()
+        generation = (
+            request.get("generation").upper() if request.get("generation") else None
+        )
+        format = request.get("format").upper() if request.get("format") else None
+        prompt += f"**{pokemon}{f' {generation}' if generation else ''}{f' {format}' if format else ''}**"
     prompt += ":"
     return prompt
 
@@ -197,7 +175,7 @@ def get_view(
                     [pokemon.upper()]
                     + [
                         generation.upper()
-                        for generation in [get_gen(request.get("generation")) or "none"]
+                        for generation in [request.get("generation") or "none"]
                         if generation != "none"
                     ]
                     + [
@@ -220,73 +198,75 @@ def get_view(
     return view
 
 
-def format_name(pokemon: str) -> str:
-    # Format the Pokémon name to have each word (split by hyphen) start with a capital letter and the rest lowercase, except for single letters after hyphen which should remain lowercase.
-    formatted_parts = []
-    for part in pokemon.split("-"):
-        if len(part) > 1:
-            formatted_parts.append(part.capitalize())
-        else:
-            formatted_parts.append(part.lower())
-    return "-".join(formatted_parts)
+def format_pokemon(pokemon: str) -> str:
+    # Returns the pokemon name with proper case formatting.
+    if "-" in pokemon:
+        pokemon = pokemon.replace("-", " ")
+    parts = [part.capitalize() for part in pokemon.split(" ")]
+    return " ".join(parts)
 
 
-def format_set(moveset: dict) -> str:
-    # Returns the formatted set data from the moveset information given.
-    name = moveset["pokemon"]
-    item = moveset.get("items", [])
-    item_str = f" @ {item[0]}" if item else ""
-    level = moveset.get("levels", [])
-    level_str = f"\nLevel: {level[0]}" if level else ""
-    ability = moveset.get("abilities", [])
-    ability_str = f"\nAbility: {ability[0]}" if ability else ""
-    evs_list = moveset.get("evconfigs", [])
-    if evs_list:
-        evs_dict = evs_list[0]
-        evs = " / ".join(
-            (
-                f"{value} {'HP' if key == 'hp' else key.capitalize()}"
-                if key != "spa" and key != "spd" and key != "spe"
-                else f"{value} {'Atk' if key == 'atk' else 'Def' if key == 'def' else 'SpA' if key == 'spa' else 'SpD' if key == 'spd' else 'Spe'}"
-            )
-            for key, value in evs_dict.items()
-            if value > 0
-        )
-        evs_str = f"\nEVs: {evs}" if evs else ""
-    else:
-        evs_str = ""
-    ivs_list = moveset.get("ivconfigs", [])
-    if ivs_list:
-        ivs_dict = ivs_list[0]
-        ivs = " / ".join(
-            (
-                f"{value} {'HP' if key == 'hp' else key.capitalize()}"
-                if key != "spa" and key != "spd" and key != "spe"
-                else f"{value} {'Atk' if key == 'atk' else 'Def' if key == 'def' else 'SpA' if key == 'spa' else 'SpD' if key == 'spd' else 'Spe'}"
-            )
-            for key, value in ivs_dict.items()
-            if value != 31
-        )
-        ivs_str = f"\nIVs: {ivs}" if ivs else ""
-    else:
-        ivs_str = ""
-    tera = moveset.get("teratypes", [])
-    tera_str = f"\nTera Type: {random.choice(tera)}" if tera else ""
-    nature = moveset.get("natures", [])
-    nature_str = f"\n{nature[0]} Nature" if nature else ""
+def format_set(pokemon: str, moveset: dict) -> str:
+    # Returns the formatted set data from the pokemon and moveset information given.
+    stats = {
+        "hp": "HP",
+        "atk": "Atk",
+        "def": "Def",
+        "spa": "SpA",
+        "spd": "SpD",
+        "spe": "Spe",
+    }
+    pokemon_str = format_pokemon(pokemon)
+    item = moveset.get("item", "")
+    ability = moveset.get("ability", "")
+    evs = moveset.get("evs", {})
+    ivs = moveset.get("ivs", {})
+    tera = moveset.get("teratypes", "")
+    nature = moveset.get("nature", "")
     moves = []
-    for slot in moveset.get("moveslots", []):
-        if slot:
-            available_moves = [move["move"] for move in slot]
-            selected_move = random.choice(available_moves)
-            moves.append(selected_move)
-            available_moves.remove(selected_move)
-            while selected_move in moves[:-1]:
-                selected_move = random.choice(available_moves)
-                moves[-1] = selected_move
-                available_moves.remove(selected_move)
-    moves_str = "\n- " + "\n- ".join(moves)
-    formatted_set = f"{name}{item_str}{ability_str}{level_str}{evs_str}{ivs_str}{tera_str}{nature_str}{moves_str}"
+    if isinstance(item, list):
+        item_str = f" @ {random.choice(item)}" if item else ""
+    else:
+        item_str = f" @ {item}" if item else ""
+    if isinstance(ability, list):
+        ability_str = f"Ability: {random.choice(item)}" if ability else ""
+    else:
+        ability_str = f"Ability: {ability}" if ability else ""
+    if isinstance(evs, list) and all(isinstance(item, dict) for item in evs):
+        evs = random.choice(evs)
+    evs = " / ".join(f"{value} {stats[key]}" for key, value in evs.items() if value > 0)
+    evs_str = f"EVs: {evs}" if evs else ""
+    if isinstance(ivs, list) and all(isinstance(item, dict) for item in ivs):
+        ivs = random.choice(ivs)
+    ivs = " / ".join(f"{value} {stats[key]}" for key, value in ivs.items() if value > 0)
+    ivs_str = f"IVs: {ivs}" if ivs else ""
+    if isinstance(tera, list):
+        tera_str = f"Tera Type: {random.choice(tera)}" if tera else ""
+    else:
+        tera_str = f"Tera Type: {tera}" if tera else ""
+    if isinstance(nature, list):
+        nature_str = f"{random.choice(nature)} Nature" if nature else ""
+    else:
+        nature_str = f"{nature} Nature" if nature else ""
+    for move in moveset.get("moves", []):
+        if isinstance(move, list):
+            selected_move = random.choice(move)
+            moves.append(f"- {selected_move}")
+        else:
+            moves.append(f"- {move}")
+    moves_str = "\n".join(moves)
+    formatted_set = f"{pokemon_str}{item_str}"
+    if ability_str:
+        formatted_set += f"\n{ability_str}"
+    if evs_str:
+        formatted_set += f"\n{evs_str}"
+    if ivs_str:
+        formatted_set += f"\n{ivs_str}"
+    if tera_str:
+        formatted_set += f"\n{tera_str}"
+    if nature_str:
+        formatted_set += f"\n{nature_str}"
+    formatted_set += f"\n{moves_str}"
     return formatted_set.strip()
 
 
@@ -296,7 +276,7 @@ async def add_set(
     # Adds the set information to the selected sets and Pokemon information to the selected states.
     selected_states.setdefault(prompt_key, [])
     selected_sets.setdefault(prompt_key, {})
-    selected_states[prompt_key].append(message_key + button_key)
+    selected_states[prompt_key] = message_key + button_key
     selected_sets[prompt_key][message_key] = [set_data]
 
 

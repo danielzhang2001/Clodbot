@@ -40,25 +40,29 @@ class GiveSet:
         # Fetches and displays set data based on Pokemon, Generation, Format and Set names given.
         if not generation:
             generation = await get_latest_gen(pokemon)
-        gen_value = get_gen(generation)
-        url = f"https://smogonapi.herokuapp.com/GetSmogonData/{gen_value}/{pokemon}"
+        if not generation:
+            return None
+        url = f"https://pkmn.github.io/smogon/data/sets/{generation}.json"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
-                    if not format:
-                        format = await get_first_format(pokemon, generation)
-                    for strategy in data.get("strategies", []):
-                        if (
-                            strategy["format"].lower()
-                            == format.replace("-", " ").lower()
-                        ):
-                            for moveset in strategy.get("movesets", []):
+                    if pokemon.lower() in (p.lower() for p in data):
+                        pokemon_key = next(
+                            p for p in data if p.lower() == pokemon.lower()
+                        )
+                        pokemon_data = data[pokemon_key]
+                        if not format:
+                            format = await get_first_format(pokemon, generation)
+                        if format and format in pokemon_data:
+                            format_data = pokemon_data[format]
+                            for moveset_name, moveset in format_data.items():
                                 if (
-                                    moveset["name"].lower().replace(" ", "")
+                                    moveset_name.lower().replace(" ", "")
                                     == set_name.lower()
                                 ):
-                                    return format_set(moveset)
+                                    return format_set(pokemon, moveset)
+        return None
 
     @staticmethod
     async def fetch_random_sets(ctx: commands.Context, input_str: str) -> None:
@@ -147,6 +151,7 @@ class GiveSet:
         if deselected:
             await remove_set(prompt_key, message_key, button_key)
         else:
+            pokemon = format_pokemon(pokemon)
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             await add_set(prompt_key, message_key, button_key, set_data)
         set_data = "\n\n".join(

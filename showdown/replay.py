@@ -209,7 +209,9 @@ def process_spikes(
     spikes_player = None
     spikes_found = False
     for action in actions:
-        spikes_match = re.search(r"\|p(\d)a: ([^\|\n]+)\|Spikes\|", action)
+        spikes_match = re.search(
+            r"\|p(\d)a: ([^\|\n]+)\|(Spikes|Ceaseless Edge)\|", action
+        )
         if spikes_match:
             spikes_player, spikes_pokemon = spikes_match.groups()
             spikes_starter = spikes_pokemon.strip()
