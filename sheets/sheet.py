@@ -1192,9 +1192,11 @@ def next_data_cell(values: List[List[str]]) -> str:
     letters = ["B", "G", "L", "Q"]
     last_index = 3
     for section in range(0, len(values), 15):
+        print("going into section")
         names_row = values[section]
         details_row = values[section + 1]
         for index, letter in enumerate(letters):
+            print("going into letters")
             start_index = index * 5
             group_cells = [
                 (
@@ -1235,15 +1237,6 @@ def next_data_cell(values: List[List[str]]) -> str:
                     else "Invalid"
                 ),
             ]
-            for i, cell in enumerate(group_cells):
-                if cell == "Invalid":
-                    print(
-                        f"Invalid cell detected at position {i} (start_index {start_index})"
-                    )
-                else:
-                    print(
-                        f"Valid cell: {cell} at position {i} (start_index {start_index})"
-                    )
             if any(cell == "Invalid" for cell in group_cells):
                 return f"{letter}{section + 2}"
             last_index = index
