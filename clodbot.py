@@ -160,7 +160,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             and len(remaining) == 2
             and remaining_lower[1].startswith("week")
         ):
-            if remaining_lower[1].startswith("week"):
+            if len(remaining_lower) > 1 and remaining_lower[1].startswith("week"):
                 week = int(remaining_lower[1][4:])
             if await ManageSheet.has_default(server_id):
                 sheet_link, sheet_name = await ManageSheet.use_default(server_id)
@@ -172,7 +172,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             and len(remaining) == 3
             and remaining_lower[2].startswith("week")
         ):
-            if remaining_lower[2].startswith("week"):
+            if len(remaining_lower) > 2 and remaining_lower[2].startswith("week"):
                 week = int(remaining_lower[2][4:])
             sheet_link = remaining[0]
             data = remaining[1]
@@ -183,7 +183,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             and remaining_lower[3].startswith("week")
         ):
             print("got the initial update!")
-            if remaining_lower[3].startswith("week"):
+            if len(remaining_lower) > 3 and remaining_lower[3].startswith("week"):
                 week = int(remaining_lower[3][4:])
             sheet_link = remaining[0]
             sheet_name = remaining[1]
