@@ -1235,7 +1235,7 @@ def next_data_cell(values: List[List[str]]) -> str:
                 ),
             ]
             if any(cell == "Invalid" for cell in group_cells):
-                return f"{letter}{section + 2}"
+                return f"{letter}{section + 1}"
             last_index = index
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
 
