@@ -1190,6 +1190,7 @@ def next_data_cell(values: List[List[str]]) -> str:
     letters = ["B", "G", "L", "Q"]
     last_index = 3
     for section in range(1, len(values), 15):
+        print(f"section: {section}")
         names_row = values[section]
         details_row = values[section + 1]
         for index, letter in enumerate(letters):
