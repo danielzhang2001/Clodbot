@@ -182,15 +182,11 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             and len(remaining) == 4
             and remaining_lower[3].startswith("week")
         ):
-            print("got the initial update!")
             if len(remaining_lower) > 3 and remaining_lower[3].startswith("week"):
                 week = int(remaining_lower[3][4:])
             sheet_link = remaining[0]
             sheet_name = remaining[1]
             data = remaining[2]
-            print(f"sheet link is here: {sheet_link}")
-            print(f"sheet name is here: {sheet_name}")
-            print(f"data is here: {data}")
         else:
             if command == "update":
                 raise NoUpdate()
@@ -200,11 +196,9 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
                 raise NoList()
             return
         creds = await authenticate_sheet(ctx, server_id, sheet_link)
-        print("we finished authenticating!")
         if isinstance(creds, AuthFailure):
             return
         if command == "update":
-            print("about to update!")
             message = await ManageSheet.update_sheet(
                 ctx, server_id, creds, sheet_link, sheet_name, data, name_dict, week
             )
