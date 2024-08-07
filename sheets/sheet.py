@@ -1237,6 +1237,7 @@ def next_data_cell(values: List[List[str]]) -> str:
                     else "Invalid"
                 ),
             ]
+            print("done grouping!")
             if any(cell == "Invalid" for cell in group_cells):
                 return f"{letter}{section + 2}"
             last_index = index
