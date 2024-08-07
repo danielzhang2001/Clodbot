@@ -27,6 +27,7 @@ class ManageSheet:
         week: Optional[int] = None,
     ) -> str:
         # Updates sheets with replay data.
+        print("in update sheet!")
         print(f"sheet link: {sheet_link}")
         print(f"sheet name: {sheet_name}")
         print(f"replay link: {replay_link}")
