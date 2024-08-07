@@ -111,6 +111,7 @@ def add_data(
     pokemon: List[Tuple[str, List[int]]],
 ) -> None:
     # Adds the Player Name, Pokemon, Games, Kills and Deaths data into the sheet on the specific cell, as well as does cell formatting.
+    print(f"add data called on {player_name}!")
     sheet_name, start_cell = cell.split("!")
     col, row = start_cell.rstrip("0123456789"), int(
         "".join(filter(str.isdigit, start_cell))
