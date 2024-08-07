@@ -1188,15 +1188,12 @@ def next_week_cell(values: List[List[str]], week: int) -> str:
 
 def next_data_cell(values: List[List[str]]) -> str:
     # Returns the row and column indices for the top of the next available section for player data.
-    print("next data cell called!")
     letters = ["B", "G", "L", "Q"]
     last_index = 3
     for section in range(0, len(values), 15):
-        print("going into section")
         names_row = values[section]
         details_row = values[section + 1]
         for index, letter in enumerate(letters):
-            print("going into letters")
             start_index = index * 5
             group_cells = [
                 (
@@ -1237,12 +1234,33 @@ def next_data_cell(values: List[List[str]]) -> str:
                     else "Invalid"
                 ),
             ]
-            print("done grouping!")
+            if group_cells[0] != "Invalid":
+                print(f"Name found: {group_cells[0]}")
+            else:
+                print("Name not found or invalid.")
+
+            if group_cells[1] != "Invalid":
+                print("POKEMON found.")
+            else:
+                print("POKEMON not found or invalid.")
+
+            if group_cells[2] != "Invalid":
+                print("GAMES found.")
+            else:
+                print("GAMES not found or invalid.")
+
+            if group_cells[3] != "Invalid":
+                print("KILLS found.")
+            else:
+                print("KILLS not found or invalid.")
+
+            if group_cells[4] != "Invalid":
+                print("DEATHS found.")
+            else:
+                print("DEATHS not found or invalid.")
             if any(cell == "Invalid" for cell in group_cells):
-                print("invalid!")
                 return f"{letter}{section + 2}"
             last_index = index
-    print("valid!")
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
 
 
