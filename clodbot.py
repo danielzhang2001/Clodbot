@@ -51,7 +51,7 @@ async def on_interaction(interaction: discord.Interaction) -> None:
         format = parts[5] if parts[5] != "none" else None
         set_name = parts[6]
         request_count = int(parts[7])
-        # await interaction.response.defer()
+        await interaction.response.defer()
         await GiveSet.set_selection(
             interaction,
             prompt_key,
@@ -182,6 +182,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             and len(remaining) == 4
             and remaining_lower[3].startswith("week")
         ):
+            print("got the initial update!")
             if remaining_lower[3].startswith("week"):
                 week = int(remaining_lower[3][4:])
             sheet_link = remaining[0]
@@ -199,6 +200,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         if isinstance(creds, AuthFailure):
             return
         if command == "update":
+            print("about to update!")
             message = await ManageSheet.update_sheet(
                 ctx, server_id, creds, sheet_link, sheet_name, data, name_dict, week
             )
