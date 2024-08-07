@@ -27,6 +27,11 @@ class ManageSheet:
         week: Optional[int] = None,
     ) -> str:
         # Updates sheets with replay data.
+        print(f"sheet link: {sheet_link}")
+        print(f"sheet name: {sheet_name}")
+        print(f"replay link: {replay_link}")
+        print(f"name dict: {name_dict}")
+        print(f"week: {week}")
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
