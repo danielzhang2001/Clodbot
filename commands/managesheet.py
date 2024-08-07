@@ -76,6 +76,7 @@ class ManageSheet:
             if week is not None:
                 add_columns(service, spreadsheet_id, sheet_id, week, values)
                 values = get_values(service, spreadsheet_id, sheet_name)
+                print(f"values before adding {player_name}: {values}")
                 start_cell = f"{sheet_name}!{next_week_cell(values, week)}"
                 add_data(
                     service,
@@ -93,7 +94,6 @@ class ManageSheet:
                     )
                 else:
                     start_cell = f"{sheet_name}!{next_data_cell(values)}"
-                    print(f"start cell for {player_name}: {start_cell}")
                     add_data(
                         service,
                         spreadsheet_id,
