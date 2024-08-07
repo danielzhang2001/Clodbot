@@ -1239,8 +1239,10 @@ def next_data_cell(values: List[List[str]]) -> str:
             ]
             print("done grouping!")
             if any(cell == "Invalid" for cell in group_cells):
+                print("invalid!")
                 return f"{letter}{section + 2}"
             last_index = index
+    print("valid!")
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
 
 
