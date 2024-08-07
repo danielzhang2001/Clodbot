@@ -188,6 +188,9 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
             sheet_link = remaining[0]
             sheet_name = remaining[1]
             data = remaining[2]
+            print(f"sheet link is here: {sheet_link}")
+            print(f"sheet name is here: {sheet_name}")
+            print(f"data is here: {data}")
         else:
             if command == "update":
                 raise NoUpdate()
@@ -197,6 +200,7 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
                 raise NoList()
             return
         creds = await authenticate_sheet(ctx, server_id, sheet_link)
+        print("we finished authenticating!")
         if isinstance(creds, AuthFailure):
             return
         if command == "update":
