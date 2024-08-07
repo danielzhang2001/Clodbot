@@ -139,8 +139,8 @@ def add_data(
         valueInputOption="USER_ENTERED",
         body=body,
     ).execute()
-    # widen_columns(service, spreadsheet_id, sheet_id)
-    # clear_cells(service, spreadsheet_id, sheet_id, cell_range)
+    widen_columns(service, spreadsheet_id, sheet_id)
+    clear_cells(service, spreadsheet_id, sheet_id, cell_range)
     format_data(service, spreadsheet_id, sheet_id, cell_range)
 
 
@@ -1234,30 +1234,6 @@ def next_data_cell(values: List[List[str]]) -> str:
                     else "Invalid"
                 ),
             ]
-            if group_cells[0] != "Invalid":
-                print(f"Name found: {group_cells[0]}")
-            else:
-                print("Name not found or invalid.")
-
-            if group_cells[1] != "Invalid":
-                print("POKEMON found.")
-            else:
-                print("POKEMON not found or invalid.")
-
-            if group_cells[2] != "Invalid":
-                print("GAMES found.")
-            else:
-                print("GAMES not found or invalid.")
-
-            if group_cells[3] != "Invalid":
-                print("KILLS found.")
-            else:
-                print("KILLS not found or invalid.")
-
-            if group_cells[4] != "Invalid":
-                print("DEATHS found.")
-            else:
-                print("DEATHS not found or invalid.")
             if any(cell == "Invalid" for cell in group_cells):
                 return f"{letter}{section + 2}"
             last_index = index
