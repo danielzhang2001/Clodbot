@@ -1234,11 +1234,18 @@ def next_data_cell(values: List[List[str]]) -> str:
                     else "Invalid"
                 ),
             ]
+            for i, cell in enumerate(group_cells):
+                if cell == "Invalid":
+                    print(
+                        f"Invalid cell detected at position {i} (start_index {start_index})"
+                    )
+                else:
+                    print(
+                        f"Valid cell: {cell} at position {i} (start_index {start_index})"
+                    )
             if any(cell == "Invalid" for cell in group_cells):
-                print("returning invalid!")
                 return f"{letter}{section + 2}"
             last_index = index
-    print("returning valid!")
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
 
 
