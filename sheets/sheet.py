@@ -1241,7 +1241,7 @@ def next_data_cell(values: List[List[str]]) -> str:
                 return f"{letter}{section + 1}"
             last_index = index
     print("valid!")
-    return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 3)}"
+    return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 2)}"
 
 
 def check_labels(values: List[List[str]], player_name: str) -> bool:
