@@ -92,7 +92,6 @@ class ManageSheet:
                         service, spreadsheet_id, stat_range, player_name, pokemon_data
                     )
                 else:
-                    print(f"values right before {player_name}!")
                     start_cell = f"{sheet_name}!{next_data_cell(values)}"
                     add_data(
                         service,
