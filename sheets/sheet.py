@@ -1190,11 +1190,11 @@ def next_data_cell(values: List[List[str]]) -> str:
     print(f"{values}")
     letters = ["B", "G", "L", "Q"]
     last_index = 3
-    for section in range(0, len(values), 15):
+    for section in range(1, len(values), 15):
         names_row = values[section]
         details_row = values[section + 1]
         for index, letter in enumerate(letters):
-            start_index = index * 5
+            start_index = index * 5 + 1
             group_cells = [
                 (
                     names_row[start_index]
