@@ -184,7 +184,7 @@ def update_data(
     print(f"end col: {end_col}")
     end_row = int("".join(filter(str.isdigit, end_cell)))
     print(f"end row: {end_row}")
-    values = get_values(service, spreadsheet_id, sheet_name)
+    values = get_range_values(service, spreadsheet_id, cell_range)
     pokemon_indices = {
         row[1].strip(): start_row + idx
         for idx, row in enumerate(values)
