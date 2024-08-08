@@ -1144,6 +1144,7 @@ def get_values(
         .execute()
     )
     print("metadata done!")
+    print(f"sheet name: {sheet_name}")
     sheet = next(
         sheet
         for sheet in sheet_metadata["sheets"]
