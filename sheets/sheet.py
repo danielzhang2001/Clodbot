@@ -182,7 +182,7 @@ def update_data(
         for idx, row in enumerate(values)
         if row and row[0].strip()
     }
-    print("passed indices!")
+    print(f"indices: {pokemon_indices}")
     for pokemon_name, stats in pokemon_data:
         if pokemon_name in pokemon_indices:
             print(f"updating {pokemon_name}")
