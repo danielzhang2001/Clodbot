@@ -1187,21 +1187,18 @@ def next_week_cell(values: List[List[str]], week: int) -> str:
 
 def next_data_cell(values: List[List[str]]) -> str:
     # Returns the row and column indices for the top of the next available section for player data.
-    print(f"{values}")
     letters = ["B", "G", "L", "Q"]
     last_index = 3
     for section in range(1, len(values), 15):
-        print(f"section: {section}")
         names_row = values[section]
         details_row = values[section + 1]
         for index, letter in enumerate(letters):
             start_index = index * 5 + 1
-            print(f"start index: {start_index}")
             group_cells = [
                 (
                     names_row[start_index]
                     if (len(names_row) > start_index and names_row[start_index] != "")
-                    else "Invalid"
+                    else "Empty"
                 ),
                 (
                     details_row[start_index]
@@ -1209,7 +1206,7 @@ def next_data_cell(values: List[List[str]]) -> str:
                         len(details_row) > start_index
                         and details_row[start_index] == "POKEMON"
                     )
-                    else "Invalid"
+                    else "Empty"
                 ),
                 (
                     details_row[start_index + 1]
@@ -1217,7 +1214,7 @@ def next_data_cell(values: List[List[str]]) -> str:
                         len(details_row) > start_index + 1
                         and details_row[start_index + 1] == "GAMES"
                     )
-                    else "Invalid"
+                    else "Empty"
                 ),
                 (
                     details_row[start_index + 2]
@@ -1225,7 +1222,7 @@ def next_data_cell(values: List[List[str]]) -> str:
                         len(details_row) > start_index + 2
                         and details_row[start_index + 2] == "KILLS"
                     )
-                    else "Invalid"
+                    else "Empty"
                 ),
                 (
                     details_row[start_index + 3]
@@ -1233,14 +1230,12 @@ def next_data_cell(values: List[List[str]]) -> str:
                         len(details_row) > start_index + 3
                         and details_row[start_index + 3] == "DEATHS"
                     )
-                    else "Invalid"
+                    else "Empty"
                 ),
             ]
-            if any(cell == "Invalid" for cell in group_cells):
-                print("invalid!")
+            if any(cell == "Empty" for cell in group_cells):
                 return f"{letter}{section + 1}"
             last_index = index
-    print("valid!")
     return f"{letters[(last_index + 1) % len(letters)]}{2 if len(values) == 0 else (len(values) + 2)}"
 
 
