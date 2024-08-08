@@ -185,7 +185,6 @@ def update_data(
     end_row = int("".join(filter(str.isdigit, end_cell)))
     print(f"end row: {end_row}")
     values = get_values(service, spreadsheet_id, sheet_name)
-    print(f"values: {values}")
     pokemon_indices = {
         values[idx][letter_to_index(start_col)].strip(): idx + 1
         for idx in range(start_row - 1, end_row - 1)
@@ -256,7 +255,8 @@ def update_pokemon(
     service: Resource, spreadsheet_id: str, row_range: str, stats: List[int]
 ) -> None:
     # Updates existing Pokemon entries to the appropriate section in the sheet.
-    values = get_values(service, spreadsheet_id, row_range)
+    values = get_range_values(service, spreadsheet_id, row_range)
+    print(f"range values: {values}")
     updated_values = [
         [
             values[0][0],
@@ -1164,6 +1164,26 @@ def get_values(
         .execute()
     )
     values = result.get("values", [])
+    for row in values:
+        while len(row) < max_cols:
+            row.append("")
+    return values
+
+
+def get_range_values(
+    service: Resource, spreadsheet_id: str, range: str
+) -> List[List[str]]:
+    # Returns the values of the specified range in the sheet.
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=spreadsheet_id, range=range)
+        .execute()
+    )
+    values = result.get("values", [])
+    start_col = range.split("!")[-1].split(":")[0][0]
+    end_col = range.split("!")[-1].split(":")[-1][0]
+    max_cols = column_letter_to_index(end_col) - column_letter_to_index(start_col) + 1
     for row in values:
         while len(row) < max_cols:
             row.append("")
