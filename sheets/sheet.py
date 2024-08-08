@@ -207,7 +207,7 @@ def update_data(
     for pokemon_name, stats in pokemon_data:
         if pokemon_name not in pokemon_indices:
             print(f"adding {pokemon_name}")
-            values = get_values(service, spreadsheet_id, cell_range)
+            values = get_range_values(service, spreadsheet_id, cell_range)
             if not values:
                 empty_row_index = 4
             else:
