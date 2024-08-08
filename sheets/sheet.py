@@ -186,11 +186,9 @@ def update_data(
     print(f"end row: {end_row}")
     values = get_values(service, spreadsheet_id, sheet_name)
     pokemon_indices = {
-        values[idx][column_letter_to_index(start_col)].strip(): idx
-        for idx in range(start_row, end_row + 1)
-        if values[idx]
-        and len(values[idx]) > column_letter_to_index(start_col)
-        and values[idx][column_letter_to_index(start_col)].strip()
+        values[idx][letter_to_index(start_col)].strip(): idx
+        for idx in range(start_row, end_row)
+        if values[idx] and values[idx][letter_to_index(start_col)].strip()
     }
     print(f"indices: {pokemon_indices}")
     for pokemon_name, stats in pokemon_data:
