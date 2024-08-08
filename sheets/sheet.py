@@ -1183,7 +1183,7 @@ def get_range_values(
     values = result.get("values", [])
     start_col = range.split("!")[-1].split(":")[0][0]
     end_col = range.split("!")[-1].split(":")[-1][0]
-    max_cols = column_letter_to_index(end_col) - column_letter_to_index(start_col) + 1
+    max_cols = letter_to_index(end_col) - letter_to_index(start_col) + 1
     for row in values:
         while len(row) < max_cols:
             row.append("")
