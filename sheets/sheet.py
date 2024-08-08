@@ -197,6 +197,7 @@ def update_data(
             print(f"updating {pokemon_name}")
             row_index = pokemon_indices[pokemon_name]
             row_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"
+            print(f"row range: {row_range}")
             update_pokemon(
                 service,
                 spreadsheet_id,
@@ -1144,7 +1145,7 @@ def get_section_range(values: List[List[str]], player_name: str) -> str:
 def get_values(
     service: Resource, spreadsheet_id: str, sheet_name: str
 ) -> List[List[str]]:
-    # Returns the values of the sheet.
+    # Returns the values of the entire sheet.
     sheet_metadata = (
         service.spreadsheets()
         .get(spreadsheetId=spreadsheet_id, includeGridData=False)
