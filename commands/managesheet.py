@@ -88,6 +88,7 @@ class ManageSheet:
             else:
                 if check_labels(values, player_name):
                     stat_range = f"{sheet_name}!{get_stat_range(values, player_name)}"
+                    print(f"stat range: {stat_range}")
                     update_data(
                         service, spreadsheet_id, stat_range, player_name, pokemon_data
                     )
