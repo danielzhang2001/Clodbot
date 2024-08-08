@@ -1143,18 +1143,22 @@ def get_values(
         .get(spreadsheetId=spreadsheet_id, includeGridData=False)
         .execute()
     )
+    print("metadata done!")
     sheet = next(
         sheet
         for sheet in sheet_metadata["sheets"]
         if sheet["properties"]["title"] == sheet_name
     )
+    print("sheet done!")
     max_cols = sheet["properties"]["gridProperties"]["columnCount"]
+    print("max cols done!")
     result = (
         service.spreadsheets()
         .values()
         .get(spreadsheetId=spreadsheet_id, range=sheet_name)
         .execute()
     )
+    print("result done!")
     values = result.get("values", [])
     for row in values:
         while len(row) < max_cols:
