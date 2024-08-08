@@ -260,6 +260,7 @@ def update_pokemon(
     print(f"range values: {values}")
     updated_values = [
         [
+            values[0][0],
             str(int(values[0][1]) + 1),
             str(int(values[0][2]) + stats[0]),
             str(int(values[0][3]) + stats[1]),
