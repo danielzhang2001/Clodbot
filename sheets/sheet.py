@@ -162,7 +162,6 @@ def update_data(
     # Updates the Pokemon, Games, Kills and Deaths data into the sheet.
     print(f"updating data for {player_name}")
     print(f"cell range: {cell_range}")
-    values = get_values(service, spreadsheet_id, cell_range)
     print(f"values: {values}")
     sheet_name = cell_range.split("!")[0]
     print(f"sheet name: {sheet_name}")
@@ -178,6 +177,7 @@ def update_data(
     print(f"end col: {end_col}")
     end_row = int("".join(filter(str.isdigit, end_cell)))
     print(f"end row: {end_row}")
+    values = get_values(service, spreadsheet_id, sheet_name)
     pokemon_indices = {
         row[0].strip(): start_row + idx
         for idx, row in enumerate(values)
