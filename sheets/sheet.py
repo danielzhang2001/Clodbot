@@ -185,10 +185,11 @@ def update_data(
     end_row = int("".join(filter(str.isdigit, end_cell)))
     print(f"end row: {end_row}")
     values = get_range_values(service, spreadsheet_id, cell_range)
+    print(f"values: {values}")
     pokemon_indices = {
-        row[1].strip(): start_row + idx
+        row[0].strip(): start_row + idx
         for idx, row in enumerate(values)
-        if row and row[1].strip()
+        if row and row[0].strip()
     }
     print(f"indices: {pokemon_indices}")
     for pokemon_name, stats in pokemon_data:
