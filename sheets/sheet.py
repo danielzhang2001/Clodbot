@@ -168,6 +168,7 @@ def update_data(
     pokemon_data: List[Tuple[str, List[int]]],
 ) -> None:
     # Updates the Pokemon, Games, Kills and Deaths data into the sheet.
+    values = get_range_values(service, spreadsheet_id, cell_range)
     print(f"updating data for {player_name}")
     print(f"cell range: {cell_range}")
     sheet_name = cell_range.split("!")[0]
@@ -184,8 +185,6 @@ def update_data(
     print(f"end col: {end_col}")
     end_row = int("".join(filter(str.isdigit, end_cell)))
     print(f"end row: {end_row}")
-    values = get_range_values(service, spreadsheet_id, cell_range)
-    print(f"values: {values}")
     pokemon_indices = {
         row[0].strip(): start_row + idx
         for idx, row in enumerate(values)
@@ -257,7 +256,6 @@ def update_pokemon(
 ) -> None:
     # Updates existing Pokemon entries to the appropriate section in the sheet.
     values = get_range_values(service, spreadsheet_id, row_range)
-    print(f"range values: {values}")
     updated_values = [
         [
             values[0][0],
@@ -1172,23 +1170,16 @@ def get_values(
 
 
 def get_range_values(
-    service: Resource, spreadsheet_id: str, range: str
+    service: Resource, spreadsheet_id: str, cell_range: str
 ) -> List[List[str]]:
     # Returns the values of the specified range in the sheet.
     result = (
         service.spreadsheets()
         .values()
-        .get(spreadsheetId=spreadsheet_id, range=range)
+        .get(spreadsheetId=spreadsheet_id, range=cell_range)
         .execute()
     )
-    values = result.get("values", [])
-    start_col = range.split("!")[-1].split(":")[0][0]
-    end_col = range.split("!")[-1].split(":")[-1][0]
-    max_cols = letter_to_index(end_col) - letter_to_index(start_col) + 1
-    for row in values:
-        while len(row) < max_cols:
-            row.append("")
-    return values
+    return result.get("values", [])
 
 
 def next_week_range(week: int) -> str:
