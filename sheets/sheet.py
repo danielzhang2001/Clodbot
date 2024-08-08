@@ -160,6 +160,7 @@ def update_data(
     pokemon_data: List[Tuple[str, List[int]]],
 ) -> None:
     # Updates the Pokemon, Games, Kills and Deaths data into the sheet.
+    print(f"updating data for {player_name}")
     values = get_values(service, spreadsheet_id, cell_range)
     sheet_name = cell_range.split("!")[0]
     start_cell = cell_range.split("!")[1].split(":")[0]
@@ -168,13 +169,22 @@ def update_data(
     start_row = int("".join(filter(str.isdigit, start_cell)))
     end_col = "".join(filter(str.isalpha, end_cell))
     end_row = int("".join(filter(str.isdigit, end_cell)))
+    print(f"sheet name: {sheet_name}")
+    print(f"start cell: {start_cell}")
+    print(f"end cell: {end_cell}")
+    print(f"start col: {start_col}")
+    print(f"start row: {start_row}")
+    print(f"end col: {end_col}")
+    print(f"end row: {end_row}")
     pokemon_indices = {
         row[0].strip(): start_row + idx
         for idx, row in enumerate(values)
         if row and row[0].strip()
     }
+    print("passed indices!")
     for pokemon_name, stats in pokemon_data:
         if pokemon_name in pokemon_indices:
+            print(f"updating {pokemon_name}")
             row_index = pokemon_indices[pokemon_name]
             row_range = f"{sheet_name}!{start_col}{row_index}:{end_col}{row_index}"
             update_pokemon(
@@ -183,8 +193,10 @@ def update_data(
                 row_range,
                 stats,
             )
+
     for pokemon_name, stats in pokemon_data:
         if pokemon_name not in pokemon_indices:
+            print(f"adding {pokemon_name}")
             values = get_values(service, spreadsheet_id, cell_range)
             if not values:
                 empty_row_index = 4
