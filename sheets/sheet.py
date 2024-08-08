@@ -186,9 +186,9 @@ def update_data(
     print(f"end row: {end_row}")
     values = get_values(service, spreadsheet_id, sheet_name)
     pokemon_indices = {
-        values[idx][letter_to_index(start_col)].strip(): idx + 1
-        for idx in range(start_row - 1, end_row - 1)
-        if values[idx] and values[idx][letter_to_index(start_col)].strip()
+        row[1].strip(): start_row + idx
+        for idx, row in enumerate(values)
+        if row and row[1].strip()
     }
     print(f"indices: {pokemon_indices}")
     for pokemon_name, stats in pokemon_data:
@@ -207,7 +207,7 @@ def update_data(
     for pokemon_name, stats in pokemon_data:
         if pokemon_name not in pokemon_indices:
             print(f"adding {pokemon_name}")
-            values = get_values(service, spreadsheet_id, sheet_name)
+            values = get_values(service, spreadsheet_id, cell_range)
             if not values:
                 empty_row_index = 4
             else:
@@ -259,7 +259,6 @@ def update_pokemon(
     print(f"range values: {values}")
     updated_values = [
         [
-            values[0][0],
             str(int(values[0][1]) + 1),
             str(int(values[0][2]) + stats[0]),
             str(int(values[0][3]) + stats[1]),
