@@ -67,6 +67,14 @@ async def clear_sheets(sheet_link):
                 raise e
 
 
+def letter_to_index(column: str) -> int:
+    # Converts a column letter to its associated index value.
+    index = 0
+    for char in column:
+        index = index * 26 + (ord(char.upper()) - ord("A")) + 1
+    return index - 1
+
+
 def week_exists(
     service: Resource, spreadsheet_id: str, sheet_name: str, week: int
 ) -> bool:
@@ -178,9 +186,11 @@ def update_data(
     print(f"end row: {end_row}")
     values = get_values(service, spreadsheet_id, sheet_name)
     pokemon_indices = {
-        row[1].strip(): start_row + idx
-        for idx, row in enumerate(values)
-        if row and row[1].strip()
+        values[idx][column_letter_to_index(start_col)].strip(): idx
+        for idx in range(start_row, end_row + 1)
+        if values[idx]
+        and len(values[idx]) > column_letter_to_index(start_col)
+        and values[idx][column_letter_to_index(start_col)].strip()
     }
     print(f"indices: {pokemon_indices}")
     for pokemon_name, stats in pokemon_data:
