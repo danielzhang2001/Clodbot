@@ -1137,6 +1137,7 @@ def get_values(
     service: Resource, spreadsheet_id: str, sheet_name: str
 ) -> List[List[str]]:
     # Returns the values of the sheet.
+    print("starting get values!")
     sheet_metadata = (
         service.spreadsheets()
         .get(spreadsheetId=spreadsheet_id, includeGridData=False)
@@ -1158,7 +1159,7 @@ def get_values(
     for row in values:
         while len(row) < max_cols:
             row.append("")
-
+    print(f"values: {values}")
     return values
 
 
