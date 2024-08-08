@@ -161,20 +161,22 @@ def update_data(
 ) -> None:
     # Updates the Pokemon, Games, Kills and Deaths data into the sheet.
     print(f"updating data for {player_name}")
+    print(f"cell range: {cell_range}")
     values = get_values(service, spreadsheet_id, cell_range)
+    print(f"values: {values}")
     sheet_name = cell_range.split("!")[0]
-    start_cell = cell_range.split("!")[1].split(":")[0]
-    end_cell = cell_range.split("!")[1].split(":")[1]
-    start_col = "".join(filter(str.isalpha, start_cell))
-    start_row = int("".join(filter(str.isdigit, start_cell)))
-    end_col = "".join(filter(str.isalpha, end_cell))
-    end_row = int("".join(filter(str.isdigit, end_cell)))
     print(f"sheet name: {sheet_name}")
+    start_cell = cell_range.split("!")[1].split(":")[0]
     print(f"start cell: {start_cell}")
+    end_cell = cell_range.split("!")[1].split(":")[1]
     print(f"end cell: {end_cell}")
+    start_col = "".join(filter(str.isalpha, start_cell))
     print(f"start col: {start_col}")
+    start_row = int("".join(filter(str.isdigit, start_cell)))
     print(f"start row: {start_row}")
+    end_col = "".join(filter(str.isalpha, end_cell))
     print(f"end col: {end_col}")
+    end_row = int("".join(filter(str.isdigit, end_cell)))
     print(f"end row: {end_row}")
     pokemon_indices = {
         row[0].strip(): start_row + idx
