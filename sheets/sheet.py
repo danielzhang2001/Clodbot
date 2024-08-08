@@ -162,7 +162,6 @@ def update_data(
     # Updates the Pokemon, Games, Kills and Deaths data into the sheet.
     print(f"updating data for {player_name}")
     print(f"cell range: {cell_range}")
-    print(f"values: {values}")
     sheet_name = cell_range.split("!")[0]
     print(f"sheet name: {sheet_name}")
     start_cell = cell_range.split("!")[1].split(":")[0]
