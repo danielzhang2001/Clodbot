@@ -188,7 +188,7 @@ def update_data(
     print(f"values: {values}")
     pokemon_indices = {
         values[idx][letter_to_index(start_col)].strip(): idx
-        for idx in range(start_row, end_row)
+        for idx in range(start_row - 1, end_row - 1)
         if values[idx] and values[idx][letter_to_index(start_col)].strip()
     }
     print(f"indices: {pokemon_indices}")
