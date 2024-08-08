@@ -1097,10 +1097,10 @@ def get_stat_range(values: List[List[str]], name: str) -> str:
     # Searches for the name and returns the range of the section with Pokemon stats associated with that name.
     for row_index, row in enumerate(values):
         if name in row:
-            name_index = row.index(name) + 1
+            name_index = row.index(name)
             start_col = chr(65 + name_index)
             end_col = chr(ord(start_col) + 3)
-            start_row = row_index + 4
+            start_row = row_index + 3
             end_row = start_row + 11
             return f"{start_col}{start_row}:{end_col}{end_row}"
     return None
