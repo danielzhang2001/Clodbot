@@ -124,7 +124,6 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
     remaining = []
     name_dict = {}
     found_arrow = True
-    week = None
     for arg in reversed(args[1:]):
         if "->" in arg and found_arrow:
             parts = arg.split("->")
