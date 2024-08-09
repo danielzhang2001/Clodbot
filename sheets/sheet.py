@@ -1107,8 +1107,8 @@ def get_stat_range(values: List[List[str]], name: str) -> str:
     name_lower = name.lower()
     for row_index, row in enumerate(values):
         row_lower = [cell.lower() for cell in row]
-        if name.lower() in row.lower():
-            name_index = row.lower().index(name_lower)
+        if name_lower() in row_lower():
+            name_index = row_lower().index(name_lower)
             start_col = chr(65 + name_index)
             end_col = chr(ord(start_col) + 3)
             start_row = row_index + 3
