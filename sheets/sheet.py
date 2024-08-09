@@ -1262,11 +1262,13 @@ def next_data_cell(values: List[List[str]]) -> str:
 
 def check_labels(values: List[List[str]], player_name: str) -> bool:
     # Returns whether the player name is found in values along with the labels of "Pokemon", "Games", "Kills" and "Deaths".
+    player_lower = player_name.lower()
     for row_index, row in enumerate(values):
-        if player_name in row:
-            name_index = row.index(player_name)
+        row_lower = [cell.lower() for cell in row]
+        if player_lower in row_lower:
+            name_index = row_lower.index(player_lower)
             if row_index + 1 < len(values) and all(
-                values[row_index + 1][name_index + i] == label
+                values[row_index + 1][name_index + i].lower() == label.lower()
                 for i, label in enumerate(["POKEMON", "GAMES", "KILLS", "DEATHS"])
             ):
                 return True
