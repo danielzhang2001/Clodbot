@@ -66,10 +66,10 @@ class ManageSheet:
             add_week(service, spreadsheet_id, sheet_id, sheet_name, week)
         for player_name, pokemon_data in stats.items():
             player_name = get_replay_players(json_data)[player_name]
-            if player_name in name_dict:
-                player_name = name_dict[player_name]
-                print(f"New Player Name is Now {player_name}")
-                print(f"Name Dict is: {name_dict}")
+            if player_name.lower() in {k.lower(): v for k, v in name_dict.items()}:
+                player_name = name_dict[
+                    {k.lower(): k for k in name_dict}[player_name.lower()]
+                ]
             pokemon_data = [
                 (pokemon, [data["kills"], data["deaths"]])
                 for pokemon, data in pokemon_data.items()
