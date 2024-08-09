@@ -1104,9 +1104,11 @@ def get_sheet_pokemon(values: List[List[str]]) -> List[List[str]]:
 
 def get_stat_range(values: List[List[str]], name: str) -> str:
     # Searches for the name and returns the range of the section with Pokemon stats associated with that name.
+    name_lower = name.lower()
     for row_index, row in enumerate(values):
-        if name in row:
-            name_index = row.index(name)
+        row_lower = [cell.lower() for cell in row]
+        if name.lower() in row.lower():
+            name_index = row.lower().index(name_lower)
             start_col = chr(65 + name_index)
             end_col = chr(ord(start_col) + 3)
             start_row = row_index + 3
