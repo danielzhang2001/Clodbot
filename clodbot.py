@@ -88,7 +88,7 @@ async def help(ctx: commands.Context) -> None:
         "> \n"
         "> **Clodbot, sheet default** to display the default sheet link and sheet name on Discord.\n"
         "> \n"
-        "> **Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Pokemon Showdown Replay Link) [Optional Week#]** to update the stats from the replay onto the sheet name in the link. If not provided, sheet name defaults to 'Stats'. If a week number is specified, the replay will go into a week section.\n"
+        "> **Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Pokemon Showdown Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])** to update the stats from the replay onto the sheet name in the link. If not provided, sheet name defaults to 'Stats'. If a week number is specified, the replay will go into a week section. You can also assign a new name to a Showdown name in the replay, and this parameter can be applied multiple times.\n"
         "> \n"
         "> **Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)** to delete the stats section with Player Name from the sheet name in the link. If not provided, sheet name defaults to 'Stats'.\n"
         "> \n"
