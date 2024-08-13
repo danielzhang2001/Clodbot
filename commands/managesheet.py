@@ -60,6 +60,10 @@ class ManageSheet:
             if sheet_id
             else sheet_link
         )
+        if week is not None and any_data_exists(service, spreadsheet_id, sheet_name):
+            raise NonWeekSheet(sheet_title, sheet_name)
+        if week is None and any_week_exists(service, spreadsheet_id, sheet_name):
+            raise WeekSheet(sheet_title, sheet_name)
         if week is not None and not week_exists(
             service, spreadsheet_id, sheet_name, week
         ):

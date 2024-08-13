@@ -12,7 +12,7 @@ class InvalidCommand(Exception):
             "Clodbot, analyze (Replay Link)\n"
             "Clodbot, sheet set (Optional Google Sheets Link) (Optional Sheet Name)\n"
             "Clodbot, sheet default\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional 'New']\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])\n"
             "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
             "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']\n"
             "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
@@ -81,7 +81,7 @@ class NoSheet(Exception):
             "```\n"
             "Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)\n"
             "Clodbot, sheet default\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional 'New']\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])\n"
             "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
             "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']\n"
             "```"
@@ -117,7 +117,7 @@ class NoUpdate(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional 'New']\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])\n"
             "```"
         )
 
@@ -163,6 +163,28 @@ class NoDefault(Exception):
             f"No default sheet link set. You can set it as follows:\n"
             "```\n"
             "Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)\n"
+            "```"
+        )
+
+
+class NonWeekSheet(Exception):
+    # Exception raised when there is a request to update a sheet with non-week data but it has data fitted for week.
+    def __init__(self, sheet_title, sheet_name):
+        super().__init__(
+            f"You have not specified a week but the current sheet at **{sheet_title}** using **{sheet_name}** has data tailored toward week. Either delete the week data or update your data in week form as follows:\n"
+            "```\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Week#] (Optional Showdown Name->New Name [Multiple])\n"
+            "```"
+        )
+
+
+class NonWeekSheet(Exception):
+    # Exception raised when there is a request to update a sheet with week data but it has data fitted for non-week.
+    def __init__(self, sheet_title, sheet_name):
+        super().__init__(
+            f"You have specified a week but the current sheet at **{sheet_title}** using **{sheet_name}** has data not tailored toward week. Either delete the non-week data or update your data in non-week form as follows:\n"
+            "```\n"
+            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) (Optional Showdown Name->New Name [Multiple])\n"
             "```"
         )
 

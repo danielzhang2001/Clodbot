@@ -78,7 +78,7 @@ def letter_to_index(column: str) -> int:
 def week_exists(
     service: Resource, spreadsheet_id: str, sheet_name: str, week: int
 ) -> bool:
-    # Checks to see if the week section is empty or not.
+    # Checks to see if the specific week section is empty or not.
     cell_range = f"{sheet_name}!{next_week_range(week)}"
     result = (
         service.spreadsheets()
@@ -89,6 +89,82 @@ def week_exists(
     values = result.get("values", [])
     if values and values[0] and values[0][0] == f"Week {week}":
         return True
+    return False
+
+
+def any_week_exists(service: Resource, spreadsheet_id: str, sheet_name: str) -> bool:
+    # Checks if any week exists in the sheet.
+    week = 1
+    while True:
+        if week_exists(service, spreadsheet_id, sheet_name, week):
+            return True
+        cell_range = f"{sheet_name}!{next_week_range(week)}"
+        result = (
+            service.spreadsheets()
+            .values()
+            .get(spreadsheetId=spreadsheet_id, range=cell_range, majorDimension="ROWS")
+            .execute()
+        )
+        values = result.get("values", [])
+        if not values:
+            break
+        week += 1
+    return False
+
+
+def any_data_exists(service: Resource, spreadsheet_id: str, sheet_name: str) -> bool:
+    # Checks if any non-week data exists in the sheet.
+    letters = ["B", "G", "L", "Q"]
+    section = 1
+    while True:
+        cell_range = f"{sheet_name}!B{section + 1}:Q{section + 2}"
+        result = (
+            service.spreadsheets()
+            .values()
+            .get(spreadsheetId=spreadsheet_id, range=cell_range, majorDimension="ROWS")
+            .execute()
+        )
+        values = result.get("values", [])
+        if not values:
+            break
+        names_row = values[0] if len(values) > 0 else []
+        details_row = values[1] if len(values) > 1 else []
+        for index, letter in enumerate(letters):
+            start_index = index * 5
+            group_cells = [
+                (
+                    names_row[start_index]
+                    if len(names_row) > start_index and names_row[start_index] != ""
+                    else "Empty"
+                ),
+                (
+                    details_row[start_index]
+                    if len(details_row) > start_index
+                    and details_row[start_index] == "POKEMON"
+                    else "Empty"
+                ),
+                (
+                    details_row[start_index + 1]
+                    if len(details_row) > start_index + 1
+                    and details_row[start_index + 1] == "GAMES"
+                    else "Empty"
+                ),
+                (
+                    details_row[start_index + 2]
+                    if len(details_row) > start_index + 2
+                    and details_row[start_index + 2] == "KILLS"
+                    else "Empty"
+                ),
+                (
+                    details_row[start_index + 3]
+                    if len(details_row) > start_index + 3
+                    and details_row[start_index + 3] == "DEATHS"
+                    else "Empty"
+                ),
+            ]
+            if all(cell != "Empty" for cell in group_cells):
+                return True
+        section += 15
     return False
 
 
