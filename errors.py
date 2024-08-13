@@ -167,7 +167,7 @@ class NoDefault(Exception):
         )
 
 
-class NonWeekSheet(Exception):
+class WeekSheet(Exception):
     # Exception raised when there is a request to update a sheet with non-week data but it has data fitted for week.
     def __init__(self, sheet_title, sheet_name):
         super().__init__(
