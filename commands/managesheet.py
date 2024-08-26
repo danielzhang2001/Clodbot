@@ -120,6 +120,7 @@ class ManageSheet:
     ) -> str:
         # Deletes player section from the sheet.
         print("in delete player")
+        print(f"initial player name: {player_name}")
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
@@ -137,6 +138,7 @@ class ManageSheet:
         sheet_link = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
         values = get_values(service, spreadsheet_id, sheet_name)
         players = [player[0] for player in get_sheet_players(values)]
+        print("before the if")
         if player_name.lower() in [player.lower() for player in players]:
             player_name = next(
                 (name for name in players if name.lower() == player_name.lower()),
