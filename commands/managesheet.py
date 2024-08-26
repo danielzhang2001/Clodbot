@@ -140,10 +140,12 @@ class ManageSheet:
         players = [player[0] for player in get_sheet_players(values)]
         print("before the if")
         if player_name.lower() in [player.lower() for player in players]:
+            print("in the if!")
             player_name = next(
                 (name for name in players if name.lower() == player_name.lower()),
                 player_name,
             )
+            print(f"new player name is: {player_name}")
         else:
             raise NameDoesNotExist(player_name, sheet_title, sheet_name)
         print(f"player name: {player_name}")
