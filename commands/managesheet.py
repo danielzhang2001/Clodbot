@@ -119,6 +119,7 @@ class ManageSheet:
         player_name: str,
     ) -> str:
         # Deletes player section from the sheet.
+        print("in delete player")
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
@@ -143,6 +144,7 @@ class ManageSheet:
             )
         else:
             raise NameDoesNotExist(player_name, sheet_title, sheet_name)
+        print(f"player name: {player_name}")
         section_range = f"{sheet_name}!{get_section_range(values, player_name)}"
         delete_data(service, spreadsheet_id, sheet_id, section_range)
         return f"**{player_name}** removed at [**{sheet_title}**]({sheet_link}) using **{sheet_name}**."
