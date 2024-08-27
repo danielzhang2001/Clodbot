@@ -148,6 +148,7 @@ class ManageSheet:
             )
             print(f"new player name is: {player_name}")
         else:
+            print("in else!")
             raise NameDoesNotExist(player_name, sheet_title, sheet_name)
         print(f"player name: {player_name}")
         section_range = f"{sheet_name}!{get_section_range(values, player_name)}"
