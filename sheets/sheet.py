@@ -1128,7 +1128,7 @@ def get_sheet_players(values: List[List[str]]) -> List[List[str]]:
     players = []
     if not values or len(values) < 3:
         return players
-    for i in range(0, len(values), 15):
+    for i in range(1, len(values), 15):
         header_row = values[i]
         for index, name in enumerate(header_row):
             if name.strip() == "":
