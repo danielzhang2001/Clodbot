@@ -1123,6 +1123,8 @@ def get_bandings(
 
 def get_sheet_players(values: List[List[str]]) -> List[List[str]]:
     # Returns a list of all the player names and their total kills/deaths.
+    print("getting sheet players!")
+    print(f"values: {values}")
     players = []
     if not values or len(values) < 3:
         return players
