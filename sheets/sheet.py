@@ -1133,6 +1133,8 @@ def get_sheet_players(values: List[List[str]]) -> List[List[str]]:
         for index, name in enumerate(header_row):
             if name.strip() == "":
                 continue
+            if i + 1 >= len(values) or values[i + 1][index].strip() == "":
+                continue
             total_kills = 0
             total_deaths = 0
             for j in range(i + 2, min(i + 14, len(values))):
