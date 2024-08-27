@@ -139,6 +139,7 @@ class ManageSheet:
         values = get_values(service, spreadsheet_id, sheet_name)
         players = [player[0] for player in get_sheet_players(values)]
         print("before the if")
+        print(f"players: {players}")
         if player_name.lower() in [player.lower() for player in players]:
             print("in the if!")
             player_name = next(
