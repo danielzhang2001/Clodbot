@@ -1199,10 +1199,10 @@ def get_section_range(values: List[List[str]], player_name: str) -> str:
     # Searches for the name and returns the range of the entire section for that name.
     for row_index, row in enumerate(values):
         if player_name in row:
-            name_index = row.index(player_name) + 1
+            name_index = row.index(player_name)
             start_col = chr(65 + name_index)
             end_col = chr(ord(start_col) + 3)
-            start_row = row_index + 2
+            start_row = row_index + 1
             end_row = start_row + 13
             return f"{start_col}{start_row}:{end_col}{end_row}"
     return None
