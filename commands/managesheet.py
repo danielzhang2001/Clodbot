@@ -150,6 +150,7 @@ class ManageSheet:
             raise NameDoesNotExist(player_name, sheet_title, sheet_name)
         print(f"player name: {player_name}")
         section_range = f"{sheet_name}!{get_section_range(values, player_name)}"
+        print(f"section range: {section_range}")
         delete_data(service, spreadsheet_id, sheet_id, section_range)
         return f"**{player_name}** removed at [**{sheet_title}**]({sheet_link}) using **{sheet_name}**."
 
