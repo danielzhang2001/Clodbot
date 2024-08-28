@@ -130,8 +130,9 @@ class ManageSheet:
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
         for sheet in sheets:
-            if sheet["properties"]["title"] == sheet_name:
+            if sheet["properties"]["title"].lower() == sheet_name.lower():
                 sheet_id = sheet["properties"]["sheetId"]
+                sheet_name = sheet["properties"]["title"]
                 break
         if sheet_id is None:
             raise NameDoesNotExist(player_name, sheet_title, sheet_name)
