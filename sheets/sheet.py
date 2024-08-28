@@ -1150,8 +1150,8 @@ def get_sheet_players(values: List[List[str]]) -> List[List[str]]:
 def get_sheet_pokemon(values: List[List[str]]) -> List[List[str]]:
     # Returns a list of all the Pokemon names with their player and their total kills/deaths.
     pokemon = []
-    for i in range(2, len(values), 15):
-        for j in range(i + 1, min(i + 12, len(values))):
+    for i in range(3, len(values), 15):
+        for j in range(i, min(i + 12, len(values))):
             row = values[j]
             for idx, value in enumerate(row):
                 if value.strip() and not (
