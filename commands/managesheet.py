@@ -43,8 +43,9 @@ class ManageSheet:
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
         for sheet in sheets:
-            if sheet["properties"]["title"] == sheet_name:
+            if sheet["properties"]["title"].lower() == sheet_name.lower():
                 sheet_id = sheet["properties"]["sheetId"]
+                sheet_name = sheet["properties"]["title"]
                 break
         if sheet_id is None:
             body = {"requests": [{"addSheet": {"properties": {"title": sheet_name}}}]}
@@ -119,8 +120,6 @@ class ManageSheet:
         player_name: str,
     ) -> str:
         # Deletes player section from the sheet.
-        print("in delete player")
-        print(f"initial player name: {player_name}")
         service = build("sheets", "v4", credentials=creds)
         spreadsheet_id = sheet_link.split("/d/")[1].split("/")[0]
         sheet_metadata = (
