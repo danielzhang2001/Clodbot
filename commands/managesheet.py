@@ -138,21 +138,14 @@ class ManageSheet:
         sheet_link = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit#gid={sheet_id}"
         values = get_values(service, spreadsheet_id, sheet_name)
         players = [player[0] for player in get_sheet_players(values)]
-        print("before the if")
-        print(f"players: {players}")
         if player_name.lower() in [player.lower() for player in players]:
-            print("in the if!")
             player_name = next(
                 (name for name in players if name.lower() == player_name.lower()),
                 player_name,
             )
-            print(f"new player name is: {player_name}")
         else:
-            print("in else!")
             raise NameDoesNotExist(player_name, sheet_title, sheet_name)
-        print(f"player name: {player_name}")
         section_range = f"{sheet_name}!{get_section_range(values, player_name)}"
-        print(f"section range: {section_range}")
         delete_data(service, spreadsheet_id, sheet_id, section_range)
         return f"**{player_name}** removed at [**{sheet_title}**]({sheet_link}) using **{sheet_name}**."
 
@@ -176,8 +169,9 @@ class ManageSheet:
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
         for sheet in sheets:
-            if sheet["properties"]["title"] == sheet_name:
+            if sheet["properties"]["title"].lower() == sheet_name.lower():
                 sheet_id = sheet["properties"]["sheetId"]
+                sheet_name = sheet["properties"]["title"]
                 break
         if sheet_id is None:
             if data.lower() == "players":
