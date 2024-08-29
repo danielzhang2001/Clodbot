@@ -146,20 +146,19 @@ def process_poison(
     poison_player = None
     toxic_found = False
     for action in actions:
-        print(f"Processing action: {action}")
-
-        # Check for Toxic Chain ability
         regex_pattern = (
             r"\|-status\|p(\d)a: "
             + re.escape(fainted_pokemon)
             + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)",
             action,
         )
+        print(f"Action: {repr(action)}")
         print(f"Regex pattern: {regex_pattern}")
         if re.search(
             r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: " + re.escape(fainted_pokemon),
             action,
         ):
+            print("Toxic!")
             if "|-status|" in actions[actions.index(action) - 1]:
                 poison_match = re.search(
                     r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: ([^\|\n]+)", action
@@ -180,6 +179,7 @@ def process_poison(
             + re.escape(fainted_pokemon),
             action,
         ):
+            print("Malignant!")
             if (
                 "-status" in actions[actions.index(action) - 2]
                 and "tox" in actions[actions.index(action) - 2]
@@ -197,6 +197,7 @@ def process_poison(
                         toxic_found = True
                         break
         elif re.search(r"\|p(\d)a: ([^\|\n]+)\|Toxic Spikes\|", action):
+            print("Toxic Spikes!")
             tspikes_match = re.search(r"\|p(\d)a: ([^\|\n]+)\|Toxic Spikes\|", action)
             if tspikes_match:
                 tspikes_player, tspikes_pokemon = tspikes_match.groups()
