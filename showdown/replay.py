@@ -150,9 +150,10 @@ def process_poison(
 
         # Check for Toxic Chain ability
         regex_pattern = (
-            r"\|p(\d)a: "
+            r"\|-status\|p(\d)a: "
             + re.escape(fainted_pokemon)
-            + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)"
+            + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)",
+            action,
         )
         print(f"Regex pattern: {regex_pattern}")
         print(f"action: {action}")
