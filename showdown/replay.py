@@ -207,14 +207,14 @@ def process_poison(
         elif re.search(
             r"\|-status\|p(\d)a: "
             + re.escape(fainted_pokemon)
-            + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)",
+            + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)a: ([^\|\n]+)",
             action,
         ):
             print("in chain!")
             chain_match = re.search(
                 r"\|-status\|p(\d)a: "
                 + re.escape(fainted_pokemon)
-                + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)",
+                + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)a: ([^\|\n]+)",
                 action,
             )
             if chain_match:
