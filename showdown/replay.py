@@ -140,6 +140,7 @@ def process_poison(
     stats: Dict[str, Dict[str, Dict[str, int]]],
 ):
     # Processes kills from toxic or poison.
+    print("processing poison!")
     poison_starter = None
     poison_player = None
     toxic_found = False
@@ -198,6 +199,7 @@ def process_poison(
             + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)",
             action,
         ):
+            print("in chain!")
             chain_match = re.search(
                 r"\|p(\d)a: "
                 + re.escape(fainted_pokemon)
