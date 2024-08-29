@@ -141,10 +141,20 @@ def process_poison(
 ):
     # Processes kills from toxic or poison.
     print("processing poison!")
+    print(f"fainted pokemon: {fainted_pokemon}")
     poison_starter = None
     poison_player = None
     toxic_found = False
     for action in actions:
+        print(f"Processing action: {action}")
+
+        # Check for Toxic Chain ability
+        regex_pattern = (
+            r"\|p(\d)a: "
+            + re.escape(fainted_pokemon)
+            + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)"
+        )
+        print(f"Regex pattern: {regex_pattern}")
         if re.search(
             r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: " + re.escape(fainted_pokemon),
             action,
