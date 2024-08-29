@@ -192,6 +192,24 @@ def process_poison(
                 poison_player = f"p{tspikes_player}"
                 toxic_found = True
                 break
+        elif re.search(
+            r"\|p(\d)a: "
+            + re.escape(fainted_pokemon)
+            + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)",
+            action,
+        ):
+            chain_match = re.search(
+                r"\|p(\d)a: "
+                + re.escape(fainted_pokemon)
+                + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)",
+                action,
+            )
+            if chain_match:
+                _, poison_player, poison_starter = chain_match.groups()
+                poison_starter = poison_starter.strip()
+                poison_player = f"p{poison_player}"
+                toxic_found = True
+                break
     if toxic_found and poison_starter:
         for pokemon, data in stats[poison_player].items():
             if data["nickname"] == poison_starter:
