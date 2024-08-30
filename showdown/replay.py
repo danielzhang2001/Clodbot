@@ -140,24 +140,14 @@ def process_poison(
     stats: Dict[str, Dict[str, Dict[str, int]]],
 ):
     # Processes kills from toxic or poison.
-    print("processing poison!")
-    print(f"fainted pokemon: {fainted_pokemon}")
     poison_starter = None
     poison_player = None
     toxic_found = False
     for action in actions:
-        regex_pattern = (
-            r"\|-status\|p(\d)a: "
-            + re.escape(fainted_pokemon)
-            + r"\|tox\|[from] ability: Toxic Chain\|[of] p(\d)a: ([^\|\n]+)"
-        )
-        print(f"Action (repr): {repr(action)}")
-        print(f"Regex pattern (repr): {repr(regex_pattern)}")
         if re.search(
             r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: " + re.escape(fainted_pokemon),
             action,
         ):
-            print("Toxic!")
             if "|-status|" in actions[actions.index(action) - 1]:
                 poison_match = re.search(
                     r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: ([^\|\n]+)", action
@@ -178,7 +168,6 @@ def process_poison(
             + re.escape(fainted_pokemon),
             action,
         ):
-            print("Malignant!")
             if (
                 "-status" in actions[actions.index(action) - 2]
                 and "tox" in actions[actions.index(action) - 2]
@@ -196,7 +185,6 @@ def process_poison(
                         toxic_found = True
                         break
         elif re.search(r"\|p(\d)a: ([^\|\n]+)\|Toxic Spikes\|", action):
-            print("Toxic Spikes!")
             tspikes_match = re.search(r"\|p(\d)a: ([^\|\n]+)\|Toxic Spikes\|", action)
             if tspikes_match:
                 tspikes_player, tspikes_pokemon = tspikes_match.groups()
@@ -210,7 +198,6 @@ def process_poison(
             + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)a: ([^\|\n]+)",
             action,
         ):
-            print("in chain!")
             chain_match = re.search(
                 r"\|-status\|p(\d)a: "
                 + re.escape(fainted_pokemon)
@@ -226,6 +213,40 @@ def process_poison(
     if toxic_found and poison_starter:
         for pokemon, data in stats[poison_player].items():
             if data["nickname"] == poison_starter:
+                data["kills"] += 1
+                break
+
+
+def process_burn(
+    fainted_pokemon: str,
+    actions: List[str],
+    stats: Dict[str, Dict[str, Dict[str, int]]],
+):
+    # Processes kills from burn.
+    burn_starter = None
+    burn_player = None
+    burn_found = False
+    for action in actions:
+        if re.search(
+            r"\|p(\d)a: ([^\|\n]+)\|Will-O-Wisp\|p(\d)a: " + re.escape(fainted_pokemon),
+            action,
+        ):
+            if "|-status|" in actions[actions.index(action) - 1]:
+                burn_match = re.search(
+                    r"\|p(\d)a: ([^\|\n]+)\|Will-O-Wisp\|p(\d)a: ([^\|\n]+)", action
+                )
+                if burn_match:
+                    burn_player, burn_pokemon, _, burned_pokemon = burn_match.groups()
+                    if burned_pokemon.strip() == fainted_pokemon:
+                        burn_starter = burn_pokemon.strip()
+                        burn_player = f"p{burn_player}"
+                        burn_found = True
+                        break
+            elif "|-fail|" in actions[actions.index(action) + 1]:
+                continue
+    if burn_found and burn_starter:
+        for pokemon, data in stats[burn_player].items():
+            if data["nickname"] == burn_starter:
                 data["kills"] += 1
                 break
 
@@ -336,6 +357,7 @@ def process_stats(json_data: Dict[str, List[str]]) -> None:
     faint_regex = re.compile(r"\|faint\|p(\d)a: ([^\|\n]+)")
     sandstorm_regex = re.compile(r"\[from\] Sandstorm\n\|faint\|")
     poison_regex = re.compile(r"\[from\] psn\n\|faint\|")
+    burn_regex = re.compile(r"\[from\] brn\n\|faint\|")
     spikes_regex = re.compile(r"\[from\] Spikes\n\|faint\|")
     rocks_regex = re.compile(r"\[from\] Stealth Rock\n\|faint\|")
     seed_regex = re.compile(r"\[from\] Leech Seed\|\[of\]")
@@ -354,6 +376,8 @@ def process_stats(json_data: Dict[str, List[str]]) -> None:
             process_sandstorm(actions, stats)
         elif poison_regex.search(segment):
             process_poison(fainted_pokemon, actions, stats)
+        elif burn_regex.search(segment):
+            process_burn(fainted_pokemon, actions, stats)
         elif spikes_regex.search(segment):
             process_spikes(fainted_pokemon, actions, stats)
         elif rocks_regex.search(segment):
