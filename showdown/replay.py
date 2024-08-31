@@ -204,6 +204,7 @@ def process_poison(
             r"\|p(\d)a: ([^\|\n]+)\|Sludge Bomb\|p(\d)a: " + re.escape(fainted_pokemon),
             action,
         ):
+            print("in sludge bomb!")
             if (
                 "-status" in actions[actions.index(action) + 1]
                 and "psn" in actions[actions.index(action) + 1]
