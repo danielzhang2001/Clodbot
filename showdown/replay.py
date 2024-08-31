@@ -206,8 +206,8 @@ def process_poison(
         ):
             print("in sludge bomb!")
             if (
-                "-status" in actions[actions.index(action) + 1]
-                and "psn" in actions[actions.index(action) + 1]
+                "-status" in actions[actions.index(action) - 2]
+                and "psn" in actions[actions.index(action) - 2]
             ):
                 print("sludge inflicted poison!")
                 sludge_match = re.search(
