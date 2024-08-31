@@ -209,6 +209,7 @@ def process_poison(
                 "-status" in actions[actions.index(action) + 1]
                 and "psn" in actions[actions.index(action) + 1]
             ):
+                print("sludge inflicted poison!")
                 sludge_match = re.search(
                     r"\|p(\d)a: ([^\|\n]+)\|Sludge Bomb\|p(\d)a: ([^\|\n]+)", action
                 )
