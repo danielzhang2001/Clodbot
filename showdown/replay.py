@@ -179,7 +179,7 @@ def process_poison(
     # Processes kills from toxic or poison.
     poison_starter = None
     poison_player = None
-    toxic_found = False
+    poison_found = False
     for action in actions:
         if re.search(
             r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: " + re.escape(fainted_pokemon),
@@ -196,7 +196,7 @@ def process_poison(
                     if poisoned_pokemon.strip() == fainted_pokemon:
                         poison_starter = poison_pokemon.strip()
                         poison_player = f"p{poison_player}"
-                        toxic_found = True
+                        poison_found = True
                         break
             elif "|-fail|" in actions[actions.index(action) + 1]:
                 continue
@@ -218,7 +218,7 @@ def process_poison(
                     if target_pokemon.strip() == fainted_pokemon:
                         poison_starter = sludge_pokemon.strip()
                         poison_player = f"p{sludge_player}"
-                        toxic_found = True
+                        poison_found = True
                         break
         elif re.search(
             r"\|p(\d)a: ([^\|\n]+)\|Sludge Wave\|p(\d)a: " + re.escape(fainted_pokemon),
@@ -238,7 +238,7 @@ def process_poison(
                     if target_pokemon.strip() == fainted_pokemon:
                         poison_starter = sludge_pokemon.strip()
                         poison_player = f"p{sludge_player}"
-                        toxic_found = True
+                        poison_found = True
                         break
         elif re.search(
             r"\|p(\d)a: ([^\|\n]+)\|Malignant Chain\|p(\d)a: "
@@ -259,7 +259,7 @@ def process_poison(
                     if target_pokemon.strip() == fainted_pokemon:
                         poison_starter = malignant_pokemon.strip()
                         poison_player = f"p{malignant_player}"
-                        toxic_found = True
+                        poison_found = True
                         break
         elif re.search(r"\|p(\d)a: ([^\|\n]+)\|Toxic Spikes\|", action):
             tspikes_match = re.search(r"\|p(\d)a: ([^\|\n]+)\|Toxic Spikes\|", action)
@@ -267,7 +267,25 @@ def process_poison(
                 tspikes_player, tspikes_pokemon = tspikes_match.groups()
                 poison_starter = tspikes_pokemon.strip()
                 poison_player = f"p{tspikes_player}"
-                toxic_found = True
+                poison_found = True
+                break
+        elif re.search(
+            r"\|-status\|p(\d)a: "
+            + re.escape(fainted_pokemon)
+            + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)a: ([^\|\n]+)",
+            action,
+        ):
+            point_match = re.search(
+                r"\|-status\|p(\d)a: "
+                + re.escape(fainted_pokemon)
+                + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)a: ([^\|\n]+)",
+                action,
+            )
+            if point_match:
+                _, poison_player, poison_starter = point_match.groups()
+                poison_starter = poison_starter.strip()
+                poison_player = f"p{poison_player}"
+                poison_found = True
                 break
         elif re.search(
             r"\|-status\|p(\d)a: "
@@ -285,9 +303,26 @@ def process_poison(
                 _, poison_player, poison_starter = chain_match.groups()
                 poison_starter = poison_starter.strip()
                 poison_player = f"p{poison_player}"
-                toxic_found = True
+                poison_found = True
                 break
-    if toxic_found and poison_starter:
+        elif re.search(r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize", action):
+            if (
+                "-status" in actions[actions.index(action) - 2]
+                and "tox" in actions[actions.index(action) - 2]
+            ):
+                sync_match = re.search(
+                    r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n\|-status\|p(\d)a: "
+                    + re.escape(fainted_pokemon)
+                    + r"\|tox",
+                    action,
+                )
+                if sync_match:
+                    sync_player, sync_pokemon, _ = sync_match.groups()
+                    poison_starter = sync_pokemon.strip()
+                    poison_player = f"p{sync_player}"
+                    toxic_found = True
+                    break
+    if poison_found and poison_starter:
         for pokemon, data in stats[poison_player].items():
             if data["nickname"] == poison_starter:
                 data["kills"] += 1
@@ -336,6 +371,45 @@ def process_burn(
                     lava_player, lava_pokemon, _, target_pokemon = lava_match.groups()
                     if target_pokemon.strip() == fainted_pokemon:
                         burn_starter = lava_pokemon.strip()
+                        burn_player = f"p{burn_player}"
+                        burn_found = True
+                        break
+        elif re.search(
+            r"\|p(\d)a: ([^\|\n]+)\|Flamethrower\|p(\d)a: "
+            + re.escape(fainted_pokemon),
+            action,
+        ):
+            if (
+                "-status" in actions[actions.index(action) - 2]
+                and "brn" in actions[actions.index(action) - 2]
+            ):
+                flamethrower_match = re.search(
+                    r"\|p(\d)a: ([^\|\n]+)\|Flamethrower\|p(\d)a: ([^\|\n]+)", action
+                )
+                if flamethrower_match:
+                    flamethrower_player, flamethrower_pokemon, _, target_pokemon = (
+                        flamethrower_match.groups()
+                    )
+                    if target_pokemon.strip() == fainted_pokemon:
+                        burn_starter = flamethrower_pokemon.strip()
+                        burn_player = f"p{burn_player}"
+                        burn_found = True
+                        break
+        elif re.search(
+            r"\|p(\d)a: ([^\|\n]+)\|Fire Blast\|p(\d)a: " + re.escape(fainted_pokemon),
+            action,
+        ):
+            if (
+                "-status" in actions[actions.index(action) - 2]
+                and "brn" in actions[actions.index(action) - 2]
+            ):
+                fire_match = re.search(
+                    r"\|p(\d)a: ([^\|\n]+)\|Fire Blast\|p(\d)a: ([^\|\n]+)", action
+                )
+                if fire_match:
+                    fire_player, fire_pokemon, _, target_pokemon = fire_match.groups()
+                    if target_pokemon.strip() == fainted_pokemon:
+                        burn_starter = fire_pokemon.strip()
                         burn_player = f"p{burn_player}"
                         burn_found = True
                         break
