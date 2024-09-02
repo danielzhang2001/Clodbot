@@ -319,6 +319,7 @@ def process_poison(
                     r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: ([^\|\n]+)",
                     action,
                 )
+                print(f"action: {action}")
                 if sync_match:
                     sync_player, sync_pokemon, _, target_pokemon = sync_match.groups()
                     if target_pokemon.strip() == fainted_pokemon:
