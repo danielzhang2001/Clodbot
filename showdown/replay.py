@@ -307,7 +307,7 @@ def process_poison(
                 break
         elif re.search(r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize", action):
             print("in synchronize!")
-            print(f"actions index: {actions[actions.index(action) - 2]}")
+            print(f"actions index: {actions[actions.index(action) + 1]}")
             if (
                 "-status" in actions[actions.index(action) - 2]
                 and "tox" in actions[actions.index(action) - 2]
