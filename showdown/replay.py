@@ -323,6 +323,7 @@ def process_poison(
                     sync_player, sync_pokemon, _, target_pokemon = sync_match.groups()
                     if target_pokemon.strip() == fainted_pokemon:
                         print("sync matched!")
+                        print(f"sync match groups: {sync_match.groups()}")
                         print(f"sync player is {sync_player}")
                         print(f"sync pokemon is {sync_pokemon}")
                         poison_starter = sync_pokemon.strip()
