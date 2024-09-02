@@ -315,11 +315,12 @@ def process_poison(
 
             # Check the previous action to verify status condition
             if "-status" in action and ("tox" in action or "psn" in action):
+                full_action = actions[actions.index(action) - 1] + "\n" + action
                 sync_match = re.search(
                     r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: ([^\|\n]+)",
-                    action,
+                    full_action,
                 )
-                print(f"action: {action}")
+                print(f"full action: {full_action}")
                 if sync_match:
                     sync_player, sync_pokemon, _, target_pokemon = sync_match.groups()
                     if target_pokemon.strip() == fainted_pokemon:
