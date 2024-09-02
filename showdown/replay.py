@@ -314,7 +314,7 @@ def process_poison(
             print("in synchronize!")
 
             # Check the previous action to verify status condition
-            if "-status" in actions and ("tox" in actions or "psn" in actions):
+            if "-status" in action and ("tox" in action or "psn" in action):
                 sync_match = re.search(
                     r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: ([^\|\n]+)",
                     action,
