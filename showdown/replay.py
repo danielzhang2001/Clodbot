@@ -320,7 +320,10 @@ def process_poison(
                     action,
                 )
                 if sync_match:
+                    print("sync matched!")
                     sync_player, sync_pokemon, _ = sync_match.groups()
+                    print(f"sync player is {sync_player}")
+                    print(f"sync pokemon is {sync_pokemon}")
                     poison_starter = sync_pokemon.strip()
                     poison_player = f"p{sync_player}"
                     poison_found = True
