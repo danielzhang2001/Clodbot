@@ -308,17 +308,18 @@ def process_poison(
         elif re.search(r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize", action):
             print("in synchronize!")
             print(f"actions index: {actions[actions.index(action) + 1]}")
-            if (
-                "-status" in actions[actions.index(action) + 1]
-                and "tox" in actions[actions.index(action) + 1]
+            if "-status" in actions[actions.index(action) + 1] and (
+                "tox" in actions[actions.index(action) + 1]
+                or "psn" in actions[actions.index(action) + 1]
             ):
                 print("status detected in synchronize!")
                 sync_match = re.search(
                     r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n\|-status\|p(\d)a: "
                     + re.escape(fainted_pokemon)
-                    + r"\|tox",
+                    + r"\|(tox|psn)",
                     action,
                 )
+                print(f"sync match is: {sync_match}")
                 if sync_match:
                     print("sync matched!")
                     sync_player, sync_pokemon, _ = sync_match.groups()
