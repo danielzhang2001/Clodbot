@@ -317,7 +317,7 @@ def process_poison(
             if "-status" in action and ("tox" in action or "psn" in action):
                 print("status detected in synchronize!")
                 sync_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\|-status\|p(\d)a: "
+                    r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: "
                     + re.escape(fainted_pokemon)
                     + r"\|(tox|psn)",
                     action,
