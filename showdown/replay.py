@@ -314,10 +314,7 @@ def process_poison(
             print("in synchronize!")
             print(f"action: {action}")
             print(f"actions index: {actions[actions.index(action) - 1]}")
-            if "-status" in actions[actions.index(action) + 1] and (
-                "tox" in actions[actions.index(action) + 1]
-                or "psn" in actions[actions.index(action) + 1]
-            ):
+            if "-status" in action and ("tox" in action or "psn" in action):
                 print("status detected in synchronize!")
                 sync_match = re.search(
                     r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\|-status\|p(\d)a: "
