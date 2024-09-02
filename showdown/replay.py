@@ -319,16 +319,16 @@ def process_poison(
                     r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: ([^\|\n]+)",
                     action,
                 )
-        if sync_match:
-            sync_player, sync_pokemon, _, target_pokemon = sync_match.groups()
-            if target_pokemon.strip() == fainted_pokemon:
-                print("sync matched!")
-                print(f"sync player is {sync_player}")
-                print(f"sync pokemon is {sync_pokemon}")
-                poison_starter = sync_pokemon.strip()
-                poison_player = f"p{sync_player}"
-                poison_found = True
-                break
+                if sync_match:
+                    sync_player, sync_pokemon, _, target_pokemon = sync_match.groups()
+                    if target_pokemon.strip() == fainted_pokemon:
+                        print("sync matched!")
+                        print(f"sync player is {sync_player}")
+                        print(f"sync pokemon is {sync_pokemon}")
+                        poison_starter = sync_pokemon.strip()
+                        poison_player = f"p{sync_player}"
+                        poison_found = True
+                        break
     if poison_found and poison_starter:
         for pokemon, data in stats[poison_player].items():
             if data["nickname"] == poison_starter:
