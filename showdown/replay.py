@@ -305,7 +305,12 @@ def process_poison(
                 poison_player = f"p{poison_player}"
                 poison_found = True
                 break
-        elif re.search(r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize", action):
+        elif re.search(
+            r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n\|-status\|p(\d)a: "
+            + re.escape(fainted_pokemon)
+            + r"\|(tox|psn)",
+            action,
+        ):
             print("in synchronize!")
             print(f"actions index: {actions[actions.index(action) + 1]}")
             if "-status" in actions[actions.index(action) + 1] and (
