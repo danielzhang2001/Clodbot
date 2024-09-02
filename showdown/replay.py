@@ -306,7 +306,7 @@ def process_poison(
                 poison_found = True
                 break
         elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: "
+            r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n\|-status\|p(\d)a: "
             + re.escape(fainted_pokemon)
             + r"\|(tox|psn)",
             action,
@@ -317,7 +317,7 @@ def process_poison(
             if "-status" in action and ("tox" in action or "psn" in action):
                 print("status detected in synchronize!")
                 sync_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: "
+                    r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n\|-status\|p(\d)a: "
                     + re.escape(fainted_pokemon)
                     + r"\|(tox|psn)",
                     action,
@@ -325,7 +325,7 @@ def process_poison(
                 print(f"sync match is: {sync_match}")
                 if sync_match:
                     print("sync matched!")
-                    sync_player, sync_pokemon, _ = sync_match.groups()
+                    sync_player, sync_pokemon, status = sync_match.groups()
                     print(f"sync player is {sync_player}")
                     print(f"sync pokemon is {sync_pokemon}")
                     poison_starter = sync_pokemon.strip()
