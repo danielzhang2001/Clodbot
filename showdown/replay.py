@@ -181,7 +181,6 @@ def process_poison(
     poison_player = None
     poison_found = False
     for action in actions:
-        print(f"action: {action}")
         if re.search(
             r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: " + re.escape(fainted_pokemon),
             action,
@@ -313,7 +312,8 @@ def process_poison(
             action,
         ):
             print("in synchronize!")
-            print(f"actions index: {actions[actions.index(action) + 1]}")
+            print(f"action: {action}")
+            print(f"actions index: {actions[actions.index(action) - 2]}")
             if "-status" in actions[actions.index(action) + 1] and (
                 "tox" in actions[actions.index(action) + 1]
                 or "psn" in actions[actions.index(action) + 1]
