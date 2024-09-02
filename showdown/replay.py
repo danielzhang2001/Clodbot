@@ -313,7 +313,7 @@ def process_poison(
         ):
             print("in synchronize!")
             print(f"action: {action}")
-            print(f"actions index: {actions[actions.index(action) - 2]}")
+            print(f"actions index: {actions[actions.index(action) - 1]}")
             if "-status" in actions[actions.index(action) + 1] and (
                 "tox" in actions[actions.index(action) + 1]
                 or "psn" in actions[actions.index(action) + 1]
