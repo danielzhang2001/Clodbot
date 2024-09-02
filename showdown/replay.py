@@ -323,7 +323,7 @@ def process_poison(
                     sync_player, sync_pokemon, _ = sync_match.groups()
                     poison_starter = sync_pokemon.strip()
                     poison_player = f"p{sync_player}"
-                    toxic_found = True
+                    poison_found = True
                     break
     if poison_found and poison_starter:
         for pokemon, data in stats[poison_player].items():
