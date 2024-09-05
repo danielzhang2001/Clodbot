@@ -135,17 +135,29 @@ def process_stats(json_data: Dict[str, List[str]]) -> None:
         actions = log[:event].split("\n")[::-1]
         segment = log[event - 80 : event + 30]
         if poison_regex.search(segment):
+            print("processing poison!")
             process_poison(fainted_pokemon, actions, stats)
+            print("done poison!")
         elif burn_regex.search(segment):
+            print("processing burn!")
             process_burn(fainted_pokemon, actions, stats)
+            print("done burn!")
         elif rocks_regex.search(segment):
+            print("processing rocks!")
             process_rocks(fainted_pokemon, actions, stats)
+            print("done rocks!")
         elif spikes_regex.search(segment):
-            process_spikes(fainted_pokemon, actions, stats)
+            print("processing spikes!")
+            process_spikes(fainted_player, fainted_pokemon, actions, stats)
+            print("done spikes!")
         elif seed_regex.search(segment):
+            print("processing seed!")
             process_seed(fainted_pokemon, actions, stats)
+            print("done seed!")
         elif sandstorm_regex.search(segment):
+            print("processing sandstorm!")
             process_sandstorm(actions, stats)
+            print("done sandstorm!")
         else:
             process_direct(fainted_player, fainted_pokemon, actions, stats)
 
@@ -238,6 +250,24 @@ def process_poison(
                     if target_pokemon.strip() == fainted_pokemon:
                         poison_starter = sludge_pokemon.strip()
                         poison_player = f"p{sludge_player}"
+                        poison_found = True
+                        break
+        elif re.search(
+            r"\|p(\d)a: ([^\|\n]+)\|Gunk Shot\|p(\d)a: " + re.escape(fainted_pokemon),
+            action,
+        ):
+            if (
+                "-status" in actions[actions.index(action) - 2]
+                and "psn" in actions[actions.index(action) - 2]
+            ):
+                gunk_match = re.search(
+                    r"\|p(\d)a: ([^\|\n]+)\|Gunk Shot\|p(\d)a: ([^\|\n]+)", action
+                )
+                if gunk_match:
+                    gunk_player, gunk_pokemon, _, target_pokemon = gunk_match.groups()
+                    if target_pokemon.strip() == fainted_pokemon:
+                        poison_starter = gunk_pokemon.strip()
+                        poison_player = f"p{gunk_player}"
                         poison_found = True
                         break
         elif re.search(
@@ -433,6 +463,25 @@ def process_burn(
                 burn_player = f"p{burn_player}"
                 burn_found = True
                 break
+        elif re.search(
+            r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: "
+            + re.escape(fainted_pokemon)
+            + r"\|(brn)",
+            action,
+        ):
+            if "-status" in action and "brn" in action:
+                full_action = actions[actions.index(action) + 1] + "\n" + action
+                sync_match = re.search(
+                    r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n\|-status\|p(\d)a: ([^\|\n]+)",
+                    full_action,
+                )
+                if sync_match:
+                    sync_player, sync_pokemon, _, target_pokemon = sync_match.groups()
+                    if target_pokemon.strip() == fainted_pokemon:
+                        burn_starter = sync_pokemon.strip()
+                        burn_player = f"p{sync_player}"
+                        burn_found = True
+                        break
     if burn_found and burn_starter:
         for pokemon, data in stats[burn_player].items():
             if data["nickname"] == burn_starter:
@@ -441,6 +490,7 @@ def process_burn(
 
 
 def process_spikes(
+    fainted_player: str,
     fainted_pokemon: str,
     actions: List[str],
     stats: Dict[str, Dict[str, Dict[str, int]]],
@@ -449,16 +499,18 @@ def process_spikes(
     spikes_starter = None
     spikes_player = None
     spikes_found = False
+    print(f"{actions}")
     for action in actions:
         spikes_match = re.search(
             r"\|p(\d)a: ([^\|\n]+)\|(Spikes|Ceaseless Edge)\|", action
         )
         if spikes_match:
-            spikes_player, spikes_pokemon = spikes_match.groups()
+            spikes_player, spikes_pokemon, *_ = spikes_match.groups()
             spikes_starter = spikes_pokemon.strip()
             spikes_player = f"p{spikes_player}"
-            spikes_found = True
-            break
+            if spikes_player != f"p{fainted_player}":
+                spikes_found = True
+                break
 
     if spikes_found and spikes_starter:
         for pokemon, data in stats[spikes_player].items():
