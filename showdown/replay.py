@@ -185,320 +185,105 @@ def process_poison(
     poison_starter = None
     poison_player = None
     poison_found = False
+
     for action in actions:
-        if re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if "|-status|" in actions[actions.index(action) - 1]:
-                poison_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Toxic\|p(\d)a: ([^\|\n]+)", action
-                )
-                if poison_match:
-                    poison_player, poison_pokemon, fainted_player, poisoned_pokemon = (
-                        poison_match.groups()
-                    )
-                    if poisoned_pokemon.strip() == fainted_pokemon:
-                        poison_starter = poison_pokemon.strip()
-                        poison_player = f"p{poison_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-            elif "|-fail|" in actions[actions.index(action) + 1]:
-                continue
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Sludge Bomb\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "psn" in actions[actions.index(action) - 2]
-            ):
-                sludge_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Sludge Bomb\|p(\d)a: ([^\|\n]+)", action
-                )
-                if sludge_match:
-                    sludge_player, sludge_pokemon, fainted_player, target_pokemon = (
-                        sludge_match.groups()
-                    )
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = sludge_pokemon.strip()
-                        poison_player = f"p{sludge_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Sludge Wave\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "psn" in actions[actions.index(action) - 2]
-            ):
-                sludge_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Sludge Wave\|p(\d)a: ([^\|\n]+)", action
-                )
-                if sludge_match:
-                    sludge_player, sludge_pokemon, fainted_player, target_pokemon = (
-                        sludge_match.groups()
-                    )
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = sludge_pokemon.strip()
-                        poison_player = f"p{sludge_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Gunk Shot\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "psn" in actions[actions.index(action) - 2]
-            ):
-                gunk_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Gunk Shot\|p(\d)a: ([^\|\n]+)", action
-                )
-                if gunk_match:
-                    gunk_player, gunk_pokemon, fainted_player, target_pokemon = gunk_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = gunk_pokemon.strip()
-                        poison_player = f"p{gunk_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Poison Fang\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "psn" in actions[actions.index(action) - 2]
-            ):
-                fang_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Poison Fang\|p(\d)a: ([^\|\n]+)", action
-                )
-                if fang_match:
-                    fang_player, fang_pokemon, fainted_player, target_pokemon = fang_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = fang_pokemon.strip()
-                        poison_player = f"p{fang_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Fling\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and ("tox" in actions[actions.index(action) - 2] or "psn" in actions[actions.index(action) - 2])
-                ):
-                fling_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Fling\|p(\d)a: ([^\|\n]+)", action
-                )
-                if fling_match:
-                    fling_player, fling_pokemon, fainted_player, target_pokemon = fling_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = fling_pokemon.strip()
-                        poison_player = f"p{fling_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Cross Poison\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "psn" in actions[actions.index(action) - 2]
-            ):
-                cross_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Cross Poison\|p(\d)a: ([^\|\n]+)", action
-                )
-                if cross_match:
-                    cross_player, cross_pokemon, fainted_player, target_pokemon = cross_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = cross_pokemon.strip()
-                        poison_player = f"p{cross_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Barb Barrage\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "psn" in actions[actions.index(action) - 2]
-            ):
-                barb_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Barb Barrage\\|p(\d)a: ([^\|\n]+)", action
-                )
-                if barb_match:
-                    barb_player, barb_pokemon, fainted_player, target_pokemon = barb_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = barb_pokemon.strip()
-                        poison_player = f"p{barb_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Malignant Chain\|p(\d)a: "
-            + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "tox" in actions[actions.index(action) - 2]
-            ):
-                malignant_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Malignant Chain\|p(\d)a: ([^\|\n]+)", action
-                )
-                if malignant_match:
-                    malignant_player, malignant_pokemon, fainted_player, target_pokemon = (
-                        malignant_match.groups()
-                    )
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = malignant_pokemon.strip()
-                        poison_player = f"p{malignant_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Mortal Spin\|p(\d)a: "
-            + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "psn" in actions[actions.index(action) - 2]
-            ):
-                mortal_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Mortal Spin\|p(\d)a: ([^\|\n]+)", action
-                )
-                if mortal_match:
-                    mortal_player, mortal_pokemon, fainted_player, target_pokemon = (
-                        mortal_match.groups()
-                    )
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = mortal_pokemon.strip()
-                        poison_player = f"p{mortal_player}"
-                        if poison_player != f"p{mortal_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Dire Claw\|p(\d)a: "
-            + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "tox" in actions[actions.index(action) - 2]
-            ):
-                dire_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Dire Claw\|p(\d)a: ([^\|\n]+)", action
-                )
-                if dire_match:
-                    dire_player, dire_pokemon, fainted_player, target_pokemon = (
-                        dire_match.groups()
-                    )
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = dire_pokemon.strip()
-                        poison_player = f"p{dire_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|move: Protect\n|-status\|p(\d)a: " + re.escape(fainted_pokemon) + r"\|psn",
-            action,
-        ):
-            full_action = actions[actions.index(action) + 1] + "\n" + action
-            baneful_match = re.search(
-                r"\|p(\d)a: ([^\|\n]+)\|move: Protect\n\|-status\|p(\d)a: ([^\|\n]+)",
-                full_action,
-            )
-            if baneful_match:
-                baneful_player, baneful_pokemon, fainted_player, target_pokemon = baneful_match.groups()
-                if target_pokemon.strip() == fainted_pokemon:
-                    poison_starter = baneful_pokemon.strip()
-                    poison_player = f"p{baneful_player}"
-                    if poison_player != f"p{fainted_player}":
-                        poison_found = True
-                        break
-        elif re.search(r"\|p(\d)a: ([^\|\n]+)\|Toxic Spikes\|", action):
-            tspikes_match = re.search(r"\|p(\d)a: ([^\|\n]+)\|Toxic Spikes\|", action)
-            if tspikes_match:
-                tspikes_player, tspikes_pokemon = tspikes_match.groups()
-                poison_starter = tspikes_pokemon.strip()
-                poison_player = f"p{tspikes_player}"
-                if poison_player != f"p{fainted_player}":
-                    poison_found = True
-                    break
-        elif re.search(
-            r"\|-status\|p(\d)a: "
-            + re.escape(fainted_pokemon)
-            + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)a: ([^\|\n]+)",
-            action,
-        ):
-            point_match = re.search(
-                r"\|-status\|p(\d)a: "
-                + re.escape(fainted_pokemon)
-                + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)a: ([^\|\n]+)",
-                action,
-            )
-            if point_match:
-                _, poison_player, poison_starter = point_match.groups()
-                poison_starter = poison_starter.strip()
-                poison_player = f"p{poison_player}"
-                if poison_player != f"p{fainted_player}":
-                    poison_found = True
-                    break
-        elif re.search(
-            r"\|-status\|p(\d)a: "
-            + re.escape(fainted_pokemon)
-            + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)a: ([^\|\n]+)",
-            action,
-        ):
-            chain_match = re.search(
+        for toxic_move in ["Toxic", "Malignant Chain", "Toxic Spikes", "Toxic Chain"]:
+            if re.search(rf"\|p(\d)a: ([^\|\n]+)\|{toxic_move}\|p(\d)a: " + re.escape(fainted_pokemon), action):
+                if "-status" in actions[actions.index(action) - 1] and "tox" in actions[actions.index(action) - 1]:
+                    poison_match = re.search(rf"\|p(\d)a: ([^\|\n]+)\|{toxic_move}\|p(\d)a: ([^\|\n]+)", action)
+                    if poison_match:
+                        poison_player, poison_pokemon, _, poisoned_pokemon = poison_match.groups()
+                        if poisoned_pokemon.strip() == fainted_pokemon:
+                            poison_starter = poison_pokemon.strip()
+                            poison_player = f"p{poison_player}"
+                            if poison_player != f"p{fainted_player}":
+                                poison_found = True
+                                break
+            elif re.search(
                 r"\|-status\|p(\d)a: "
                 + re.escape(fainted_pokemon)
                 + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)a: ([^\|\n]+)",
                 action,
-            )
-            if chain_match:
-                _, poison_player, poison_starter = chain_match.groups()
-                poison_starter = poison_starter.strip()
-                poison_player = f"p{poison_player}"
-                if poison_player != f"p{fainted_player}":
-                    poison_found = True
-                    break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: "
-            + re.escape(fainted_pokemon)
-            + r"\|(tox|psn)",
-            action,
-        ):
-            if "-status" in action and ("tox" in action or "psn" in action):
-                full_action = actions[actions.index(action) + 1] + "\n" + action
-                sync_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n\|-status\|p(\d)a: ([^\|\n]+)",
-                    full_action,
+            ):
+                chain_match = re.search(
+                    r"\|-status\|p(\d)a: "
+                    + re.escape(fainted_pokemon)
+                    + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)a: ([^\|\n]+)",
+                    action,
                 )
-                if sync_match:
-                    sync_player, sync_pokemon, _, target_pokemon = sync_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        poison_starter = sync_pokemon.strip()
-                        poison_player = f"p{sync_player}"
-                        if poison_player != f"p{fainted_player}":
-                            poison_found = True
-                            break
+                if chain_match:
+                    _, poison_player, poison_starter = chain_match.groups()
+                    poison_starter = poison_starter.strip()
+                    poison_player = f"p{poison_player}"
+                    if poison_player != f"p{fainted_player}":
+                        poison_found = True
+                        break
+
+        for poison_move in [
+            "Sludge", "Sludge Bomb", "Sludge Wave", "Gunk Shot", "Smog", "Poison Fang",
+            "Poison Jab", "Poison Sting", "Poison Tail", "Poison Gas", "Poison Powder",
+            "Fling", "Cross Poison", "Toxic Thread", "Twineedle", "Barb Barrage",
+            "Shell Side Arm", "Mortal Spin", "Dire Claw", "Secret Power",
+            "G-Max Befuddle", "G-Max Malodor", "G-Max Stun Shock", "Poison Point"
+        ]:
+            pattern = rf"\|p(\d)a: ([^\|\n]+)\|{poison_move}\|p(\d)a: " + re.escape(fainted_pokemon)
+            if re.search(pattern, action):
+                prev_action = actions[actions.index(action) - 2]
+                if "-status" in prev_action and "psn" in prev_action:
+                    match = re.search(rf"\|p(\d)a: ([^\|\n]+)\|{poison_move}\|p(\d)a: ([^\|\n]+)", action)
+                    if match:
+                        attacker_player, attacker_pokemon, target_player, target_pokemon = match.groups()
+                        if target_pokemon.strip() == fainted_pokemon:
+                            poison_starter = attacker_pokemon.strip()
+                            poison_player = f"p{attacker_player}"
+                            if poison_player != f"p{target_player}":
+                                poison_found = True
+                                break
+            elif re.search(
+                r"\|-status\|p(\d)a: "
+                + re.escape(fainted_pokemon)
+                + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)a: ([^\|\n]+)",
+                action,
+            ):
+                point_match = re.search(
+                    r"\|-status\|p(\d)a: "
+                    + re.escape(fainted_pokemon)
+                    + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)a: ([^\|\n]+)",
+                    action,
+                )
+                if point_match:
+                    _, poison_player, poison_starter = point_match.groups()
+                    poison_starter = poison_starter.strip()
+                    poison_player = f"p{poison_player}"
+                    if poison_player != f"p{fainted_player}":
+                        poison_found = True
+                        break
+
+        for ability in ["Psycho Shift", "Synchronize"]:
+            if re.search(
+                rf"\|p(\d)a: ([^\|\n]+)\|ability: {ability}\n|-status\|p(\d)a: " + re.escape(fainted_pokemon) + r"\|(tox|psn)",
+                action,
+            ):
+                if "-status" in action and ("tox" in action or "psn" in action):
+                    full_action = actions[actions.index(action) + 1] + "\n" + action
+                    ability_match = re.search(
+                        rf"\|p(\d)a: ([^\|\n]+)\|ability: {ability}\n\|-status\|p(\d)a: ([^\|\n]+)",
+                        full_action,
+                    )
+                    if ability_match:
+                        ability_player, ability_pokemon, _, target_pokemon = ability_match.groups()
+                        if target_pokemon.strip() == fainted_pokemon:
+                            poison_starter = ability_pokemon.strip()
+                            poison_player = f"p{ability_player}"
+                            if poison_player != f"p{fainted_player}":
+                                poison_found = True
+                                break
+
     if poison_found and poison_starter:
         for pokemon, data in stats[poison_player].items():
             if data["nickname"] == poison_starter:
                 data["kills"] += 1
                 break
-
 
 def process_burn(
     fainted_player: str,
@@ -510,542 +295,69 @@ def process_burn(
     burn_starter = None
     burn_player = None
     burn_found = False
+
     for action in actions:
-        if re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Will-O-Wisp\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if "|-status|" in actions[actions.index(action) - 1]:
-                burn_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Will-O-Wisp\|p(\d)a: ([^\|\n]+)", action
-                )
-                if burn_match:
-                    burn_player, burn_pokemon, fainted_player, burned_pokemon = burn_match.groups()
-                    if burned_pokemon.strip() == fainted_pokemon:
-                        burn_starter = burn_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-            elif "|-fail|" in actions[actions.index(action) + 1]:
-                continue
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Lava Plume\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                lava_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Lava Plume\|p(\d)a: ([^\|\n]+)", action
-                )
-                if lava_match:
-                    lava_player, lava_pokemon, fainted_player, target_pokemon = lava_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = lava_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Flamethrower\|p(\d)a: "
-            + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                flamethrower_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Flamethrower\|p(\d)a: ([^\|\n]+)", action
-                )
-                if flamethrower_match:
-                    flamethrower_player, flamethrower_pokemon, fainted_player, target_pokemon = (
-                        flamethrower_match.groups()
-                    )
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = flamethrower_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Fire Blast\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                fire_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Fire Blast\|p(\d)a: ([^\|\n]+)", action
-                )
-                if fire_match:
-                    fire_player, fire_pokemon, fainted_player, target_pokemon = fire_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = fire_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Flare Blitz\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                blitz_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Flare Blitz\|p(\d)a: ([^\|\n]+)", action
-                )
-                if blitz_match:
-                    blitz_player, blitz_pokemon, fainted_player, target_pokemon = blitz_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = blitz_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Heat Wave\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                heat_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Heat Wave\|p(\d)a: ([^\|\n]+)", action
-                )
-                if heat_match:
-                    heat_player, heat_pokemon, fainted_player, target_pokemon = heat_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = heat_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Scald\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                scald_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Scald\|p(\d)a: ([^\|\n]+)", action
-                )
-                if scald_match:
-                    scald_player, scald_pokemon, fainted_player, target_pokemon = scald_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = scald_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Scorching Sands\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                scorching_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Scorching Sands\|p(\d)a: ([^\|\n]+)", action
-                )
-                if scorching_match:
-                    scorching_player, scorching_pokemon, fainted_player, target_pokemon = scorching_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = scorching_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Blaze Kick\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                blaze_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Blaze Kick\|p(\d)a: ([^\|\n]+)", action
-                )
-                if blaze_match:
-                    blaze_player, blaze_pokemon, fainted_player, target_pokemon = blaze_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = blaze_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Fire Fang\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                fang_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Fire Fang\|p(\d)a: ([^\|\n]+)", action
-                )
-                if fang_match:
-                    fang_player, fang_pokemon, fainted_player, target_pokemon = fang_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = fang_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Fire Punch\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                punch_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Fire Punch\|p(\d)a: ([^\|\n]+)", action
-                )
-                if punch_match:
-                    punch_player, punch_pokemon, fainted_player, target_pokemon = punch_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = punch_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Ember\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                ember_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Ember\|p(\d)a: ([^\|\n]+)", action
-                )
-                if ember_match:
-                    ember_player, ember_pokemon, fainted_player, target_pokemon = ember_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = ember_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Flame Wheel\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                wheel_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Flame Wheel\|p(\d)a: ([^\|\n]+)", action
-                )
-                if wheel_match:
-                    wheel_player, wheel_pokemon, fainted_player, target_pokemon = wheel_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = wheel_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Burning Jealousy\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                jealousy_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Burning Jealousy\|p(\d)a: ([^\|\n]+)", action
-                )
-                if jealousy_match:
-                    jealousy_player, jealousy_pokemon, fainted_player, target_pokemon = jealousy_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = jealousy_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Inferno\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                inferno_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Inferno\|p(\d)a: ([^\|\n]+)", action
-                )
-                if inferno_match:
-                    inferno_player, inferno_pokemon, fainted_player, target_pokemon = inferno_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = inferno_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Pyro Ball\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                pyro_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Pyro Ball\|p(\d)a: ([^\|\n]+)", action
-                )
-                if pyro_match:
-                    pyro_player, pyro_pokemon, fainted_player, target_pokemon = pyro_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = pyro_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Infernal Parade\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                infernal_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Infernal Parade\|p(\d)a: ([^\|\n]+)", action
-                )
-                if infernal_match:
-                    infernal_player, infernal_pokemon, fainted_player, target_pokemon = infernal_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = infernal_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Blue Flare\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                blue_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Blue Flare\|p(\d)a: ([^\|\n]+)", action
-                )
-                if blue_match:
-                    blue_player, blue_pokemon, fainted_player, target_pokemon = blue_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = blue_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Searing Shot\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                searing_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Searing Shot\|p(\d)a: ([^\|\n]+)", action
-                )
-                if searing_match:
-                    searing_player, searing_pokemon, fainted_player, target_pokemon = searing_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = searing_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Steam Eruption\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                steam_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Steam Eruption\|p(\d)a: ([^\|\n]+)", action
-                )
-                if steam_match:
-                    steam_player, steam_pokemon, fainted_player, target_pokemon = steam_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = steam_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Tri Attack\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                tri_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Tri Attack\|p(\d)a: ([^\|\n]+)", action
-                )
-                if tri_match:
-                    tri_player, tri_pokemon, fainted_player, target_pokemon = tri_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = tri_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Secret Power\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                secret_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Secret Power\|p(\d)a: ([^\|\n]+)", action
-                )
-                if secret_match:
-                    secret_player, secret_pokemon, fainted_player, target_pokemon = secret_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = secret_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Fling\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                fling_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Fling\|p(\d)a: ([^\|\n]+)", action
-                )
-                if fling_match:
-                    fling_player, fling_pokemon, fainted_player, target_pokemon = fling_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = fling_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Matcha Gotcha\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                matcha_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Matcha Gotcha\|p(\d)a: ([^\|\n]+)", action
-                )
-                if matcha_match:
-                    matcha_player, matcha_pokemon, fainted_player, target_pokemon = matcha_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = matcha_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Sacred Fire\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                sacred_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Sacred Fire\|p(\d)a: ([^\|\n]+)", action
-                )
-                if sacred_match:
-                    sacred_player, sacred_pokemon, fainted_player, target_pokemon = sacred_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = sacred_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|Sandsear Storm\|p(\d)a: " + re.escape(fainted_pokemon),
-            action,
-        ):
-            if (
-                "-status" in actions[actions.index(action) - 2]
-                and "brn" in actions[actions.index(action) - 2]
-            ):
-                sandsear_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|Sandsear Storm\|p(\d)a: ([^\|\n]+)", action
-                )
-                if sandsear_match:
-                    sandsear_player, sandsear_pokemon, fainted_player, target_pokemon = sandsear_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = sandsear_pokemon.strip()
-                        burn_player = f"p{burn_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
-        elif re.search(
-            r"\|-status\|p(\d)a: "
-            + re.escape(fainted_pokemon)
-            + r"\|brn\|\[from\] ability: Flame Body\|\[of\] p(\d)a: ([^\|\n]+)",
-            action,
-        ):
-            body_match = re.search(
+        for burn_move in [
+            "Will-O-Wisp", "Lava Plume", "Flamethrower", "Fire Blast", "Flare Blitz",
+            "Heat Wave", "Scald", "Scorching Sands", "Blaze Kick", "Fire Fang", 
+            "Fire Punch", "Ember", "Flame Wheel", "Burning Jealousy", "Inferno", 
+            "Pyro Ball", "Infernal Parade", "Blue Flare", "Searing Shot", 
+            "Steam Eruption", "Tri Attack", "Secret Power", "Fling", 
+            "Matcha Gotcha", "Sacred Fire", "Sandsear Storm"
+        ]:
+            pattern = rf"\|p(\d)a: ([^\|\n]+)\|{burn_move}\|p(\d)a: " + re.escape(fainted_pokemon)
+            if re.search(pattern, action):
+                prev_action = actions[actions.index(action) - 2]
+                if "-status" in prev_action and "brn" in prev_action:
+                    match = re.search(rf"\|p(\d)a: ([^\|\n]+)\|{burn_move}\|p(\d)a: ([^\|\n]+)", action)
+                    if match:
+                        attacker_player, attacker_pokemon, target_player, target_pokemon = match.groups()
+                        if target_pokemon.strip() == fainted_pokemon:
+                            burn_starter = attacker_pokemon.strip()
+                            burn_player = f"p{attacker_player}"
+                            if burn_player != f"p{target_player}":
+                                burn_found = True
+                                break
+            elif re.search(
                 r"\|-status\|p(\d)a: "
                 + re.escape(fainted_pokemon)
                 + r"\|brn\|\[from\] ability: Flame Body\|\[of\] p(\d)a: ([^\|\n]+)",
                 action,
-            )
-            if body_match:
-                _, burn_player, burn_starter = body_match.groups()
-                burn_starter = burn_starter.strip()
-                burn_player = f"p{burn_player}"
-                if burn_player != f"p{fainted_player}":
-                    burn_found = True
-                    break
-        elif re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n|-status\|p(\d)a: "
-            + re.escape(fainted_pokemon)
-            + r"\|(brn)",
-            action,
-        ):
-            if "-status" in action and "brn" in action:
-                full_action = actions[actions.index(action) + 1] + "\n" + action
-                sync_match = re.search(
-                    r"\|p(\d)a: ([^\|\n]+)\|ability: Synchronize\n\|-status\|p(\d)a: ([^\|\n]+)",
-                    full_action,
+            ):
+                body_match = re.search(
+                    r"\|-status\|p(\d)a: "
+                    + re.escape(fainted_pokemon)
+                    + r"\|brn\|\[from\] ability: Flame Body\|\[of\] p(\d)a: ([^\|\n]+)",
+                    action,
                 )
-                if sync_match:
-                    sync_player, sync_pokemon, fainted_player, target_pokemon = sync_match.groups()
-                    if target_pokemon.strip() == fainted_pokemon:
-                        burn_starter = sync_pokemon.strip()
-                        burn_player = f"p{sync_player}"
-                        if burn_player != f"p{fainted_player}":
-                            burn_found = True
-                            break
+                if body_match:
+                    _, burn_player, burn_starter = body_match.groups()
+                    burn_starter = burn_starter.strip()
+                    burn_player = f"p{burn_player}"
+                    if burn_player != f"p{fainted_player}":
+                        burn_found = True
+                        break
+
+        for ability in ["Synchronize"]:
+            if re.search(
+                rf"\|p(\d)a: ([^\|\n]+)\|ability: {ability}\n|-status\|p(\d)a: " + re.escape(fainted_pokemon) + r"\|(brn)",
+                action,
+            ):
+                if "-status" in action and "brn" in action:
+                    full_action = actions[actions.index(action) + 1] + "\n" + action
+                    ability_match = re.search(
+                        rf"\|p(\d)a: ([^\|\n]+)\|ability: {ability}\n\|-status\|p(\d)a: ([^\|\n]+)",
+                        full_action,
+                    )
+                    if ability_match:
+                        ability_player, ability_pokemon, _, target_pokemon = ability_match.groups()
+                        if target_pokemon.strip() == fainted_pokemon:
+                            burn_starter = ability_pokemon.strip()
+                            burn_player = f"p{ability_player}"
+                            if burn_player != f"p{fainted_player}":
+                                burn_found = True
+                                break
+
     if burn_found and burn_starter:
         for pokemon, data in stats[burn_player].items():
             if data["nickname"] == burn_starter:
