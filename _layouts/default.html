@@ -61,12 +61,14 @@
     <!-- FOOTER -->
     <div id="footer_wrap" class="outer">
         <footer class="inner">
-            <div class="footer-content">
+            <div class="footer-content" style="display: flex; justify-content: space-between; align-items: center;">
                 {% if site.github.is_project_page %}
-                <p class="copyright">{{ site.title | default: site.github.repository_name }} maintained by <a
-                        href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
+                <p class="copyright">
+                    {{ site.title | default: site.github.repository_name }} maintained by 
+                    <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a>
+                </p>
                 {% endif %}
-                <p class="align-right">Artwork by swamphy</p>
+                <p class="artwork" style="margin: 0;">Artwork by swamphy</p>
             </div>
             <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
         </footer>
