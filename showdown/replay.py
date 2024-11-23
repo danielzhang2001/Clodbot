@@ -456,8 +456,11 @@ def process_direct(
 ):
     # Processes normal kills that result in one Pokemon directly killing another.
     for action in actions:
-        killer = re.search(r"\|p(\d)a: ([^\|\n]+)\|", action)
+        print(f"ACTION GOING DOWN LIST {action}")
+        killer = re.search(r"\|p(\d)[ab]: ([^\|\n]+)\|", action)
         if killer and killer.group(1) != fainted_player:
+            print(f"KILLER", killer)
+            print(f"ACTION CORRESPONDING", action);
             killer_player, killer_pokemon = killer.groups()
             killer_pokemon = killer_pokemon.strip()
             player_key = f"p{killer_player}"
