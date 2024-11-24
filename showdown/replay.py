@@ -54,7 +54,7 @@ def get_revives(json_data: Dict[str, List[str]]) -> List[Tuple[str, str]]:
     revives = []
     log = json_data.get("log", "")
     revive_regex = re.compile(
-        r"\|p(\d)a: ([^\|]+)\|Revival Blessing[\s\S]*?\-heal\|p(\d): ([^\|\n]+)",
+        r"\|p(\d)[ab]: ([^\|]+)\|Revival Blessing[\s\S]*?\-heal\|p(\d): ([^\|\n]+)",
         re.DOTALL,
     )
     for match in revive_regex.finditer(log):
@@ -116,7 +116,7 @@ def initialize_stats(pokemon_data: Dict[str, Dict[str, str]]) -> None:
 def process_stats(json_data: Dict[str, List[str]]) -> None:
     # Updates the kill and death values for each Pokemon.
     log = json_data.get("log", "")
-    faint_regex = re.compile(r"\|faint\|p(\d)a: ([^\|\n]+)")
+    faint_regex = re.compile(r"\|faint\|p(\d)[ab]: ([^\|\n]+)")
     sandstorm_regex = re.compile(r"\[from\] Sandstorm\n\|faint\|")
     poison_regex = re.compile(r"\[from\] psn\n\|faint\|")
     burn_regex = re.compile(r"\[from\] brn\n\|faint\|")
@@ -188,9 +188,9 @@ def process_poison(
 
     for action in actions:
         for toxic_move in ["Toxic", "Malignant Chain", "Toxic Spikes", "Toxic Chain"]:
-            if re.search(rf"\|p(\d)a: ([^\|\n]+)\|{toxic_move}\|p(\d)a: " + re.escape(fainted_pokemon), action):
+            if re.search(rf"\|p(\d)[ab]: ([^\|\n]+)\|{toxic_move}\|p(\d)[ab]: " + re.escape(fainted_pokemon), action):
                 if "-status" in actions[actions.index(action) - 1] and "tox" in actions[actions.index(action) - 1]:
-                    poison_match = re.search(rf"\|p(\d)a: ([^\|\n]+)\|{toxic_move}\|p(\d)a: ([^\|\n]+)", action)
+                    poison_match = re.search(rf"\|p(\d)[ab]: ([^\|\n]+)\|{toxic_move}\|p(\d)[ab]: ([^\|\n]+)", action)
                     if poison_match:
                         poison_player, poison_pokemon, _, poisoned_pokemon = poison_match.groups()
                         if poisoned_pokemon.strip() == fainted_pokemon:
@@ -200,15 +200,15 @@ def process_poison(
                                 poison_found = True
                                 break
             elif re.search(
-                r"\|-status\|p(\d)a: "
+                r"\|-status\|p(\d)[ab]: "
                 + re.escape(fainted_pokemon)
-                + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)a: ([^\|\n]+)",
+                + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)[ab]: ([^\|\n]+)",
                 action,
             ):
                 chain_match = re.search(
-                    r"\|-status\|p(\d)a: "
+                    r"\|-status\|p(\d)[ab]: "
                     + re.escape(fainted_pokemon)
-                    + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)a: ([^\|\n]+)",
+                    + r"\|tox\|\[from\] ability: Toxic Chain\|\[of\] p(\d)[ab]: ([^\|\n]+)",
                     action,
                 )
                 if chain_match:
@@ -226,11 +226,11 @@ def process_poison(
             "Shell Side Arm", "Mortal Spin", "Dire Claw", "Secret Power",
             "G-Max Befuddle", "G-Max Malodor", "G-Max Stun Shock", "Poison Point"
         ]:
-            pattern = rf"\|p(\d)a: ([^\|\n]+)\|{poison_move}\|p(\d)a: " + re.escape(fainted_pokemon)
+            pattern = rf"\|p(\d)[ab]: ([^\|\n]+)\|{poison_move}\|p(\d)[ab]: " + re.escape(fainted_pokemon)
             if re.search(pattern, action):
                 prev_action = actions[actions.index(action) - 2]
                 if "-status" in prev_action and "psn" in prev_action:
-                    match = re.search(rf"\|p(\d)a: ([^\|\n]+)\|{poison_move}\|p(\d)a: ([^\|\n]+)", action)
+                    match = re.search(rf"\|p(\d)[ab]: ([^\|\n]+)\|{poison_move}\|p(\d)[ab]: ([^\|\n]+)", action)
                     if match:
                         attacker_player, attacker_pokemon, target_player, target_pokemon = match.groups()
                         if target_pokemon.strip() == fainted_pokemon:
@@ -240,15 +240,15 @@ def process_poison(
                                 poison_found = True
                                 break
             elif re.search(
-                r"\|-status\|p(\d)a: "
+                r"\|-status\|p(\d)[ab]: "
                 + re.escape(fainted_pokemon)
-                + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)a: ([^\|\n]+)",
+                + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)[ab]: ([^\|\n]+)",
                 action,
             ):
                 point_match = re.search(
-                    r"\|-status\|p(\d)a: "
+                    r"\|-status\|p(\d)[ab]: "
                     + re.escape(fainted_pokemon)
-                    + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)a: ([^\|\n]+)",
+                    + r"\|psn\|\[from\] ability: Poison Point\|\[of\] p(\d)[ab]: ([^\|\n]+)",
                     action,
                 )
                 if point_match:
@@ -261,13 +261,13 @@ def process_poison(
 
         for ability in ["Psycho Shift", "Synchronize"]:
             if re.search(
-                rf"\|p(\d)a: ([^\|\n]+)\|ability: {ability}\n|-status\|p(\d)a: " + re.escape(fainted_pokemon) + r"\|(tox|psn)",
+                rf"\|p(\d)[ab]: ([^\|\n]+)\|ability: {ability}\n|-status\|p(\d)[ab]: " + re.escape(fainted_pokemon) + r"\|(tox|psn)",
                 action,
             ):
                 if "-status" in action and ("tox" in action or "psn" in action):
                     full_action = actions[actions.index(action) + 1] + "\n" + action
                     ability_match = re.search(
-                        rf"\|p(\d)a: ([^\|\n]+)\|ability: {ability}\n\|-status\|p(\d)a: ([^\|\n]+)",
+                        rf"\|p(\d)[ab]: ([^\|\n]+)\|ability: {ability}\n\|-status\|p(\d)[ab]: ([^\|\n]+)",
                         full_action,
                     )
                     if ability_match:
@@ -305,11 +305,11 @@ def process_burn(
             "Steam Eruption", "Tri Attack", "Secret Power", "Fling", 
             "Matcha Gotcha", "Sacred Fire", "Sandsear Storm"
         ]:
-            pattern = rf"\|p(\d)a: ([^\|\n]+)\|{burn_move}\|p(\d)a: " + re.escape(fainted_pokemon)
+            pattern = rf"\|p(\d)[ab]: ([^\|\n]+)\|{burn_move}\|p(\d)[ab]: " + re.escape(fainted_pokemon)
             if re.search(pattern, action):
                 prev_action = actions[actions.index(action) - 2]
                 if "-status" in prev_action and "brn" in prev_action:
-                    match = re.search(rf"\|p(\d)a: ([^\|\n]+)\|{burn_move}\|p(\d)a: ([^\|\n]+)", action)
+                    match = re.search(rf"\|p(\d)[ab]: ([^\|\n]+)\|{burn_move}\|p(\d)[ab]: ([^\|\n]+)", action)
                     if match:
                         attacker_player, attacker_pokemon, target_player, target_pokemon = match.groups()
                         if target_pokemon.strip() == fainted_pokemon:
@@ -319,15 +319,15 @@ def process_burn(
                                 burn_found = True
                                 break
             elif re.search(
-                r"\|-status\|p(\d)a: "
+                r"\|-status\|p(\d)[ab]: "
                 + re.escape(fainted_pokemon)
-                + r"\|brn\|\[from\] ability: Flame Body\|\[of\] p(\d)a: ([^\|\n]+)",
+                + r"\|brn\|\[from\] ability: Flame Body\|\[of\] p(\d)[ab]: ([^\|\n]+)",
                 action,
             ):
                 body_match = re.search(
-                    r"\|-status\|p(\d)a: "
+                    r"\|-status\|p(\d)[ab]: "
                     + re.escape(fainted_pokemon)
-                    + r"\|brn\|\[from\] ability: Flame Body\|\[of\] p(\d)a: ([^\|\n]+)",
+                    + r"\|brn\|\[from\] ability: Flame Body\|\[of\] p(\d)[ab]: ([^\|\n]+)",
                     action,
                 )
                 if body_match:
@@ -340,13 +340,13 @@ def process_burn(
 
         for ability in ["Synchronize"]:
             if re.search(
-                rf"\|p(\d)a: ([^\|\n]+)\|ability: {ability}\n|-status\|p(\d)a: " + re.escape(fainted_pokemon) + r"\|(brn)",
+                rf"\|p(\d)[ab]: ([^\|\n]+)\|ability: {ability}\n|-status\|p(\d)[ab]: " + re.escape(fainted_pokemon) + r"\|(brn)",
                 action,
             ):
                 if "-status" in action and "brn" in action:
                     full_action = actions[actions.index(action) + 1] + "\n" + action
                     ability_match = re.search(
-                        rf"\|p(\d)a: ([^\|\n]+)\|ability: {ability}\n\|-status\|p(\d)a: ([^\|\n]+)",
+                        rf"\|p(\d)[ab]: ([^\|\n]+)\|ability: {ability}\n\|-status\|p(\d)[ab]: ([^\|\n]+)",
                         full_action,
                     )
                     if ability_match:
@@ -377,7 +377,7 @@ def process_spikes(
     spikes_found = False
     for action in actions:
         spikes_match = re.search(
-            r"\|p(\d)a: ([^\|\n]+)\|(Spikes|Ceaseless Edge)\|", action
+            r"\|p(\d)[ab]: ([^\|\n]+)\|(Spikes|Ceaseless Edge)\|", action
         )
         if spikes_match:
             spikes_player, spikes_pokemon, *_ = spikes_match.groups()
@@ -405,7 +405,7 @@ def process_rocks(
     rocks_player = None
     rocks_found = False
     for action in actions:
-        rocks_match = re.search(r"\|p(\d)a: ([^\|\n]+)\|Stealth Rock\|", action)
+        rocks_match = re.search(r"\|p(\d)[ab]: ([^\|\n]+)\|Stealth Rock\|", action)
         if rocks_match:
             rocks_player, rocks_pokemon = rocks_match.groups()
             rocks_starter = rocks_pokemon.strip()
@@ -431,7 +431,7 @@ def process_seed(
     leech_player = None
     for action in actions:
         leech_match = re.search(
-            r"\|[^\|]+\|\[from\] Leech Seed\|\[of\] (p\d)a: ([^\|\n]+)",
+            r"\|[^\|]+\|\[from\] Leech Seed\|\[of\] (p\d)[ab]: ([^\|\n]+)",
             action,
         )
         if leech_match:
@@ -456,7 +456,7 @@ def process_direct(
 ):
     # Processes normal kills that result in one Pokemon directly killing another.
     for action in actions:
-        killer = re.search(r"\|p(\d)a: ([^\|\n]+)\|", action)
+        killer = re.search(r"\|p(\d)[ab]: ([^\|\n]+)\|", action)
         if killer and killer.group(1) != fainted_player:
             killer_player, killer_pokemon = killer.groups()
             killer_pokemon = killer_pokemon.strip()
