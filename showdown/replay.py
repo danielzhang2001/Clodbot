@@ -23,19 +23,19 @@ def get_replay_pokemon(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, s
     log = json_data.get("log", "")
     all_pokemon = {"p1": {}, "p2": {}}
     if "|poke|" in log:
-        pokemon_regex = re.compile(r"\|poke\|(p\d)\|([^,|]+)")
+        pokemon_regex = re.compile(r"\|poke\|(p\d)[ab]\|([^,|]+)")
         for match in pokemon_regex.finditer(log):
             player, pokemon = match.groups()
             pokemon = pokemon.strip().replace("-*", "")
             all_pokemon[player][pokemon] = pokemon
-    event_regex = re.compile(r"\|(switch|replace)\|(p\d)a: (.+?)\|([^,|]+)")
+    event_regex = re.compile(r"\|(switch|replace)\|(p\d)[ab]: (.+?)\|([^,|]+)")
     for match in event_regex.finditer(log):
         event_type, player, nickname, pokemon = match.groups()
         pokemon = pokemon.strip()
         nickname = nickname.strip()
         all_pokemon[player][pokemon] = nickname
     transform_regex = re.compile(
-        r"\|detailschange\|(p\d)a: (.+?)\|([^,|]+)-(Mega|Terastal|Hero)"
+        r"\|detailschange\|(p\d)[ab]: (.+?)\|([^,|]+)-(Mega|Terastal|Hero)"
     )
     for match in transform_regex.finditer(log):
         player, nickname, base_pokemon, form = match.groups()
@@ -54,7 +54,7 @@ def get_revives(json_data: Dict[str, List[str]]) -> List[Tuple[str, str]]:
     revives = []
     log = json_data.get("log", "")
     revive_regex = re.compile(
-        r"\|p(\d)[ab]: ([^\|]+)\|Revival Blessing[\s\S]*?\-heal\|p(\d): ([^\|\n]+)",
+        r"\|p(\d)[ab]: ([^\|]+)\|Revival Blessing[\s\S]*?\-heal\|p(\d)[ab]: ([^\|\n]+)",
         re.DOTALL,
     )
     for match in revive_regex.finditer(log):
