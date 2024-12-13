@@ -6,6 +6,7 @@ title: Sheet Command
 <div class="other-commands">
   <h1>Sheet Command</h1>
   <div class = "command-links">
+    <a href="https://clodbot.com" class="command">HOME</a>
     <a href="https://clodbot.com/analyze" class="command">ANALYZE</a>
     <a href="https://clodbot.com/giveset"  class="command">GIVESET</a>
   </div>

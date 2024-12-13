@@ -6,6 +6,7 @@ title: Analyze Command
 <div class="other-commands">
   <h1>Analyze Command</h1>
   <div class = "command-links">
+    <a href="https://clodbot.com" class="command">HOME</a>
     <a href="https://clodbot.com/sheet" class="command">SHEET</a>
     <a href="https://clodbot.com/giveset"  class="command">GIVESET</a>
   </div>
