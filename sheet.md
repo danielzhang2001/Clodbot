@@ -16,6 +16,8 @@ The Sheet Command manipulates information on Google Sheets using a sheets link p
 
 <img src="assets/images/sheet.png" style="width:100%; height:auto; max-width:none; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); margin-bottom: 10px;">
 
+<img src="assets/images/sheet2.png" style="width:100%; height:auto; max-width:none; border: 4px solid #005682; border-radius: 15px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); margin-bottom: 10px;">
+
 <hr class="line">
 
 ### Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)
