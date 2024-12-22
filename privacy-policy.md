@@ -11,8 +11,7 @@ This Privacy Policy describes the policies and procedures on the collection, use
 you use the Service and tells you about your privacy rights and how the law protects you.
 
 We use your data from Pokemon Showdown to provide and improve the service. By using the service, you agree to the
-collection and use of information in accordance with this Privacy Policy. This Privacy Policy has been created with the 
-help of the [Privacy Policy Generator](https://www.termsfeed.com/privacy-policy-generator/){:target="_blank"}.
+collection and use of information in accordance with this Privacy Policy.
 
 <hr class="line">
 
