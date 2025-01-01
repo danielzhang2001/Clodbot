@@ -98,6 +98,10 @@ Content
     background-image: url('../images/privacy.png');
 }
 
+.terms::after {
+    background-image: url('../images/terms.png');
+}
+
 .home:hover {
     border-bottom-left-radius: 20px;
 }

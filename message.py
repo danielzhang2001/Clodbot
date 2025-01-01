@@ -1,7 +1,3 @@
-"""
-Sends a message to the 'general' channel of all servers, with specific @everyone handling for certain servers.
-"""
-
 import os
 import discord
 from dotenv import load_dotenv
@@ -15,30 +11,24 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
+# Target channel name and message content
 TARGET_CHANNEL_NAME = "general"
-MESSAGE_CONTENT_STANDARD = (
-    "Hello everyone! For those that have been using me (feel free to ignore me if you don't), there have been some major updates! These include:\n\n"
-    "**PASSIVE KILL TRACKING**: Instead of the Pokémon on field getting the kill, if the cause of death was passive, the kill instead gets attributed to the initial setter (Stealth Rock, Toxic, etc).\n"
-    "**DOUBLES SUPPORT**: I am now able to give accurate information on double battles!\n"
-    "**WEEK TRACKING SUPPORT**: I now have the option to update Google Sheets based on week! Hopefully this makes tracking data for Draft Leagues easier!\n\n"
-    "Please use **Clodbot, help** to see the list of commands, or visit https://clodbot.com for more information. Thank you, and happy holidays! I'll go back to stalling out OU teams now."
+MESSAGE_CONTENT = (
+    "Official Trailer Released for Clodbot: https://www.youtube.com/watch?v=CB3H_Uw3y9g"
 )
-MESSAGE_CONTENT_SPECIAL = (
-    "Hello @everyone! For those that have been using me (feel free to ignore me if you don't), there have been some major updates! These include:\n\n"
-    "**PASSIVE KILL TRACKING**: Instead of the Pokémon on field getting the kill, if the cause of death was passive, the kill instead gets attributed to the initial setter (Stealth Rock, Toxic, etc).\n"
-    "**DOUBLES SUPPORT**: I am now able to give accurate information on double battles!\n"
-    "**WEEK TRACKING SUPPORT**: I now have the option to update Google Sheets based on week! Hopefully this makes tracking data for Draft Leagues easier!\n\n"
-    "Please use **Clodbot, help** to see the list of commands, or visit https://clodbot.com for more information. Thank you, and happy holidays! I'll go back to stalling out OU teams now."
-)
-
+EXCLUDED_SERVER_NAME = "Paradox Parlor Draft League"
 SPECIAL_SERVER_NAMES = ["BATTLE FRONTIER GTA", "Clodbot"]
-
 
 @client.event
 async def on_ready():
     print(f"Logged in as: {client.user.name} (ID: {client.user.id})")
 
     for guild in client.guilds:
+        # Skip the excluded server
+        if guild.name == EXCLUDED_SERVER_NAME:
+            print(f"Skipping server: {guild.name} (ID: {guild.id})")
+            continue
+
         print(f"Processing server: {guild.name} (ID: {guild.id})")
 
         # Look for the first 'general' channel in the current server
@@ -49,13 +39,13 @@ async def on_ready():
 
         if target_channel:
             try:
-                # Use the special message for special servers, otherwise use the standard message
+                # Use @everyone for special servers
                 if guild.name in SPECIAL_SERVER_NAMES:
-                    message = MESSAGE_CONTENT_SPECIAL
+                    message = f"@everyone {MESSAGE_CONTENT}"
                 else:
-                    message = MESSAGE_CONTENT_STANDARD
+                    message = MESSAGE_CONTENT
 
-                # Send the message
+                # Send the message to the 'general' channel
                 await target_channel.send(message)
                 print(f"Message sent to {TARGET_CHANNEL_NAME} in {guild.name}.")
             except discord.Forbidden:
@@ -68,7 +58,7 @@ async def on_ready():
     print("All messages sent. Closing connection.")
     await client.close()
 
-
+# Get the bot token from the .env file
 token = os.getenv("DISCORD_BOT_TOKEN")
 
 if token:
