@@ -431,7 +431,7 @@ def process_seed(
     leech_player = None
     for action in actions:
         leech_match = re.search(
-            r"\|[^\|]+\|\[from\] Leech Seed\|\[of\] (p\d)[ab]: ([^\|\n]+)",
+            r"\|[^\|]+\|\[from\] Leech Seed\|\[of\] p(\d)[ab]: ([^\|\n]+)",
             action,
         )
         if leech_match:
