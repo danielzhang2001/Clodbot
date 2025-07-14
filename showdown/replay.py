@@ -23,7 +23,7 @@ def get_replay_pokemon(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, s
     log = json_data.get("log", "")
     all_pokemon = {"p1": {}, "p2": {}}
     if "|poke|" in log:
-        pokemon_regex = re.compile(r"\|poke\|(p\d)[ab]\|([^,|]+)")
+        pokemon_regex = re.compile(r"\|poke\|(p\d)[ab]?\|([^,|]+)")
         for match in pokemon_regex.finditer(log):
             player, pokemon = match.groups()
             pokemon = pokemon.strip().replace("-*", "")
@@ -31,6 +31,7 @@ def get_replay_pokemon(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, s
     event_regex = re.compile(r"\|(switch|replace)\|(p\d)[ab]: (.+?)\|([^,|]+)")
     for match in event_regex.finditer(log):
         event_type, player, nickname, pokemon = match.groups()
+        print("MATCHING", pokemon)
         pokemon = pokemon.strip()
         nickname = nickname.strip()
         all_pokemon[player][pokemon] = nickname
