@@ -147,7 +147,7 @@ Content
     margin-left: auto;
 }
 
-.invite-group {
+.button-group {
     display: flex;
     gap: 30px;
 }
@@ -290,7 +290,7 @@ Full-Width Styles
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.invite {
+.button {
     display: flex;
     background-color: #5670cc;
     color: white;
@@ -304,7 +304,10 @@ Full-Width Styles
     justify-content: center;
 }
 
-.invite:hover {
+.button:hover,
+.button:active,
+.button:focus,
+.button:visited {
     background-color: rgba(85, 111, 206, 0.8);
     text-decoration: none;
 }
@@ -388,7 +391,7 @@ Small Device Styles
         font-size: 12px;
     }
 
-    .invite {
+    .button {
         width: 56px;
         height: 21px;
     }
@@ -416,11 +419,11 @@ Small Device Styles
         padding-right: 0;
     }
 
-    .invite-group {
+    .button-group {
         gap: 20px;
     }
 
-    .invite {
+    .button {
         width: 40px;
         height: 15px;
     }
