@@ -24,7 +24,7 @@ class Analyze:
         revives = get_revives(json_data)
         winner = get_winner(json_data)
         loser = get_loser(json_data)
-        get_stats(json_data)
-        difference = get_difference(players, winner, revives)
-        message = create_message(players, winner, loser, difference)
+        stats = get_stats(json_data)
+        difference = get_difference(players, winner, revives, stats)
+        message = create_message(players, winner, loser, difference, stats)
         return message

@@ -3,10 +3,7 @@ General functions in analyzing Pokemon Showdown replay links.
 """
 
 import re
-import json
 from typing import Dict, List, Tuple
-
-stats = {}
 
 
 def get_replay_players(json_data: Dict[str, List[str]]) -> Dict[str, str]:
@@ -84,14 +81,12 @@ def get_loser(json_data: Dict[str, List[str]]) -> str:
             return name
 
 
-def get_difference(
-    players: Dict[str, str], winner: str, revives: List[Tuple[str, str]]
-) -> str:
+def get_difference(players: Dict[str, str], winner: str, revives: List[Tuple[str, str]], stats: Dict[str, Dict[str, Dict[str, int]]]) -> str:
     # Retrieves the point difference from winning player to losing player.
-    p1_deaths = sum(pokemon["deaths"] for pokemon in stats["p1"].values())
-    p2_deaths = sum(pokemon["deaths"] for pokemon in stats["p2"].values())
+    p1_deaths = sum(pokemon["deaths"] for pokemon in stats.get("p1", {}).values())
+    p2_deaths = sum(pokemon["deaths"] for pokemon in stats.get("p2", {}).values())
     for player, pokemon in revives:
-        for nickname, pokemon_stats in stats[player].items():
+        for _, pokemon_stats in stats.get(player, {}).items():
             if pokemon_stats["nickname"] == pokemon:
                 if player == "p1":
                     p1_deaths -= 1
@@ -104,20 +99,17 @@ def get_difference(
         difference = f"({p1_deaths - p2_deaths}-0)"
     return difference
 
-
-def initialize_stats(pokemon_data: Dict[str, Dict[str, str]]) -> None:
+def initialize_stats(pokemon_data: Dict[str, Dict[str, str]]) -> Dict[str, Dict[str, Dict[str, int]]]:
     # Initializes stats (player, nickname, kills, deaths) for each Pokemon.
+    stats: Dict[str, Dict[str, Dict[str, int]]] = {}
     for player, pokemon in pokemon_data.items():
         stats[player] = {}
         for actual_pokemon, nickname in pokemon.items():
-            stats[player][actual_pokemon] = {
-                "nickname": nickname,
-                "kills": 0,
-                "deaths": 0,
-            }
+            stats[player][actual_pokemon] = {"nickname": nickname, "kills": 0, "deaths": 0}
+    return stats
 
 
-def process_stats(json_data: Dict[str, List[str]]) -> None:
+def process_stats(json_data: Dict[str, List[str]], stats: Dict[str, Dict[str, Dict[str, int]]]) -> None:
     # Updates the kill and death values for each Pokemon.
     log = json_data.get("log", "")
     faint_regex = re.compile(r"\|faint\|p(\d)[ab]: ([^\|\n]+)")
@@ -474,34 +466,29 @@ def process_direct(
             if kill_found:
                 break
 
-
 def get_stats(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, Dict[str, int]]]:
     # Returns the updated stats.
     pokemon = get_replay_pokemon(json_data)
-    initialize_stats(pokemon)
-    process_stats(json_data)
+    stats = initialize_stats(pokemon)
+    process_stats(json_data, stats)
     return stats
 
 
-def create_message(
-    players: Dict[str, str], winner: str, loser: str, difference: str
-) -> str:
+def create_message(players: Dict[str, str], winner: str, loser: str, difference: str, stats: Dict[str, Dict[str, Dict[str, int]]]) -> str:
     # Creates and returns the final message.
+    winner_key = next(key for key, value in players.items() if value == winner)
+    loser_key  = next(key for key, value in players.items() if value == loser)
     message = f"**OUTCOME: ||{winner} {difference} {loser}||**\n\n"
     message += f"**{winner}'s Pokemon:**\n"
     winner_message = ""
-    for pokemon, data in stats[
-        next(key for key, value in players.items() if value == winner)
-    ].items():
+    for pokemon, data in stats[winner_key].items():
         kills = data["kills"]
         deaths = data["deaths"]
         winner_message += f"{pokemon} (Kills: {kills}, Deaths: {deaths})\n"
     message += f"||```\n{winner_message.strip()}\n```||\n"
     message += f"**{loser}'s Pokemon:**\n"
     loser_message = ""
-    for pokemon, data in stats[
-        next(key for key, value in players.items() if value == loser)
-    ].items():
+    for pokemon, data in stats[loser_key].items():
         kills = data["kills"]
         deaths = data["deaths"]
         loser_message += f"{pokemon} (Kills: {kills}, Deaths: {deaths})\n"
