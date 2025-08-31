@@ -21,12 +21,10 @@ class Analyze:
         except requests.exceptions.RequestException:
             raise InvalidReplay(replay_link)
         players = get_replay_players(json_data)
-        pokemon = get_replay_pokemon(json_data)
         revives = get_revives(json_data)
         winner = get_winner(json_data)
         loser = get_loser(json_data)
-        initialize_stats(pokemon)
-        process_stats(json_data)
+        get_stats(json_data)
         difference = get_difference(players, winner, revives)
         message = create_message(players, winner, loser, difference)
         return message
