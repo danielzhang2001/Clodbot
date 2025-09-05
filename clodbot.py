@@ -12,8 +12,11 @@ from commands.giveset import GiveSet
 from commands.managesheet import ManageSheet
 from sheets.sheet import authenticate_sheet
 from errors import *
+from server_stats import publish_stats
 
 intents = discord.Intents.default()
+intents.guilds = True
+intents.members = True
 intents.typing = False
 intents.presences = False
 intents.message_content = True
@@ -28,13 +31,10 @@ bot = commands.Bot(
 
 @bot.event
 async def on_ready():
-    # Print a message when the bot connects to Discord.
+    # Print a message when the bot connects to Discord and publishes bot stats.
     print(f"{bot.user} has connected to Discord!")
-    await bot.change_presence(
-        activity=discord.Activity(
-            type=discord.ActivityType.listening, name="clodbot, help"
-        )
-    )
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="clodbot, help"))
+    bot.loop.create_task(publish_stats(bot))
 
 
 @bot.event
@@ -243,7 +243,6 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
         if invalid_parts:
             await ctx.send(InvalidParts(invalid_parts).args[0])
         await GiveSet.set_prompt(ctx, requests)
-
 
 load_dotenv()
 bot_token = os.environ["DISCORD_BOT_TOKEN"]

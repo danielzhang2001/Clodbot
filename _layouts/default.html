@@ -16,7 +16,6 @@
 </head>
 
 <body>
-
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <div class="flex">
@@ -33,6 +32,10 @@
                 <div class="header">
                     <div class="header-text">
                         <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
+                        <div class="stats-badges">
+                            <span class="badge"><span data-servers>—</span> servers</span>
+                            <span class="badge"><span data-users>—</span> users</span>
+                        </div>
                         <div class="button-group">
                             <a class="button"
                                 href="https://discord.com/oauth2/authorize?client_id=1090450927992975491&permissions=2048&scope=bot"
@@ -76,6 +79,17 @@
             <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
         </footer>
     </div>
+    <script>
+        (function () {
+        const RAW = "https://gist.githubusercontent.com/danielzhang2001/46d7d8eea38139526ef1665801d2174b/raw/clodbot-stats.json";
+        const format = number => { try { return Number(number).toLocaleString(); } catch { return number; } };
+        fetch(RAW).then(response => response.json()).then(data => {
+            const servers = data.numServers;
+            const users = data.numUsers;
+            document.querySelectorAll("[data-servers]").forEach(element => element.textContent = format(servers));
+            document.querySelectorAll("[data-users]").forEach(element => element.textContent   = format(users));
+        }).catch(() => {});
+        })();
+    </script>
 </body>
-
 </html>
