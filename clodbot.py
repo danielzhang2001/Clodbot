@@ -16,7 +16,6 @@ from server_stats import publish_stats
 
 intents = discord.Intents.default()
 intents.guilds = True
-intents.members = True
 intents.typing = False
 intents.presences = False
 intents.message_content = True
