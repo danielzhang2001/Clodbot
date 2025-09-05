@@ -213,9 +213,28 @@ Content
     gap: 25px;
 }
 
-.stats-badges { display:flex; gap:.5rem; margin:.5rem 0 0; }
+.stats-badges {
+  display: flex;
+  gap: 1.25rem;
+  margin: .5rem 0 0;
+  align-items: center;
+}
 
-.badge { border:2px solid #4f46e5; border-radius:12px; padding:.35rem .6rem; font-weight:600; }
+.badge {
+  border: 3px solid #4f46e5;
+  border-radius: 14px;
+  padding: .45rem .85rem;
+  background: linear-gradient(180deg, #3b3fe0 0%, #2a2ecb 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    0 0 12px rgba(79,70,229,.25);
+}
+
+.stats-badges .badge:first-child {
+  margin-left: -10px;
+}
 
 @keyframes move {
     0% {
