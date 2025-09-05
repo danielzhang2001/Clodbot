@@ -221,7 +221,7 @@ Content
 }
 
 .badge {
-  border: 3px solid #4f46e5;
+  border: 4px solid #4f46e5;
   border-radius: 14px;
   padding: .45rem .85rem;
   background: linear-gradient(180deg, #3b3fe0 0%, #2a2ecb 100%);
