@@ -3,7 +3,7 @@ General functions in analyzing Pokemon Showdown replay links.
 """
 
 import re
-from typing import Dict, List, Tuple
+from typing import Optional, Dict, List, Tuple
 
 
 def get_replay_players(json_data: Dict[str, List[str]]) -> Dict[str, str]:
@@ -108,8 +108,7 @@ def initialize_stats(pokemon_data: Dict[str, Dict[str, str]]) -> Dict[str, Dict[
             stats[player][actual_pokemon] = {"nickname": nickname, "kills": 0, "deaths": 0}
     return stats
 
-
-def process_stats(json_data: Dict[str, List[str]], stats: Dict[str, Dict[str, Dict[str, int]]]) -> None:
+def process_stats(json_data: Dict[str, List[str]], stats: Dict[str, Dict[str, Dict[str, int]]], passive_kills: Optional[List[Tuple[str, str, str]]]) -> None:
     # Updates the kill and death values for each Pokemon.
     log = json_data.get("log", "")
     faint_regex = re.compile(r"\|faint\|p(\d)[ab]: ([^\|\n]+)")
@@ -131,27 +130,29 @@ def process_stats(json_data: Dict[str, List[str]], stats: Dict[str, Dict[str, Di
         actions = log[:event].split("\n")[::-1]
         segment = log[event - 80 : event + 30]
         if poison_regex.search(segment):
-            process_poison(fainted_player, fainted_pokemon, actions, stats)
+            process_poison(fainted_player, fainted_pokemon, actions, stats, passive_kills)
         elif burn_regex.search(segment):
-            process_burn(fainted_player, fainted_pokemon, actions, stats)
+            process_burn(fainted_player, fainted_pokemon, actions, stats, passive_kills)
         elif rocks_regex.search(segment):
-            process_rocks(fainted_player, fainted_pokemon, actions, stats)
+            process_rocks(fainted_player, fainted_pokemon, actions, stats, passive_kills)
         elif spikes_regex.search(segment):
-            process_spikes(fainted_player, fainted_pokemon, actions, stats)
+            process_spikes(fainted_player, fainted_pokemon, actions, stats, passive_kills)
         elif seed_regex.search(segment):
-            process_seed(fainted_player, fainted_pokemon, actions, stats)
+            process_seed(fainted_player, fainted_pokemon, actions, stats, passive_kills)
         elif sandstorm_regex.search(segment):
-            process_sandstorm(fainted_player, actions, stats)
+            process_sandstorm(fainted_player, fainted_pokemon, actions, stats, passive_kills)
         else:
             process_direct(fainted_player, fainted_pokemon, actions, stats)
 
 
 def process_sandstorm(
     fainted_player: str,
+    fainted_pokemon: str,
     actions: List[str], 
-    stats: Dict[str, Dict[str, Dict[str, int]]]):
+    stats: Dict[str, Dict[str, Dict[str, int]]],
+    passive_kills: Optional[List[Tuple[str, str, str]]] = None
+    ):
     # Processes kills from sandstorm.
-    
     sandstorm_starter = None
     sandstorm_player = None
     for action in actions:
@@ -168,6 +169,8 @@ def process_sandstorm(
         for pokemon, data in stats[sandstorm_player].items():
             if data["nickname"] == sandstorm_starter:
                 data["kills"] += 1
+                if passive_kills is not None:
+                    passive_kills.append((fainted_pokemon, sandstorm_starter, "Sandstorm"))
                 break
 
 
@@ -176,6 +179,7 @@ def process_poison(
     fainted_pokemon: str,
     actions: List[str],
     stats: Dict[str, Dict[str, Dict[str, int]]],
+    passive_kills: Optional[List[Tuple[str, str, str]]] = None
 ):
     # Processes kills from toxic or poison.
     poison_starter = None
@@ -279,6 +283,8 @@ def process_poison(
         for pokemon, data in stats[poison_player].items():
             if data["nickname"] == poison_starter:
                 data["kills"] += 1
+                if passive_kills is not None:
+                    passive_kills.append((fainted_pokemon, poison_starter, "Poison"))
                 break
 
 def process_burn(
@@ -286,6 +292,7 @@ def process_burn(
     fainted_pokemon: str,
     actions: List[str],
     stats: Dict[str, Dict[str, Dict[str, int]]],
+    passive_kills: Optional[List[Tuple[str, str, str]]] = None
 ):
     # Processes kills from burn.
     burn_starter = None
@@ -358,6 +365,8 @@ def process_burn(
         for pokemon, data in stats[burn_player].items():
             if data["nickname"] == burn_starter:
                 data["kills"] += 1
+                if passive_kills is not None:
+                    passive_kills.append((fainted_pokemon, burn_starter, "Burn"))
                 break
 
 
@@ -366,6 +375,7 @@ def process_spikes(
     fainted_pokemon: str,
     actions: List[str],
     stats: Dict[str, Dict[str, Dict[str, int]]],
+    passive_kills: Optional[List[Tuple[str, str, str]]] = None
 ):
     # Processes kills from spikes.
     spikes_starter = None
@@ -387,6 +397,8 @@ def process_spikes(
         for pokemon, data in stats[spikes_player].items():
             if data["nickname"] == spikes_starter:
                 data["kills"] += 1
+                if passive_kills is not None:
+                    passive_kills.append((fainted_pokemon, spikes_starter, "Spikes"))
                 break
 
 
@@ -395,6 +407,7 @@ def process_rocks(
     fainted_pokemon: str,
     actions: List[str],
     stats: Dict[str, Dict[str, Dict[str, int]]],
+    passive_kills: Optional[List[Tuple[str, str, str]]] = None
 ):
     # Processes kills from Stealth Rocks.
     rocks_starter = None
@@ -414,6 +427,8 @@ def process_rocks(
         for pokemon, data in stats[rocks_player].items():
             if data["nickname"] == rocks_starter:
                 data["kills"] += 1
+                if passive_kills is not None:
+                    passive_kills.append((fainted_pokemon, rocks_starter, "Stealth Rock"))
                 break
 
 
@@ -422,6 +437,7 @@ def process_seed(
     fainted_pokemon: str,
     actions: List[str],
     stats: Dict[str, Dict[str, Dict[str, int]]],
+    passive_kills: Optional[List[Tuple[str, str, str]]] = None
 ):
     leech_starter = None
     leech_player = None
@@ -441,6 +457,8 @@ def process_seed(
         for pokemon, data in stats[leech_player].items():
             if data["nickname"] == leech_starter:
                 data["kills"] += 1
+                if passive_kills is not None:
+                    passive_kills.append((fainted_pokemon, leech_starter, "Leech Seed"))
                 break
 
 
@@ -473,8 +491,23 @@ def get_stats(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, Dict[str, 
     process_stats(json_data, stats)
     return stats
 
+def get_stats_with_passives(json_data: Dict[str, List[str]]
+    ) -> Tuple[Dict[str, Dict[str, Dict[str, int]]], List[Tuple[str, str, str]]]:
+    # Returns the updated stats and a list of passive KOs.
+    pokemon = get_replay_pokemon(json_data)
+    stats = initialize_stats(pokemon)
+    passive_kills: List[Tuple[str, str, str]] = []
+    process_stats(json_data, stats, passive_kills)
+    return stats, passive_kills
 
-def create_message(players: Dict[str, str], winner: str, loser: str, difference: str, stats: Dict[str, Dict[str, Dict[str, int]]]) -> str:
+def create_message(
+        players: Dict[str, str], 
+        winner: str, 
+        loser: str, 
+        difference: str, 
+        stats: Dict[str, Dict[str, Dict[str, int]]],
+        passive_kills: Optional[List[Tuple[str, str, str]]] = None
+) -> str:
     # Creates and returns the final message.
     winner_key = next(key for key, value in players.items() if value == winner)
     loser_key  = next(key for key, value in players.items() if value == loser)
@@ -493,4 +526,10 @@ def create_message(players: Dict[str, str], winner: str, loser: str, difference:
         deaths = data["deaths"]
         loser_message += f"{pokemon} (Kills: {kills}, Deaths: {deaths})\n"
     message += f"||```\n{loser_message.strip()}\n```||\n"
+    if passive_kills:
+        passive_lines = []
+        for victim, killer, cause in passive_kills:
+            passive_lines.append(f"{victim} died from {killer}'s {cause}")
+        message += f"**Passive KOs:**\n"
+        message += f"||```\n" + "\n".join(passive_lines) + "\n```||\n"
     return message
