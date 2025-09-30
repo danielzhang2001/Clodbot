@@ -6,6 +6,13 @@ import re
 from typing import Optional, Dict, List, Tuple
 
 
+def get_original_pokemon (stats: Dict[str, Dict[str, Dict[str, int]]], player_key: str, nickname: str) -> str:
+    # Given a player's stats mapping and a nickname, return the original pokemon name
+    for species, data in stats.get(player_key, {}).items():
+        if data.get("nickname") == nickname:
+            return species
+    return nickname
+
 def get_replay_players(json_data: Dict[str, List[str]]) -> Dict[str, str]:
     # Retrieves player names.
     players_list = json_data.get("players", [])
@@ -164,13 +171,14 @@ def process_sandstorm(
             _, sandstorm_player, sandstorm_pokemon = sandstorm_match.groups()
             sandstorm_starter = sandstorm_pokemon.strip()
             break
-
     if sandstorm_starter:
         for pokemon, data in stats[sandstorm_player].items():
             if data["nickname"] == sandstorm_starter:
                 data["kills"] += 1
                 if passive_kills is not None:
-                    passive_kills.append((fainted_pokemon, sandstorm_starter, "Sandstorm"))
+                    victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
+                    killer = get_original_pokemon(stats, sandstorm_player, sandstorm_starter)
+                    passive_kills.append((victim, killer, "Sandstorm"))
                 break
 
 
@@ -185,7 +193,6 @@ def process_poison(
     poison_starter = None
     poison_player = None
     poison_found = False
-
     for action in actions:
         for toxic_move in ["Toxic", "Malignant Chain", "Toxic Spikes", "Toxic Chain"]:
             if re.search(rf"\|p(\d)[ab]: ([^\|\n]+)\|{toxic_move}\|p(\d)[ab]: " + re.escape(fainted_pokemon), action):
@@ -258,7 +265,6 @@ def process_poison(
                     if poison_player != f"p{fainted_player}":
                         poison_found = True
                         break
-
         for ability in ["Psycho Shift", "Synchronize"]:
             if re.search(
                 rf"\|p(\d)[ab]: ([^\|\n]+)\|ability: {ability}\n|-status\|p(\d)[ab]: " + re.escape(fainted_pokemon) + r"\|(tox|psn)",
@@ -278,13 +284,14 @@ def process_poison(
                             if poison_player != f"p{fainted_player}":
                                 poison_found = True
                                 break
-
     if poison_found and poison_starter:
         for pokemon, data in stats[poison_player].items():
             if data["nickname"] == poison_starter:
                 data["kills"] += 1
                 if passive_kills is not None:
-                    passive_kills.append((fainted_pokemon, poison_starter, "Poison"))
+                    victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
+                    killer = get_original_pokemon(stats, poison_player, poison_starter)
+                    passive_kills.append((victim, killer, "Poison"))
                 break
 
 def process_burn(
@@ -298,7 +305,6 @@ def process_burn(
     burn_starter = None
     burn_player = None
     burn_found = False
-
     for action in actions:
         for burn_move in [
             "Will-O-Wisp", "Lava Plume", "Flamethrower", "Fire Blast", "Flare Blitz",
@@ -340,7 +346,6 @@ def process_burn(
                     if burn_player != f"p{fainted_player}":
                         burn_found = True
                         break
-
         for ability in ["Synchronize"]:
             if re.search(
                 rf"\|p(\d)[ab]: ([^\|\n]+)\|ability: {ability}\n|-status\|p(\d)[ab]: " + re.escape(fainted_pokemon) + r"\|(brn)",
@@ -360,15 +365,15 @@ def process_burn(
                             if burn_player != f"p{fainted_player}":
                                 burn_found = True
                                 break
-
     if burn_found and burn_starter:
         for pokemon, data in stats[burn_player].items():
             if data["nickname"] == burn_starter:
                 data["kills"] += 1
                 if passive_kills is not None:
-                    passive_kills.append((fainted_pokemon, burn_starter, "Burn"))
+                    victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
+                    killer = get_original_pokemon(stats, burn_player, burn_starter)
+                    passive_kills.append((victim, killer, "Burn"))
                 break
-
 
 def process_spikes(
     fainted_player: str,
@@ -392,15 +397,15 @@ def process_spikes(
             if spikes_player != f"p{fainted_player}":
                 spikes_found = True
                 break
-
     if spikes_found and spikes_starter:
         for pokemon, data in stats[spikes_player].items():
             if data["nickname"] == spikes_starter:
                 data["kills"] += 1
                 if passive_kills is not None:
-                    passive_kills.append((fainted_pokemon, spikes_starter, "Spikes"))
+                    victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
+                    killer = get_original_pokemon(stats, spikes_player, spikes_starter)
+                    passive_kills.append((victim, killer, "Spikes"))
                 break
-
 
 def process_rocks(
     fainted_player: str,
@@ -422,15 +427,15 @@ def process_rocks(
             if rocks_player != f"p{fainted_player}":
                 rocks_found = True
                 break
-
     if rocks_found and rocks_starter:
         for pokemon, data in stats[rocks_player].items():
             if data["nickname"] == rocks_starter:
                 data["kills"] += 1
                 if passive_kills is not None:
-                    passive_kills.append((fainted_pokemon, rocks_starter, "Stealth Rock"))
+                    victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
+                    killer = get_original_pokemon(stats, rocks_player, rocks_starter)
+                    passive_kills.append((victim, killer, "Stealth Rock"))
                 break
-
 
 def process_seed(
     fainted_player: str,
@@ -452,15 +457,15 @@ def process_seed(
             leech_player = f"p{leech_player}"
             if leech_player != f"p{fainted_player}":
                 break
-
     if leech_starter and leech_player:
         for pokemon, data in stats[leech_player].items():
             if data["nickname"] == leech_starter:
                 data["kills"] += 1
                 if passive_kills is not None:
-                    passive_kills.append((fainted_pokemon, leech_starter, "Leech Seed"))
+                    victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
+                    killer = get_original_pokemon(stats, leech_player, leech_starter)
+                    passive_kills.append((victim, killer, "Leech Seed"))
                 break
-
 
 def process_direct(
     fainted_player: str,
