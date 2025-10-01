@@ -8,9 +8,9 @@ from typing import Optional, Dict, List, Tuple
 
 def get_original_pokemon (stats: Dict[str, Dict[str, Dict[str, int]]], player_key: str, nickname: str) -> str:
     # Given a player's stats mapping and a nickname, return the original pokemon name
-    for species, data in stats.get(player_key, {}).items():
+    for original, data in stats.get(player_key, {}).items():
         if data.get("nickname") == nickname:
-            return species
+            return original
     return nickname
 
 def get_replay_players(json_data: Dict[str, List[str]]) -> Dict[str, str]:
@@ -115,7 +115,7 @@ def initialize_stats(pokemon_data: Dict[str, Dict[str, str]]) -> Dict[str, Dict[
             stats[player][actual_pokemon] = {"nickname": nickname, "kills": 0, "deaths": 0}
     return stats
 
-def process_stats(json_data: Dict[str, List[str]], stats: Dict[str, Dict[str, Dict[str, int]]], passive_kills: Optional[List[Tuple[str, str, str]]]) -> None:
+def process_stats(json_data: Dict[str, List[str]], stats: Dict[str, Dict[str, Dict[str, int]]], passive_kills: Optional[List[Tuple[str, str, str, str, str]]]) -> None:
     # Updates the kill and death values for each Pokemon.
     log = json_data.get("log", "")
     faint_regex = re.compile(r"\|faint\|p(\d)[ab]: ([^\|\n]+)")
@@ -178,7 +178,7 @@ def process_sandstorm(
                 if passive_kills is not None:
                     victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
                     killer = get_original_pokemon(stats, sandstorm_player, sandstorm_starter)
-                    passive_kills.append((victim, killer, "Sandstorm"))
+                    passive_kills.append((victim, killer, "Sandstorm", f"p{fainted_player}", sandstorm_player))
                 break
 
 
@@ -291,7 +291,7 @@ def process_poison(
                 if passive_kills is not None:
                     victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
                     killer = get_original_pokemon(stats, poison_player, poison_starter)
-                    passive_kills.append((victim, killer, "Poison"))
+                    passive_kills.append((victim, killer, "Poison", f"p{fainted_player}", poison_player))
                 break
 
 def process_burn(
@@ -372,7 +372,7 @@ def process_burn(
                 if passive_kills is not None:
                     victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
                     killer = get_original_pokemon(stats, burn_player, burn_starter)
-                    passive_kills.append((victim, killer, "Burn"))
+                    passive_kills.append((victim, killer, "Burn", f"p{fainted_player}", burn_player))
                 break
 
 def process_spikes(
@@ -404,7 +404,7 @@ def process_spikes(
                 if passive_kills is not None:
                     victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
                     killer = get_original_pokemon(stats, spikes_player, spikes_starter)
-                    passive_kills.append((victim, killer, "Spikes"))
+                    passive_kills.append((victim, killer, "Spikes", f"p{fainted_player}", spikes_player))
                 break
 
 def process_rocks(
@@ -434,7 +434,7 @@ def process_rocks(
                 if passive_kills is not None:
                     victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
                     killer = get_original_pokemon(stats, rocks_player, rocks_starter)
-                    passive_kills.append((victim, killer, "Stealth Rock"))
+                    passive_kills.append((victim, killer, "Stealth Rock", f"p{fainted_player}", rocks_player))
                 break
 
 def process_seed(
@@ -464,7 +464,7 @@ def process_seed(
                 if passive_kills is not None:
                     victim = get_original_pokemon(stats, f"p{fainted_player}", fainted_pokemon)
                     killer = get_original_pokemon(stats, leech_player, leech_starter)
-                    passive_kills.append((victim, killer, "Leech Seed"))
+                    passive_kills.append((victim, killer, "Leech Seed", f"p{fainted_player}", leech_player))
                 break
 
 def process_direct(
@@ -497,11 +497,11 @@ def get_stats(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, Dict[str, 
     return stats
 
 def get_stats_with_passives(json_data: Dict[str, List[str]]
-    ) -> Tuple[Dict[str, Dict[str, Dict[str, int]]], List[Tuple[str, str, str]]]:
+    ) -> Tuple[Dict[str, Dict[str, Dict[str, int]]], List[Tuple[str, str, str, str, str]]]:
     # Returns the updated stats and a list of passive KOs.
     pokemon = get_replay_pokemon(json_data)
     stats = initialize_stats(pokemon)
-    passive_kills: List[Tuple[str, str, str]] = []
+    passive_kills: List[Tuple[str, str, str, str, str]] = []
     process_stats(json_data, stats, passive_kills)
     return stats, passive_kills
 
@@ -511,7 +511,7 @@ def create_message(
         loser: str, 
         difference: str, 
         stats: Dict[str, Dict[str, Dict[str, int]]],
-        passive_kills: Optional[List[Tuple[str, str, str]]] = None
+        passive_kills: Optional[List[Tuple[str, str, str, str, str]]] = None
 ) -> str:
     # Creates and returns the final message.
     winner_key = next(key for key, value in players.items() if value == winner)
@@ -533,8 +533,15 @@ def create_message(
     message += f"||```\n{loser_message.strip()}\n```||\n"
     if passive_kills:
         passive_lines = []
-        for victim, killer, cause in passive_kills:
-            passive_lines.append(f"{victim} died from {killer}'s {cause}")
+        for entry in passive_kills:
+            if len(entry) == 5:
+                victim, killer, cause, v_key, k_key = entry
+                victim_name = players.get(v_key, v_key)
+                killer_name = players.get(k_key, k_key)
+                passive_lines.append(f"[{victim_name}] {victim} died from [{killer_name}] {killer}'s {cause}")
+            else:
+                victim, killer, cause = entry
+                passive_lines.append(f"{victim} died from {killer}'s {cause}")
         message += f"**Passive KOs:**\n"
         message += f"||```\n" + "\n".join(passive_lines) + "\n```||\n"
     return message
