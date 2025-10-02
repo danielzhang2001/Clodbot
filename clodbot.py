@@ -7,6 +7,7 @@ import os
 import discord  # type: ignore
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
+from urllib.parse import urlparse, urlunparse
 from commands.analyze import Analyze
 from commands.giveset import GiveSet
 from commands.managesheet import ManageSheet
@@ -109,7 +110,7 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
     # Analyzes replay and sends stats in a message to Discord.
     if not args:
         raise NoAnalyze()
-    replay_link = " ".join(args)
+    replay_link = clean_replay_link(" ".join(args))
     message = await Analyze.analyze_replay(replay_link)
     await ctx.send(message)
 
@@ -201,8 +202,9 @@ async def manage_sheet(ctx: commands.Context, *args: str) -> None:
         if isinstance(creds, AuthFailure):
             return
         if command == "update":
+            replay_link = clean_replay_link(data)
             message = await ManageSheet.update_sheet(
-                ctx, server_id, creds, sheet_link, sheet_name, data, name_dict, week
+                ctx, server_id, creds, sheet_link, sheet_name, replay_link, name_dict, week
             )
         elif command == "delete":
             message = await ManageSheet.delete_player(
@@ -243,6 +245,21 @@ async def give_set(ctx: commands.Context, *args: str) -> None:
             await ctx.send(InvalidParts(invalid_parts).args[0])
         await GiveSet.set_prompt(ctx, requests)
 
+def clean_replay_link(url: str) -> str:
+    # Cleans replay link if there is additional information after the raw link
+    u = urlparse(url.strip())
+    if not u.scheme or not u.netloc:
+        base = url.split('#', 1)[0].split('?', 1)[0].rstrip('/')
+        if base.endswith('.json'):
+            base = base[:-5]
+        return base
+    path = u.path.rstrip('/')
+    if path.endswith('.json'):
+        path = path[:-5]
+    return urlunparse((u.scheme, u.netloc, path, '', '', ''))
+
 load_dotenv()
 bot_token = os.environ["DISCORD_BOT_TOKEN"]
 bot.run(bot_token)
+
+
