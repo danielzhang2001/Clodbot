@@ -489,14 +489,7 @@ def process_direct(
             if kill_found:
                 break
 
-def get_stats(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, Dict[str, int]]]:
-    # Returns the updated stats.
-    pokemon = get_replay_pokemon(json_data)
-    stats = initialize_stats(pokemon)
-    process_stats(json_data, stats)
-    return stats
-
-def get_stats_with_passives(json_data: Dict[str, List[str]]
+def get_stats(json_data: Dict[str, List[str]]
     ) -> Tuple[Dict[str, Dict[str, Dict[str, int]]], List[Tuple[str, str, str, str, str]]]:
     # Returns the updated stats and a list of passive KOs.
     pokemon = get_replay_pokemon(json_data)

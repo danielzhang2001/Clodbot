@@ -39,7 +39,7 @@ class ManageSheet:
             json_data = json.loads(response.text)
         except requests.exceptions.RequestException:
             raise InvalidReplay(replay_link)
-        stats = get_stats(json_data)
+        stats, _ = get_stats(json_data)
         sheets = sheet_metadata.get("sheets", "")
         sheet_id = None
         for sheet in sheets:
