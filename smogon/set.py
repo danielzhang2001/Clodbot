@@ -8,13 +8,29 @@ import discord
 from discord.ui import Button, View
 from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List, Tuple, Any
 from uuid import uuid4
 from errors import *
 
 selected_states = {}
 selected_sets = {}
 
+
+def normalize_species_name(name: str) -> str:
+    # Normalize a species name for comparison: lowercased, no spaces/hyphens.
+    return name.replace(" ", "").replace("-", "").lower()
+
+
+def find_pokemon_key(data: Dict[str, Any], pokemon: str) -> Optional[str]:
+    # Given the Smogon JSON for a gen and a user-supplied name, return the canonical key from the JSON if it exists.
+    target = normalize_species_name(pokemon)
+    for key in data.keys():
+        if key.lower() == pokemon.lower():
+            return key
+    for key in data.keys():
+        if normalize_species_name(key) == target:
+            return key
+    return None
 
 def get_gen_dict() -> Dict[str, str]:
     # Returns generation dictionary.
@@ -41,7 +57,7 @@ async def get_latest_gen(pokemon: str) -> Optional[str]:
             async with session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
-                    if pokemon.lower() in (p.lower() for p in data):
+                    if find_pokemon_key(data, pokemon):
                         return gen_key
     return None
 
@@ -57,7 +73,7 @@ async def get_random_gen(pokemon: str) -> Optional[str]:
             async with session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
-                    if pokemon.lower() in (p.lower() for p in data):
+                    if find_pokemon_key(data, pokemon):
                         return gen_key
     return None
 
@@ -69,11 +85,12 @@ async def get_first_format(pokemon: str, generation: str) -> Optional[str]:
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
-                if pokemon.lower() in (p.lower() for p in data):
-                    pokemon_key = next(p for p in data if p.lower() == pokemon.lower())
-                    pokemon_data = data[pokemon_key]
-                    first_format = next(iter(pokemon_data), None)
-                    return first_format
+                pokemon_key = find_pokemon_key(data, pokemon)
+                if not pokemon_key:
+                    return None
+                pokemon_data = data[pokemon_key]
+                first_format = next(iter(pokemon_data), None)
+                return first_format
     return None
 
 
@@ -84,12 +101,13 @@ async def get_random_format(pokemon: str, generation: str) -> Optional[str]:
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
-                if pokemon.lower() in (p.lower() for p in data):
-                    pokemon_key = next(p for p in data if p.lower() == pokemon.lower())
-                    pokemon_data = data[pokemon_key]
-                    formats = list(pokemon_data.keys())
-                    if formats:
-                        return random.choice(formats)
+                pokemon_key = find_pokemon_key(data, pokemon)
+                if not pokemon_key:
+                    return None
+                pokemon_data = data[pokemon_key]
+                formats = list(pokemon_data.keys())
+                if formats:
+                    return random.choice(formats)
     return None
 
 
@@ -107,15 +125,16 @@ async def get_set_names(
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
-                if pokemon.lower() in (p.lower() for p in data):
-                    pokemon_key = next(p for p in data if p.lower() == pokemon.lower())
-                    pokemon_data = data[pokemon_key]
-                    if not format:
-                        format = await get_first_format(pokemon, generation)
-                    if format and format in pokemon_data:
-                        format_data = pokemon_data[format]
-                        set_names = list(format_data.keys())
-                        return set_names
+                pokemon_key = find_pokemon_key(data, pokemon)
+                if not pokemon_key:
+                    return None
+                pokemon_data = data[pokemon_key]
+                if not format:
+                    format = await get_first_format(pokemon_key, generation)
+                if format and format in pokemon_data:
+                    format_data = pokemon_data[format]
+                    set_names = list(format_data.keys())
+                    return set_names
     return None
 
 
@@ -126,14 +145,15 @@ async def get_random_set(pokemon: str, generation: str, format: str) -> Optional
         async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
-                if pokemon.lower() in (p.lower() for p in data):
-                    pokemon_key = next(p for p in data if p.lower() == pokemon.lower())
-                    pokemon_data = data[pokemon_key]
-                    if format in pokemon_data:
-                        format_data = pokemon_data[format]
-                        set_names = list(format_data.keys())
-                        if set_names:
-                            return random.choice(set_names)
+                pokemon_key = find_pokemon_key(data, pokemon)
+                if not pokemon_key:
+                    return None
+                pokemon_data = data[pokemon_key]
+                if format in pokemon_data:
+                    format_data = pokemon_data[format]
+                    set_names = list(format_data.keys())
+                    if set_names:
+                        return random.choice(set_names)
     return None
 
 
@@ -200,10 +220,14 @@ def get_view(
 
 def format_pokemon(pokemon: str) -> str:
     # Returns the pokemon name with proper case formatting.
-    if "-" in pokemon:
-        pokemon = pokemon.replace("-", " ")
-    parts = [part.capitalize() for part in pokemon.split(" ")]
-    return " ".join(parts)
+    def cap(part: str) -> str:
+        return part[:1].upper() + part[1:].lower() if part else part
+    words = []
+    for word in pokemon.split(" "):
+        sub_parts = word.split("-")
+        sub_parts = [cap(p) for p in sub_parts]
+        words.append("-".join(sub_parts))
+    return " ".join(words)
 
 
 def format_set(pokemon: str, moveset: dict) -> str:

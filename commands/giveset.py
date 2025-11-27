@@ -47,21 +47,20 @@ class GiveSet:
             async with session.get(url) as response:
                 if response.status == 200:
                     data = await response.json()
-                    if pokemon.lower() in (p.lower() for p in data):
-                        pokemon_key = next(
-                            p for p in data if p.lower() == pokemon.lower()
-                        )
-                        pokemon_data = data[pokemon_key]
-                        if not format:
-                            format = await get_first_format(pokemon, generation)
-                        if format and format in pokemon_data:
-                            format_data = pokemon_data[format]
-                            for moveset_name, moveset in format_data.items():
-                                if (
-                                    moveset_name.lower().replace(" ", "")
-                                    == set_name.lower()
-                                ):
-                                    return format_set(pokemon, moveset)
+                    pokemon_key = find_pokemon_key(data, pokemon)
+                    if not pokemon_key:
+                        return None
+                    pokemon_data = data[pokemon_key]
+                    if not format:
+                        format = await get_first_format(pokemon_key, generation)
+                    if format and format in pokemon_data:
+                        format_data = pokemon_data[format]
+                        for moveset_name, moveset in format_data.items():
+                            if (
+                                moveset_name.lower().replace(" ", "")
+                                == set_name.lower()
+                            ):
+                                return format_set(pokemon_key, moveset)
         return None
 
     @staticmethod
@@ -151,7 +150,6 @@ class GiveSet:
         if deselected:
             await remove_set(prompt_key, message_key, button_key)
         else:
-            pokemon = format_pokemon(pokemon)
             set_data = await GiveSet.fetch_set(set_name, pokemon, generation, format)
             await add_set(prompt_key, message_key, button_key, set_data)
         set_data = "\n\n".join(
