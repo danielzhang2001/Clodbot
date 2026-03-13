@@ -42,17 +42,22 @@ def get_replay_pokemon(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, s
         if base_pokemon in all_pokemon[player] and all_pokemon[player][base_pokemon] == nickname:
             if base_pokemon != pokemon:
                 del all_pokemon[player][base_pokemon]
-    transform_regex = re.compile(
-        r"\|detailschange\|(p\d)[ab]: (.+?)\|([^,|]+)-(Mega|Terastal|Hero)"
-    )
+    transform_regex = re.compile(r"\|detailschange\|(p\d)[ab]: (.+?)\|([^,|]+)-(Mega|Terastal|Hero|Busted)")
     for match in transform_regex.finditer(log):
         player, nickname, base_pokemon, form = match.groups()
-        transform_pokemon = base_pokemon + "-" + form
+
+        if base_pokemon == "Mimikyu" and form == "Busted":
+            transform_pokemon = "Mimikyu"
+        else:
+            transform_pokemon = base_pokemon + "-" + form
+
         if (
             base_pokemon in all_pokemon[player]
             and all_pokemon[player][base_pokemon] == nickname
+            and base_pokemon != transform_pokemon
         ):
             del all_pokemon[player][base_pokemon]
+
         all_pokemon[player][transform_pokemon] = nickname
     return all_pokemon
 
