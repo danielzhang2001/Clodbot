@@ -37,6 +37,10 @@ def get_replay_pokemon(json_data: Dict[str, List[str]]) -> Dict[str, Dict[str, s
         event_type, player, nickname, pokemon = match.groups()
         pokemon = pokemon.strip()
         nickname = nickname.strip()
+
+        if pokemon == "Mimikyu-Busted":
+            pokemon = "Mimikyu"
+
         all_pokemon[player][pokemon] = nickname
         base_pokemon = re.sub(r"-.*", "", pokemon)
         if base_pokemon in all_pokemon[player] and all_pokemon[player][base_pokemon] == nickname:
