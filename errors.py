@@ -9,14 +9,14 @@ class InvalidCommand(Exception):
         super().__init__(
             "Invalid command. Please enter one of the following:\n"
             "```\n"
-            "Clodbot, analyze (Replay Link)\n"
-            "Clodbot, sheet set (Optional Google Sheets Link) (Optional Sheet Name)\n"
-            "Clodbot, sheet default\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])\n"
-            "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
-            "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']\n"
-            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
-            "Clodbot, giveset random (Optional Number)\n"
+            "@Clod analyze (Replay Link)\n"
+            "@Clod sheet set (Optional Google Sheets Link) (Optional Sheet Name)\n"
+            "@Clod sheet default\n"
+            "@Clod sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])\n"
+            "@Clod sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
+            "@Clod sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']\n"
+            "@Clod giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
+            "@Clod giveset random (Optional Number)\n"
             "```"
         )
 
@@ -32,7 +32,7 @@ class InvalidRandom(Exception):
     def __init__(self):
         super().__init__(
             "Please follow this format:\n"
-            "```Clodbot, giveset random [Number >= 1, Nothing = 1]\n"
+            "```@Clod giveset random [Number >= 1, Nothing = 1]\n"
             "```"
         )
 
@@ -49,7 +49,7 @@ class InvalidParts(Exception):
         super().__init__(
             "Too many fields provided for {}. Please follow this format:\n"
             "```\n"
-            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
+            "@Clod giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
             "```".format(", ".join(parts))
         )
 
@@ -68,7 +68,7 @@ class NoAnalyze(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, analyze (Replay Link)\n"
+            "@Clod analyze (Replay Link)\n"
             "```"
         )
 
@@ -79,11 +79,11 @@ class NoSheet(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)\n"
-            "Clodbot, sheet default\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])\n"
-            "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
-            "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']\n"
+            "@Clod sheet set (Google Sheets Link) (Optional Sheet Name)\n"
+            "@Clod sheet default\n"
+            "@Clod sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])\n"
+            "@Clod sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
+            "@Clod sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']\n"
             "```"
         )
 
@@ -94,8 +94,8 @@ class NoGiveSet(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
-            "Clodbot, giveset random (Optional Number)\n"
+            "@Clod giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]\n"
+            "@Clod giveset random (Optional Number)\n"
             "```"
         )
 
@@ -106,7 +106,7 @@ class NoSet(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)\n"
+            "@Clod sheet set (Google Sheets Link) (Optional Sheet Name)\n"
             "```"
         )
 
@@ -117,7 +117,7 @@ class NoUpdate(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])\n"
+            "@Clod sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])\n"
             "```"
         )
 
@@ -128,7 +128,7 @@ class NoDelete(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
+            "@Clod sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)\n"
             "```"
         )
 
@@ -139,7 +139,7 @@ class NoList(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Player' OR 'Pokemon']\n"
+            "@Clod sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Player' OR 'Pokemon']\n"
             "```"
         )
 
@@ -162,7 +162,7 @@ class NoDefault(Exception):
         super().__init__(
             f"No default sheet link set. You can set it as follows:\n"
             "```\n"
-            "Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)\n"
+            "@Clod sheet set (Google Sheets Link) (Optional Sheet Name)\n"
             "```"
         )
 
@@ -173,7 +173,7 @@ class WeekSheet(Exception):
         super().__init__(
             f"You have not specified a week but the current sheet at **{sheet_title}** using **{sheet_name}** has data tailored toward week. Either delete the week data or update your data in week form as follows:\n"
             "```\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Week#] (Optional Showdown Name->New Name [Multiple])\n"
+            "@Clod sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) [Week#] (Optional Showdown Name->New Name [Multiple])\n"
             "```"
         )
 
@@ -184,7 +184,7 @@ class NonWeekSheet(Exception):
         super().__init__(
             f"You have specified a week but the current sheet at **{sheet_title}** using **{sheet_name}** has data not tailored toward week. Either delete the non-week data or update your data in non-week form as follows:\n"
             "```\n"
-            "Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) (Optional Showdown Name->New Name [Multiple])\n"
+            "@Clod sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Replay Link) (Optional Showdown Name->New Name [Multiple])\n"
             "```"
         )
 

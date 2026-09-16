@@ -22,7 +22,7 @@ intents.presences = False
 intents.message_content = True
 
 bot = commands.Bot(
-    command_prefix=["clodbot, ", "Clodbot, "],
+    command_prefix=commands.when_mentioned,
     intents=intents,
     case_insensitive=True,
     help_command=None,
@@ -31,10 +31,16 @@ bot = commands.Bot(
 
 @bot.event
 async def on_ready():
-    # Print a message when the bot connects to Discord and publishes bot stats.
+    # Print a message when the bot connects to Discord.
     print(f"{bot.user} has connected to Discord!")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="clodbot, help"))
-    bot.loop.create_task(publish_stats(bot))
+    bot.tree.clear_commands(guild=None)
+    await bot.tree.sync()
+    await bot.change_presence(
+        activity=discord.Activity(
+            type=discord.ActivityType.listening,
+            name="@Clod help"
+        )
+    )
 
 
 @bot.event
@@ -85,21 +91,21 @@ async def help(ctx: commands.Context) -> None:
     # Displays all commands with a link to the website for help.
     message = (
         "**COMMANDS:**\n\n"
-        "> **Clodbot, analyze (Pokemon Showdown Replay Link)** to display the stats from the replay on Discord.\n"
+        "> **@Clod, analyze (Pokemon Showdown Replay Link)** to display the stats from the replay on Discord.\n"
         "> \n"
-        "> **Clodbot, sheet set (Google Sheets Link) (Optional Sheet Name)** to set the default Google Sheets link and sheet name for future sheet commands. If not provided, sheet name defaults to 'Stats'.\n"
+        "> **@Clod, sheet set (Google Sheets Link) (Optional Sheet Name)** to set the default Google Sheets link and sheet name for future sheet commands. If not provided, sheet name defaults to 'Stats'.\n"
         "> \n"
-        "> **Clodbot, sheet default** to display the default sheet link and sheet name on Discord.\n"
+        "> **@Clod, sheet default** to display the default sheet link and sheet name on Discord.\n"
         "> \n"
-        "> **Clodbot, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Pokemon Showdown Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])** to update the stats from the replay onto the sheet name in the link. If not provided, sheet name defaults to 'Stats'. If a week number is specified, the replay will go into a week section. You can also assign a new name to a player name in the replay, and this parameter can be applied multiple times.\n"
+        "> **@Clod, sheet update (Optional Google Sheets Link) (Optional Sheet Name) (Pokemon Showdown Replay Link) [Optional Week#] (Optional Showdown Name->New Name [Multiple])** to update the stats from the replay onto the sheet name in the link. If not provided, sheet name defaults to 'Stats'. If a week number is specified, the replay will go into a week section. You can also assign a new name to a player name in the replay, and this parameter can be applied multiple times.\n"
         "> \n"
-        "> **Clodbot, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)** to delete the stats section with Player Name from the sheet name in the link. If not provided, sheet name defaults to 'Stats'.\n"
+        "> **@Clod, sheet delete (Optional Google Sheets Link) (Optional Sheet Name) (Player Name)** to delete the stats section with Player Name from the sheet name in the link. If not provided, sheet name defaults to 'Stats'.\n"
         "> \n"
-        "> **Clodbot, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']** to display either all Player stats or all Pokemon stats from the sheet name in the link on Discord. If not provided, sheet name defaults to 'Stats'.\n"
+        "> **@Clod, sheet list (Optional Google Sheets Link) (Optional Sheet Name) ['Players' OR 'Pokemon']** to display either all Player stats or all Pokemon stats from the sheet name in the link on Discord. If not provided, sheet name defaults to 'Stats'.\n"
         "> \n"
-        "> **Clodbot, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]** to display prompt(s) for set selection based on the provided parameters.\n"
+        "> **@Clod, giveset (Pokemon) (Optional Generation) (Optional Format) [Multiple Using Commas]** to display prompt(s) for set selection based on the provided parameters.\n"
         "> \n"
-        "> **Clodbot, giveset random (Optional Number)** to display random set(s) for the specified amount of random Pokemon.\n\n"
+        "> **@Clod, giveset random (Optional Number)** to display random set(s) for the specified amount of random Pokemon.\n\n"
         "For more information, please visit the official website for Clodbot [**HERE**](https://clodbot.com)."
     )
     await ctx.send(message)

@@ -16,7 +16,7 @@ The Analyze Command displays various stats of a Pokemon Showdown battle using a 
 
 <hr class="line">
 
-### Clodbot, analyze (Pokemon Showdown Replay Link)
+### @Clod analyze (Pokemon Showdown Replay Link)
 
 Takes in a Pokemon Showdown replay link and outputs the outcome of the battle (with a differential based on Pokemon left standing), as well as each player's Pokemon with their kills and deaths beside them and passive kills. The outcome along with the Pokemon and passive kills sections are all marked with spoiler tags.
 
