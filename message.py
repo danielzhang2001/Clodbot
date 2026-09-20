@@ -15,7 +15,7 @@ client = discord.Client(intents=intents)
 TARGET_CHANNEL_NAME = "general"
 MESSAGE_CONTENT = (
     "Hey guys! Given that we have passed 10,000 unique users of Clodbot across all servers, Discord requires approval for Message Content Intent and our use case just for a prefix of 'Clodbot' doesn't qualify.\n\n"
-    "Therefore, we will be switching to mentioning the bot using @Clod instead of our old prefix to be able to use all commands. Don't worry, all commands will still function exactly the same as before! Happy Clodding!"
+    "**Therefore, we will be switching to mentioning the bot using @Clod instead of our old prefix to be able to use all commands.** Don't worry, all commands will still function exactly the same as before! Happy Clodding!"
 )
 EXCLUDED_SERVER_NAME = "Paradox Parlor Draft League"
 SPECIAL_SERVER_NAMES = ["BATTLE FRONTIER GTA", "Clodbot"]
