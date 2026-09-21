@@ -38,6 +38,14 @@ async def on_ready():
             guild.text_channels,
         )
 
+        # If no 'general' channel exists, use the first text channel the bot can send messages in
+        if target_channel is None:
+            target_channel = discord.utils.find(
+                lambda c: isinstance(c, discord.TextChannel)
+                and c.permissions_for(guild.me).send_messages,
+                guild.text_channels,
+            )
+
         if target_channel:
             try:
                 # Use @everyone for special servers
@@ -54,7 +62,7 @@ async def on_ready():
             except discord.HTTPException as e:
                 print(f"Failed to send message to {TARGET_CHANNEL_NAME} in {guild.name}: {e}")
         else:
-            print(f"Channel '{TARGET_CHANNEL_NAME}' not found in {guild.name}.")
+            print(f"No usable text channel found in {guild.name}.")
 
     print("All messages sent. Closing connection.")
     await client.close()
