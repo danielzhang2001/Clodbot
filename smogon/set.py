@@ -202,8 +202,8 @@ def get_view(
     view = View()
     pokemon, generation, format = (
         request["pokemon"],
-        request.get("generation", "none"),
-        request.get("format", "none"),
+        normalize_generation(request.get("generation")) or "none",
+        request.get("format") or "none",
     )
     if request_count > 1:
         view.add_item(

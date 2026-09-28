@@ -38,6 +38,7 @@ class GiveSet:
         format: Optional[str] = None,
     ) -> str:
         # Fetches and displays set data based on Pokemon, Generation, Format and Set names given.
+        generation = normalize_generation(generation)
         if not generation:
             generation = await get_latest_gen(pokemon)
         if not generation:
