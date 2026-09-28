@@ -47,6 +47,20 @@ def get_gen_dict() -> Dict[str, str]:
     }
 
 
+def normalize_generation(generation: Optional[str]) -> Optional[str]:
+    # Converts generation abbreviations into the Smogon generation keys
+    if not generation:
+        return None
+    generation = generation.lower()
+    gen_dict = get_gen_dict()
+    if generation in gen_dict:
+        return generation
+    for gen_key, abbreviation in gen_dict.items():
+        if generation == abbreviation:
+            return gen_key
+    return generation
+
+
 async def get_latest_gen(pokemon: str) -> Optional[str]:
     # Returns the latest eligible generation for the given Pokemon.
     gen_dict = get_gen_dict()
@@ -80,6 +94,7 @@ async def get_random_gen(pokemon: str) -> Optional[str]:
 
 async def get_first_format(pokemon: str, generation: str) -> Optional[str]:
     # Returns the first format given the Pokemon and Generation.
+    generation = normalize_generation(generation)
     url = f"https://pkmn.github.io/smogon/data/sets/{generation}.json"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -96,6 +111,7 @@ async def get_first_format(pokemon: str, generation: str) -> Optional[str]:
 
 async def get_random_format(pokemon: str, generation: str) -> Optional[str]:
     # Returns a random eligible format using the Smogon API given a Pokemon and Generation.
+    generation = normalize_generation(generation)
     url = f"https://pkmn.github.io/smogon/data/sets/{generation}.json"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -116,6 +132,7 @@ async def get_set_names(
 ) -> Optional[List[str]]:
     # Returns all set names associated with the Pokemon, Generation and Format provided. If no Generation, assumed to be latest one, and if no Format, assumed to be first one.
     pokemon = format_pokemon(pokemon)
+    generation = normalize_generation(generation)
     if not generation:
         generation = await get_latest_gen(pokemon)
         if generation is None:
@@ -140,6 +157,7 @@ async def get_set_names(
 
 async def get_random_set(pokemon: str, generation: str, format: str) -> Optional[str]:
     # Returns a random eligible set name given a Pokemon, Generation, and Format.
+    generation = normalize_generation(generation)
     url = f"https://pkmn.github.io/smogon/data/sets/{generation}.json"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -165,9 +183,8 @@ def get_prompt(requests: List[Dict[str, Optional[str]]]) -> str:
     else:
         request = requests[0]
         pokemon = request["pokemon"].upper()
-        generation = (
-            request.get("generation").upper() if request.get("generation") else None
-        )
+        generation = normalize_generation(request.get("generation"))
+        generation = generation.upper() if generation else None
         format = request.get("format").upper() if request.get("format") else None
         prompt += f"**{pokemon}{f' {generation}' if generation else ''}{f' {format}' if format else ''}**"
     prompt += ":"
