@@ -19,7 +19,7 @@ intents = discord.Intents.default()
 intents.guilds = True
 intents.typing = False
 intents.presences = False
-intents.message_content = True
+intents.message_content = False
 
 bot = commands.Bot(
     command_prefix=commands.when_mentioned,
