@@ -68,7 +68,7 @@ class NoAnalyze(Exception):
         super().__init__(
             "Please follow this format:\n"
             "```\n"
-            "@Clod analyze (Replay Link)\n"
+            "@Clod analyze (Replay Link) (Optional Additional Replay Links)\n"
             "```"
         )
 

@@ -91,7 +91,7 @@ async def help(ctx: commands.Context) -> None:
     # Displays all commands with a link to the website for help.
     message = (
         "**COMMANDS:**\n\n"
-        "> **@Clod analyze (Pokemon Showdown Replay Link)** to display the stats from the replay on Discord.\n"
+        "> **@Clod analyze (Pokemon Showdown Replay Link) (Optional Additional Replay Links)** to display the stats from the replay on Discord.\n"
         "> \n"
         "> **@Clod sheet set (Google Sheets Link) (Optional Sheet Name)** to set the default Google Sheets link and sheet name for future sheet commands. If not provided, sheet name defaults to 'Stats'.\n"
         "> \n"
@@ -113,12 +113,21 @@ async def help(ctx: commands.Context) -> None:
 
 @bot.command(name="analyze")
 async def analyze_replay(ctx: commands.Context, *args: str) -> None:
-    # Analyzes replay and sends stats in a message to Discord.
+    # Analyzes one or multiple replays and sends stats in a single message to Discord.
     if not args:
         raise NoAnalyze()
-    replay_link = clean_replay_link(" ".join(args))
-    message = await Analyze.analyze_replay(replay_link)
-    await ctx.send(message)
+    replay_links = [clean_replay_link(arg) for arg in args]
+    messages = []
+    for index, replay_link in enumerate(replay_links, start=1):
+        message = await Analyze.analyze_replay(replay_link)
+        if len(replay_links) > 1:
+            message = f"**REPLAY {index}:**\n\n{message}"
+        messages.append(message)
+    combined_message = "\n\n".join(messages)
+    if len(combined_message) > 2000:
+        await ctx.send("The combined replay analysis exceeds Discord's 2000-character message limit. Please analyze fewer replays at once.")
+        return
+    await ctx.send(combined_message)
 
 
 @bot.command(name="sheet")
