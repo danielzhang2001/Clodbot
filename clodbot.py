@@ -123,7 +123,7 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
         if len(replay_links) > 1:
             message = f"**REPLAY {index}:**\n\n{message}"
         messages.append(message)
-    combined_message = "\n\n".join(messages)
+    combined_message = "\n".join(message.rstrip("\n") for message in messages)
     if len(combined_message) > 2000:
         await ctx.send("The combined replay analysis exceeds Discord's 2000-character message limit. Please analyze fewer replays at once.")
         return
