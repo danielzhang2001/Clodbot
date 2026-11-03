@@ -4,6 +4,7 @@ The main module for running ClodBot.
 
 # pylint: disable=import-error
 import os
+import re
 from io import BytesIO
 import discord  # type: ignore
 from discord.ext import commands  # type: ignore
@@ -132,7 +133,12 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
         messages.append(aggregated_message)
     combined_message = "\n".join(message.rstrip("\n") for message in messages)
     if len(combined_message) > 2000:
-        analysis_file = discord.File(BytesIO(combined_message.encode("utf-8")),filename="clodbot-analysis.txt")
+        plain_text = combined_message
+        plain_text = plain_text.replace("```", "")
+        plain_text = plain_text.replace("||", "")
+        plain_text = plain_text.replace("**", "")
+        plain_text = "\n".join(line.rstrip() for line in plain_text.splitlines())
+        analysis_file = discord.File(BytesIO(plain_text.encode("utf-8")),filename="clodbot-analysis.txt")
         await ctx.send("The replay results are attached below.",file=analysis_file)
         return
     await ctx.send(combined_message)
