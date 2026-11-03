@@ -139,7 +139,7 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
         plain_text = plain_text.replace("**", "")
         plain_text = "\n".join(line.rstrip() for line in plain_text.splitlines())
         analysis_file = discord.File(BytesIO(plain_text.encode("utf-8")),filename="clodbot-analysis.txt")
-        await ctx.send("The replay results are attached below.",file=analysis_file)
+        await ctx.send(file=analysis_file)
         return
     await ctx.send(combined_message)
 
