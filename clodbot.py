@@ -4,6 +4,7 @@ The main module for running ClodBot.
 
 # pylint: disable=import-error
 import os
+from io import BytesIO
 import discord  # type: ignore
 from discord.ext import commands  # type: ignore
 from dotenv import load_dotenv  # type: ignore
@@ -111,7 +112,6 @@ async def help(ctx: commands.Context) -> None:
     await ctx.send(message)
 
 
-
 @bot.command(name="analyze")
 async def analyze_replay(ctx: commands.Context, *args: str) -> None:
     # Analyzes one or multiple replays and sends individual and aggregated results in a single message.
@@ -132,7 +132,8 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
         messages.append(aggregated_message)
     combined_message = "\n".join(message.rstrip("\n") for message in messages)
     if len(combined_message) > 2000:
-        await ctx.send("The combined replay analysis exceeds Discord's 2000-character message limit. Please analyze fewer replays at once.")
+        analysis_file = discord.File(BytesIO(combined_message.encode("utf-8")),filename="clodbot-analysis.txt")
+        await ctx.send("The replay results are attached below.",file=analysis_file)
         return
     await ctx.send(combined_message)
 
