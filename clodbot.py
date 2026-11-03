@@ -111,18 +111,25 @@ async def help(ctx: commands.Context) -> None:
     await ctx.send(message)
 
 
+
 @bot.command(name="analyze")
 async def analyze_replay(ctx: commands.Context, *args: str) -> None:
-    # Analyzes one or multiple replays and sends stats in a single message to Discord.
+    # Analyzes one or multiple replays and sends individual and aggregated results in a single message.
     if not args:
         raise NoAnalyze()
     replay_links = [clean_replay_link(arg) for arg in args]
     messages = []
+    results = []
     for index, replay_link in enumerate(replay_links, start=1):
-        message = await Analyze.analyze_replay(replay_link)
+        result = await Analyze.get_replay_details(replay_link)
+        results.append(result)
+        message = result["message"]
         if len(replay_links) > 1:
             message = f"**REPLAY {index}:**\n\n{message}"
         messages.append(message)
+    if len(replay_links) > 1:
+        aggregated_message = Analyze.aggregate_replays(results)
+        messages.append(aggregated_message)
     combined_message = "\n".join(message.rstrip("\n") for message in messages)
     if len(combined_message) > 2000:
         await ctx.send("The combined replay analysis exceeds Discord's 2000-character message limit. Please analyze fewer replays at once.")
