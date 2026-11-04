@@ -133,10 +133,14 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
         messages.append(aggregated_message)
     combined_message = "\n".join(message.rstrip("\n") for message in messages)
     if len(combined_message) > 2000:
-        plain_text = combined_message
-        plain_text = plain_text.replace("```", "")
-        plain_text = plain_text.replace("||", "")
-        plain_text = plain_text.replace("**", "")
+        plain_messages = []
+        for message in messages:
+            plain_text = message.replace("```", "")
+            plain_text = plain_text.replace("||", "")
+            plain_text = plain_text.replace("**", "")
+            plain_messages.append(plain_text.strip())
+        separator = "\n\n" + "─" * 60 + "\n\n"
+        plain_text = separator.join(plain_messages)
         plain_text = "\n".join(line.rstrip() for line in plain_text.splitlines())
         analysis_file = discord.File(BytesIO(plain_text.encode("utf-8")),filename="clodbot-analysis.txt")
         await ctx.send(file=analysis_file)
