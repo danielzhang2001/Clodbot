@@ -93,7 +93,7 @@ async def help(ctx: commands.Context) -> None:
     # Displays all commands with a link to the website for help.
     message = (
         "**COMMANDS:**\n\n"
-        "> **@Clod analyze (Pokemon Showdown Replay Link) (Optional Additional Replay Links)** to display the stats from the replay on Discord.\n"
+        "> **@Clod analyze (Pokemon Showdown Replay Link) (Optional Additional Replay Links) [Optional 'Spoiler']** to display stats from replays, including aggregated results for multiple replays. Adding 'Spoiler' at the end will put spoiler tags over the results.\n"
         "> \n"
         "> **@Clod sheet set (Google Sheets Link) (Optional Sheet Name)** to set the default Google Sheets link and sheet name for future sheet commands. If not provided, sheet name defaults to 'Stats'.\n"
         "> \n"
@@ -113,12 +113,17 @@ async def help(ctx: commands.Context) -> None:
     await ctx.send(message)
 
 
+
 @bot.command(name="analyze")
 async def analyze_replay(ctx: commands.Context, *args: str) -> None:
-    # Analyzes one or multiple replays and sends individual and aggregated results in a single message.
+    # Analyzes replays and sends individual and aggregated results in a single message.
     if not args:
         raise NoAnalyze()
-    replay_links = [clean_replay_link(arg) for arg in args]
+    spoiler = args[-1].lower() == "spoiler"
+    replay_args = args[:-1] if spoiler else args
+    if not replay_args:
+        raise NoAnalyze()
+    replay_links = [clean_replay_link(arg) for arg in replay_args]
     messages = []
     results = []
     for index, replay_link in enumerate(replay_links, start=1):
@@ -131,6 +136,8 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
     if len(replay_links) > 1:
         aggregated_message = Analyze.aggregate_replays(results)
         messages.append(aggregated_message)
+    if not spoiler:
+        messages = [message.replace("||", "") for message in messages]
     combined_message = "\n".join(message.rstrip("\n") for message in messages)
     if len(combined_message) > 2000:
         plain_messages = []

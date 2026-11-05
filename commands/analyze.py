@@ -17,6 +17,7 @@ class Analyze:
         # Analyzes a replay link and returns its formatted message.
         result = await Analyze.get_replay_details(replay_link)
         return result["message"]
+    
     @staticmethod
     async def get_replay_details(replay_link: str) -> dict:
         # Analyzes a replay and returns its message and underlying statistics.
