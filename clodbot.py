@@ -149,7 +149,7 @@ async def analyze_replay(ctx: commands.Context, *args: str) -> None:
         separator = "\n\n" + "─" * 60 + "\n\n"
         plain_text = separator.join(plain_messages)
         plain_text = "\n".join(line.rstrip() for line in plain_text.splitlines())
-        analysis_file = discord.File(BytesIO(plain_text.encode("utf-8")),filename="clodbot-analysis.txt")
+        analysis_file = discord.File(BytesIO(plain_text.encode("utf-8")),filename="SPOILER_clodbot-analysis.txt" if spoiler else "clodbot-analysis.txt",spoiler=spoiler)
         await ctx.send(file=analysis_file)
         return
     await ctx.send(combined_message)
